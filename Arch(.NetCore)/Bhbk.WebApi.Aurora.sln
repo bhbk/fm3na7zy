@@ -1,0 +1,85 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29911.84
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bhbk.Cli.Aurora", "Bhbk.Cli.Aurora\Bhbk.Cli.Aurora.csproj", "{E75923F2-4C4E-499D-864A-359758828A72}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bhbk.Daemon.Aurora", "Bhbk.Daemon.Aurora\Bhbk.Daemon.Aurora.csproj", "{18D764DB-22CA-427D-9DB5-0FCDAACC2AC9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bhbk.Daemon.Aurora.Tests", "Bhbk.Daemon.Aurora.Tests\Bhbk.Daemon.Aurora.Tests.csproj", "{158C7CBC-E279-4EC4-8BD8-F86EEEA0203B}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bhbk.Lib.Aurora", "Bhbk.Lib.Aurora\Bhbk.Lib.Aurora.csproj", "{4C03C157-FC79-407A-A0EB-713E0844573D}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bhbk.Lib.Aurora.Data", "Bhbk.Lib.Aurora.Data\Bhbk.Lib.Aurora.Data.csproj", "{5B04D6FC-0B7C-4BE8-AC41-C8F5434AD5B8}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bhbk.Lib.Aurora.Domain", "Bhbk.Lib.Aurora.Domain\Bhbk.Lib.Aurora.Domain.csproj", "{952EF791-0DB3-40B0-823B-8DAF85802E50}"
+EndProject
+Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "Bhbk.Mssql.Aurora", "Bhbk.Mssql.Aurora\Bhbk.Mssql.Aurora.sqlproj", "{D0A64D7C-3B66-490E-8935-0BBA4A4FAAB8}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bhbk.WebApi.Aurora", "Bhbk.WebApi.Aurora\Bhbk.WebApi.Aurora.csproj", "{6E50706C-502E-433B-B8D1-24480BCFA5C8}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bhbk.WebApi.Aurora.Tests", "Bhbk.WebApi.Aurora.Tests\Bhbk.WebApi.Aurora.Tests.csproj", "{4EE6A97C-CFE7-4539-A7D0-680ED8AE9683}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{636A42AB-4D59-493A-8CAF-EB0E4F2BD2E0}"
+	ProjectSection(SolutionItems) = preProject
+		..\.gitignore = ..\.gitignore
+		..\.gitlab-ci.yml = ..\.gitlab-ci.yml
+		build.cmd = build.cmd
+		clean.cmd = clean.cmd
+		..\license.md = ..\license.md
+		..\readme.md = ..\readme.md
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E75923F2-4C4E-499D-864A-359758828A72}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E75923F2-4C4E-499D-864A-359758828A72}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E75923F2-4C4E-499D-864A-359758828A72}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E75923F2-4C4E-499D-864A-359758828A72}.Release|Any CPU.Build.0 = Release|Any CPU
+		{18D764DB-22CA-427D-9DB5-0FCDAACC2AC9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{18D764DB-22CA-427D-9DB5-0FCDAACC2AC9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{18D764DB-22CA-427D-9DB5-0FCDAACC2AC9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{18D764DB-22CA-427D-9DB5-0FCDAACC2AC9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4C03C157-FC79-407A-A0EB-713E0844573D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4C03C157-FC79-407A-A0EB-713E0844573D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4C03C157-FC79-407A-A0EB-713E0844573D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4C03C157-FC79-407A-A0EB-713E0844573D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5B04D6FC-0B7C-4BE8-AC41-C8F5434AD5B8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5B04D6FC-0B7C-4BE8-AC41-C8F5434AD5B8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5B04D6FC-0B7C-4BE8-AC41-C8F5434AD5B8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5B04D6FC-0B7C-4BE8-AC41-C8F5434AD5B8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{952EF791-0DB3-40B0-823B-8DAF85802E50}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{952EF791-0DB3-40B0-823B-8DAF85802E50}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{952EF791-0DB3-40B0-823B-8DAF85802E50}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{952EF791-0DB3-40B0-823B-8DAF85802E50}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D0A64D7C-3B66-490E-8935-0BBA4A4FAAB8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D0A64D7C-3B66-490E-8935-0BBA4A4FAAB8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D0A64D7C-3B66-490E-8935-0BBA4A4FAAB8}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{D0A64D7C-3B66-490E-8935-0BBA4A4FAAB8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D0A64D7C-3B66-490E-8935-0BBA4A4FAAB8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D0A64D7C-3B66-490E-8935-0BBA4A4FAAB8}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{6E50706C-502E-433B-B8D1-24480BCFA5C8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6E50706C-502E-433B-B8D1-24480BCFA5C8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6E50706C-502E-433B-B8D1-24480BCFA5C8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6E50706C-502E-433B-B8D1-24480BCFA5C8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4EE6A97C-CFE7-4539-A7D0-680ED8AE9683}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4EE6A97C-CFE7-4539-A7D0-680ED8AE9683}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4EE6A97C-CFE7-4539-A7D0-680ED8AE9683}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4EE6A97C-CFE7-4539-A7D0-680ED8AE9683}.Release|Any CPU.Build.0 = Release|Any CPU
+		{158C7CBC-E279-4EC4-8BD8-F86EEEA0203B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{158C7CBC-E279-4EC4-8BD8-F86EEEA0203B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{158C7CBC-E279-4EC4-8BD8-F86EEEA0203B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{158C7CBC-E279-4EC4-8BD8-F86EEEA0203B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {0C481B95-40B4-4AE0-B192-23F1C2205419}
+	EndGlobalSection
+EndGlobal
