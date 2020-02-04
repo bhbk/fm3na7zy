@@ -2,6 +2,23 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
+    <Platforms>AnyCPU;x64;x86</Platforms>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="9.0.0" />
+    <PackageReference Include="Bhbk.Lib.Common" Version="2020.3.6.830" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+    <PackageReference Include="Rebex.FileTransfer" Version="5.0.7450" />
+    <PackageReference Include="Rebex.Security" Version="5.0.7450" />
+    <PackageReference Include="Rebex.Sftp" Version="5.0.7450" />
+    <PackageReference Include="Serilog.AspNetCore" Version="3.2.0" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="3.1.1" />
+    <PackageReference Include="Serilog.Sinks.RollingFile" Version="3.3.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Bhbk.Lib.Aurora.Data\Bhbk.Lib.Aurora.Data.csproj" />
+  </ItemGroup>
 
 </Project>

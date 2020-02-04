@@ -1,0 +1,10 @@
+﻿{
+  "profiles": {
+    "Bhbk.DaemonFTP.Aurora": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    }
+  }
+}

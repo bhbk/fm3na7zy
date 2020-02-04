@@ -5,28 +5,28 @@ powershell -command "& { Remove-Item *.tmp }"
 powershell -command "& { if (Test-Path .\Packages) { Remove-Item .\Packages -Recurse -Force } }"
 powershell -command "& { if (Test-Path .\TestResults) { Remove-Item .\TestResults -Recurse -Force } }"
 
-cd Bhbk.Cli.Identity
+cd Bhbk.Cli.Aurora
 powershell -command "& { if (Test-Path .\bin) { Remove-Item .\bin -Recurse -Force } }"
 powershell -command "& { if (Test-Path .\obj) { Remove-Item .\obj -Recurse -Force } }"
 
-cd ..\Bhbk.Daemon.Aurora
+cd ..\Bhbk.DaemonSSH.Aurora
 powershell -command "& { if (Test-Path .\bin) { Remove-Item .\bin -Recurse -Force } }"
 powershell -command "& { if (Test-Path .\obj) { Remove-Item .\obj -Recurse -Force } }"
 powershell -command "& { if (Test-Path .\*.log) { Remove-Item .\*.log -Recurse -Force } }"
 
-cd ..\Bhbk.Daemon.Aurora.Tests
+cd ..\Bhbk.DaemonSSH.Aurora.Tests
 powershell -command "& { if (Test-Path .\bin) { Remove-Item .\bin -Recurse -Force } }"
 powershell -command "& { if (Test-Path .\obj) { Remove-Item .\obj -Recurse -Force } }"
 
-cd ..\Bhbk.Lib.Identity
+cd ..\Bhbk.Lib.Aurora
 powershell -command "& { if (Test-Path .\bin) { Remove-Item .\bin -Recurse -Force } }"
 powershell -command "& { if (Test-Path .\obj) { Remove-Item .\obj -Recurse -Force } }"
 
-cd ..\Bhbk.Lib.Identity.Data
+cd ..\Bhbk.Lib.Aurora.Data
 powershell -command "& { if (Test-Path .\bin) { Remove-Item .\bin -Recurse -Force } }"
 powershell -command "& { if (Test-Path .\obj) { Remove-Item .\obj -Recurse -Force } }"
 
-cd ..\Bhbk.Lib.Identity.Domain
+cd ..\Bhbk.Lib.Aurora.Domain
 powershell -command "& { if (Test-Path .\bin) { Remove-Item .\bin -Recurse -Force } }"
 powershell -command "& { if (Test-Path .\obj) { Remove-Item .\obj -Recurse -Force } }"
 
