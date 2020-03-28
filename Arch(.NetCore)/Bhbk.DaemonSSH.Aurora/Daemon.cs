@@ -8,7 +8,9 @@ using Bhbk.Lib.QueryExpression.Factories;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.VisualBasic;
 using Rebex;
+using Rebex.IO;
 using Rebex.Net;
 using Rebex.Net.Servers;
 using Rebex.Security.Certificates;
@@ -317,11 +319,17 @@ namespace Bhbk.DaemonSSH.Aurora
                     var keys = uow.UserPublicKeys.Get(QueryExpressionFactory.GetQueryExpression<tbl_UserPublicKeys>()
                         .Where(x => x.UserId == user.Id && x.Enabled).ToLambda());
 
+                    /*
+                     */
+                    //DaemonSandbox.Files(conf, uow, user);
+                    /*
+                     */
+
                     if (e.Key != null)
                     {
                         Log.Information($"Authenticate in-progress for '{e.UserName}' at '{e.ClientEndPoint}' running '{e.ClientSoftwareIdentifier}' with public key.");
 
-                        if(keys.Where(x => x.KeyValueBase64 == Convert.ToBase64String(e.Key.GetPublicKey(), Base64FormattingOptions.None)).Any())
+                        if (keys.Where(x => x.KeyValueBase64 == Convert.ToBase64String(e.Key.GetPublicKey(), Base64FormattingOptions.None)).Any())
                         {
                             Log.Information($"Authenticate success for '{e.UserName}' at '{e.ClientEndPoint}' running '{e.ClientSoftwareIdentifier}' with public key.");
 

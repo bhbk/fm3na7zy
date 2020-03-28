@@ -7,7 +7,7 @@ namespace Bhbk.Lib.Aurora.Data.Models_DIRECT
     {
         public Guid Id { get; set; }
         public Guid UserId { get; set; }
-        public Guid? PublicKeyId { get; set; }
+        public Guid PublicKeyId { get; set; }
         public string KeyValueBase64 { get; set; }
         public string KeyValueAlgo { get; set; }
         public string KeyValuePass { get; set; }

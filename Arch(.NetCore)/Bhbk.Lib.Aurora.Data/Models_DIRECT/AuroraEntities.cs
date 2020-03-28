@@ -105,6 +105,10 @@ namespace Bhbk.Lib.Aurora.Data.Models_DIRECT
             {
                 entity.HasKey(e => new { e.Id, e.UserId });
 
+                entity.HasIndex(e => new { e.Id, e.UserId })
+                    .HasName("IX_tbl_UserPrivateKeys")
+                    .IsUnique();
+
                 entity.Property(e => e.KeyValueAlgo)
                     .IsRequired()
                     .HasMaxLength(16);
@@ -125,8 +129,11 @@ namespace Bhbk.Lib.Aurora.Data.Models_DIRECT
 
             modelBuilder.Entity<tbl_UserPublicKeys>(entity =>
             {
-                entity.HasKey(e => new { e.Id, e.UserId })
-                    .HasName("PK_tbl_PublicKeys");
+                entity.HasKey(e => new { e.Id, e.UserId });
+
+                entity.HasIndex(e => new { e.Id, e.UserId })
+                    .HasName("IX_tbl_UserPublicKeys")
+                    .IsUnique();
 
                 entity.Property(e => e.Hostname)
                     .IsRequired()

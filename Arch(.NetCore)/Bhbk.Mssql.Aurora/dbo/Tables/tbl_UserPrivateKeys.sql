@@ -1,7 +1,7 @@
-﻿CREATE TABLE [dbo].[tbl_UserPrivateKeys] (
+CREATE TABLE [dbo].[tbl_UserPrivateKeys] (
     [Id]             UNIQUEIDENTIFIER NOT NULL,
     [UserId]         UNIQUEIDENTIFIER NOT NULL,
-    [PublicKeyId]    UNIQUEIDENTIFIER NULL,
+    [PublicKeyId]    UNIQUEIDENTIFIER NOT NULL,
     [KeyValueBase64] NVARCHAR (2048)  NOT NULL,
     [KeyValueAlgo]   NVARCHAR (16)    NOT NULL,
     [KeyValuePass]   NVARCHAR (1024)  NOT NULL,
@@ -16,6 +16,9 @@
 
 
 
-GO
 
+
+GO
+CREATE UNIQUE NONCLUSTERED INDEX [IX_tbl_UserPrivateKeys]
+    ON [dbo].[tbl_UserPrivateKeys]([Id] ASC, [UserId] ASC);
 

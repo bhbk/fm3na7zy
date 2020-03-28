@@ -1,20 +1,241 @@
 ﻿using Bhbk.Lib.Aurora.Data.Infrastructure_DIRECT;
 using Bhbk.Lib.Aurora.Data.Models_DIRECT;
 using Bhbk.Lib.Cryptography.Entropy;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using Microsoft.Extensions.Configuration;
+using Bhbk.Lib.QueryExpression.Extensions;
+using Bhbk.Lib.QueryExpression.Factories;
 using Rebex.Net;
 using Rebex.Security.Certificates;
+using Rebex.Security.Cryptography.Pkcs;
 using Serilog;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace Bhbk.Lib.Aurora.Domain.Helpers
 {
 	public class KeyHelpers
-    {
-		public static List<SshPublicKey> GetPublicKeysForUsers(string path)
+	{
+		public static SshPrivateKey GenerateSshPrivateKey(IUnitOfWork uow, tbl_Users user, SshHostKeyAlgorithm keyAlgo, int keySize, string keyPass, SignatureHashAlgorithm hashAlgo, string hostname)
+		{
+			var pubId = Guid.NewGuid();
+			var privId = Guid.NewGuid();
+			var keyPair = SshPrivateKey.Generate(keyAlgo, keySize);
+
+			uow.UserPrivateKeys.Create(
+				new tbl_UserPrivateKeys
+				{
+					Id = privId,
+					PublicKeyId = pubId,
+					UserId = user.Id,
+					KeyValueBase64 = Convert.ToBase64String(keyPair.GetPrivateKey(), Base64FormattingOptions.None),
+					KeyValueAlgo = keyAlgo.ToString(),
+					KeyValuePass = keyPass,
+					Enabled = true,
+					Created = DateTime.Now
+				});
+			uow.UserPublicKeys.Create(
+				new tbl_UserPublicKeys
+				{
+					Id = pubId,
+					PrivateKeyId = privId,
+					UserId = user.Id,
+					KeyValueBase64 = Convert.ToBase64String(keyPair.GetPublicKey(), Base64FormattingOptions.None),
+					KeyValueAlgo = keyAlgo.ToString(),
+					KeySig = keyPair.Fingerprint.ToString(hashAlgo, false),
+					KeySigAlgo = hashAlgo.ToString(),
+					Hostname = hostname,
+					Enabled = true,
+					Created = DateTime.Now
+				});
+			uow.Commit();
+
+			return keyPair;
+		}
+
+		public static void ExportSshPrivateKey(tbl_Users user, tbl_UserPrivateKeys key, SshPrivateKeyFormat keyFormat, string keyPass, FileInfo outputFile)
+		{
+			using (var stream = new MemoryStream())
+			{
+				var privKey = new SshPrivateKey(Convert.FromBase64String(key.KeyValueBase64), key.KeyValuePass);
+				privKey.Save(stream, keyPass, keyFormat);
+
+				File.WriteAllBytes(outputFile.FullName, stream.ToArray());
+			}
+		}
+
+		public static void ExportSshPublicKey(tbl_Users user, tbl_UserPublicKeys key, SshPublicKeyFormat keyFormat, FileInfo outputFile)
+		{
+			using (var stream = new MemoryStream())
+			{
+				var pubKey = new SshPublicKey(Convert.FromBase64String(key.KeyValueBase64));
+				pubKey.SavePublicKey(stream, keyFormat);
+
+				File.WriteAllBytes(outputFile.FullName, stream.ToArray());
+			}
+		}
+
+		/*
+		 * openssh uses base64 and special formatting for public keys
+		 * https://man.openbsd.org/ssh-keygen
+		 */
+		public static void ExportSshPublicKeyBase64(tbl_Users user, tbl_UserPublicKeys key, FileInfo outputFile)
+		{
+			var pubKey = new SshPublicKey(Convert.FromBase64String(key.KeyValueBase64));
+			var data = new string($"ssh-rsa {Convert.ToBase64String(pubKey.GetPublicKey())} {user.UserName}@{key.Hostname}");
+
+			File.WriteAllText(outputFile.FullName, data);
+		}
+
+		public static SshPrivateKey ImportSshPrivateKey(IUnitOfWork uow, tbl_Users user, SignatureHashAlgorithm hashAlgo, string keyPass, string hostname, FileInfo inputFile)
+		{
+			var key = new SshPrivateKey(inputFile.FullName, keyPass);
+
+			var privId = Guid.NewGuid();
+			var pubId = Guid.NewGuid();
+
+			var privKeyBase64 = Convert.ToBase64String(key.GetPrivateKey(), Base64FormattingOptions.None);
+			var pubKeyBase64 = Convert.ToBase64String(key.GetPublicKey(), Base64FormattingOptions.None);
+
+			var privKeyExists = uow.UserPrivateKeys.Get(QueryExpressionFactory.GetQueryExpression<tbl_UserPrivateKeys>()
+				.Where(x => x.KeyValueBase64 == privKeyBase64).ToLambda()).SingleOrDefault();
+			var pubKeyExists = uow.UserPublicKeys.Get(QueryExpressionFactory.GetQueryExpression<tbl_UserPublicKeys>()
+				.Where(x => x.KeyValueBase64 == pubKeyBase64).ToLambda()).SingleOrDefault();
+
+			if (privKeyExists == null && pubKeyExists == null)
+			{
+				uow.UserPrivateKeys.Create(
+					new tbl_UserPrivateKeys
+					{
+						Id = privId,
+						PublicKeyId = pubId,
+						UserId = user.Id,
+						KeyValueBase64 = privKeyBase64,
+						KeyValueAlgo = hashAlgo.ToString(),
+						KeyValuePass = keyPass,
+						Enabled = true,
+						Created = DateTime.Now
+					});
+				uow.UserPublicKeys.Create(
+					new tbl_UserPublicKeys
+					{
+						Id = pubId,
+						PrivateKeyId = privId,
+						UserId = user.Id,
+						KeyValueBase64 = pubKeyBase64,
+						KeyValueAlgo = key.KeyAlgorithm.ToString(),
+						KeySig = key.Fingerprint.ToString(hashAlgo, false),
+						KeySigAlgo = hashAlgo.ToString(),
+						Hostname = hostname,
+						Enabled = true,
+						Created = DateTime.Now
+					});
+				uow.Commit();
+			}
+			else if (privKeyExists != null && pubKeyExists == null)
+			{
+				uow.UserPublicKeys.Create(
+					new tbl_UserPublicKeys
+					{
+						Id = pubId,
+						PrivateKeyId = privKeyExists.Id,
+						UserId = user.Id,
+						KeyValueBase64 = pubKeyBase64,
+						KeyValueAlgo = key.KeyAlgorithm.ToString(),
+						KeySig = key.Fingerprint.ToString(hashAlgo, false),
+						KeySigAlgo = hashAlgo.ToString(),
+						Hostname = hostname,
+						Enabled = true,
+						Created = DateTime.Now
+					});
+				uow.Commit();
+			}
+			else if (privKeyExists == null && pubKeyExists != null)
+			{
+				uow.UserPrivateKeys.Create(
+					new tbl_UserPrivateKeys
+					{
+						Id = privId,
+						PublicKeyId = pubKeyExists.Id,
+						UserId = user.Id,
+						KeyValueBase64 = privKeyBase64,
+						KeyValueAlgo = hashAlgo.ToString(),
+						KeyValuePass = keyPass,
+						Enabled = true,
+						Created = DateTime.Now
+					});
+				uow.Commit();
+			}
+
+			return key;
+		}
+
+		public static SshPublicKey ImportSshPublicKey(IUnitOfWork uow, tbl_Users user, SignatureHashAlgorithm hashAlgo, string hostname, FileInfo inputFile)
+		{
+			var pubKey = new SshPublicKey(inputFile.FullName);
+			var pubKeyBase64 = Convert.ToBase64String(pubKey.GetPublicKey(), Base64FormattingOptions.None);
+
+			var pubKeyExists = uow.UserPublicKeys.Get(QueryExpressionFactory.GetQueryExpression<tbl_UserPublicKeys>()
+				.Where(x => x.KeyValueBase64 == pubKeyBase64).ToLambda());
+
+			if (pubKeyExists == null)
+			{
+				uow.UserPublicKeys.Create(
+					new tbl_UserPublicKeys
+					{
+						Id = Guid.NewGuid(),
+						UserId = user.Id,
+						KeyValueBase64 = pubKeyBase64,
+						KeyValueAlgo = pubKey.KeyAlgorithm.ToString(),
+						KeySig = pubKey.Fingerprint.ToString(hashAlgo, false),
+						KeySigAlgo = hashAlgo.ToString(),
+						Hostname = hostname,
+						Enabled = true,
+						Created = DateTime.Now
+					});
+				uow.Commit();
+			}
+
+			return pubKey;
+		}
+
+		/*
+		 * openssh uses base64 and special formatting for public keys
+		 * https://man.openbsd.org/ssh-keygen
+		 */
+		public static SshPublicKey ImportSshPublicKeyBase64(IUnitOfWork uow, tbl_Users user, SignatureHashAlgorithm hashAlgo, string hostname, FileInfo inputFile)
+		{
+			var file = File.ReadAllText(inputFile.FullName);
+			var base64 = file.Split(" ");
+			var asciiBytes = Convert.FromBase64String(base64[1]);
+
+			var pubKey = new SshPublicKey(asciiBytes);
+			var pubKeyBase64 = Convert.ToBase64String(pubKey.GetPublicKey(), Base64FormattingOptions.None);
+
+			if (!uow.UserPublicKeys.Get(QueryExpressionFactory.GetQueryExpression<tbl_UserPublicKeys>()
+				.Where(x => x.KeyValueBase64 == pubKeyBase64).ToLambda()).Any())
+			{
+				uow.UserPublicKeys.Create(
+					new tbl_UserPublicKeys
+					{
+						Id = Guid.NewGuid(),
+						UserId = user.Id,
+						KeyValueBase64 = pubKeyBase64,
+						KeyValueAlgo = pubKey.KeyAlgorithm.ToString(),
+						KeySig = pubKey.Fingerprint.ToString(hashAlgo, false),
+						KeySigAlgo = hashAlgo.ToString(),
+						Hostname = hostname,
+						Enabled = true,
+						Created = DateTime.Now
+					});
+				uow.Commit();
+			}
+
+			return pubKey;
+		}
+
+		[Obsolete]
+		public static List<SshPublicKey> ImportSshPublicKeys(string path)
 		{
 			var list = new List<SshPublicKey>();
 			string[] files;
@@ -98,104 +319,5 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 
 			return list;
 		}
-
-        public static void ExportSshPrivateKey(tbl_Users user, tbl_UserPrivateKeys key, SshPrivateKeyFormat keyFormat, string keyPass, FileInfo outputFile)
-        {
-            if (string.IsNullOrEmpty(keyPass))
-                keyPass = AlphaNumeric.CreateString(32);
-
-            using (var stream = new MemoryStream())
-            {
-                var privKey = new SshPrivateKey(Convert.FromBase64String(key.KeyValueBase64), key.KeyValuePass);
-                privKey.Save(stream, keyPass, keyFormat);
-
-                File.WriteAllBytes(outputFile.FullName, stream.ToArray());
-            }
-        }
-
-        public static void ExportSshPublicKey(tbl_Users user, tbl_UserPublicKeys key, SshPublicKeyFormat keyFormat, FileInfo outputFile)
-        {
-            using (var stream = new MemoryStream())
-            {
-                var pubKey = new SshPublicKey(Convert.FromBase64String(key.KeyValueBase64));
-                pubKey.SavePublicKey(stream, keyFormat);
-
-                File.WriteAllBytes(outputFile.FullName, stream.ToArray());
-            }
-        }
-
-		/*
-		 * use format for openssh clients
-		 * https://www.rebex.net/sftp.net/features/private-keys.aspx
-		 */
-		public static void ExportSshPublicKeyBase64(tbl_Users user, tbl_UserPublicKeys key, FileInfo outputFile)
-		{
-			var pubKey = new SshPublicKey(Convert.FromBase64String(key.KeyValueBase64));
-			var content = new string($"ssh-rsa {Convert.ToBase64String(pubKey.GetPublicKey())} {user.UserName}@{key.Hostname}");
-
-			File.WriteAllText(outputFile.FullName, content);
-		}
-
-		public static SshPrivateKey ImportSshPublicKey(IUnitOfWork uow, tbl_Users user, SignatureHashAlgorithm hashAlgo, string hostname, FileInfo inputFile)
-		{
-			var pubKey = new SshPrivateKey(inputFile.FullName);
-
-			uow.UserPublicKeys.Create(
-				new tbl_UserPublicKeys
-				{
-					Id = Guid.NewGuid(),
-					UserId = user.Id,
-					KeyValueBase64 = Convert.ToBase64String(pubKey.GetPublicKey(), Base64FormattingOptions.None),
-					KeyValueAlgo = pubKey.KeyAlgorithm.ToString(),
-					KeySig = pubKey.Fingerprint.ToString(hashAlgo, false),
-					KeySigAlgo = hashAlgo.ToString(),
-					Hostname = hostname,
-					Enabled = true,
-					Created = DateTime.Now
-				});
-			uow.Commit();
-
-			return pubKey;
-		}
-
-		public static SshPrivateKey CreateSshKeyPair(IUnitOfWork uow, tbl_Users user, SshHostKeyAlgorithm keyAlgo, int keySize, string keyPass, SignatureHashAlgorithm hashAlgo, string hostname)
-        {
-            if (string.IsNullOrEmpty(keyPass))
-                keyPass = AlphaNumeric.CreateString(32);
-
-            var pubId = Guid.NewGuid();
-            var privId = Guid.NewGuid();
-            var keyPair = SshPrivateKey.Generate(keyAlgo, keySize);
-
-            uow.UserPrivateKeys.Create(
-                new tbl_UserPrivateKeys
-                {
-                    Id = privId,
-                    PublicKeyId = pubId,
-                    UserId = user.Id,
-                    KeyValueBase64 = Convert.ToBase64String(keyPair.GetPrivateKey(), Base64FormattingOptions.None),
-                    KeyValueAlgo = keyAlgo.ToString(),
-                    KeyValuePass = keyPass,
-                    Enabled = true,
-                    Created = DateTime.Now
-                });
-            uow.UserPublicKeys.Create(
-                new tbl_UserPublicKeys
-                {
-                    Id = pubId,
-                    PrivateKeyId = privId,
-                    UserId = user.Id,
-                    KeyValueBase64 = Convert.ToBase64String(keyPair.GetPublicKey(), Base64FormattingOptions.None),
-                    KeyValueAlgo = keyAlgo.ToString(),
-					KeySig = keyPair.Fingerprint.ToString(hashAlgo, false),
-					KeySigAlgo = hashAlgo.ToString(),
-                    Hostname = hostname,
-                    Enabled = true,
-                    Created = DateTime.Now
-                });
-            uow.Commit();
-
-            return keyPair;
-        }
-    }
+	}
 }
