@@ -13,5 +13,6 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 {
     public class UserHelpers
     {
+
     }
 }

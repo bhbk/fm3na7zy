@@ -3,9 +3,9 @@ using Bhbk.Lib.DataAccess.EFCore.Repositories;
 
 namespace Bhbk.Lib.Aurora.Data.Repositories_DIRECT
 {
-    public class PrivateKeyRepository : GenericRepository<tbl_PrivateKeys>
+    public class UserPasswordRepository : GenericRepository<tbl_UserPasswords>
     {
-        public PrivateKeyRepository(AuroraEntities context)
+        public UserPasswordRepository(AuroraEntities context)
             : base(context) { }
     }
 }

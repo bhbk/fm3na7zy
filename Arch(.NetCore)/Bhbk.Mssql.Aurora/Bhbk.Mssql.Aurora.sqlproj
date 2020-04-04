@@ -117,10 +117,12 @@
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\tbl_Users.sql" />
-    <Build Include="dbo\Tables\tbl_PrivateKeys.sql" />
     <Build Include="dbo\Tables\tbl_UserPublicKeys.sql" />
     <Build Include="dbo\Tables\tbl_UserPrivateKeys.sql" />
     <Build Include="dbo\Tables\tbl_UserPasswords.sql" />
     <Build Include="dbo\Tables\tbl_Settings.sql" />
+    <Build Include="dbo\Tables\tbl_UserFolders.sql" />
+    <Build Include="dbo\Tables\tbl_UserFiles.sql" />
+    <Build Include="dbo\Tables\tbl_SystemKeys.sql" />
   </ItemGroup>
 </Project>

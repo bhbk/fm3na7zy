@@ -14,8 +14,10 @@ namespace Bhbk.Lib.Aurora.Data.Infrastructure_DIRECT
         private readonly AuroraEntities _context;
         private readonly ILoggerFactory _logger;
         public InstanceContext InstanceType { get; private set; }
-        public PrivateKeyRepository PrivateKeys { get; private set; }
         public SettingsRepository Settings { get; private set; }
+        public SystemKeyRepository SystemKeys { get; private set; }
+        public UserFileRepository UserFiles { get; private set; }
+        public UserPasswordRepository UserPasswords { get; private set; }
         public UserPrivateKeyRepository UserPrivateKeys { get; private set; }
         public UserPublicKeyRepository UserPublicKeys { get; private set; }
         public UserRepository Users { get; private set; }
@@ -76,8 +78,10 @@ namespace Bhbk.Lib.Aurora.Data.Infrastructure_DIRECT
 
             InstanceType = instance.InstanceType;
 
-            PrivateKeys = new PrivateKeyRepository(_context);
+            SystemKeys = new SystemKeyRepository(_context);
             Settings = new SettingsRepository(_context);
+            UserFiles = new UserFileRepository(_context);
+            UserPasswords = new UserPasswordRepository(_context);
             UserPrivateKeys = new UserPrivateKeyRepository(_context);
             UserPublicKeys = new UserPublicKeyRepository(_context);
             Users = new UserRepository(_context);

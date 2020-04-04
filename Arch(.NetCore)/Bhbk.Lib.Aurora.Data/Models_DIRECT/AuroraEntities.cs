@@ -15,8 +15,10 @@ namespace Bhbk.Lib.Aurora.Data.Models_DIRECT
         {
         }
 
-        public virtual DbSet<tbl_PrivateKeys> tbl_PrivateKeys { get; set; }
         public virtual DbSet<tbl_Settings> tbl_Settings { get; set; }
+        public virtual DbSet<tbl_SystemKeys> tbl_SystemKeys { get; set; }
+        public virtual DbSet<tbl_UserFiles> tbl_UserFiles { get; set; }
+        public virtual DbSet<tbl_UserFolders> tbl_UserFolders { get; set; }
         public virtual DbSet<tbl_UserPasswords> tbl_UserPasswords { get; set; }
         public virtual DbSet<tbl_UserPrivateKeys> tbl_UserPrivateKeys { get; set; }
         public virtual DbSet<tbl_UserPublicKeys> tbl_UserPublicKeys { get; set; }
@@ -33,31 +35,6 @@ namespace Bhbk.Lib.Aurora.Data.Models_DIRECT
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<tbl_PrivateKeys>(entity =>
-            {
-                entity.HasIndex(e => e.Id)
-                    .HasName("IX_tbl_PrivateKeys")
-                    .IsUnique();
-
-                entity.Property(e => e.Id).ValueGeneratedNever();
-
-                entity.Property(e => e.KeyValueAlgo)
-                    .IsRequired()
-                    .HasMaxLength(16);
-
-                entity.Property(e => e.KeyValueBase64)
-                    .IsRequired()
-                    .HasMaxLength(2048);
-
-                entity.Property(e => e.KeyValueFormat)
-                    .IsRequired()
-                    .HasMaxLength(16);
-
-                entity.Property(e => e.KeyValuePass)
-                    .IsRequired()
-                    .HasMaxLength(1024);
-            });
-
             modelBuilder.Entity<tbl_Settings>(entity =>
             {
                 entity.Property(e => e.Id).ValueGeneratedNever();
@@ -71,6 +48,72 @@ namespace Bhbk.Lib.Aurora.Data.Models_DIRECT
                     .IsRequired()
                     .HasMaxLength(256)
                     .IsUnicode(false);
+            });
+
+            modelBuilder.Entity<tbl_SystemKeys>(entity =>
+            {
+                entity.HasIndex(e => e.Id)
+                    .HasName("IX_tbl_PrivateKeys")
+                    .IsUnique();
+
+                entity.Property(e => e.Id).ValueGeneratedNever();
+
+                entity.Property(e => e.KeyValueAlgo)
+                    .IsRequired()
+                    .HasMaxLength(16);
+
+                entity.Property(e => e.KeyValueBase64).IsRequired();
+
+                entity.Property(e => e.KeyValueFormat)
+                    .IsRequired()
+                    .HasMaxLength(16);
+
+                entity.Property(e => e.KeyValuePass)
+                    .IsRequired()
+                    .HasMaxLength(1024);
+            });
+
+            modelBuilder.Entity<tbl_UserFiles>(entity =>
+            {
+                entity.Property(e => e.Id).ValueGeneratedNever();
+
+                entity.Property(e => e.FileHashSHA256)
+                    .IsRequired()
+                    .HasMaxLength(64);
+
+                entity.Property(e => e.RealFileName).IsRequired();
+
+                entity.Property(e => e.RealFolder).IsRequired();
+
+                entity.Property(e => e.VirtualFileName).IsRequired();
+
+                entity.HasOne(d => d.User)
+                    .WithMany(p => p.tbl_UserFiles)
+                    .HasForeignKey(d => d.UserId)
+                    .HasConstraintName("FK_tbl_UserFiles_UserID");
+            });
+
+            modelBuilder.Entity<tbl_UserFolders>(entity =>
+            {
+                entity.HasIndex(e => e.Id)
+                    .HasName("IX_tbl_UserFolders")
+                    .IsUnique();
+
+                entity.Property(e => e.Id).ValueGeneratedNever();
+
+                entity.Property(e => e.VirtualFolderName)
+                    .IsRequired()
+                    .IsUnicode(false);
+
+                entity.HasOne(d => d.User)
+                    .WithMany(p => p.tbl_UserFolders)
+                    .HasForeignKey(d => d.UserId)
+                    .HasConstraintName("FK_tbl_UserFolders_UserID");
+
+                entity.HasOne(d => d.VirtualParent)
+                    .WithMany(p => p.InverseVirtualParent)
+                    .HasForeignKey(d => d.VirtualParentId)
+                    .HasConstraintName("FK_tbl_UserFolders_VirtualParentID");
             });
 
             modelBuilder.Entity<tbl_UserPasswords>(entity =>
@@ -103,19 +146,21 @@ namespace Bhbk.Lib.Aurora.Data.Models_DIRECT
 
             modelBuilder.Entity<tbl_UserPrivateKeys>(entity =>
             {
-                entity.HasKey(e => new { e.Id, e.UserId });
-
-                entity.HasIndex(e => new { e.Id, e.UserId })
+                entity.HasIndex(e => e.Id)
                     .HasName("IX_tbl_UserPrivateKeys")
                     .IsUnique();
+
+                entity.HasIndex(e => e.PublicKeyId)
+                    .HasName("IX_tbl_UserPrivateKeys_PublicKeyID")
+                    .IsUnique();
+
+                entity.Property(e => e.Id).ValueGeneratedNever();
 
                 entity.Property(e => e.KeyValueAlgo)
                     .IsRequired()
                     .HasMaxLength(16);
 
-                entity.Property(e => e.KeyValueBase64)
-                    .IsRequired()
-                    .HasMaxLength(2048);
+                entity.Property(e => e.KeyValueBase64).IsRequired();
 
                 entity.Property(e => e.KeyValuePass)
                     .IsRequired()
@@ -129,11 +174,11 @@ namespace Bhbk.Lib.Aurora.Data.Models_DIRECT
 
             modelBuilder.Entity<tbl_UserPublicKeys>(entity =>
             {
-                entity.HasKey(e => new { e.Id, e.UserId });
-
-                entity.HasIndex(e => new { e.Id, e.UserId })
+                entity.HasIndex(e => e.Id)
                     .HasName("IX_tbl_UserPublicKeys")
                     .IsUnique();
+
+                entity.Property(e => e.Id).ValueGeneratedNever();
 
                 entity.Property(e => e.Hostname)
                     .IsRequired()
@@ -151,9 +196,12 @@ namespace Bhbk.Lib.Aurora.Data.Models_DIRECT
                     .IsRequired()
                     .HasMaxLength(16);
 
-                entity.Property(e => e.KeyValueBase64)
-                    .IsRequired()
-                    .HasMaxLength(2048);
+                entity.Property(e => e.KeyValueBase64).IsRequired();
+
+                entity.HasOne(d => d.PrivateKey)
+                    .WithMany(p => p.tbl_UserPublicKeys)
+                    .HasForeignKey(d => d.PrivateKeyId)
+                    .HasConstraintName("FK_tbl_UserPublicKeys_UserPrivateID");
 
                 entity.HasOne(d => d.User)
                     .WithMany(p => p.tbl_UserPublicKeys)

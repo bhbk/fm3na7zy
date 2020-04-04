@@ -2,11 +2,17 @@
     [Id]         UNIQUEIDENTIFIER NOT NULL,
     [IdentityId] UNIQUEIDENTIFIER NULL,
     [UserName]   VARCHAR (128)    NULL,
-    [Enabled]    BIT              NULL,
+    [Enabled]    BIT              CONSTRAINT [DF_tbl_Users_Enabled] DEFAULT ((0)) NOT NULL,
     [Created]    DATETIME2 (7)    NOT NULL,
-    [Immutable]  BIT              NOT NULL,
+    [Immutable]  BIT              CONSTRAINT [DF_tbl_Users_Immutable] DEFAULT ((0)) NOT NULL,
     CONSTRAINT [PK_tbl_Users] PRIMARY KEY CLUSTERED ([Id] ASC)
 );
+
+
+
+
+
+
 
 
 

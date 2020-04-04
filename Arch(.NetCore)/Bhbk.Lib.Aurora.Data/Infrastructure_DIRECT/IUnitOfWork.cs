@@ -5,8 +5,10 @@ namespace Bhbk.Lib.Aurora.Data.Infrastructure_DIRECT
 {
     public interface IUnitOfWork : IGenericUnitOfWork
     {
-        public PrivateKeyRepository PrivateKeys { get; }
+        public SystemKeyRepository SystemKeys { get; }
         public SettingsRepository Settings { get; }
+        public UserFileRepository UserFiles { get; }
+        public UserPasswordRepository UserPasswords { get; }
         public UserPrivateKeyRepository UserPrivateKeys { get; }
         public UserPublicKeyRepository UserPublicKeys { get; }
         public UserRepository Users { get; }

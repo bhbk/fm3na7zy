@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Bhbk.Lib.Aurora.Data.Models_DIRECT
 {
-    public partial class tbl_PrivateKeys
+    public partial class tbl_SystemKeys
     {
         public Guid Id { get; set; }
         public string KeyValueBase64 { get; set; }

@@ -1,16 +1,15 @@
 ﻿using Bhbk.Lib.Aurora.Data.Infrastructure_DIRECT;
 using Bhbk.Lib.Aurora.Data.Models_DIRECT;
-using Bhbk.Lib.Cryptography.Entropy;
 using Bhbk.Lib.QueryExpression.Extensions;
 using Bhbk.Lib.QueryExpression.Factories;
 using Rebex.Net;
 using Rebex.Security.Certificates;
-using Rebex.Security.Cryptography.Pkcs;
 using Serilog;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 
 namespace Bhbk.Lib.Aurora.Domain.Helpers
 {
@@ -53,7 +52,7 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 			return keyPair;
 		}
 
-		public static void ExportSshPrivateKey(tbl_Users user, tbl_UserPrivateKeys key, SshPrivateKeyFormat keyFormat, string keyPass, FileInfo outputFile)
+		public static SshPrivateKey ExportSshPrivateKey(tbl_Users user, tbl_UserPrivateKeys key, SshPrivateKeyFormat keyFormat, string keyPass, FileInfo outputFile)
 		{
 			using (var stream = new MemoryStream())
 			{
@@ -61,10 +60,12 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 				privKey.Save(stream, keyPass, keyFormat);
 
 				File.WriteAllBytes(outputFile.FullName, stream.ToArray());
+
+				return privKey;
 			}
 		}
 
-		public static void ExportSshPublicKey(tbl_Users user, tbl_UserPublicKeys key, SshPublicKeyFormat keyFormat, FileInfo outputFile)
+		public static SshPublicKey ExportSshPublicKey(tbl_Users user, tbl_UserPublicKeys key, SshPublicKeyFormat keyFormat, FileInfo outputFile)
 		{
 			using (var stream = new MemoryStream())
 			{
@@ -72,6 +73,8 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 				pubKey.SavePublicKey(stream, keyFormat);
 
 				File.WriteAllBytes(outputFile.FullName, stream.ToArray());
+
+				return pubKey;
 			}
 		}
 
@@ -79,12 +82,36 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 		 * openssh uses base64 and special formatting for public keys
 		 * https://man.openbsd.org/ssh-keygen
 		 */
-		public static void ExportSshPublicKeyBase64(tbl_Users user, tbl_UserPublicKeys key, FileInfo outputFile)
+		public static SshPublicKey ExportSshPublicKeyBase64(tbl_Users user, tbl_UserPublicKeys key, FileInfo outputFile)
 		{
 			var pubKey = new SshPublicKey(Convert.FromBase64String(key.KeyValueBase64));
 			var data = new string($"ssh-rsa {Convert.ToBase64String(pubKey.GetPublicKey())} {user.UserName}@{key.Hostname}");
 
 			File.WriteAllText(outputFile.FullName, data);
+
+			return pubKey;
+		}
+
+		/*
+		 * openssh uses base64 and special formatting for public keys
+		 * https://man.openbsd.org/ssh-keygen
+		 */
+		public static ICollection<SshPublicKey> ExportSshPublicKeysBase64(tbl_Users user, ICollection<tbl_UserPublicKeys> keys, FileInfo outputFile)
+		{
+			var sb = new StringBuilder();
+			var pubKeys = new List<SshPublicKey>();
+
+			foreach (var key in keys)
+			{
+				var pubKey = new SshPublicKey(Convert.FromBase64String(key.KeyValueBase64));
+
+				sb.AppendLine(new string($"ssh-rsa {Convert.ToBase64String(pubKey.GetPublicKey())} {user.UserName}@{key.Hostname}"));
+				pubKeys.Add(pubKey);
+			}
+
+			File.WriteAllText(outputFile.FullName, sb.ToString());
+
+			return pubKeys;
 		}
 
 		public static SshPrivateKey ImportSshPrivateKey(IUnitOfWork uow, tbl_Users user, SignatureHashAlgorithm hashAlgo, string keyPass, string hostname, FileInfo inputFile)
@@ -232,6 +259,48 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 			}
 
 			return pubKey;
+		}
+
+		/*
+		 * openssh uses base64 and special formatting for public keys
+		 * https://man.openbsd.org/ssh-keygen
+		 */
+		public static ICollection<SshPublicKey> ImportSshPublicKeysBase64(IUnitOfWork uow, tbl_Users user, SignatureHashAlgorithm hashAlgo, string hostname, FileInfo inputFile)
+		{
+			var lines = File.ReadAllLines(inputFile.FullName);
+			var pubKeys = new List<SshPublicKey>();
+
+			foreach (var line in lines)
+			{
+				var base64 = line.Split(" ");
+				var asciiBytes = Convert.FromBase64String(base64[1]);
+
+				var pubKey = new SshPublicKey(asciiBytes);
+				var pubKeyBase64 = Convert.ToBase64String(pubKey.GetPublicKey(), Base64FormattingOptions.None);
+
+				pubKeys.Add(pubKey);
+
+				if (!uow.UserPublicKeys.Get(QueryExpressionFactory.GetQueryExpression<tbl_UserPublicKeys>()
+					.Where(x => x.KeyValueBase64 == pubKeyBase64).ToLambda()).Any())
+				{
+					uow.UserPublicKeys.Create(
+						new tbl_UserPublicKeys
+						{
+							Id = Guid.NewGuid(),
+							UserId = user.Id,
+							KeyValueBase64 = pubKeyBase64,
+							KeyValueAlgo = pubKey.KeyAlgorithm.ToString(),
+							KeySig = pubKey.Fingerprint.ToString(hashAlgo, false),
+							KeySigAlgo = hashAlgo.ToString(),
+							Hostname = hostname,
+							Enabled = true,
+							Created = DateTime.Now
+						});
+					uow.Commit();
+				}
+			}
+
+			return pubKeys;
 		}
 
 		[Obsolete]

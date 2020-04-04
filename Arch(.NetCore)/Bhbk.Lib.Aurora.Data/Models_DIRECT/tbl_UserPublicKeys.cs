@@ -15,7 +15,9 @@ namespace Bhbk.Lib.Aurora.Data.Models_DIRECT
         public string Hostname { get; set; }
         public bool Enabled { get; set; }
         public DateTime Created { get; set; }
+        public bool Immutable { get; set; }
 
+        public virtual tbl_UserPrivateKeys PrivateKey { get; set; }
         public virtual tbl_Users User { get; set; }
     }
 }

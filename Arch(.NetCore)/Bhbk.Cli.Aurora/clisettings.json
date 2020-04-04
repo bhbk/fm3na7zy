@@ -8,6 +8,9 @@
       }
     }
   },
+  "Storage": {
+    "BasePath": ".\\bin\\"
+  },
   "Databases": {
     "AuroraEntities": "Data Source=bits.test.ochap.local; Initial Catalog=BhbkAurora; User ID=Sql.BhbkAurora; Password=Pa$$word01!"
   }

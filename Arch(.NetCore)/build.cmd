@@ -26,3 +26,9 @@ dotnet octo pack --id=Bhbk.WebApi.Aurora --version=%VERSION% --basePath=Bhbk.Web
 set VERSION=
 rem dotnet tool uninstall Octopus.DotNet.Cli --global
 rem powershell -command "& { update-package -reinstall }"
+
+Bhbk.Cli.Aurora.exe create-user --user=tester --pass=password
+Bhbk.Cli.Aurora.exe create-key --user=tester --type=RSA --size=4096 --hash=SHA256
+Bhbk.Cli.Aurora.exe export-keys --user=tester --directory=.\data\.ssh\
+Bhbk.Cli.Aurora.exe import-keys --user=tester --directory=.\data\.ssh\
+Bhbk.Cli.Aurora.exe show-keys --user=tester

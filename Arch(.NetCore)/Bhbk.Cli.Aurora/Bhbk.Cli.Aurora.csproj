@@ -22,4 +22,10 @@
     <ProjectReference Include="..\Bhbk.Lib.Aurora.Domain\Bhbk.Lib.Aurora.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="clisettings.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
