@@ -6,8 +6,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Bhbk.Lib.Common" Version="2020.3.6.830" />
-    <PackageReference Include="Bhbk.Lib.DataState" Version="2020.3.6.830" />
+    <PackageReference Include="Bhbk.Lib.Common" Version="2020.3.8.2030" />
+    <PackageReference Include="Bhbk.Lib.DataState" Version="2020.3.8.2030" />
     <PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="5.2.7" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="3.1.5" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />

@@ -9,8 +9,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Bhbk.Lib.Common" Version="2020.3.6.830" />
-    <PackageReference Include="Bhbk.Lib.DataState" Version="2020.3.6.830" />
+    <PackageReference Include="Bhbk.Lib.Common" Version="2020.3.8.2030" />
+    <PackageReference Include="Bhbk.Lib.DataState" Version="2020.3.8.2030" />
     <PackageReference Include="coverlet.msbuild" Version="2.9.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

@@ -17,6 +17,7 @@ namespace Bhbk.Lib.Aurora.Data.Infrastructure_DIRECT
         public SettingsRepository Settings { get; private set; }
         public SystemKeyRepository SystemKeys { get; private set; }
         public UserFileRepository UserFiles { get; private set; }
+        public UserFolderRepository UserFolders { get; private set; }
         public UserPasswordRepository UserPasswords { get; private set; }
         public UserPrivateKeyRepository UserPrivateKeys { get; private set; }
         public UserPublicKeyRepository UserPublicKeys { get; private set; }
@@ -41,9 +42,9 @@ namespace Bhbk.Lib.Aurora.Data.Infrastructure_DIRECT
                     {
 #if !RELEASE
                         var builder = new DbContextOptionsBuilder<AuroraEntities>()
-                            .UseSqlServer(connection)
-                            .UseLoggerFactory(_logger)
-                            .EnableSensitiveDataLogging();
+                            .UseSqlServer(connection);
+                            //.UseLoggerFactory(_logger)
+                            //.EnableSensitiveDataLogging();
 #elif RELEASE
                         var builder = new DbContextOptionsBuilder<AuroraEntities>()
                             .UseSqlServer(connection);
@@ -81,6 +82,7 @@ namespace Bhbk.Lib.Aurora.Data.Infrastructure_DIRECT
             SystemKeys = new SystemKeyRepository(_context);
             Settings = new SettingsRepository(_context);
             UserFiles = new UserFileRepository(_context);
+            UserFolders = new UserFolderRepository(_context);
             UserPasswords = new UserPasswordRepository(_context);
             UserPrivateKeys = new UserPrivateKeyRepository(_context);
             UserPublicKeys = new UserPublicKeyRepository(_context);

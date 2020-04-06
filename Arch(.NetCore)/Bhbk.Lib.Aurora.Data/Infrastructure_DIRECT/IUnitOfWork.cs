@@ -8,6 +8,7 @@ namespace Bhbk.Lib.Aurora.Data.Infrastructure_DIRECT
         public SystemKeyRepository SystemKeys { get; }
         public SettingsRepository Settings { get; }
         public UserFileRepository UserFiles { get; }
+        public UserFolderRepository UserFolders { get; }
         public UserPasswordRepository UserPasswords { get; }
         public UserPrivateKeyRepository UserPrivateKeys { get; }
         public UserPublicKeyRepository UserPublicKeys { get; }

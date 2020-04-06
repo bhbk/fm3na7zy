@@ -1,4 +1,5 @@
 ﻿using Rebex.IO.FileSystem;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -6,29 +7,31 @@ using System.Linq;
 
 namespace Bhbk.DaemonSSH.Aurora.FileSystems
 {
-    public class MemoryFileSystemProvider : ReadWriteFileSystemProvider
+    public class MemoryFileSystem : ReadWriteFileSystemProvider
     {
         private readonly Dictionary<NodeBase, MemoryNodeData> _store;
-        private readonly Dictionary<NodePath, NodeBase> _paths;
+        private readonly Dictionary<NodePath, NodeBase> _path;
 
-        public MemoryFileSystemProvider()
+        public MemoryFileSystem()
             : this(null) { }
 
-        public MemoryFileSystemProvider(FileSystemProviderSettings settings)
+        public MemoryFileSystem(FileSystemProviderSettings settings)
             : base(settings)
         {
             _store = new Dictionary<NodeBase, MemoryNodeData>();
             _store.Add(Root, new MemoryNodeData());
 
-            _paths = new Dictionary<NodePath, NodeBase>();
-            _paths.Add(Root.Path, Root);
+            _path = new Dictionary<NodePath, NodeBase>();
+            _path.Add(Root.Path, Root);
         }
 
         protected override DirectoryNode CreateDirectory(DirectoryNode parent, DirectoryNode child)
         {
             _store.Add(child, new MemoryNodeData());
             _store[parent].Children.Add(child);
-            _paths.Add(child.Path, child);
+            _path.Add(child.Path, child);
+
+            Log.Information($"Create directory {child.Path}");
 
             return child;
         }
@@ -37,7 +40,9 @@ namespace Bhbk.DaemonSSH.Aurora.FileSystems
         {
             _store.Add(child, new MemoryNodeData());
             _store[parent].Children.Add(child);
-            _paths.Add(child.Path, child);
+            _path.Add(child.Path, child);
+
+            Log.Information($"Create file {child.Path}");
 
             return child;
         }
@@ -49,7 +54,9 @@ namespace Bhbk.DaemonSSH.Aurora.FileSystems
 
             _store.Remove(node);
             _store[node.Parent].Children.Remove(node);
-            _paths.Remove(node.Path);
+            _path.Remove(node.Path);
+
+            Log.Information($"Delete {node.Path}");
 
             return node;
         }
@@ -57,7 +64,7 @@ namespace Bhbk.DaemonSSH.Aurora.FileSystems
         protected override bool Exists(NodePath path, NodeType nodeType)
         {
             NodeBase node;
-            _paths.TryGetValue(path, out node);
+            _path.TryGetValue(path, out node);
 
             return node != null && node.NodeType == nodeType;
         }
@@ -108,7 +115,7 @@ namespace Bhbk.DaemonSSH.Aurora.FileSystems
             if (!node.Exists())
                 return 0L;
 
-            return _store[node].Length;
+            return _store[node].Content.Length;
         }
 
         protected override NodeTimeInfo GetTimeInfo(NodeBase node)
@@ -137,11 +144,13 @@ namespace Bhbk.DaemonSSH.Aurora.FileSystems
 
             _store.Remove(node);
             _store[node.Parent].Children.Remove(node);
-            _paths.Remove(node.Path);
+            _path.Remove(node.Path);
 
             _store.Add(newNode, newNodeData);
             _store[newNode.Parent].Children.Add(newNode);
-            _paths.Add(newNode.Path, newNode);
+            _path.Add(newNode.Path, newNode);
+
+            Log.Information($"Rename {node.Path} to {newNode.Path}");
 
             return newNode;
         }
@@ -191,26 +200,22 @@ namespace Bhbk.DaemonSSH.Aurora.FileSystems
             set;
         }
 
-        public NodeTimeInfo TimeInfo
-        {
-            get;
-            set;
-        }
-
         public List<NodeBase> Children
         {
             get;
             set;
         }
 
-        public long Length
-        {
-            get
-            {
-                return Content.Length;
-            }
+        public MemoryStream Content 
+        { 
+            get; 
+            set; 
         }
 
-        public MemoryStream Content { get; set; }
+        public NodeTimeInfo TimeInfo
+        {
+            get;
+            set;
+        }
     }
 }

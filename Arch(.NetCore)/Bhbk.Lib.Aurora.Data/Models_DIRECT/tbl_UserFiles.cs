@@ -7,16 +7,18 @@ namespace Bhbk.Lib.Aurora.Data.Models_DIRECT
     {
         public Guid Id { get; set; }
         public Guid UserId { get; set; }
-        public Guid? VirtualParentId { get; set; }
-        public string VirtualFileName { get; set; }
-        public string RealFolder { get; set; }
+        public Guid? FolderId { get; set; }
+        public string VirtualName { get; set; }
+        public string RealPath { get; set; }
         public string RealFileName { get; set; }
-        public int FileSize { get; set; }
+        public long FileSize { get; set; }
         public string FileHashSHA256 { get; set; }
         public DateTime Created { get; set; }
         public DateTime? LastAccessed { get; set; }
         public DateTime? LastUpdated { get; set; }
+        public bool ReadOnly { get; set; }
 
+        public virtual tbl_UserFolders Folder { get; set; }
         public virtual tbl_Users User { get; set; }
     }
 }

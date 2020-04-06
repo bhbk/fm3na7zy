@@ -23,6 +23,7 @@ using System.Net;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Hashing = Bhbk.Lib.Cryptography.Hashing;
 
 /*
  * https://www.rebex.net/file-server/features/easy-to-use-api.aspx
@@ -156,18 +157,20 @@ namespace Bhbk.DaemonSSH.Aurora
                         {
                             Log.Information($"Authenticate success for '{e.UserName}' at '{e.ClientEndPoint}' running '{e.ClientSoftwareIdentifier}' with public key.");
 
-                            var path = new FileInfo(_conf["Storage:LocalBasePath"]
-                                + Path.DirectorySeparatorChar + "data"
-                                + Path.DirectorySeparatorChar + user.UserName);
+                            var compositeFs = new CompositeReadWriteFileSystem(
+                                new FileSystemProviderSettings()
+                                {
+                                    LogWriter = _server.LogWriter,
+                                    EnableGetContentMethodForDirectories = true,
+                                    EnableGetLengthMethodForDirectories = true,
+                                    EnableSaveContentMethodForDirectories = true,
+                                    EnableStrictChecks = false,
+                                }, _factory, user.Id);
 
-                            if (!Directory.Exists(path.FullName))
-                                Directory.CreateDirectory(path.FullName);
+                            var userFs = new FileServerUser(e.UserName, e.Password);
+                            userFs.SetFileSystem(compositeFs);
 
-                            var localfs = new LocalFileSystemProvider(path.FullName, FileSystemType.ReadWrite);
-                            var fsuser = new FileServerUser(e.UserName, e.Password);
-                            fsuser.SetFileSystem(localfs);
-
-                            e.Accept(fsuser);
+                            e.Accept(userFs);
                             return;
                         }
                         else
@@ -186,30 +189,20 @@ namespace Bhbk.DaemonSSH.Aurora
                         {
                             Log.Information($"Authenticate success for '{e.UserName}' at '{e.ClientEndPoint}' running '{e.ClientSoftwareIdentifier}' with password.");
 
-                            var path = new FileInfo(_conf["Storage:LocalBasePath"]
-                                + Path.DirectorySeparatorChar + "data"
-                                + Path.DirectorySeparatorChar + user.UserName);
+                            var compositeFs = new CompositeReadWriteFileSystem(
+                                new FileSystemProviderSettings()
+                                {
+                                    LogWriter = _server.LogWriter,
+                                    EnableGetContentMethodForDirectories = true,
+                                    EnableGetLengthMethodForDirectories = true,
+                                    EnableSaveContentMethodForDirectories = true,
+                                    EnableStrictChecks = false,
+                                }, _factory, user.Id);
 
-                            if (!Directory.Exists(path.FullName))
-                                Directory.CreateDirectory(path.FullName);
+                            var userFs = new FileServerUser(e.UserName, e.Password);
+                            userFs.SetFileSystem(compositeFs);
 
-                            //var localfs = new LocalFileSystemProvider(path.FullName, FileSystemType.ReadWrite);
-                            //var fsuser = new FileServerUser(e.UserName, e.Password);
-                            //fsuser.SetFileSystem(localfs);
-
-                            //e.Accept(fsuser);
-
-                            //var memoryfs = new MemoryFSProvider();
-                            //var fsuser = new FileServerUser(e.UserName, e.Password);
-                            //fsuser.SetFileSystem(memoryfs);
-
-                            //e.Accept(fsuser);
-
-                            var databasefs = new DatabaseFileSystemProvider(_factory, _conf, user);
-                            var fsuser = new FileServerUser(e.UserName, e.Password);
-                            fsuser.SetFileSystem(databasefs);
-
-                            e.Accept(fsuser);
+                            e.Accept(userFs);
                             return;
                         }
                         else

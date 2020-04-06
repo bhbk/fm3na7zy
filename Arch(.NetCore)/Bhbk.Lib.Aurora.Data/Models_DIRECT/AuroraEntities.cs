@@ -83,9 +83,14 @@ namespace Bhbk.Lib.Aurora.Data.Models_DIRECT
 
                 entity.Property(e => e.RealFileName).IsRequired();
 
-                entity.Property(e => e.RealFolder).IsRequired();
+                entity.Property(e => e.RealPath).IsRequired();
 
-                entity.Property(e => e.VirtualFileName).IsRequired();
+                entity.Property(e => e.VirtualName).IsRequired();
+
+                entity.HasOne(d => d.Folder)
+                    .WithMany(p => p.tbl_UserFiles)
+                    .HasForeignKey(d => d.FolderId)
+                    .HasConstraintName("FK_tbl_UserFiles_VirtualPathID");
 
                 entity.HasOne(d => d.User)
                     .WithMany(p => p.tbl_UserFiles)
@@ -101,19 +106,19 @@ namespace Bhbk.Lib.Aurora.Data.Models_DIRECT
 
                 entity.Property(e => e.Id).ValueGeneratedNever();
 
-                entity.Property(e => e.VirtualFolderName)
+                entity.Property(e => e.VirtualName)
                     .IsRequired()
                     .IsUnicode(false);
+
+                entity.HasOne(d => d.Parent)
+                    .WithMany(p => p.InverseParent)
+                    .HasForeignKey(d => d.ParentId)
+                    .HasConstraintName("FK_tbl_UserFolders_ParentID");
 
                 entity.HasOne(d => d.User)
                     .WithMany(p => p.tbl_UserFolders)
                     .HasForeignKey(d => d.UserId)
                     .HasConstraintName("FK_tbl_UserFolders_UserID");
-
-                entity.HasOne(d => d.VirtualParent)
-                    .WithMany(p => p.InverseVirtualParent)
-                    .HasForeignKey(d => d.VirtualParentId)
-                    .HasConstraintName("FK_tbl_UserFolders_VirtualParentID");
             });
 
             modelBuilder.Entity<tbl_UserPasswords>(entity =>
