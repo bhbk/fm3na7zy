@@ -3,28 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29911.84
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bhbk.Cli.Aurora", "Bhbk.Cli.Aurora\Bhbk.Cli.Aurora.csproj", "{E75923F2-4C4E-499D-864A-359758828A72}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bhbk.DaemonFTP.Aurora", "Bhbk.DaemonFTP.Aurora\Bhbk.DaemonFTP.Aurora.csproj", "{4BAD1AD6-24E6-40CC-9F25-C5CFFD57A804}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bhbk.DaemonFTP.Aurora.Tests", "Bhbk.DaemonFTP.Aurora.Tests\Bhbk.DaemonFTP.Aurora.Tests.csproj", "{F44C7A63-8853-4F41-A41A-C232191AEAAC}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bhbk.DaemonSSH.Aurora", "Bhbk.DaemonSSH.Aurora\Bhbk.DaemonSSH.Aurora.csproj", "{18D764DB-22CA-427D-9DB5-0FCDAACC2AC9}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bhbk.DaemonSSH.Aurora.Tests", "Bhbk.DaemonSSH.Aurora.Tests\Bhbk.DaemonSSH.Aurora.Tests.csproj", "{158C7CBC-E279-4EC4-8BD8-F86EEEA0203B}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bhbk.Lib.Aurora", "Bhbk.Lib.Aurora\Bhbk.Lib.Aurora.csproj", "{4C03C157-FC79-407A-A0EB-713E0844573D}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bhbk.Lib.Aurora.Data", "Bhbk.Lib.Aurora.Data\Bhbk.Lib.Aurora.Data.csproj", "{5B04D6FC-0B7C-4BE8-AC41-C8F5434AD5B8}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bhbk.Lib.Aurora.Domain", "Bhbk.Lib.Aurora.Domain\Bhbk.Lib.Aurora.Domain.csproj", "{952EF791-0DB3-40B0-823B-8DAF85802E50}"
-EndProject
-Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "Bhbk.Mssql.Aurora", "Bhbk.Mssql.Aurora\Bhbk.Mssql.Aurora.sqlproj", "{D0A64D7C-3B66-490E-8935-0BBA4A4FAAB8}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bhbk.WebApi.Aurora", "Bhbk.WebApi.Aurora\Bhbk.WebApi.Aurora.csproj", "{6E50706C-502E-433B-B8D1-24480BCFA5C8}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bhbk.WebApi.Aurora.Tests", "Bhbk.WebApi.Aurora.Tests\Bhbk.WebApi.Aurora.Tests.csproj", "{4EE6A97C-CFE7-4539-A7D0-680ED8AE9683}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{636A42AB-4D59-493A-8CAF-EB0E4F2BD2E0}"
 	ProjectSection(SolutionItems) = preProject
 		..\.gitignore = ..\.gitignore
@@ -34,6 +12,30 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		..\license.md = ..\license.md
 		..\readme.md = ..\readme.md
 	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bhbk.Cli.Aurora", "Bhbk.Cli.Aurora\Bhbk.Cli.Aurora.csproj", "{E75923F2-4C4E-499D-864A-359758828A72}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bhbk.Daemon.Aurora.FTP", "Bhbk.Daemon.Aurora.FTP\Bhbk.Daemon.Aurora.FTP.csproj", "{4BAD1AD6-24E6-40CC-9F25-C5CFFD57A804}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bhbk.Daemon.Aurora.FTP.Tests", "Bhbk.Daemon.Aurora.FTP.Tests\Bhbk.Daemon.Aurora.FTP.Tests.csproj", "{F44C7A63-8853-4F41-A41A-C232191AEAAC}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bhbk.Daemon.Aurora.SSH", "Bhbk.Daemon.Aurora.SSH\Bhbk.Daemon.Aurora.SSH.csproj", "{18D764DB-22CA-427D-9DB5-0FCDAACC2AC9}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bhbk.Daemon.Aurora.SSH.Tests", "Bhbk.Daemon.Aurora.SSH.Tests\Bhbk.Daemon.Aurora.SSH.Tests.csproj", "{158C7CBC-E279-4EC4-8BD8-F86EEEA0203B}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bhbk.Lib.Aurora", "Bhbk.Lib.Aurora\Bhbk.Lib.Aurora.csproj", "{4C03C157-FC79-407A-A0EB-713E0844573D}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bhbk.Lib.Aurora.Data.EFCore", "Bhbk.Lib.Aurora.Data.EFCore\Bhbk.Lib.Aurora.Data.EFCore.csproj", "{5B04D6FC-0B7C-4BE8-AC41-C8F5434AD5B8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bhbk.Lib.Aurora.Data.EF6", "Bhbk.Lib.Aurora.Data.EF6\Bhbk.Lib.Aurora.Data.EF6.csproj", "{05666376-18C4-4F4F-90AD-27F9C1D0D349}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bhbk.Lib.Aurora.Domain", "Bhbk.Lib.Aurora.Domain\Bhbk.Lib.Aurora.Domain.csproj", "{952EF791-0DB3-40B0-823B-8DAF85802E50}"
+EndProject
+Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "Bhbk.Mssql.Aurora", "Bhbk.Mssql.Aurora\Bhbk.Mssql.Aurora.sqlproj", "{D0A64D7C-3B66-490E-8935-0BBA4A4FAAB8}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bhbk.WebApi.Aurora", "Bhbk.WebApi.Aurora\Bhbk.WebApi.Aurora.csproj", "{6E50706C-502E-433B-B8D1-24480BCFA5C8}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bhbk.WebApi.Aurora.Tests", "Bhbk.WebApi.Aurora.Tests\Bhbk.WebApi.Aurora.Tests.csproj", "{4EE6A97C-CFE7-4539-A7D0-680ED8AE9683}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -57,6 +59,30 @@ Global
 		{E75923F2-4C4E-499D-864A-359758828A72}.Release|x64.Build.0 = Release|x64
 		{E75923F2-4C4E-499D-864A-359758828A72}.Release|x86.ActiveCfg = Release|x86
 		{E75923F2-4C4E-499D-864A-359758828A72}.Release|x86.Build.0 = Release|x86
+		{4BAD1AD6-24E6-40CC-9F25-C5CFFD57A804}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4BAD1AD6-24E6-40CC-9F25-C5CFFD57A804}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4BAD1AD6-24E6-40CC-9F25-C5CFFD57A804}.Debug|x64.ActiveCfg = Debug|x64
+		{4BAD1AD6-24E6-40CC-9F25-C5CFFD57A804}.Debug|x64.Build.0 = Debug|x64
+		{4BAD1AD6-24E6-40CC-9F25-C5CFFD57A804}.Debug|x86.ActiveCfg = Debug|x86
+		{4BAD1AD6-24E6-40CC-9F25-C5CFFD57A804}.Debug|x86.Build.0 = Debug|x86
+		{4BAD1AD6-24E6-40CC-9F25-C5CFFD57A804}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4BAD1AD6-24E6-40CC-9F25-C5CFFD57A804}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4BAD1AD6-24E6-40CC-9F25-C5CFFD57A804}.Release|x64.ActiveCfg = Release|x64
+		{4BAD1AD6-24E6-40CC-9F25-C5CFFD57A804}.Release|x64.Build.0 = Release|x64
+		{4BAD1AD6-24E6-40CC-9F25-C5CFFD57A804}.Release|x86.ActiveCfg = Release|Any CPU
+		{4BAD1AD6-24E6-40CC-9F25-C5CFFD57A804}.Release|x86.Build.0 = Release|Any CPU
+		{F44C7A63-8853-4F41-A41A-C232191AEAAC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F44C7A63-8853-4F41-A41A-C232191AEAAC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F44C7A63-8853-4F41-A41A-C232191AEAAC}.Debug|x64.ActiveCfg = Debug|x64
+		{F44C7A63-8853-4F41-A41A-C232191AEAAC}.Debug|x64.Build.0 = Debug|x64
+		{F44C7A63-8853-4F41-A41A-C232191AEAAC}.Debug|x86.ActiveCfg = Debug|x86
+		{F44C7A63-8853-4F41-A41A-C232191AEAAC}.Debug|x86.Build.0 = Debug|x86
+		{F44C7A63-8853-4F41-A41A-C232191AEAAC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F44C7A63-8853-4F41-A41A-C232191AEAAC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F44C7A63-8853-4F41-A41A-C232191AEAAC}.Release|x64.ActiveCfg = Release|x64
+		{F44C7A63-8853-4F41-A41A-C232191AEAAC}.Release|x64.Build.0 = Release|x64
+		{F44C7A63-8853-4F41-A41A-C232191AEAAC}.Release|x86.ActiveCfg = Release|Any CPU
+		{F44C7A63-8853-4F41-A41A-C232191AEAAC}.Release|x86.Build.0 = Release|Any CPU
 		{18D764DB-22CA-427D-9DB5-0FCDAACC2AC9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{18D764DB-22CA-427D-9DB5-0FCDAACC2AC9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{18D764DB-22CA-427D-9DB5-0FCDAACC2AC9}.Debug|x64.ActiveCfg = Debug|x64
@@ -105,6 +131,18 @@ Global
 		{5B04D6FC-0B7C-4BE8-AC41-C8F5434AD5B8}.Release|x64.Build.0 = Release|x64
 		{5B04D6FC-0B7C-4BE8-AC41-C8F5434AD5B8}.Release|x86.ActiveCfg = Release|x86
 		{5B04D6FC-0B7C-4BE8-AC41-C8F5434AD5B8}.Release|x86.Build.0 = Release|x86
+		{05666376-18C4-4F4F-90AD-27F9C1D0D349}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{05666376-18C4-4F4F-90AD-27F9C1D0D349}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{05666376-18C4-4F4F-90AD-27F9C1D0D349}.Debug|x64.ActiveCfg = Debug|x64
+		{05666376-18C4-4F4F-90AD-27F9C1D0D349}.Debug|x64.Build.0 = Debug|x64
+		{05666376-18C4-4F4F-90AD-27F9C1D0D349}.Debug|x86.ActiveCfg = Debug|x86
+		{05666376-18C4-4F4F-90AD-27F9C1D0D349}.Debug|x86.Build.0 = Debug|x86
+		{05666376-18C4-4F4F-90AD-27F9C1D0D349}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{05666376-18C4-4F4F-90AD-27F9C1D0D349}.Release|Any CPU.Build.0 = Release|Any CPU
+		{05666376-18C4-4F4F-90AD-27F9C1D0D349}.Release|x64.ActiveCfg = Release|x64
+		{05666376-18C4-4F4F-90AD-27F9C1D0D349}.Release|x64.Build.0 = Release|x64
+		{05666376-18C4-4F4F-90AD-27F9C1D0D349}.Release|x86.ActiveCfg = Release|Any CPU
+		{05666376-18C4-4F4F-90AD-27F9C1D0D349}.Release|x86.Build.0 = Release|Any CPU
 		{952EF791-0DB3-40B0-823B-8DAF85802E50}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{952EF791-0DB3-40B0-823B-8DAF85802E50}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{952EF791-0DB3-40B0-823B-8DAF85802E50}.Debug|x64.ActiveCfg = Debug|x64
@@ -149,30 +187,6 @@ Global
 		{4EE6A97C-CFE7-4539-A7D0-680ED8AE9683}.Release|x64.Build.0 = Release|x64
 		{4EE6A97C-CFE7-4539-A7D0-680ED8AE9683}.Release|x86.ActiveCfg = Release|x86
 		{4EE6A97C-CFE7-4539-A7D0-680ED8AE9683}.Release|x86.Build.0 = Release|x86
-		{4BAD1AD6-24E6-40CC-9F25-C5CFFD57A804}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{4BAD1AD6-24E6-40CC-9F25-C5CFFD57A804}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{4BAD1AD6-24E6-40CC-9F25-C5CFFD57A804}.Debug|x64.ActiveCfg = Debug|x64
-		{4BAD1AD6-24E6-40CC-9F25-C5CFFD57A804}.Debug|x64.Build.0 = Debug|x64
-		{4BAD1AD6-24E6-40CC-9F25-C5CFFD57A804}.Debug|x86.ActiveCfg = Debug|x86
-		{4BAD1AD6-24E6-40CC-9F25-C5CFFD57A804}.Debug|x86.Build.0 = Debug|x86
-		{4BAD1AD6-24E6-40CC-9F25-C5CFFD57A804}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{4BAD1AD6-24E6-40CC-9F25-C5CFFD57A804}.Release|Any CPU.Build.0 = Release|Any CPU
-		{4BAD1AD6-24E6-40CC-9F25-C5CFFD57A804}.Release|x64.ActiveCfg = Release|Any CPU
-		{4BAD1AD6-24E6-40CC-9F25-C5CFFD57A804}.Release|x64.Build.0 = Release|Any CPU
-		{4BAD1AD6-24E6-40CC-9F25-C5CFFD57A804}.Release|x86.ActiveCfg = Release|Any CPU
-		{4BAD1AD6-24E6-40CC-9F25-C5CFFD57A804}.Release|x86.Build.0 = Release|Any CPU
-		{F44C7A63-8853-4F41-A41A-C232191AEAAC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F44C7A63-8853-4F41-A41A-C232191AEAAC}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F44C7A63-8853-4F41-A41A-C232191AEAAC}.Debug|x64.ActiveCfg = Debug|x64
-		{F44C7A63-8853-4F41-A41A-C232191AEAAC}.Debug|x64.Build.0 = Debug|x64
-		{F44C7A63-8853-4F41-A41A-C232191AEAAC}.Debug|x86.ActiveCfg = Debug|x86
-		{F44C7A63-8853-4F41-A41A-C232191AEAAC}.Debug|x86.Build.0 = Debug|x86
-		{F44C7A63-8853-4F41-A41A-C232191AEAAC}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F44C7A63-8853-4F41-A41A-C232191AEAAC}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F44C7A63-8853-4F41-A41A-C232191AEAAC}.Release|x64.ActiveCfg = Release|Any CPU
-		{F44C7A63-8853-4F41-A41A-C232191AEAAC}.Release|x64.Build.0 = Release|Any CPU
-		{F44C7A63-8853-4F41-A41A-C232191AEAAC}.Release|x86.ActiveCfg = Release|Any CPU
-		{F44C7A63-8853-4F41-A41A-C232191AEAAC}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

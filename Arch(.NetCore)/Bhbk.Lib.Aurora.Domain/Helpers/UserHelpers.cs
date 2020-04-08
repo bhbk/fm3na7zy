@@ -1,5 +1,5 @@
-﻿using Bhbk.Lib.Aurora.Data.Infrastructure_DIRECT;
-using Bhbk.Lib.Aurora.Data.Models_DIRECT;
+﻿using Bhbk.Lib.Aurora.Data.EFCore.Infrastructure_DIRECT;
+using Bhbk.Lib.Aurora.Data.EFCore.Models_DIRECT;
 using Bhbk.Lib.Cryptography.Entropy;
 using Microsoft.Extensions.Configuration;
 using Rebex.Net;

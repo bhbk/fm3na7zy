@@ -18,7 +18,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Bhbk.Lib.Aurora.Data\Bhbk.Lib.Aurora.Data.csproj" />
+    <ProjectReference Include="..\Bhbk.Lib.Aurora.Data.EF6\Bhbk.Lib.Aurora.Data.EF6.csproj" />
+    <ProjectReference Include="..\Bhbk.Lib.Aurora.Data.EFCore\Bhbk.Lib.Aurora.Data.EFCore.csproj" />
   </ItemGroup>
 
 </Project>

@@ -9,12 +9,12 @@ cd Bhbk.Cli.Aurora
 powershell -command "& { if (Test-Path .\bin) { Remove-Item .\bin -Recurse -Force } }"
 powershell -command "& { if (Test-Path .\obj) { Remove-Item .\obj -Recurse -Force } }"
 
-cd ..\Bhbk.DaemonSSH.Aurora
+cd ..\Bhbk.Daemon.Aurora.SSH
 powershell -command "& { if (Test-Path .\bin) { Remove-Item .\bin -Recurse -Force } }"
 powershell -command "& { if (Test-Path .\obj) { Remove-Item .\obj -Recurse -Force } }"
 powershell -command "& { if (Test-Path .\*.log) { Remove-Item .\*.log -Recurse -Force } }"
 
-cd ..\Bhbk.DaemonSSH.Aurora.Tests
+cd ..\Bhbk.Daemon.Aurora.SSH.Tests
 powershell -command "& { if (Test-Path .\bin) { Remove-Item .\bin -Recurse -Force } }"
 powershell -command "& { if (Test-Path .\obj) { Remove-Item .\obj -Recurse -Force } }"
 
