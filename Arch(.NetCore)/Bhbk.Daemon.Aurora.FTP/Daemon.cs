@@ -28,7 +28,7 @@ namespace Bhbk.Daemon.Aurora.FTP
             {
                 await Task.Delay(TimeSpan.FromSeconds(_delay), cancellationToken);
 
-                Log.Information(typeof(Daemon).Name + " worker running at: {time}", DateTimeOffset.Now);
+                //Log.Information(typeof(Daemon).Name + " worker running at: {time}", DateTimeOffset.Now);
 
                 try
                 {

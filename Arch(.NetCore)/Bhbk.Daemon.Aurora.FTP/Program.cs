@@ -27,7 +27,7 @@ namespace Bhbk.Daemon.Aurora.FTP
                 options.AddSingleton<IMapper>(_mapper);
                 options.AddSingleton<IConfiguration>(_conf);
                 options.AddSingleton<IContextService>(_instance);
-                options.AddScoped<IUnitOfWork, UnitOfWork>(_ =>
+                options.AddTransient<IUnitOfWork, UnitOfWork>(_ =>
                 {
                     return new UnitOfWork(_conf["Databases:AuroraEntities"], _instance);
                 });
@@ -42,7 +42,7 @@ namespace Bhbk.Daemon.Aurora.FTP
                 options.AddSingleton<IMapper>(_mapper);
                 options.AddSingleton<IConfiguration>(_conf);
                 options.AddSingleton<IContextService>(_instance);
-                options.AddScoped<IUnitOfWork, UnitOfWork>(_ =>
+                options.AddTransient<IUnitOfWork, UnitOfWork>(_ =>
                 {
                     return new UnitOfWork(_conf["Databases:AuroraEntities"], _instance);
                 });

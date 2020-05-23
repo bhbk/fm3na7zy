@@ -1,4 +1,5 @@
-using Bhbk.Daemon.Aurora.SSH.FileSystems;
+using Bhbk.Daemon.Aurora.SSH.Providers;
+using Bhbk.Daemon.Aurora.SSH.Helpers;
 using Bhbk.Lib.Aurora.Data.EFCore.Infrastructure_DIRECT;
 using Bhbk.Lib.Aurora.Data.EFCore.Models_DIRECT;
 using Bhbk.Lib.Cryptography.Entropy;
@@ -23,7 +24,7 @@ using System.Net;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Hashing = Bhbk.Lib.Cryptography.Hashing;
+using Bhbk.Daemon.Aurora.SSH.Factories;
 
 /*
  * https://www.rebex.net/file-server/features/easy-to-use-api.aspx
@@ -33,19 +34,21 @@ namespace Bhbk.Daemon.Aurora.SSH
 {
     public class Daemon : IHostedService, IDisposable
     {
-        private LogLevel _level;
         private readonly IServiceScopeFactory _factory;
         private readonly IConfiguration _conf;
+        private readonly LogLevel _logLevel;
         private readonly FileServer _server;
         private readonly int _delay;
 
         public Daemon(IServiceScopeFactory factory, IConfiguration conf)
         {
-            _level = LogLevel.Info;
             _factory = factory;
             _conf = conf;
             _delay = int.Parse(_conf["Tasks:SshWorker:PollingDelay"]);
             _server = new FileServer();
+
+            if (!Enum.TryParse<LogLevel>(_conf["Rebex:LogLevel"], true, out _logLevel))
+                throw new InvalidCastException();
         }
 
         public async Task ExecuteAsync(CancellationToken cancellationToken)
@@ -74,8 +77,6 @@ namespace Bhbk.Daemon.Aurora.SSH
 
         public async Task StartAsync(CancellationToken cancellationToken)
         {
-            Log.Information(typeof(Daemon).Name + " started at: {time}", DateTimeOffset.Now);
-
             AsymmetricKeyAlgorithm.Register(Curve25519.Create);
             AsymmetricKeyAlgorithm.Register(Ed25519.Create);
             AsymmetricKeyAlgorithm.Register(EllipticCurveAlgorithm.Create);
@@ -85,7 +86,7 @@ namespace Bhbk.Daemon.Aurora.SSH
                 Load_LicenseKeys();
                 Load_SystemKeys();
 
-                _server.LogWriter = new ConsoleLogWriter(_level);
+                _server.LogWriter = new ConsoleLogWriter(_logLevel);
                 _server.Settings.AllowedAuthenticationMethods = AuthenticationMethods.PublicKey | AuthenticationMethods.Password;
                 _server.Authentication += Event_Authentication;
                 _server.Connecting += Event_Connecting;
@@ -109,8 +110,6 @@ namespace Bhbk.Daemon.Aurora.SSH
 
         public async Task StopAsync(CancellationToken cancellationToken)
         {
-            Log.Information(typeof(Daemon).Name + " stopped at: {time}", DateTimeOffset.Now);
-
             try
             {
                 if (_server.IsRunning)
@@ -133,44 +132,33 @@ namespace Bhbk.Daemon.Aurora.SSH
 
             try
             {
-                using (var scope = _factory.CreateScope())
+                if (e.Key != null)
                 {
-                    var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
-                    var user = uow.Users.Get(QueryExpressionFactory.GetQueryExpression<tbl_Users>()
-                        .Where(x => x.UserName == e.UserName).ToLambda(),
-                            new List<Expression<Func<tbl_Users, object>>>()
-                            {
-                                x => x.tbl_UserFolders,
-                                x => x.tbl_UserFiles,
-                                x => x.tbl_UserPasswords,
-                                x => x.tbl_UserPublicKeys
-                            }).SingleOrDefault();
+                    Log.Information($"Authenticate in-progress for '{e.UserName}' at '{e.ClientEndPoint}' running '{e.ClientSoftwareIdentifier}' with public key.");
 
-                    var keys = user.tbl_UserPublicKeys.Where(x => x.Enabled);
-                    var pass = user.tbl_UserPasswords;
-
-                    if (e.Key != null)
+                    using (var scope = _factory.CreateScope())
                     {
-                        Log.Information($"Authenticate in-progress for '{e.UserName}' at '{e.ClientEndPoint}' running '{e.ClientSoftwareIdentifier}' with public key.");
+                        var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+                        var user = uow.Users.Get(QueryExpressionFactory.GetQueryExpression<tbl_Users>()
+                            .Where(x => x.UserName == e.UserName).ToLambda(),
+                                new List<Expression<Func<tbl_Users, object>>>()
+                                {
+                                    x => x.tbl_UserFolders,
+                                    x => x.tbl_UserFiles,
+                                    x => x.tbl_UserPublicKeys,
+                                }).SingleOrDefault();
+
+                        var keys = user.tbl_UserPublicKeys.Where(x => x.Enabled);
 
                         if (keys.Where(x => x.KeyValueBase64 == Convert.ToBase64String(e.Key.GetPublicKey(), Base64FormattingOptions.None)).Any())
                         {
                             Log.Information($"Authenticate success for '{e.UserName}' at '{e.ClientEndPoint}' running '{e.ClientSoftwareIdentifier}' with public key.");
 
-                            var compositeFs = new CompositeReadWriteFileSystem(
-                                new FileSystemProviderSettings()
-                                {
-                                    LogWriter = _server.LogWriter,
-                                    EnableGetContentMethodForDirectories = true,
-                                    EnableGetLengthMethodForDirectories = true,
-                                    EnableSaveContentMethodForDirectories = true,
-                                    EnableStrictChecks = false,
-                                }, _factory, user.Id);
+                            var fs = FileSystemFactory.CreateUserFileSystem(_factory, user);
+                            var fsUser = new FileServerUser(e.UserName, e.Password);
+                            fsUser.SetFileSystem(fs);
 
-                            var userFs = new FileServerUser(e.UserName, e.Password);
-                            userFs.SetFileSystem(compositeFs);
-
-                            e.Accept(userFs);
+                            e.Accept(fsUser);
                             return;
                         }
                         else
@@ -181,28 +169,34 @@ namespace Bhbk.Daemon.Aurora.SSH
                             return;
                         }
                     }
-                    else if (e.Password != null)
+                }
+                else if (e.Password != null)
+                {
+                    Log.Information($"Authenticate in-progress for '{e.UserName}' at '{e.ClientEndPoint}' running '{e.ClientSoftwareIdentifier}' with password.");
+
+                    using (var scope = _factory.CreateScope())
                     {
-                        Log.Information($"Authenticate in-progress for '{e.UserName}' at '{e.ClientEndPoint}' running '{e.ClientSoftwareIdentifier}' with password.");
+                        var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+                        var user = uow.Users.Get(QueryExpressionFactory.GetQueryExpression<tbl_Users>()
+                            .Where(x => x.UserName == e.UserName).ToLambda(),
+                                new List<Expression<Func<tbl_Users, object>>>()
+                                {
+                                    x => x.tbl_UserFolders,
+                                    x => x.tbl_UserFiles,
+                                    x => x.tbl_UserPasswords,
+                                }).SingleOrDefault();
+
+                        var pass = user.tbl_UserPasswords;
 
                         if (PBKDF2.Validate(pass.PasswordHashPBKDF2, e.Password))
                         {
                             Log.Information($"Authenticate success for '{e.UserName}' at '{e.ClientEndPoint}' running '{e.ClientSoftwareIdentifier}' with password.");
 
-                            var compositeFs = new CompositeReadWriteFileSystem(
-                                new FileSystemProviderSettings()
-                                {
-                                    LogWriter = _server.LogWriter,
-                                    EnableGetContentMethodForDirectories = true,
-                                    EnableGetLengthMethodForDirectories = true,
-                                    EnableSaveContentMethodForDirectories = true,
-                                    EnableStrictChecks = false,
-                                }, _factory, user.Id);
+                            var fs = FileSystemFactory.CreateUserFileSystem(_factory, user);
+                            var fsUser = new FileServerUser(e.UserName, e.Password);
+                            fsUser.SetFileSystem(fs);
 
-                            var userFs = new FileServerUser(e.UserName, e.Password);
-                            userFs.SetFileSystem(compositeFs);
-
-                            e.Accept(userFs);
+                            e.Accept(fsUser);
                             return;
                         }
                         else
@@ -213,12 +207,11 @@ namespace Bhbk.Daemon.Aurora.SSH
                             return;
                         }
                     }
-
-                    Log.Error($"Authenticate not possible for '{e.UserName}' at '{e.ClientEndPoint}' running '{e.ClientSoftwareIdentifier}'.");
-
-                    e.Reject();
                 }
 
+                Log.Error($"Authenticate not possible for '{e.UserName}' at '{e.ClientEndPoint}' running '{e.ClientSoftwareIdentifier}'.");
+
+                e.Reject();
             }
             catch (Exception ex)
             {
@@ -319,7 +312,7 @@ namespace Bhbk.Daemon.Aurora.SSH
                     var keys = user.tbl_UserPublicKeys.Where(x => x.Enabled);
                     var pass = user.tbl_UserPasswords;
 
-                    if (pass != null 
+                    if (pass != null
                         && pass.Enabled
                         && keys.Count() > 0)
                     {
@@ -338,7 +331,7 @@ namespace Bhbk.Daemon.Aurora.SSH
                         return;
                     }
 
-                    if (pass != null 
+                    if (pass != null
                         && pass.Enabled
                         && keys.Count() == 0)
                     {
@@ -386,9 +379,10 @@ namespace Bhbk.Daemon.Aurora.SSH
                 using (var scope = _factory.CreateScope())
                 {
                     var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+                    var key = uow.Settings.Get(x => x.ConfigKey == "RebexLicense")
+                        .OrderBy(x => x.Created).Last();
 
-                    Rebex.Licensing.Key = uow.Settings.Get(x => x.ConfigKey == "RebexLicense")
-                        .OrderBy(x => x.Created).Last().ConfigValue;
+                    Rebex.Licensing.Key = key.ConfigValue;
                 }
             }
             catch (Exception ex)

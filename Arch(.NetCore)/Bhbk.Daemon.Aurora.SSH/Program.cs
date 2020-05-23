@@ -27,7 +27,7 @@ namespace Bhbk.Daemon.Aurora.SSH
                 options.AddSingleton<IMapper>(_mapper);
                 options.AddSingleton<IConfiguration>(_conf);
                 options.AddSingleton<IContextService>(_instance);
-                options.AddScoped<IUnitOfWork, UnitOfWork>(_ =>
+                options.AddTransient<IUnitOfWork, UnitOfWork>(_ =>
                 {
                     return new UnitOfWork(_conf["Databases:AuroraEntities"], _instance);
                 });
@@ -42,7 +42,7 @@ namespace Bhbk.Daemon.Aurora.SSH
                 options.AddSingleton<IMapper>(_mapper);
                 options.AddSingleton<IConfiguration>(_conf);
                 options.AddSingleton<IContextService>(_instance);
-                options.AddScoped<IUnitOfWork, UnitOfWork>(_ =>
+                options.AddTransient<IUnitOfWork, UnitOfWork>(_ =>
                 {
                     return new UnitOfWork(_conf["Databases:AuroraEntities"], _instance);
                 });
@@ -64,7 +64,7 @@ namespace Bhbk.Daemon.Aurora.SSH
             Log.Logger = new LoggerConfiguration()
                 .ReadFrom.Configuration(_conf)
                 .WriteTo.Console()
-                .WriteTo.RollingFile(Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + "appdebug.log", retainedFileCountLimit: 7)
+                .WriteTo.RollingFile(Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + "appdebug.log", retainedFileCountLimit: 7, fileSizeLimitBytes: 10485760)
                 .Enrich.FromLogContext()
                 .CreateLogger();
 

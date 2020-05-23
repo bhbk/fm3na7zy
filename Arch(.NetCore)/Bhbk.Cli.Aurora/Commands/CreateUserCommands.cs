@@ -11,6 +11,8 @@ using ManyConsole;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Linq;
+using Bhbk.Lib.Aurora.Primitives.Enums;
+using Rebex;
 
 namespace Bhbk.Cli.Aurora.Commands
 {
@@ -64,6 +66,7 @@ namespace Bhbk.Cli.Aurora.Commands
                     {
                         Id = Guid.NewGuid(),
                         UserName = _userName,
+                        FileSystem = FileSystemTypes.Composite.ToString(),
                         Enabled = true,
                         Created = DateTime.Now,
                         Immutable = false,

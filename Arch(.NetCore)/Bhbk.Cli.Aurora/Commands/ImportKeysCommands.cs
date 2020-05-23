@@ -26,6 +26,7 @@ namespace Bhbk.Cli.Aurora.Commands
         private static IUnitOfWork _uow;
         private static FileInfo _path;
         private static tbl_Users _user;
+        private static string _hostname;
 
         public ImportKeysCommands()
         {
@@ -62,6 +63,11 @@ namespace Bhbk.Cli.Aurora.Commands
             HasRequiredOption("d|directory=", "Enter directory path for imports", arg =>
             {
                 _path = new FileInfo(arg);
+            });
+
+            HasOption("h|hostname=", "Enter password for user", arg =>
+            {
+                _hostname = arg;
             });
         }
 
@@ -101,12 +107,12 @@ namespace Bhbk.Cli.Aurora.Commands
 
                 //public opensshbase64 key format
                 var pubOpenSshBase64File = new FileInfo(_path.FullName + Path.DirectorySeparatorChar + "pub.opensshbase64.txt");
-                KeyHelpers.ImportSshPublicKeyBase64(_uow, _user, SignatureHashAlgorithm.SHA256, Dns.GetHostName(), pubOpenSshBase64File);
+                KeyHelpers.ImportSshPublicKeyBase64(_uow, _user, SignatureHashAlgorithm.SHA256, pubOpenSshBase64File);
                 Console.Out.WriteLine("Opened " + pubOpenSshBase64File);
 
                 //public opensshbase64 key format in "authorized_keys"
                 var pubOpenSshBase64sFile = new FileInfo(_path.FullName + Path.DirectorySeparatorChar + "authorized_keys.txt");
-                KeyHelpers.ImportSshPublicKeysBase64(_uow, _user, SignatureHashAlgorithm.SHA256, Dns.GetHostName(), pubOpenSshBase64sFile);
+                KeyHelpers.ImportSshPublicKeysBase64(_uow, _user, SignatureHashAlgorithm.SHA256, pubOpenSshBase64sFile);
                 Console.Out.WriteLine("Opened " + pubOpenSshBase64sFile);
 
                 //public pkcs8 key format

@@ -230,11 +230,13 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 		 * openssh uses base64 and special formatting for public keys
 		 * https://man.openbsd.org/ssh-keygen
 		 */
-		public static SshPublicKey ImportSshPublicKeyBase64(IUnitOfWork uow, tbl_Users user, SignatureHashAlgorithm hashAlgo, string hostname, FileInfo inputFile)
+		public static SshPublicKey ImportSshPublicKeyBase64(IUnitOfWork uow, tbl_Users user, SignatureHashAlgorithm hashAlgo, FileInfo inputFile)
 		{
 			var file = File.ReadAllText(inputFile.FullName);
 			var base64 = file.Split(" ");
 			var asciiBytes = Convert.FromBase64String(base64[1]);
+
+			var comment = base64[2].Split("@");
 
 			var pubKey = new SshPublicKey(asciiBytes);
 			var pubKeyBase64 = Convert.ToBase64String(pubKey.GetPublicKey(), Base64FormattingOptions.None);
@@ -251,7 +253,7 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 						KeyValueAlgo = pubKey.KeyAlgorithm.ToString(),
 						KeySig = pubKey.Fingerprint.ToString(hashAlgo, false),
 						KeySigAlgo = hashAlgo.ToString(),
-						Hostname = hostname,
+						Hostname = comment[1],
 						Enabled = true,
 						Created = DateTime.Now
 					});
@@ -265,7 +267,7 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 		 * openssh uses base64 and special formatting for public keys
 		 * https://man.openbsd.org/ssh-keygen
 		 */
-		public static ICollection<SshPublicKey> ImportSshPublicKeysBase64(IUnitOfWork uow, tbl_Users user, SignatureHashAlgorithm hashAlgo, string hostname, FileInfo inputFile)
+		public static ICollection<SshPublicKey> ImportSshPublicKeysBase64(IUnitOfWork uow, tbl_Users user, SignatureHashAlgorithm hashAlgo, FileInfo inputFile)
 		{
 			var lines = File.ReadAllLines(inputFile.FullName);
 			var pubKeys = new List<SshPublicKey>();
@@ -274,6 +276,8 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 			{
 				var base64 = line.Split(" ");
 				var asciiBytes = Convert.FromBase64String(base64[1]);
+
+				var comment = base64[2].Split("@");
 
 				var pubKey = new SshPublicKey(asciiBytes);
 				var pubKeyBase64 = Convert.ToBase64String(pubKey.GetPublicKey(), Base64FormattingOptions.None);
@@ -292,7 +296,7 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 							KeyValueAlgo = pubKey.KeyAlgorithm.ToString(),
 							KeySig = pubKey.Fingerprint.ToString(hashAlgo, false),
 							KeySigAlgo = hashAlgo.ToString(),
-							Hostname = hostname,
+							Hostname = comment[1],
 							Enabled = true,
 							Created = DateTime.Now
 						});

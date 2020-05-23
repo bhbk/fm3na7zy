@@ -6,15 +6,22 @@
     [RealPath]       NVARCHAR (MAX)   NOT NULL,
     [RealFileName]   NVARCHAR (MAX)   NOT NULL,
     [FileSize]       BIGINT           NOT NULL,
-    [FileHashSHA256] NVARCHAR (64)    NOT NULL,
+    [FileHashSHA256] NVARCHAR (64)    NULL,
+    [FileReadOnly]   BIT              CONSTRAINT [DF_tbl_UserFiles_FileReadOnly] DEFAULT ((0)) NOT NULL,
+    [FileCommitted]  BIT              CONSTRAINT [DF_tbl_UserFiles_FileCommitted] DEFAULT ((0)) NOT NULL,
     [Created]        DATETIME2 (7)    NOT NULL,
     [LastAccessed]   DATETIME2 (7)    NULL,
     [LastUpdated]    DATETIME2 (7)    NULL,
-    [ReadOnly]       BIT              CONSTRAINT [DF_tbl_UserFiles_ReadOnly] DEFAULT ((0)) NOT NULL,
     CONSTRAINT [PK_tbl_UserFiles] PRIMARY KEY CLUSTERED ([Id] ASC),
     CONSTRAINT [FK_tbl_UserFiles_FolderID] FOREIGN KEY ([FolderId]) REFERENCES [dbo].[tbl_UserFolders] ([Id]),
     CONSTRAINT [FK_tbl_UserFiles_UserID] FOREIGN KEY ([UserId]) REFERENCES [dbo].[tbl_Users] ([Id]) ON DELETE CASCADE ON UPDATE CASCADE
 );
+
+
+
+
+
+
 
 
 

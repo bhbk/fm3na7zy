@@ -13,10 +13,11 @@ namespace Bhbk.Lib.Aurora.Data.EFCore.Models_DIRECT
         public string RealFileName { get; set; }
         public long FileSize { get; set; }
         public string FileHashSHA256 { get; set; }
+        public bool FileReadOnly { get; set; }
+        public bool FileCommitted { get; set; }
         public DateTime Created { get; set; }
         public DateTime? LastAccessed { get; set; }
         public DateTime? LastUpdated { get; set; }
-        public bool ReadOnly { get; set; }
 
         public virtual tbl_UserFolders Folder { get; set; }
         public virtual tbl_Users User { get; set; }

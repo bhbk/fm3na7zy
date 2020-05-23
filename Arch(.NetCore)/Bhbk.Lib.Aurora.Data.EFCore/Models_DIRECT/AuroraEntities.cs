@@ -75,11 +75,13 @@ namespace Bhbk.Lib.Aurora.Data.EFCore.Models_DIRECT
 
             modelBuilder.Entity<tbl_UserFiles>(entity =>
             {
+                entity.HasIndex(e => e.Id)
+                    .HasName("IX_tbl_UserFiles")
+                    .IsUnique();
+
                 entity.Property(e => e.Id).ValueGeneratedNever();
 
-                entity.Property(e => e.FileHashSHA256)
-                    .IsRequired()
-                    .HasMaxLength(64);
+                entity.Property(e => e.FileHashSHA256).HasMaxLength(64);
 
                 entity.Property(e => e.RealFileName).IsRequired();
 
@@ -90,7 +92,7 @@ namespace Bhbk.Lib.Aurora.Data.EFCore.Models_DIRECT
                 entity.HasOne(d => d.Folder)
                     .WithMany(p => p.tbl_UserFiles)
                     .HasForeignKey(d => d.FolderId)
-                    .HasConstraintName("FK_tbl_UserFiles_VirtualPathID");
+                    .HasConstraintName("FK_tbl_UserFiles_FolderID");
 
                 entity.HasOne(d => d.User)
                     .WithMany(p => p.tbl_UserFiles)
@@ -222,7 +224,17 @@ namespace Bhbk.Lib.Aurora.Data.EFCore.Models_DIRECT
 
                 entity.Property(e => e.Id).ValueGeneratedNever();
 
+                entity.Property(e => e.Debugger)
+                    .HasMaxLength(16)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.FileSystem)
+                    .IsRequired()
+                    .HasMaxLength(16)
+                    .IsUnicode(false);
+
                 entity.Property(e => e.UserName)
+                    .IsRequired()
                     .HasMaxLength(128)
                     .IsUnicode(false);
             });

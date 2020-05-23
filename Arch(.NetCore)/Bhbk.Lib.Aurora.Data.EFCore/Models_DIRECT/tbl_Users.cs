@@ -16,6 +16,8 @@ namespace Bhbk.Lib.Aurora.Data.EFCore.Models_DIRECT
         public Guid Id { get; set; }
         public Guid? IdentityId { get; set; }
         public string UserName { get; set; }
+        public string FileSystem { get; set; }
+        public string Debugger { get; set; }
         public bool Enabled { get; set; }
         public DateTime Created { get; set; }
         public bool Immutable { get; set; }
