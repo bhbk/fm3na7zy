@@ -1,15 +1,17 @@
 ﻿using Bhbk.Lib.Aurora.Data.EFCore.Infrastructure_DIRECT;
 using Bhbk.Lib.Aurora.Data.EFCore.Models_DIRECT;
 using Bhbk.Lib.QueryExpression.Extensions;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 
 namespace Bhbk.Daemon.Aurora.SSH.Helpers
 {
-    internal class FileSystemHelper
+    internal class CompositeFileSystemHelper
     {
-        internal static tbl_UserFolders ConvertPathToSqlForFolder(IUnitOfWork uow, tbl_Users user, string path)
+        internal static tbl_UserFolders ConvertPathToSqlFolder(IUnitOfWork uow, tbl_Users user, string path)
         {
             if (path.FirstOrDefault() == '/')
                 path = path.Substring(1);
@@ -30,7 +32,7 @@ namespace Bhbk.Daemon.Aurora.SSH.Helpers
             return folder;
         }
 
-        internal static tbl_UserFiles ConvertPathToSqlForFile(IUnitOfWork uow, tbl_Users user, string path)
+        internal static tbl_UserFiles ConvertPathToSqlFile(IUnitOfWork uow, tbl_Users user, string path)
         {
             if (path.FirstOrDefault() == '/')
                 path = path.Substring(1);
@@ -42,7 +44,7 @@ namespace Bhbk.Daemon.Aurora.SSH.Helpers
             for (int i = 0; i <= pathBits.Count() - 2; i++)
                 folderPath += "/" + pathBits.ElementAt(i);
 
-            var folder = ConvertPathToSqlForFolder(uow, user, folderPath);
+            var folder = ConvertPathToSqlFolder(uow, user, folderPath);
 
             var file = uow.UserFiles.Get(x => x.UserId == user.Id
                 && x.FolderId == folder.Id
@@ -51,7 +53,7 @@ namespace Bhbk.Daemon.Aurora.SSH.Helpers
             return file;
         }
 
-        internal static string ConvertSqlToPathForFolder(IUnitOfWork uow, tbl_Users user, tbl_UserFolders folder)
+        internal static string ConvertSqlToPathFolder(IUnitOfWork uow, tbl_Users user, tbl_UserFolders folder)
         {
             var path = string.Empty;
             var paths = new List<string> { };
@@ -68,7 +70,7 @@ namespace Bhbk.Daemon.Aurora.SSH.Helpers
             return path;
         }
 
-        internal static string ConvertSqlToPathForFile(IUnitOfWork uow, tbl_Users user, tbl_UserFiles file)
+        internal static string ConvertSqlToPathFile(IUnitOfWork uow, tbl_Users user, tbl_UserFiles file)
         {
             var path = string.Empty;
             var paths = new List<string> { };
@@ -112,8 +114,10 @@ namespace Bhbk.Daemon.Aurora.SSH.Helpers
                         ReadOnly = true,
                     });
                 uow.Commit();
-            }
 
+                var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
+                Log.Information($"'{callPath}' '{user.UserName}' initialize '/'");
+            }
         }
     }
 }

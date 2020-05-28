@@ -13,7 +13,7 @@ using System.Text;
 
 namespace Bhbk.Lib.Aurora.Domain.Helpers
 {
-	public class KeyHelpers
+	public class KeyHelper
 	{
 		public static SshPrivateKey GenerateSshPrivateKey(IUnitOfWork uow, tbl_Users user, SshHostKeyAlgorithm keyAlgo, int keySize, string keyPass, SignatureHashAlgorithm hashAlgo, string hostname)
 		{

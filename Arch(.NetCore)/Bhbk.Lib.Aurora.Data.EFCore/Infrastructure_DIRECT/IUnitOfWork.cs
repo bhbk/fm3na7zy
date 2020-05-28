@@ -5,10 +5,12 @@ namespace Bhbk.Lib.Aurora.Data.EFCore.Infrastructure_DIRECT
 {
     public interface IUnitOfWork : IGenericUnitOfWork
     {
-        public SystemKeyRepository SystemKeys { get; }
-        public SettingsRepository Settings { get; }
+        public SysCredentialRepository SysCredentials { get; }
+        public SysPrivateKeyRepository SysPrivateKeys { get; }
+        public SysSettingRepository SysSettings { get; }
         public UserFileRepository UserFiles { get; }
         public UserFolderRepository UserFolders { get; }
+        public UserMountRepository UserMounts { get; }
         public UserPasswordRepository UserPasswords { get; }
         public UserPrivateKeyRepository UserPrivateKeys { get; }
         public UserPublicKeyRepository UserPublicKeys { get; }

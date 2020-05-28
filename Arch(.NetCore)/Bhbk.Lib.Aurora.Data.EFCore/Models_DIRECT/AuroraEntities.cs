@@ -15,10 +15,12 @@ namespace Bhbk.Lib.Aurora.Data.EFCore.Models_DIRECT
         {
         }
 
-        public virtual DbSet<tbl_Settings> tbl_Settings { get; set; }
-        public virtual DbSet<tbl_SystemKeys> tbl_SystemKeys { get; set; }
+        public virtual DbSet<tbl_SysCredentials> tbl_SysCredentials { get; set; }
+        public virtual DbSet<tbl_SysPrivateKeys> tbl_SysPrivateKeys { get; set; }
+        public virtual DbSet<tbl_SysSettings> tbl_SysSettings { get; set; }
         public virtual DbSet<tbl_UserFiles> tbl_UserFiles { get; set; }
         public virtual DbSet<tbl_UserFolders> tbl_UserFolders { get; set; }
+        public virtual DbSet<tbl_UserMounts> tbl_UserMounts { get; set; }
         public virtual DbSet<tbl_UserPasswords> tbl_UserPasswords { get; set; }
         public virtual DbSet<tbl_UserPrivateKeys> tbl_UserPrivateKeys { get; set; }
         public virtual DbSet<tbl_UserPublicKeys> tbl_UserPublicKeys { get; set; }
@@ -35,22 +37,30 @@ namespace Bhbk.Lib.Aurora.Data.EFCore.Models_DIRECT
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<tbl_Settings>(entity =>
+            modelBuilder.Entity<tbl_SysCredentials>(entity =>
             {
+                entity.HasIndex(e => e.Id)
+                    .HasName("IX_tbl_SysCredentials")
+                    .IsUnique();
+
                 entity.Property(e => e.Id).ValueGeneratedNever();
 
-                entity.Property(e => e.ConfigKey)
+                entity.Property(e => e.Domain)
+                    .HasMaxLength(128)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.Password)
                     .IsRequired()
                     .HasMaxLength(128)
                     .IsUnicode(false);
 
-                entity.Property(e => e.ConfigValue)
+                entity.Property(e => e.UserName)
                     .IsRequired()
-                    .HasMaxLength(256)
+                    .HasMaxLength(128)
                     .IsUnicode(false);
             });
 
-            modelBuilder.Entity<tbl_SystemKeys>(entity =>
+            modelBuilder.Entity<tbl_SysPrivateKeys>(entity =>
             {
                 entity.HasIndex(e => e.Id)
                     .HasName("IX_tbl_PrivateKeys")
@@ -71,6 +81,21 @@ namespace Bhbk.Lib.Aurora.Data.EFCore.Models_DIRECT
                 entity.Property(e => e.KeyValuePass)
                     .IsRequired()
                     .HasMaxLength(1024);
+            });
+
+            modelBuilder.Entity<tbl_SysSettings>(entity =>
+            {
+                entity.Property(e => e.Id).ValueGeneratedNever();
+
+                entity.Property(e => e.ConfigKey)
+                    .IsRequired()
+                    .HasMaxLength(128)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.ConfigValue)
+                    .IsRequired()
+                    .HasMaxLength(256)
+                    .IsUnicode(false);
             });
 
             modelBuilder.Entity<tbl_UserFiles>(entity =>
@@ -121,6 +146,42 @@ namespace Bhbk.Lib.Aurora.Data.EFCore.Models_DIRECT
                     .WithMany(p => p.tbl_UserFolders)
                     .HasForeignKey(d => d.UserId)
                     .HasConstraintName("FK_tbl_UserFolders_UserID");
+            });
+
+            modelBuilder.Entity<tbl_UserMounts>(entity =>
+            {
+                entity.HasKey(e => e.UserId);
+
+                entity.HasIndex(e => e.UserId)
+                    .HasName("IX_tbl_UserMounts")
+                    .IsUnique();
+
+                entity.Property(e => e.UserId).ValueGeneratedNever();
+
+                entity.Property(e => e.AuthType)
+                    .IsRequired()
+                    .HasMaxLength(16)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.ServerName)
+                    .IsRequired()
+                    .HasMaxLength(256)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.ServerPath)
+                    .IsRequired()
+                    .HasMaxLength(256)
+                    .IsUnicode(false);
+
+                entity.HasOne(d => d.Credential)
+                    .WithMany(p => p.tbl_UserMounts)
+                    .HasForeignKey(d => d.CredentialId)
+                    .HasConstraintName("FK_tbl_UserMounts_CredentialID");
+
+                entity.HasOne(d => d.User)
+                    .WithOne(p => p.tbl_UserMounts)
+                    .HasForeignKey<tbl_UserMounts>(d => d.UserId)
+                    .HasConstraintName("FK_tbl_UserMounts_UserID");
             });
 
             modelBuilder.Entity<tbl_UserPasswords>(entity =>
@@ -224,7 +285,7 @@ namespace Bhbk.Lib.Aurora.Data.EFCore.Models_DIRECT
 
                 entity.Property(e => e.Id).ValueGeneratedNever();
 
-                entity.Property(e => e.Debugger)
+                entity.Property(e => e.DebugLevel)
                     .HasMaxLength(16)
                     .IsUnicode(false);
 

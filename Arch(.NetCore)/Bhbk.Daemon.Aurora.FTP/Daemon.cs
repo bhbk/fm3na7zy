@@ -1,9 +1,9 @@
-﻿using Bhbk.Lib.Aurora.Data.EFCore.Infrastructure_DIRECT;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Serilog;
 using System;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -24,11 +24,17 @@ namespace Bhbk.Daemon.Aurora.FTP
 
         private async Task ExecuteAsync(CancellationToken cancellationToken)
         {
+            var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
+
             while (!cancellationToken.IsCancellationRequested)
             {
+#if DEBUG
+                Log.Information($"'{callPath}' sleeping for {TimeSpan.FromSeconds(_delay)}");
+#endif
                 await Task.Delay(TimeSpan.FromSeconds(_delay), cancellationToken);
-
-                //Log.Information(typeof(Daemon).Name + " worker running at: {time}", DateTimeOffset.Now);
+#if DEBUG
+                Log.Information($"'{callPath}' running");
+#endif
 
                 try
                 {
@@ -48,8 +54,6 @@ namespace Bhbk.Daemon.Aurora.FTP
 
         public async Task StartAsync(CancellationToken cancellationToken)
         {
-            Log.Information(typeof(Daemon).Name + " started at: {time}", DateTimeOffset.Now);
-
             try
             {
 
@@ -64,8 +68,6 @@ namespace Bhbk.Daemon.Aurora.FTP
 
         public async Task StopAsync(CancellationToken cancellationToken)
         {
-            Log.Information(typeof(Daemon).Name + " stopped at: {time}", DateTimeOffset.Now);
-
             try
             {
 

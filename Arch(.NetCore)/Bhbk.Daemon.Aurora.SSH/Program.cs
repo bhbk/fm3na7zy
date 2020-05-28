@@ -18,15 +18,17 @@ namespace Bhbk.Daemon.Aurora.SSH
         private static IMapper _mapper;
         private static IConfiguration _conf;
         private static IContextService _instance;
+        private static ILogger _logger;
 
         public static IHostBuilder CreateLinuxHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
             .UseSystemd()
             .ConfigureServices((hostContext, options) =>
             {
-                options.AddSingleton<IMapper>(_mapper);
                 options.AddSingleton<IConfiguration>(_conf);
                 options.AddSingleton<IContextService>(_instance);
+                options.AddSingleton<ILogger>(_logger);
+                options.AddSingleton<IMapper>(_mapper);
                 options.AddTransient<IUnitOfWork, UnitOfWork>(_ =>
                 {
                     return new UnitOfWork(_conf["Databases:AuroraEntities"], _instance);
@@ -39,9 +41,10 @@ namespace Bhbk.Daemon.Aurora.SSH
             .UseWindowsService()
             .ConfigureServices((hostContext, options) =>
             {
-                options.AddSingleton<IMapper>(_mapper);
                 options.AddSingleton<IConfiguration>(_conf);
                 options.AddSingleton<IContextService>(_instance);
+                options.AddSingleton<ILogger>(_logger);
+                options.AddSingleton<IMapper>(_mapper);
                 options.AddTransient<IUnitOfWork, UnitOfWork>(_ =>
                 {
                     return new UnitOfWork(_conf["Databases:AuroraEntities"], _instance);
@@ -51,9 +54,6 @@ namespace Bhbk.Daemon.Aurora.SSH
 
         public static void Main(string[] args)
         {
-            _mapper = new MapperConfiguration(x => x.AddProfile<AutoMapperProfile_DIRECT>())
-                .CreateMapper();
-
             _conf = (IConfiguration)new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
@@ -67,6 +67,11 @@ namespace Bhbk.Daemon.Aurora.SSH
                 .WriteTo.RollingFile(Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + "appdebug.log", retainedFileCountLimit: 7, fileSizeLimitBytes: 10485760)
                 .Enrich.FromLogContext()
                 .CreateLogger();
+
+            _logger = Log.Logger;
+
+            _mapper = new MapperConfiguration(x => x.AddProfile<AutoMapperProfile_DIRECT>())
+                .CreateMapper();
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
                 CreateLinuxHostBuilder(args).Build().Run();

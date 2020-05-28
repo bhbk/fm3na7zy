@@ -11,22 +11,21 @@ using ManyConsole;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
 
 namespace Bhbk.Cli.Aurora.Commands
 {
-    public class DeleteKeysCommands : ConsoleCommand
+    public class KeyDeleteCommands : ConsoleCommand
     {
         private static IConfiguration _conf;
         private static IUnitOfWork _uow;
         private static tbl_Users _user;
         private static bool _delete = false, _deleteAll = false;
 
-        public DeleteKeysCommands()
+        public KeyDeleteCommands()
         {
-            IsCommand("delete-key", "Delete public/private key pairs");
+            IsCommand("delete-key", "Delete user public/private key pairs");
 
             HasRequiredOption("u|user=", "Enter existing user", arg =>
             {
@@ -73,7 +72,7 @@ namespace Bhbk.Cli.Aurora.Commands
             {
                 if (_delete)
                 {
-                    ConsoleHelpers.ConsolePrintUserKeyPairs(_user.tbl_UserPublicKeys.Where(x => !x.Immutable));
+                    ConsoleHelper.OutUserPublicKeyPairs(_user.tbl_UserPublicKeys.Where(x => !x.Immutable));
 
                     Console.Out.Write("  *** Enter GUID of public key to delete *** : ");
                     var input = StandardInput.GetInput();
@@ -94,7 +93,7 @@ namespace Bhbk.Cli.Aurora.Commands
                 }
                 else if (_deleteAll)
                 {
-                    ConsoleHelpers.ConsolePrintUserKeyPairs(_user.tbl_UserPublicKeys.Where(x => !x.Immutable));
+                    ConsoleHelper.OutUserPublicKeyPairs(_user.tbl_UserPublicKeys.Where(x => !x.Immutable));
 
                     _uow.UserPublicKeys.Delete(QueryExpressionFactory.GetQueryExpression<tbl_UserPublicKeys>()
                         .Where(x => x.UserId == _user.Id && !x.Immutable).ToLambda());
@@ -106,7 +105,7 @@ namespace Bhbk.Cli.Aurora.Commands
                 }
                 else
                 {
-                    ConsoleHelpers.ConsolePrintUserKeyPairs(_user.tbl_UserPublicKeys.Where(x => !x.Immutable));
+                    ConsoleHelper.OutUserPublicKeyPairs(_user.tbl_UserPublicKeys.Where(x => !x.Immutable));
                 }
 
                 return StandardOutput.FondFarewell();

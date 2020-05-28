@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Bhbk.Lib.Aurora.Data.EFCore.Models_DIRECT
 {
-    public partial class tbl_Settings
+    public partial class tbl_SysSettings
     {
         public Guid Id { get; set; }
         public string ConfigKey { get; set; }

@@ -35,7 +35,7 @@ deploy:
   only:
     - dummy
   script:
-    - set VERSION=2020.04.06.2030
+    - set VERSION=2020.05.23.1830
     - cd ..\Arch(.NetCore)
     - nuget restore Bhbk.Lib.Aurora.Data.EF6\Bhbk.Lib.Aurora.Data.EF6.csproj -SolutionDirectory . -Verbosity quiet
     - dotnet restore Bhbk.WebApi.Aurora.sln --no-cache --verbosity quiet

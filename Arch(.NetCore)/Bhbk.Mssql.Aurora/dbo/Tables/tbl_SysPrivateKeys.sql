@@ -1,4 +1,4 @@
-﻿CREATE TABLE [dbo].[tbl_SystemKeys] (
+﻿CREATE TABLE [dbo].[tbl_SysPrivateKeys] (
     [Id]             UNIQUEIDENTIFIER NOT NULL,
     [KeyValueBase64] NVARCHAR (MAX)   NOT NULL,
     [KeyValueAlgo]   NVARCHAR (16)    NOT NULL,
@@ -13,5 +13,5 @@
 
 GO
 CREATE UNIQUE NONCLUSTERED INDEX [IX_tbl_PrivateKeys]
-    ON [dbo].[tbl_SystemKeys]([Id] ASC);
+    ON [dbo].[tbl_SysPrivateKeys]([Id] ASC);
 

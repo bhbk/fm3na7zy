@@ -3,7 +3,7 @@ using System.Text;
 
 namespace Bhbk.Lib.Aurora.Domain.Helpers
 {
-    public class HashHelpers
+    public class HashHelper
     {
         /*
          * https://medium.com/eonian-technologies/file-name-hashing-creating-a-hashed-directory-structure-eabb03aa4091

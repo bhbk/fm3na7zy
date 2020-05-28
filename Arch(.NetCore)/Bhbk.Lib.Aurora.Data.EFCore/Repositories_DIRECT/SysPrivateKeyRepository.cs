@@ -3,9 +3,9 @@ using Bhbk.Lib.DataAccess.EFCore.Repositories;
 
 namespace Bhbk.Lib.Aurora.Data.EFCore.Repositories_DIRECT
 {
-    public class SettingsRepository : GenericRepository<tbl_Settings>
+    public class SysPrivateKeyRepository : GenericRepository<tbl_SysPrivateKeys>
     {
-        public SettingsRepository(AuroraEntities context)
+        public SysPrivateKeyRepository(AuroraEntities context)
             : base(context) { }
     }
 }

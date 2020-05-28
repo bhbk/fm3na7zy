@@ -20,7 +20,7 @@ using System.Net;
 
 namespace Bhbk.Cli.Aurora.Commands
 {
-    public class CreateKeyCommands : ConsoleCommand
+    public class KeyCreateCommands : ConsoleCommand
     {
         private static IConfiguration _conf;
         private static IUnitOfWork _uow;
@@ -33,9 +33,9 @@ namespace Bhbk.Cli.Aurora.Commands
         private static string _keyTypeList = string.Join(", ", Enum.GetNames(typeof(SshHostKeyAlgorithm)));
         private static string _sigTypeList = string.Join(", ", Enum.GetNames(typeof(SignatureHashAlgorithm)));
 
-        public CreateKeyCommands()
+        public KeyCreateCommands()
         {
-            IsCommand("create-key", "Create public/private key pairs");
+            IsCommand("create-key", "Create user public/private key pairs");
 
             HasRequiredOption("u|user=", "Enter user that already exists", arg =>
             {
@@ -98,17 +98,21 @@ namespace Bhbk.Cli.Aurora.Commands
         {
             try
             {
-                if (string.IsNullOrEmpty(_keyPass))
+                if (!string.IsNullOrEmpty(_keyPass))
                 {
-                    //Console.Out.Write("  *** Enter password for the new private key *** : ");
-                    //_keyPass = StandardInput.GetHiddenInput();
+                    Console.Out.Write("  *** Enter password for the new private key *** : ");
+                    _keyPass = StandardInput.GetHiddenInput();
+                }
+                else
+                {
+                    Console.Out.WriteLine("  *** The password is being generated... ***");
                     _keyPass = AlphaNumeric.CreateString(32);
                 }
 
                 if (string.IsNullOrEmpty(_keyDns))
                     _keyDns = Dns.GetHostName();
 
-                var key = KeyHelpers.GenerateSshPrivateKey(_uow, _user, _keyType, _keySize, _keyPass, _sigType, _keyDns);
+                var key = KeyHelper.GenerateSshPrivateKey(_uow, _user, _keyType, _keySize, _keyPass, _sigType, _keyDns);
 
                 Console.Out.WriteLine();
                 Console.Out.WriteLine("  *** Private key (base64 format) ***"

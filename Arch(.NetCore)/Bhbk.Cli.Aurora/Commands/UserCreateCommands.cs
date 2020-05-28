@@ -1,5 +1,6 @@
 ﻿using Bhbk.Lib.Aurora.Data.EFCore.Infrastructure_DIRECT;
 using Bhbk.Lib.Aurora.Data.EFCore.Models_DIRECT;
+using Bhbk.Lib.Aurora.Primitives.Enums;
 using Bhbk.Lib.CommandLine.IO;
 using Bhbk.Lib.Common.FileSystem;
 using Bhbk.Lib.Common.Primitives.Enums;
@@ -11,21 +12,21 @@ using ManyConsole;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Linq;
-using Bhbk.Lib.Aurora.Primitives.Enums;
-using Rebex;
 
 namespace Bhbk.Cli.Aurora.Commands
 {
-    public class CreateUserCommands : ConsoleCommand
+    public class UserCreateCommands : ConsoleCommand
     {
         private static IConfiguration _conf;
         private static IUnitOfWork _uow;
         private static string _userName;
         private static string _userPass;
+        private static FileSystemTypes _filesystemType;
+        private static string _filesystemTypeList = string.Join(", ", Enum.GetNames(typeof(FileSystemTypes)));
 
-        public CreateUserCommands()
+        public UserCreateCommands()
         {
-            IsCommand("create-user", "Create a user");
+            IsCommand("create-user", "Create user");
 
             HasRequiredOption("u|user=", "Enter user that does not exist already", arg =>
             {
@@ -51,6 +52,12 @@ namespace Bhbk.Cli.Aurora.Commands
                 _userName = arg;
             });
 
+            HasRequiredOption("f|filesystem=", "Enter type of filesystem for user", arg =>
+            {
+                if (!Enum.TryParse(arg, out _filesystemType))
+                    throw new ConsoleHelpAsException($"*** Invalid filesystem type. Options are '{_filesystemTypeList}' ***");
+            });
+
             HasOption("p|pass=", "Enter password for user", arg =>
             {
                 _userPass = arg;
@@ -66,7 +73,7 @@ namespace Bhbk.Cli.Aurora.Commands
                     {
                         Id = Guid.NewGuid(),
                         UserName = _userName,
-                        FileSystem = FileSystemTypes.Composite.ToString(),
+                        FileSystem = _filesystemType.ToString(),
                         Enabled = true,
                         Created = DateTime.Now,
                         Immutable = false,

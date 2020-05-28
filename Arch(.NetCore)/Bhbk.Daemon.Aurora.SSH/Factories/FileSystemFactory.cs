@@ -1,18 +1,21 @@
-﻿using Bhbk.Daemon.Aurora.SSH.Providers;
+﻿using Bhbk.Daemon.Aurora.SSH.FileSystems;
+using Bhbk.Daemon.Aurora.SSH.Helpers;
 using Bhbk.Lib.Aurora.Data.EFCore.Models_DIRECT;
 using Bhbk.Lib.Aurora.Primitives.Enums;
 using Microsoft.Extensions.DependencyInjection;
 using Rebex;
 using Rebex.IO.FileSystem;
+using Serilog;
 using System;
+using System.Reflection;
 
 namespace Bhbk.Daemon.Aurora.SSH.Factories
 {
     public static class FileSystemFactory
     {
-        public static FileSystemProvider CreateUserFileSystem(IServiceScopeFactory factory, tbl_Users user)
+        public static FileSystemProvider CreateFileSystem(IServiceScopeFactory factory, tbl_Users user, ILogger logger)
         {
-            LogLevel fsLogger;
+            LogLevel fsLogLevel;
             FileSystemTypes fsType;
 
             var fsSettings = new FileSystemProviderSettings()
@@ -23,26 +26,41 @@ namespace Bhbk.Daemon.Aurora.SSH.Factories
                 EnableStrictChecks = false,
             };
 
-            if (!string.IsNullOrEmpty(user.Debugger))
+            if (!string.IsNullOrEmpty(user.DebugLevel))
             {
-                if (!Enum.TryParse<LogLevel>(user.Debugger, true, out fsLogger))
+                if (!Enum.TryParse<LogLevel>(user.DebugLevel, true, out fsLogLevel))
                     throw new InvalidCastException();
 
-                var fileName = String.Format("appdebug-{0:yyyyMMdd}-{1}.log", DateTime.Now, user.UserName);
-
-                fsSettings.LogWriter = new FileLogWriter(fileName, fsLogger);
+                fsSettings.LogWriter = new LogWriterHelper(logger, user, fsLogLevel);
             }
 
             if (!Enum.TryParse<FileSystemTypes>(user.FileSystem, true, out fsType))
                 throw new InvalidCastException();
 
+            var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
+
             switch (fsType)
             {
                 case FileSystemTypes.Composite:
-                    return new ReadWriteFileSystem(fsSettings, factory, user);
+                    {
+                        Log.Information($"'{callPath}' '{user.UserName}' initialize '{typeof(CompositeReadWriteFileSystem).Name}'");
+
+                        return new CompositeReadWriteFileSystem(fsSettings, factory, user);
+                    }
 
                 case FileSystemTypes.Memory:
-                    return new MemoryFileSystemProvider();
+                    {
+                        Log.Information($"'{callPath}' '{user.UserName}' initialize '{typeof(MemoryFileSystemProvider).Name}'");
+
+                        return new MemoryFileSystemProvider();
+                    }
+
+                case FileSystemTypes.SMB:
+                    {
+                        Log.Information($"'{callPath}' '{user.UserName}' initialize '{typeof(SmbReadWriteFileSystem).Name}'");
+
+                        return new SmbReadWriteFileSystem(fsSettings, factory, user);
+                    }
 
                 default:
                     throw new NotImplementedException();

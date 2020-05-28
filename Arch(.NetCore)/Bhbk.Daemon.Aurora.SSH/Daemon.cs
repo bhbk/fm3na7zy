@@ -1,5 +1,4 @@
-using Bhbk.Daemon.Aurora.SSH.Providers;
-using Bhbk.Daemon.Aurora.SSH.Helpers;
+using Bhbk.Daemon.Aurora.SSH.Factories;
 using Bhbk.Lib.Aurora.Data.EFCore.Infrastructure_DIRECT;
 using Bhbk.Lib.Aurora.Data.EFCore.Models_DIRECT;
 using Bhbk.Lib.Cryptography.Entropy;
@@ -10,7 +9,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Rebex;
-using Rebex.IO.FileSystem;
+using Rebex.IO.FileSystem.Notifications;
 using Rebex.Net;
 using Rebex.Net.Servers;
 using Rebex.Security.Cryptography;
@@ -21,10 +20,10 @@ using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Net;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Bhbk.Daemon.Aurora.SSH.Factories;
 
 /*
  * https://www.rebex.net/file-server/features/easy-to-use-api.aspx
@@ -53,12 +52,18 @@ namespace Bhbk.Daemon.Aurora.SSH
 
         public async Task ExecuteAsync(CancellationToken cancellationToken)
         {
+            var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
+
             while (!cancellationToken.IsCancellationRequested)
             {
+#if DEBUG
+                Log.Information($"'{callPath}' sleeping for {TimeSpan.FromSeconds(_delay)}");
+#endif
                 await Task.Delay(TimeSpan.FromSeconds(_delay), cancellationToken);
 
-                //Log.Information(typeof(Daemon).Name + " worker running at: {time}", DateTimeOffset.Now);
-
+#if DEBUG
+                Log.Information($"'{callPath}' running");
+#endif
                 try
                 {
                     using (var scope = _factory.CreateScope())
@@ -83,19 +88,24 @@ namespace Bhbk.Daemon.Aurora.SSH
 
             try
             {
-                Load_LicenseKeys();
-                Load_SystemKeys();
+                ServerInitializeLicenseKeys();
+                ServerInitializeSystemKeys();
 
                 _server.LogWriter = new ConsoleLogWriter(_logLevel);
                 _server.Settings.AllowedAuthenticationMethods = AuthenticationMethods.PublicKey | AuthenticationMethods.Password;
-                _server.Authentication += Event_Authentication;
-                _server.Connecting += Event_Connecting;
-                _server.FileDownloaded += Event_FileDownloaded;
-                _server.FileUploaded += Event_FileUploaded;
-                _server.PathAccessAuthorization += Event_PathAccessAuthorization;
-                _server.PreAuthentication += Event_PreAuthentication;
-                _server.ShellCommand += Event_ShellCommand;
+                _server.Authentication += SessionAuthentication;
+                _server.Connecting += SessionConnecting;
+                _server.Disconnected += SessionDisconnected;
+                _server.FileDownloaded += SessionFileDownloaded;
+                _server.FileUploaded += SessionFileUploaded;
+                _server.PathAccessAuthorization += SessionPathAccessAuthorization;
+                _server.PreAuthentication += SessionPreAuthentication;
+                _server.ShellCommand += SessionShellCommand;
 
+#if DEBUG
+                _server.Bind(new IPEndPoint(IPAddress.Parse("::1"), int.Parse(_conf["Daemons:SshServer:Port"])), FileServerProtocol.Sftp);
+                _server.Bind(new IPEndPoint(IPAddress.Parse("::1"), int.Parse(_conf["Daemons:SshServer:Port"])), FileServerProtocol.Shell);
+#endif
                 _server.Bind(new IPEndPoint(IPAddress.Parse(_conf["Daemons:SshServer:Host"]), int.Parse(_conf["Daemons:SshServer:Port"])), FileServerProtocol.Sftp);
                 _server.Bind(new IPEndPoint(IPAddress.Parse(_conf["Daemons:SshServer:Host"]), int.Parse(_conf["Daemons:SshServer:Port"])), FileServerProtocol.Shell);
                 _server.Start();
@@ -114,6 +124,9 @@ namespace Bhbk.Daemon.Aurora.SSH
             {
                 if (_server.IsRunning)
                 {
+#if DEBUG
+                    _server.Unbind(new IPEndPoint(IPAddress.Parse("::1"), int.Parse(_conf["Daemons:SshServer:Port"])));
+#endif
                     _server.Unbind(new IPEndPoint(IPAddress.Parse(_conf["Daemons:SshServer:Host"]), int.Parse(_conf["Daemons:SshServer:Port"])));
                     _server.Stop();
                 }
@@ -124,7 +137,177 @@ namespace Bhbk.Daemon.Aurora.SSH
             }
         }
 
-        private void Event_Authentication(object sender, AuthenticationEventArgs e)
+        private void ServerInitializeLicenseKeys()
+        {
+            /*
+             * https://www.rebex.net/support/trial/
+             */
+
+            try
+            {
+                using (var scope = _factory.CreateScope())
+                {
+                    var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+                    var key = uow.SysSettings.Get(x => x.ConfigKey == "RebexLicense")
+                        .OrderBy(x => x.Created).Last();
+
+                    Rebex.Licensing.Key = key.ConfigValue;
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex.ToString());
+            }
+        }
+
+        private void ServerInitializeSystemKeys()
+        {
+            try
+            {
+                using (var scope = _factory.CreateScope())
+                {
+                    var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+
+                    /*
+                    * https://en.wikipedia.org/wiki/Digital_Signature_Algorithm
+                    */
+                    var dsaKey = uow.SysPrivateKeys.Get(QueryExpressionFactory.GetQueryExpression<tbl_SysPrivateKeys>()
+                        .Where(x => x.KeyValueAlgo == "DSA").ToLambda())
+                        .OrderBy(x => x.Created).LastOrDefault();
+
+                    if (dsaKey == null)
+                    {
+                        var stream = new MemoryStream();
+                        var key = SshPrivateKey.Generate(SshHostKeyAlgorithm.DSS, 1024);
+                        var pass = AlphaNumeric.CreateString(32);
+
+                        key.Save(stream, pass, SshPrivateKeyFormat.Pkcs8);
+
+                        dsaKey = uow.SysPrivateKeys.Create(
+                            new tbl_SysPrivateKeys
+                            {
+                                Id = Guid.NewGuid(),
+                                KeyValueBase64 = Encoding.ASCII.GetString(stream.ToArray()),
+                                KeyValueAlgo = "DSA",
+                                KeyValuePass = pass,
+                                KeyValueFormat = SshPrivateKeyFormat.Pkcs8.ToString().ToUpper(),
+                                Enabled = true,
+                                Created = DateTime.Now,
+                                Immutable = true
+                            });
+                        uow.Commit();
+                    }
+
+                    var dsaBytes = Encoding.ASCII.GetBytes(dsaKey.KeyValueBase64);
+                    _server.Keys.Add(new SshPrivateKey(dsaBytes, dsaKey.KeyValuePass));
+
+                    /*
+                     * https://en.wikipedia.org/wiki/RSA_(cryptosystem)
+                     */
+                    var rsaKey = uow.SysPrivateKeys.Get(QueryExpressionFactory.GetQueryExpression<tbl_SysPrivateKeys>()
+                        .Where(x => x.KeyValueAlgo == "RSA").ToLambda())
+                        .OrderBy(x => x.Created).LastOrDefault();
+
+                    if (rsaKey == null)
+                    {
+                        var stream = new MemoryStream();
+                        var key = SshPrivateKey.Generate(SshHostKeyAlgorithm.RSA, 2048);
+                        var pass = AlphaNumeric.CreateString(32);
+
+                        key.Save(stream, pass, SshPrivateKeyFormat.Pkcs8);
+
+                        rsaKey = uow.SysPrivateKeys.Create(
+                            new tbl_SysPrivateKeys
+                            {
+                                Id = Guid.NewGuid(),
+                                KeyValueBase64 = Encoding.ASCII.GetString(stream.ToArray()),
+                                KeyValueAlgo = "RSA",
+                                KeyValuePass = pass,
+                                KeyValueFormat = SshPrivateKeyFormat.Pkcs8.ToString().ToUpper(),
+                                Enabled = true,
+                                Created = DateTime.Now,
+                                Immutable = true
+                            });
+                        uow.Commit();
+                    }
+
+                    var rsaBytes = Encoding.ASCII.GetBytes(rsaKey.KeyValueBase64);
+                    _server.Keys.Add(new SshPrivateKey(rsaBytes, rsaKey.KeyValuePass));
+
+                    /*
+                     * https://en.wikipedia.org/wiki/Elliptic_Curve_Digital_Signature_Algorithm
+                     */
+                    var ecdsaKey = uow.SysPrivateKeys.Get(QueryExpressionFactory.GetQueryExpression<tbl_SysPrivateKeys>()
+                        .Where(x => x.KeyValueAlgo == "ECDSA").ToLambda())
+                        .OrderBy(x => x.Created).LastOrDefault();
+
+                    if (ecdsaKey == null)
+                    {
+                        var stream = new MemoryStream();
+                        var key = SshPrivateKey.Generate(SshHostKeyAlgorithm.ECDsaNistP521, 521);
+                        var pass = AlphaNumeric.CreateString(32);
+
+                        key.Save(stream, pass, SshPrivateKeyFormat.Pkcs8);
+
+                        ecdsaKey = uow.SysPrivateKeys.Create(
+                            new tbl_SysPrivateKeys
+                            {
+                                Id = Guid.NewGuid(),
+                                KeyValueBase64 = Encoding.ASCII.GetString(stream.ToArray()),
+                                KeyValueAlgo = "ECDSA",
+                                KeyValuePass = pass,
+                                KeyValueFormat = SshPrivateKeyFormat.Pkcs8.ToString().ToUpper(),
+                                Enabled = true,
+                                Created = DateTime.Now,
+                                Immutable = true
+                            });
+                        uow.Commit();
+                    }
+
+                    var ecdsaBytes = Encoding.ASCII.GetBytes(ecdsaKey.KeyValueBase64);
+                    _server.Keys.Add(new SshPrivateKey(ecdsaBytes, ecdsaKey.KeyValuePass));
+
+                    /*
+                     * https://en.wikipedia.org/wiki/Curve25519
+                     */
+                    var ed25519Key = uow.SysPrivateKeys.Get(QueryExpressionFactory.GetQueryExpression<tbl_SysPrivateKeys>()
+                        .Where(x => x.KeyValueAlgo == "ED25519").ToLambda())
+                        .OrderBy(x => x.Created).LastOrDefault();
+
+                    if (ed25519Key == null)
+                    {
+                        var stream = new MemoryStream();
+                        var key = SshPrivateKey.Generate(SshHostKeyAlgorithm.ED25519, 256);
+                        var pass = AlphaNumeric.CreateString(32);
+
+                        key.Save(stream, pass, SshPrivateKeyFormat.Pkcs8);
+
+                        ed25519Key = uow.SysPrivateKeys.Create(
+                            new tbl_SysPrivateKeys
+                            {
+                                Id = Guid.NewGuid(),
+                                KeyValueBase64 = Encoding.ASCII.GetString(stream.ToArray()),
+                                KeyValueAlgo = "ED25519",
+                                KeyValuePass = pass,
+                                KeyValueFormat = SshPrivateKeyFormat.Pkcs8.ToString().ToUpper(),
+                                Enabled = true,
+                                Created = DateTime.Now,
+                                Immutable = true
+                            });
+                        uow.Commit();
+                    }
+
+                    var ed25519Bytes = Encoding.ASCII.GetBytes(ed25519Key.KeyValueBase64);
+                    _server.Keys.Add(new SshPrivateKey(ed25519Bytes, ed25519Key.KeyValuePass));
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex.ToString());
+            }
+        }
+
+        private void SessionAuthentication(object sender, AuthenticationEventArgs e)
         {
             /*
              * https://www.rebex.net/file-server/features/events.aspx#authentication
@@ -132,12 +315,15 @@ namespace Bhbk.Daemon.Aurora.SSH
 
             try
             {
+                var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
+
                 if (e.Key != null)
                 {
-                    Log.Information($"Authenticate in-progress for '{e.UserName}' at '{e.ClientEndPoint}' running '{e.ClientSoftwareIdentifier}' with public key.");
+                    Log.Information($"'{callPath}' '{e.UserName}' in-progress from '{e.ClientEndPoint}' running '{e.ClientSoftwareIdentifier}' with public key");
 
                     using (var scope = _factory.CreateScope())
                     {
+                        var logger = scope.ServiceProvider.GetRequiredService<ILogger>();
                         var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
                         var user = uow.Users.Get(QueryExpressionFactory.GetQueryExpression<tbl_Users>()
                             .Where(x => x.UserName == e.UserName).ToLambda(),
@@ -152,18 +338,24 @@ namespace Bhbk.Daemon.Aurora.SSH
 
                         if (keys.Where(x => x.KeyValueBase64 == Convert.ToBase64String(e.Key.GetPublicKey(), Base64FormattingOptions.None)).Any())
                         {
-                            Log.Information($"Authenticate success for '{e.UserName}' at '{e.ClientEndPoint}' running '{e.ClientSoftwareIdentifier}' with public key.");
+                            Log.Information($"'{callPath}' '{e.UserName}' success from '{e.ClientEndPoint}' running '{e.ClientSoftwareIdentifier}' with public key");
 
-                            var fs = FileSystemFactory.CreateUserFileSystem(_factory, user);
+                            var fs = FileSystemFactory.CreateFileSystem(_factory, user, logger);
                             var fsUser = new FileServerUser(e.UserName, e.Password);
                             fsUser.SetFileSystem(fs);
+
+                            var fsNotify = fs.GetFileSystemNotifier();
+                            fsNotify.CreatePreview += SessionNotifyCreatePreview;
+                            fsNotify.CreateCompleted += SessionNotifyCreateCompleted;
+                            fsNotify.DeletePreview += SessionNotifyDeletePreview;
+                            fsNotify.DeleteCompleted += SessionNotifyDeleteCompleted;
 
                             e.Accept(fsUser);
                             return;
                         }
                         else
                         {
-                            Log.Error($"Authenticate failure for '{e.UserName}' at '{e.ClientEndPoint}' running '{e.ClientSoftwareIdentifier}' with public key.");
+                            Log.Error($"'{callPath}' '{e.UserName}' failure from '{e.ClientEndPoint}' running '{e.ClientSoftwareIdentifier}' with public key");
 
                             e.Reject();
                             return;
@@ -172,10 +364,11 @@ namespace Bhbk.Daemon.Aurora.SSH
                 }
                 else if (e.Password != null)
                 {
-                    Log.Information($"Authenticate in-progress for '{e.UserName}' at '{e.ClientEndPoint}' running '{e.ClientSoftwareIdentifier}' with password.");
+                    Log.Information($"'{callPath}' '{e.UserName}' in-progress from '{e.ClientEndPoint}' running '{e.ClientSoftwareIdentifier}' with password");
 
                     using (var scope = _factory.CreateScope())
                     {
+                        var logger = scope.ServiceProvider.GetRequiredService<ILogger>();
                         var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
                         var user = uow.Users.Get(QueryExpressionFactory.GetQueryExpression<tbl_Users>()
                             .Where(x => x.UserName == e.UserName).ToLambda(),
@@ -190,18 +383,24 @@ namespace Bhbk.Daemon.Aurora.SSH
 
                         if (PBKDF2.Validate(pass.PasswordHashPBKDF2, e.Password))
                         {
-                            Log.Information($"Authenticate success for '{e.UserName}' at '{e.ClientEndPoint}' running '{e.ClientSoftwareIdentifier}' with password.");
+                            Log.Information($"'{callPath}' '{e.UserName}' success from '{e.ClientEndPoint}' running '{e.ClientSoftwareIdentifier}' with password");
 
-                            var fs = FileSystemFactory.CreateUserFileSystem(_factory, user);
+                            var fs = FileSystemFactory.CreateFileSystem(_factory, user, logger);
                             var fsUser = new FileServerUser(e.UserName, e.Password);
                             fsUser.SetFileSystem(fs);
+
+                            var fsNotify = fs.GetFileSystemNotifier();
+                            fsNotify.CreatePreview += SessionNotifyCreatePreview;
+                            fsNotify.CreateCompleted += SessionNotifyCreateCompleted;
+                            fsNotify.DeletePreview += SessionNotifyDeletePreview;
+                            fsNotify.DeleteCompleted += SessionNotifyDeleteCompleted;
 
                             e.Accept(fsUser);
                             return;
                         }
                         else
                         {
-                            Log.Error($"Authenticate failure for '{e.UserName}' at '{e.ClientEndPoint}' running '{e.ClientSoftwareIdentifier}' with password.");
+                            Log.Error($"'{callPath}' '{e.UserName}' failure from '{e.ClientEndPoint}' running '{e.ClientSoftwareIdentifier}' with password");
 
                             e.Reject();
                             return;
@@ -209,7 +408,7 @@ namespace Bhbk.Daemon.Aurora.SSH
                     }
                 }
 
-                Log.Error($"Authenticate not possible for '{e.UserName}' at '{e.ClientEndPoint}' running '{e.ClientSoftwareIdentifier}'.");
+                Log.Error($"'{callPath}' '{e.UserName}' not possible from '{e.ClientEndPoint}' running '{e.ClientSoftwareIdentifier}'");
 
                 e.Reject();
             }
@@ -219,7 +418,7 @@ namespace Bhbk.Daemon.Aurora.SSH
             }
         }
 
-        private void Event_Connecting(object sender, ConnectingEventArgs e)
+        private void SessionConnecting(object sender, ConnectingEventArgs e)
         {
             /*
              * https://www.rebex.net/file-server/features/events.aspx#connecting
@@ -227,6 +426,10 @@ namespace Bhbk.Daemon.Aurora.SSH
 
             try
             {
+                var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
+
+                Log.Information($"'{callPath}' from {e.ClientEndPoint}");
+
                 e.Accept = true;
             }
             catch (Exception ex)
@@ -235,15 +438,17 @@ namespace Bhbk.Daemon.Aurora.SSH
             }
         }
 
-        private void Event_FileDownloaded(object sender, FileTransferredEventArgs e)
+        private void SessionDisconnected(object sender, DisconnectedEventArgs e)
         {
             /*
-             * https://www.rebex.net/file-server/features/events.aspx#upload-download-events
+             * https://www.rebex.net/file-server/features/events.aspx#disconnected
              */
 
             try
             {
-                Log.Information($"User '{e.User.Name}' downloaded file '{e.FullPath}', bytes transferred: {e.BytesTransferred}");
+                var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
+
+                Log.Information($"'{callPath}' '{e.User.Name}' from {e.Session.ClientEndPoint} after {e.Session.Duration}");
             }
             catch (Exception ex)
             {
@@ -251,15 +456,13 @@ namespace Bhbk.Daemon.Aurora.SSH
             }
         }
 
-        private void Event_FileUploaded(object sender, FileTransferredEventArgs e)
+        private void SessionFileDownloaded(object sender, FileTransferredEventArgs e)
         {
-            /*
-             * https://www.rebex.net/file-server/features/events.aspx#upload-download-events
-             */
-
             try
             {
-                Log.Information($"User '{e.User.Name}' uploaded file '{e.FullPath}', bytes transferred: {e.BytesTransferred}");
+                var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
+
+                Log.Information($"'{callPath}' '{e.User.Name}' file '/{e.FullPath}' bytes {e.BytesTransferred} to {e.Session.ClientEndPoint}");
             }
             catch (Exception ex)
             {
@@ -267,7 +470,89 @@ namespace Bhbk.Daemon.Aurora.SSH
             }
         }
 
-        private void Event_PathAccessAuthorization(object sender, PathAccessAuthorizationEventArgs e)
+        private void SessionFileUploaded(object sender, FileTransferredEventArgs e)
+        {
+            try
+            {
+                var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
+
+                Log.Information($"'{callPath}' '{e.User.Name}' file '/{e.FullPath}' bytes {e.BytesTransferred} from {e.Session.ClientEndPoint}");
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex.ToString());
+            }
+        }
+
+        private void SessionNotifyCreateCompleted(object sender, SingleNodeOperationEventArgs e)
+        {
+            try
+            {
+                if (e.ResultNode.IsFile)
+                {
+                    var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
+
+                    Log.Information($"'{callPath}' '{ServerSession.Current.UserName}' file '{e.ResultNode.Path.StringPath}'");
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex.ToString());
+            }
+        }
+
+        private void SessionNotifyCreatePreview(object sender, PreviewSingleNodeOperationEventArgs e)
+        {
+            try
+            {
+                if (e.Node.IsFile)
+                {
+                    var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
+
+                    Log.Information($"'{callPath}' '{ServerSession.Current.UserName}' file '{e.Node.Path.StringPath}'");
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex.ToString());
+            }
+        }
+
+        private void SessionNotifyDeleteCompleted(object sender, SingleNodeOperationEventArgs e)
+        {
+            try
+            {
+                if (e.ResultNode.IsFile)
+                {
+                    var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
+
+                    Log.Information($"'{callPath}' '{ServerSession.Current.UserName}' file '{e.ResultNode.Path.StringPath}'");
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex.ToString());
+            }
+        }
+
+        private void SessionNotifyDeletePreview(object sender, PreviewSingleNodeOperationEventArgs e)
+        {
+            try
+            {
+                if (e.Node.IsFile)
+                {
+                    var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
+
+                    Log.Information($"'{callPath}' '{ServerSession.Current.UserName}' file '{e.Node.Path.StringPath}'");
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex.ToString());
+            }
+        }
+
+        private void SessionPathAccessAuthorization(object sender, PathAccessAuthorizationEventArgs e)
         {
             /*
              * https://www.rebex.net/file-server/features/events.aspx#path-access-authorization
@@ -283,7 +568,7 @@ namespace Bhbk.Daemon.Aurora.SSH
             }
         }
 
-        private void Event_PreAuthentication(object sender, PreAuthenticationEventArgs e)
+        private void SessionPreAuthentication(object sender, PreAuthenticationEventArgs e)
         {
             /*
              * https://www.rebex.net/file-server/features/events.aspx#pre-authentication
@@ -291,6 +576,8 @@ namespace Bhbk.Daemon.Aurora.SSH
 
             try
             {
+                var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
+
                 using (var scope = _factory.CreateScope())
                 {
                     var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
@@ -316,7 +603,7 @@ namespace Bhbk.Daemon.Aurora.SSH
                         && pass.Enabled
                         && keys.Count() > 0)
                     {
-                        Log.Information($"Pre-authenticate allowed for '{e.UserName}' at '{e.ClientEndPoint}' running '{e.ClientSoftwareIdentifier}' with password or public key.");
+                        Log.Information($"'{callPath}' '{e.UserName}' allowed from '{e.ClientEndPoint}' running '{e.ClientSoftwareIdentifier}' with password or public key");
 
                         e.Accept(AuthenticationMethods.PublicKey | AuthenticationMethods.Password);
                         return;
@@ -325,7 +612,7 @@ namespace Bhbk.Daemon.Aurora.SSH
                     if (pass == null
                         && keys.Count() > 0)
                     {
-                        Log.Information($"Pre-authenticate allowed for '{e.UserName}' at '{e.ClientEndPoint}' running '{e.ClientSoftwareIdentifier}' with public key.");
+                        Log.Information($"'{callPath}' '{e.UserName}' allowed from '{e.ClientEndPoint}' running '{e.ClientSoftwareIdentifier}' with public key");
 
                         e.Accept(AuthenticationMethods.PublicKey);
                         return;
@@ -335,13 +622,13 @@ namespace Bhbk.Daemon.Aurora.SSH
                         && pass.Enabled
                         && keys.Count() == 0)
                     {
-                        Log.Information($"Pre-authenticate allowed for '{e.UserName}' at '{e.ClientEndPoint}' running '{e.ClientSoftwareIdentifier}' with password.");
+                        Log.Information($"'{callPath}' '{e.UserName}' allowed from '{e.ClientEndPoint}' running '{e.ClientSoftwareIdentifier}' with password");
 
                         e.Accept(AuthenticationMethods.Password);
                         return;
                     }
 
-                    Log.Error($"Pre-authenticate not allowed for '{e.UserName}' at '{e.ClientEndPoint}' running '{e.ClientSoftwareIdentifier}'.");
+                    Log.Error($"'{callPath}' '{e.UserName}' not allowed from '{e.ClientEndPoint}' running '{e.ClientSoftwareIdentifier}'");
 
                     e.Reject();
                 }
@@ -352,7 +639,7 @@ namespace Bhbk.Daemon.Aurora.SSH
             }
         }
 
-        private void Event_ShellCommand(object sender, ShellCommandEventArgs e)
+        private void SessionShellCommand(object sender, ShellCommandEventArgs e)
         {
             /*
              * https://www.rebex.net/file-server/features/events.aspx#shell-command
@@ -361,176 +648,6 @@ namespace Bhbk.Daemon.Aurora.SSH
             try
             {
 
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex.ToString());
-            }
-        }
-
-        private void Load_LicenseKeys()
-        {
-            /*
-             * https://www.rebex.net/support/trial/
-             */
-
-            try
-            {
-                using (var scope = _factory.CreateScope())
-                {
-                    var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
-                    var key = uow.Settings.Get(x => x.ConfigKey == "RebexLicense")
-                        .OrderBy(x => x.Created).Last();
-
-                    Rebex.Licensing.Key = key.ConfigValue;
-                }
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex.ToString());
-            }
-        }
-
-        private void Load_SystemKeys()
-        {
-            try
-            {
-                using (var scope = _factory.CreateScope())
-                {
-                    var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
-
-                    /*
-                    * https://en.wikipedia.org/wiki/Digital_Signature_Algorithm
-                    */
-                    var dsaKey = uow.SystemKeys.Get(QueryExpressionFactory.GetQueryExpression<tbl_SystemKeys>()
-                        .Where(x => x.KeyValueAlgo == "DSA").ToLambda())
-                        .OrderBy(x => x.Created).LastOrDefault();
-
-                    if (dsaKey == null)
-                    {
-                        var stream = new MemoryStream();
-                        var key = SshPrivateKey.Generate(SshHostKeyAlgorithm.DSS, 1024);
-                        var pass = AlphaNumeric.CreateString(32);
-
-                        key.Save(stream, pass, SshPrivateKeyFormat.Pkcs8);
-
-                        dsaKey = uow.SystemKeys.Create(
-                            new tbl_SystemKeys
-                            {
-                                Id = Guid.NewGuid(),
-                                KeyValueBase64 = Encoding.ASCII.GetString(stream.ToArray()),
-                                KeyValueAlgo = "DSA",
-                                KeyValuePass = pass,
-                                KeyValueFormat = SshPrivateKeyFormat.Pkcs8.ToString().ToUpper(),
-                                Enabled = true,
-                                Created = DateTime.Now,
-                                Immutable = true
-                            });
-                        uow.Commit();
-                    }
-
-                    var dsaBytes = Encoding.ASCII.GetBytes(dsaKey.KeyValueBase64);
-                    _server.Keys.Add(new SshPrivateKey(dsaBytes, dsaKey.KeyValuePass));
-
-                    /*
-                     * https://en.wikipedia.org/wiki/RSA_(cryptosystem)
-                     */
-                    var rsaKey = uow.SystemKeys.Get(QueryExpressionFactory.GetQueryExpression<tbl_SystemKeys>()
-                        .Where(x => x.KeyValueAlgo == "RSA").ToLambda())
-                        .OrderBy(x => x.Created).LastOrDefault();
-
-                    if (rsaKey == null)
-                    {
-                        var stream = new MemoryStream();
-                        var key = SshPrivateKey.Generate(SshHostKeyAlgorithm.RSA, 2048);
-                        var pass = AlphaNumeric.CreateString(32);
-
-                        key.Save(stream, pass, SshPrivateKeyFormat.Pkcs8);
-
-                        rsaKey = uow.SystemKeys.Create(
-                            new tbl_SystemKeys
-                            {
-                                Id = Guid.NewGuid(),
-                                KeyValueBase64 = Encoding.ASCII.GetString(stream.ToArray()),
-                                KeyValueAlgo = "RSA",
-                                KeyValuePass = pass,
-                                KeyValueFormat = SshPrivateKeyFormat.Pkcs8.ToString().ToUpper(),
-                                Enabled = true,
-                                Created = DateTime.Now,
-                                Immutable = true
-                            });
-                        uow.Commit();
-                    }
-
-                    var rsaBytes = Encoding.ASCII.GetBytes(rsaKey.KeyValueBase64);
-                    _server.Keys.Add(new SshPrivateKey(rsaBytes, rsaKey.KeyValuePass));
-
-                    /*
-                     * https://en.wikipedia.org/wiki/Elliptic_Curve_Digital_Signature_Algorithm
-                     */
-                    var ecdsaKey = uow.SystemKeys.Get(QueryExpressionFactory.GetQueryExpression<tbl_SystemKeys>()
-                        .Where(x => x.KeyValueAlgo == "ECDSA").ToLambda())
-                        .OrderBy(x => x.Created).LastOrDefault();
-
-                    if (ecdsaKey == null)
-                    {
-                        var stream = new MemoryStream();
-                        var key = SshPrivateKey.Generate(SshHostKeyAlgorithm.ECDsaNistP521, 521);
-                        var pass = AlphaNumeric.CreateString(32);
-
-                        key.Save(stream, pass, SshPrivateKeyFormat.Pkcs8);
-
-                        ecdsaKey = uow.SystemKeys.Create(
-                            new tbl_SystemKeys
-                            {
-                                Id = Guid.NewGuid(),
-                                KeyValueBase64 = Encoding.ASCII.GetString(stream.ToArray()),
-                                KeyValueAlgo = "ECDSA",
-                                KeyValuePass = pass,
-                                KeyValueFormat = SshPrivateKeyFormat.Pkcs8.ToString().ToUpper(),
-                                Enabled = true,
-                                Created = DateTime.Now,
-                                Immutable = true
-                            });
-                        uow.Commit();
-                    }
-
-                    var ecdsaBytes = Encoding.ASCII.GetBytes(ecdsaKey.KeyValueBase64);
-                    _server.Keys.Add(new SshPrivateKey(ecdsaBytes, ecdsaKey.KeyValuePass));
-
-                    /*
-                     * https://en.wikipedia.org/wiki/Curve25519
-                     */
-                    var ed25519Key = uow.SystemKeys.Get(QueryExpressionFactory.GetQueryExpression<tbl_SystemKeys>()
-                        .Where(x => x.KeyValueAlgo == "ED25519").ToLambda())
-                        .OrderBy(x => x.Created).LastOrDefault();
-
-                    if (ed25519Key == null)
-                    {
-                        var stream = new MemoryStream();
-                        var key = SshPrivateKey.Generate(SshHostKeyAlgorithm.ED25519, 256);
-                        var pass = AlphaNumeric.CreateString(32);
-
-                        key.Save(stream, pass, SshPrivateKeyFormat.Pkcs8);
-
-                        ed25519Key = uow.SystemKeys.Create(
-                            new tbl_SystemKeys
-                            {
-                                Id = Guid.NewGuid(),
-                                KeyValueBase64 = Encoding.ASCII.GetString(stream.ToArray()),
-                                KeyValueAlgo = "ED25519",
-                                KeyValuePass = pass,
-                                KeyValueFormat = SshPrivateKeyFormat.Pkcs8.ToString().ToUpper(),
-                                Enabled = true,
-                                Created = DateTime.Now,
-                                Immutable = true
-                            });
-                        uow.Commit();
-                    }
-
-                    var ed25519Bytes = Encoding.ASCII.GetBytes(ed25519Key.KeyValueBase64);
-                    _server.Keys.Add(new SshPrivateKey(ed25519Bytes, ed25519Key.KeyValuePass));
-                }
             }
             catch (Exception ex)
             {

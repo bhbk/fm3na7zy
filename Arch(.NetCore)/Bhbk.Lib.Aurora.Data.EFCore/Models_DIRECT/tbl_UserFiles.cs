@@ -14,7 +14,6 @@ namespace Bhbk.Lib.Aurora.Data.EFCore.Models_DIRECT
         public long FileSize { get; set; }
         public string FileHashSHA256 { get; set; }
         public bool FileReadOnly { get; set; }
-        public bool FileCommitted { get; set; }
         public DateTime Created { get; set; }
         public DateTime? LastAccessed { get; set; }
         public DateTime? LastUpdated { get; set; }

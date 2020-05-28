@@ -6,6 +6,6 @@ namespace Bhbk.Lib.Aurora.Primitives.Enums
     {
         Composite = 1,
         Memory = 2,
-        Mount = 3,
+        SMB = 3,
     }
 }

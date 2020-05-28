@@ -17,11 +17,12 @@ namespace Bhbk.Lib.Aurora.Data.EFCore.Models_DIRECT
         public Guid? IdentityId { get; set; }
         public string UserName { get; set; }
         public string FileSystem { get; set; }
-        public string Debugger { get; set; }
+        public string DebugLevel { get; set; }
         public bool Enabled { get; set; }
         public DateTime Created { get; set; }
         public bool Immutable { get; set; }
 
+        public virtual tbl_UserMounts tbl_UserMounts { get; set; }
         public virtual tbl_UserPasswords tbl_UserPasswords { get; set; }
         public virtual ICollection<tbl_UserFiles> tbl_UserFiles { get; set; }
         public virtual ICollection<tbl_UserFolders> tbl_UserFolders { get; set; }

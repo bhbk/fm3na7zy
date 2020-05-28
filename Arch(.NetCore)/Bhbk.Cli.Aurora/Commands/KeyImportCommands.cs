@@ -10,24 +10,27 @@ using Bhbk.Lib.QueryExpression.Factories;
 using ManyConsole;
 using Microsoft.Extensions.Configuration;
 using Rebex.Net;
+using Rebex.Security.Certificates;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Net;
 
 namespace Bhbk.Cli.Aurora.Commands
 {
-    public class ExportKeysCommands : ConsoleCommand
+    public class KeyImportCommands : ConsoleCommand
     {
         private static IConfiguration _conf;
         private static IUnitOfWork _uow;
         private static FileInfo _path;
         private static tbl_Users _user;
+        private static string _hostname;
 
-        public ExportKeysCommands()
+        public KeyImportCommands()
         {
-            IsCommand("export-keys", "Export public/private key pairs");
+            IsCommand("import-keys", "Import all public/private key pairs");
 
             HasRequiredOption("u|user=", "Enter user that exists already", arg =>
             {
@@ -57,9 +60,14 @@ namespace Bhbk.Cli.Aurora.Commands
                     throw new ConsoleHelpAsException($"  *** Invalid user '{arg}' ***");
             });
 
-            HasRequiredOption("d|directory=", "Enter directory path for exports", arg =>
+            HasRequiredOption("d|directory=", "Enter directory path for imports", arg =>
             {
                 _path = new FileInfo(arg);
+            });
+
+            HasOption("h|hostname=", "Enter password for user", arg =>
+            {
+                _hostname = arg;
             });
         }
 
@@ -76,54 +84,54 @@ namespace Bhbk.Cli.Aurora.Commands
                 //private newopenssh key format
                 var privNewOpenSsh = SshPrivateKeyFormat.NewOpenSsh;
                 var privNewOpenSshFile = new FileInfo(_path.FullName + Path.DirectorySeparatorChar + "key." + privNewOpenSsh.ToString().ToLower() + ".txt");
-                KeyHelpers.ExportSshPrivateKey(_user, priv, privNewOpenSsh, priv.KeyValuePass, privNewOpenSshFile);
-                Console.Out.WriteLine("Created " + privNewOpenSshFile);
+                KeyHelper.ImportSshPrivateKey(_uow, _user, SignatureHashAlgorithm.SHA256, priv.KeyValuePass, Dns.GetHostName(), privNewOpenSshFile);
+                Console.Out.WriteLine("Opened " + privNewOpenSshFile);
 
                 //private openssh key format
                 var privOpenSsh = SshPrivateKeyFormat.OpenSsh;
                 var privOpenSshFile = new FileInfo(_path.FullName + Path.DirectorySeparatorChar + "key." + privOpenSsh.ToString().ToLower() + ".txt");
-                KeyHelpers.ExportSshPrivateKey(_user, priv, privOpenSsh, priv.KeyValuePass, privOpenSshFile);
-                Console.Out.WriteLine("Created " + privOpenSshFile);
+                KeyHelper.ImportSshPrivateKey(_uow, _user, SignatureHashAlgorithm.SHA256, priv.KeyValuePass, Dns.GetHostName(), privOpenSshFile);
+                Console.Out.WriteLine("Opened " + privOpenSshFile);
 
                 //private pkcs8 key format
                 var privPcks8 = SshPrivateKeyFormat.Pkcs8;
                 var privPcks8File = new FileInfo(_path.FullName + Path.DirectorySeparatorChar + "key." + privPcks8.ToString().ToLower() + ".txt");
-                KeyHelpers.ExportSshPrivateKey(_user, priv, privPcks8, priv.KeyValuePass, privPcks8File);
-                Console.Out.WriteLine("Created " + privPcks8File);
+                KeyHelper.ImportSshPrivateKey(_uow, _user, SignatureHashAlgorithm.SHA256, priv.KeyValuePass, Dns.GetHostName(), privPcks8File);
+                Console.Out.WriteLine("Opened " + privPcks8File);
 
                 //private putty key format
                 var privPutty = SshPrivateKeyFormat.Putty;
                 var privPuttyFile = new FileInfo(_path.FullName + Path.DirectorySeparatorChar + "key." + privPutty.ToString().ToLower() + ".txt");
-                KeyHelpers.ExportSshPrivateKey(_user, priv, privPutty, priv.KeyValuePass, privPuttyFile);
-                Console.Out.WriteLine("Created " + privPuttyFile);
+                KeyHelper.ImportSshPrivateKey(_uow, _user, SignatureHashAlgorithm.SHA256, priv.KeyValuePass, Dns.GetHostName(), privPuttyFile);
+                Console.Out.WriteLine("Opened " + privPuttyFile);
 
                 //public opensshbase64 key format
                 var pubOpenSshBase64File = new FileInfo(_path.FullName + Path.DirectorySeparatorChar + "pub.opensshbase64.txt");
-                KeyHelpers.ExportSshPublicKeyBase64(_user, pub, pubOpenSshBase64File);
-                Console.Out.WriteLine("Created " + pubOpenSshBase64File);
+                KeyHelper.ImportSshPublicKeyBase64(_uow, _user, SignatureHashAlgorithm.SHA256, pubOpenSshBase64File);
+                Console.Out.WriteLine("Opened " + pubOpenSshBase64File);
 
                 //public opensshbase64 key format in "authorized_keys"
                 var pubOpenSshBase64sFile = new FileInfo(_path.FullName + Path.DirectorySeparatorChar + "authorized_keys.txt");
-                KeyHelpers.ExportSshPublicKeysBase64(_user, _user.tbl_UserPublicKeys, pubOpenSshBase64sFile);
-                Console.Out.WriteLine("Created " + pubOpenSshBase64sFile);
+                KeyHelper.ImportSshPublicKeysBase64(_uow, _user, SignatureHashAlgorithm.SHA256, pubOpenSshBase64sFile);
+                Console.Out.WriteLine("Opened " + pubOpenSshBase64sFile);
 
                 //public pkcs8 key format
                 var pubPkcs8 = SshPublicKeyFormat.Pkcs8;
                 var pubPkcs8File = new FileInfo(_path.FullName + Path.DirectorySeparatorChar + "pub." + pubPkcs8.ToString().ToLower() + ".txt");
-                KeyHelpers.ExportSshPublicKey(_user, pub, pubPkcs8, pubPkcs8File);
-                Console.Out.WriteLine("Created " + pubPkcs8File);
+                KeyHelper.ImportSshPublicKey(_uow, _user, SignatureHashAlgorithm.SHA256, Dns.GetHostName(), pubPkcs8File);
+                Console.Out.WriteLine("Opened " + pubPkcs8File);
 
                 //public ssh2base64 key format
                 var pubSsh2Base64 = SshPublicKeyFormat.Ssh2Base64;
                 var pubSsh2Base64File = new FileInfo(_path.FullName + Path.DirectorySeparatorChar + "pub." + pubSsh2Base64.ToString().ToLower() + ".txt");
-                KeyHelpers.ExportSshPublicKey(_user, pub, pubSsh2Base64, pubSsh2Base64File);
-                Console.Out.WriteLine("Created " + pubSsh2Base64File);
+                KeyHelper.ImportSshPublicKey(_uow, _user, SignatureHashAlgorithm.SHA256, Dns.GetHostName(), pubSsh2Base64File);
+                Console.Out.WriteLine("Opened " + pubSsh2Base64File);
 
                 //public ssh2raw key format
                 var pubSsh2Raw = SshPublicKeyFormat.Ssh2Raw;
                 var pubSsh2RawFile = new FileInfo(_path.FullName + Path.DirectorySeparatorChar + "pub." + pubSsh2Raw.ToString().ToLower());
-                KeyHelpers.ExportSshPublicKey(_user, pub, pubSsh2Raw, pubSsh2RawFile);
-                Console.Out.WriteLine("Created " + pubSsh2Base64File);
+                KeyHelper.ImportSshPublicKey(_uow, _user, SignatureHashAlgorithm.SHA256, Dns.GetHostName(), pubSsh2RawFile);
+                Console.Out.WriteLine("Opened " + pubSsh2Base64File);
 
                 return StandardOutput.FondFarewell();
             }
