@@ -17,6 +17,7 @@ namespace Bhbk.Lib.Aurora.Data.EFCore.Models_DIRECT
         public DateTime Created { get; set; }
         public DateTime? LastAccessed { get; set; }
         public DateTime? LastUpdated { get; set; }
+        public DateTime LastVerified { get; set; }
 
         public virtual tbl_UserFolders Folder { get; set; }
         public virtual tbl_Users User { get; set; }

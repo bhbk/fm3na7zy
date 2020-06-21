@@ -289,7 +289,7 @@ namespace Bhbk.Lib.Aurora.Data.EFCore.Models_DIRECT
                     .HasMaxLength(16)
                     .IsUnicode(false);
 
-                entity.Property(e => e.FileSystem)
+                entity.Property(e => e.FileSystemType)
                     .IsRequired()
                     .HasMaxLength(16)
                     .IsUnicode(false);

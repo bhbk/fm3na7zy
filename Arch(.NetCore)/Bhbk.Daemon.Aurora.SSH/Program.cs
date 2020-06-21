@@ -15,10 +15,10 @@ namespace Bhbk.Daemon.Aurora.SSH
 {
     public class Program
     {
-        private static IMapper _mapper;
         private static IConfiguration _conf;
         private static IContextService _instance;
         private static ILogger _logger;
+        private static IMapper _mapper;
 
         public static IHostBuilder CreateLinuxHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)

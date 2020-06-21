@@ -47,15 +47,15 @@ namespace Bhbk.Daemon.Aurora.SSH.FileSystems
                 {
                     var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
 
-                    var folder = CompositeFileSystemHelper.ConvertPathToSqlFolder(uow, _user, parent.Path.StringPath);
+                    var folderEntity = CompositeFileSystemHelper.ConvertPathToSqlFolder(uow, _user, parent.Path.StringPath);
                     var now = DateTime.UtcNow;
 
-                    var newFolder = uow.UserFolders.Create(
+                    uow.UserFolders.Create(
                         new tbl_UserFolders
                         {
                             Id = Guid.NewGuid(),
                             UserId = _user.Id,
-                            ParentId = folder.Id,
+                            ParentId = folderEntity.Id,
                             VirtualName = child.Name,
                             Created = now,
                             LastAccessed = null,
@@ -63,8 +63,6 @@ namespace Bhbk.Daemon.Aurora.SSH.FileSystems
                             ReadOnly = false,
                         });
                     uow.Commit();
-
-                    var folderPath = CompositeFileSystemHelper.ConvertSqlToPathFolder(uow, _user, newFolder);
 
                     return child;
                 }
@@ -80,21 +78,25 @@ namespace Bhbk.Daemon.Aurora.SSH.FileSystems
         {
             var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
 
+            DirectoryInfo folder = null;
+            FileInfo file = null;
+
             try
             {
                 using (var scope = _factory.CreateScope())
                 {
                     var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+                    var conf = scope.ServiceProvider.GetRequiredService<IConfiguration>();
 
-                    var folder = CompositeFileSystemHelper.ConvertPathToSqlFolder(uow, _user, parent.Path.StringPath);
+                    var folderEntity = CompositeFileSystemHelper.ConvertPathToSqlFolder(uow, _user, parent.Path.StringPath);
                     var now = DateTime.UtcNow;
 
-                    var newFile = uow.UserFiles.Create(
+                    var fileEntity = uow.UserFiles.Create(
                         new tbl_UserFiles
                         {
                             Id = Guid.NewGuid(),
                             UserId = _user.Id,
-                            FolderId = folder.Id,
+                            FolderId = folderEntity.Id,
                             VirtualName = child.Name,
                             RealPath = HashHelper.GenerateDirectoryHash($"{_user.ToString()}{parent.Path.StringPath}{child.Name}"),
                             RealFileName = Hashing.MD5.Create(Guid.NewGuid().ToString()),
@@ -104,12 +106,21 @@ namespace Bhbk.Daemon.Aurora.SSH.FileSystems
                             Created = now,
                             LastAccessed = null,
                             LastUpdated = null,
+                            LastVerified = now,
                         });
                     uow.Commit();
 
-                    var filePath = CompositeFileSystemHelper.ConvertSqlToPathFile(uow, _user, newFile);
+                    folder = new DirectoryInfo(conf["Storage:BaseLocalPath"]
+                        + Path.DirectorySeparatorChar + fileEntity.RealPath);
 
-                    Log.Information($"'{callPath}' '{_user.UserName}' empty file '{child.Path}'");
+                    if (!folder.Exists)
+                        folder.Create();
+
+                    file = new FileInfo(conf["Storage:BaseLocalPath"]
+                        + Path.DirectorySeparatorChar + fileEntity.RealPath
+                        + Path.DirectorySeparatorChar + fileEntity.RealFileName);
+
+                    using (var fs = new FileStream(file.FullName, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite)) { }
 
                     return child;
                 }
@@ -125,6 +136,8 @@ namespace Bhbk.Daemon.Aurora.SSH.FileSystems
         {
             var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
 
+            FileInfo file = null;
+
             try
             {
                 if (!node.Exists())
@@ -136,12 +149,10 @@ namespace Bhbk.Daemon.Aurora.SSH.FileSystems
 
                     if (node.NodeType == NodeType.Directory)
                     {
-                        var folder = CompositeFileSystemHelper.ConvertPathToSqlFolder(uow, _user, node.Path.StringPath);
+                        var folderEntity = CompositeFileSystemHelper.ConvertPathToSqlFolder(uow, _user, node.Path.StringPath);
 
-                        var deleteFolder = uow.UserFolders.Delete(folder);
+                        uow.UserFolders.Delete(folderEntity);
                         uow.Commit();
-
-                        var folderPath = CompositeFileSystemHelper.ConvertSqlToPathFolder(uow, _user, deleteFolder);
 
                         Log.Information($"'{callPath}' '{_user.UserName}' folder '{node.Path}'");
 
@@ -151,36 +162,37 @@ namespace Bhbk.Daemon.Aurora.SSH.FileSystems
                     {
                         var conf = scope.ServiceProvider.GetRequiredService<IConfiguration>();
 
-                        var file = CompositeFileSystemHelper.ConvertPathToSqlFile(uow, _user, node.Path.StringPath);
+                        var fileEntity = CompositeFileSystemHelper.ConvertPathToSqlFile(uow, _user, node.Path.StringPath);
 
-                        var realFilePath = new FileInfo(conf["Storage:BaseLocalPath"]
-                            + Path.DirectorySeparatorChar + file.RealPath
-                            + Path.DirectorySeparatorChar + file.RealFileName);
+                        file = new FileInfo(conf["Storage:BaseLocalPath"]
+                            + Path.DirectorySeparatorChar + fileEntity.RealPath
+                            + Path.DirectorySeparatorChar + fileEntity.RealFileName);
 
-                        /*
-                         * an empty file is not stored on file-system.
-                         */
-                        if (file.FileSize == 0)
-                        {
-                            Log.Information($"'{callPath}' '{_user.UserName}' emtpy file '{node.Path}'");
-                        }
-                        else
-                        {
-                            File.Delete(realFilePath.FullName);
+                        File.Delete(file.FullName);
 
-                            Log.Information($"'{callPath}' '{_user.UserName}' file '{node.Path}' from '{realFilePath.FullName}'");
-                        }
-
-                        var deleteFile = uow.UserFiles.Delete(file);
+                        uow.UserFiles.Delete(fileEntity);
                         uow.Commit();
 
-                        var filePath = CompositeFileSystemHelper.ConvertSqlToPathFile(uow, _user, deleteFile);
+                        Log.Information($"'{callPath}' '{_user.UserName}' file '{node.Path}' from '{file.FullName}'");
 
                         return node;
                     }
                     else
                         throw new NotImplementedException();
                 }
+            }
+            catch (IOException ex)
+            {
+                Log.Error(ex.ToString());
+                throw;
+            }
+            catch (DbUpdateException ex)
+            {
+                if (file.Exists)
+                    file.Delete();
+
+                Log.Error(ex.ToString());
+                throw;
             }
             catch (Exception ex)
             {
@@ -199,18 +211,18 @@ namespace Bhbk.Daemon.Aurora.SSH.FileSystems
 
                     if (nodeType == NodeType.Directory)
                     {
-                        var folder = CompositeFileSystemHelper.ConvertPathToSqlFolder(uow, _user, path.StringPath);
+                        var folderEntity = CompositeFileSystemHelper.ConvertPathToSqlFolder(uow, _user, path.StringPath);
 
-                        if (folder != null)
+                        if (folderEntity != null)
                             return true;
 
                         return false;
                     }
                     else if (nodeType == NodeType.File)
                     {
-                        var file = CompositeFileSystemHelper.ConvertPathToSqlFile(uow, _user, path.StringPath);
+                        var fileEntity = CompositeFileSystemHelper.ConvertPathToSqlFile(uow, _user, path.StringPath);
 
-                        if (file != null)
+                        if (fileEntity != null)
                             return true;
 
                         return false;
@@ -239,19 +251,21 @@ namespace Bhbk.Daemon.Aurora.SSH.FileSystems
 
                     if (node.NodeType == NodeType.Directory)
                     {
-                        var folder = CompositeFileSystemHelper.ConvertPathToSqlFolder(uow, _user, node.Path.StringPath);
+                        var folderEntity = CompositeFileSystemHelper.ConvertPathToSqlFolder(uow, _user, node.Path.StringPath);
 
-                        if (folder.ReadOnly)
+                        if (folderEntity.ReadOnly)
                             return new NodeAttributes(FileAttributes.Directory | FileAttributes.ReadOnly);
+
                         else
                             return new NodeAttributes(FileAttributes.Directory);
                     }
                     else if (node.NodeType == NodeType.File)
                     {
-                        var file = CompositeFileSystemHelper.ConvertPathToSqlFile(uow, _user, node.Path.StringPath);
+                        var fileEntity = CompositeFileSystemHelper.ConvertPathToSqlFile(uow, _user, node.Path.StringPath);
 
-                        if (file.FileReadOnly)
+                        if (fileEntity.FileReadOnly)
                             return new NodeAttributes(FileAttributes.ReadOnly);
+
                         else
                             return new NodeAttributes(FileAttributes.Normal);
                     }
@@ -276,21 +290,21 @@ namespace Bhbk.Daemon.Aurora.SSH.FileSystems
 
                     var parentFolder = CompositeFileSystemHelper.ConvertPathToSqlFolder(uow, _user, parent.Path.StringPath);
 
-                    var folder = uow.UserFolders.Get(x => x.UserId == _user.Id
+                    var folderEntities = uow.UserFolders.Get(x => x.UserId == _user.Id
                         && x.ParentId == parentFolder.Id
                         && x.VirtualName == name).SingleOrDefault();
 
-                    if (folder != null)
-                        return new DirectoryNode(folder.VirtualName, parent,
-                            new NodeTimeInfo(folder.Created, folder.LastAccessed, folder.LastUpdated));
+                    if (folderEntities != null)
+                        return new DirectoryNode(folderEntities.VirtualName, parent,
+                            new NodeTimeInfo(folderEntities.Created, folderEntities.LastAccessed, folderEntities.LastUpdated));
 
-                    var file = uow.UserFiles.Get(x => x.UserId == _user.Id
+                    var fileEntities = uow.UserFiles.Get(x => x.UserId == _user.Id
                         && x.FolderId == parentFolder.Id
                         && x.VirtualName == name).SingleOrDefault();
 
-                    if (file != null)
-                        return new FileNode(file.VirtualName, parent,
-                            new NodeTimeInfo(file.Created, file.LastAccessed, file.LastUpdated));
+                    if (fileEntities != null)
+                        return new FileNode(fileEntities.VirtualName, parent,
+                            new NodeTimeInfo(fileEntities.Created, fileEntities.LastAccessed, fileEntities.LastUpdated));
 
                     return null;
                 }
@@ -359,44 +373,22 @@ namespace Bhbk.Daemon.Aurora.SSH.FileSystems
                         var conf = scope.ServiceProvider.GetRequiredService<IConfiguration>();
                         var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
 
-                        var folder = CompositeFileSystemHelper.ConvertPathToSqlFolder(uow, _user, node.Parent.Path.StringPath);
+                        var folderEntity = CompositeFileSystemHelper.ConvertPathToSqlFolder(uow, _user, node.Parent.Path.StringPath);
 
-                        var file = uow.UserFiles.Get(x => x.UserId == _user.Id
-                            && x.FolderId == folder.Id
+                        var fileEntity = uow.UserFiles.Get(x => x.UserId == _user.Id
+                            && x.FolderId == folderEntity.Id
                             && x.VirtualName == node.Name).Single();
 
-                        var realFilePath = new FileInfo(conf["Storage:BaseLocalPath"]
-                            + Path.DirectorySeparatorChar + file.RealPath
-                            + Path.DirectorySeparatorChar + file.RealFileName);
+                        var file = new FileInfo(conf["Storage:BaseLocalPath"]
+                            + Path.DirectorySeparatorChar + fileEntity.RealPath
+                            + Path.DirectorySeparatorChar + fileEntity.RealFileName);
 
-                        /*
-                         * an empty file is created in the database but not on the file-system
-                         */
-                        if (!realFilePath.Exists)
-                        {
-                            file.LastAccessed = DateTime.UtcNow;
+                        fileEntity.LastAccessed = DateTime.UtcNow;
 
-                            uow.UserFiles.Update(file);
-                            uow.Commit();
+                        uow.UserFiles.Update(fileEntity);
+                        uow.Commit();
 
-                            Log.Information($"'{callPath}' '{_user.UserName}' empty file '{node.Path}'");
-
-                            return NodeContent.CreateDelayedWriteContent(new MemoryStream());
-                        }
-                        /*
-                         * a file that is created in the database and on the file-system
-                         */
-                        else
-                        {
-                            file.LastAccessed = DateTime.UtcNow;
-
-                            uow.UserFiles.Update(file);
-                            uow.Commit();
-
-                            Log.Information($"'{callPath}' '{_user.UserName}' file '{node.Path}' from '{realFilePath.FullName}'");
-
-                            return NodeContent.CreateDelayedWriteContent(File.Open(realFilePath.FullName, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite));
-                        }
+                        return NodeContent.CreateDelayedWriteContent(File.Open(file.FullName, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite));
                     }
                     else
                         throw new NotImplementedException();
@@ -413,21 +405,19 @@ namespace Bhbk.Daemon.Aurora.SSH.FileSystems
         {
             try
             {
-                if (!node.Exists())
+                if (!node.Exists()
+                    || node.NodeType == NodeType.Directory)
                     return 0L;
 
                 using (var scope = _factory.CreateScope())
                 {
-                    if (node.NodeType == NodeType.Directory)
-                        return 0L;
-
-                    else if (node.NodeType == NodeType.File)
+                    if (node.NodeType == NodeType.File)
                     {
                         var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
 
-                        var file = CompositeFileSystemHelper.ConvertPathToSqlFile(uow, _user, node.Path.StringPath);
+                        var fileEntity = CompositeFileSystemHelper.ConvertPathToSqlFile(uow, _user, node.Path.StringPath);
 
-                        return file.FileSize;
+                        return fileEntity.FileSize;
                     }
                     else
                         throw new NotImplementedException();
@@ -450,15 +440,15 @@ namespace Bhbk.Daemon.Aurora.SSH.FileSystems
 
                     if (node.NodeType == NodeType.Directory)
                     {
-                        var folder = CompositeFileSystemHelper.ConvertPathToSqlFolder(uow, _user, node.Path.StringPath);
+                        var folderEntity = CompositeFileSystemHelper.ConvertPathToSqlFolder(uow, _user, node.Path.StringPath);
 
-                        return new NodeTimeInfo(folder.Created, folder.LastAccessed, folder.LastUpdated);
+                        return new NodeTimeInfo(folderEntity.Created, folderEntity.LastAccessed, folderEntity.LastUpdated);
                     }
                     else if (node.NodeType == NodeType.File)
                     {
-                        var file = CompositeFileSystemHelper.ConvertPathToSqlFile(uow, _user, node.Path.StringPath);
+                        var fileEntity = CompositeFileSystemHelper.ConvertPathToSqlFile(uow, _user, node.Path.StringPath);
 
-                        return new NodeTimeInfo(file.Created, file.LastAccessed, file.LastUpdated);
+                        return new NodeTimeInfo(fileEntity.Created, fileEntity.LastAccessed, fileEntity.LastUpdated);
                     }
                     else
                         throw new NotImplementedException();
@@ -534,31 +524,31 @@ namespace Bhbk.Daemon.Aurora.SSH.FileSystems
 
                     if (node.NodeType == NodeType.Directory)
                     {
-                        var folder = CompositeFileSystemHelper.ConvertPathToSqlFolder(uow, _user, node.Path.StringPath);
+                        var folderEntity = CompositeFileSystemHelper.ConvertPathToSqlFolder(uow, _user, node.Path.StringPath);
 
-                        folder.VirtualName = newName;
+                        folderEntity.VirtualName = newName;
 
-                        uow.UserFolders.Update(folder);
+                        uow.UserFolders.Update(folderEntity);
                         uow.Commit();
 
-                        var newPath = CompositeFileSystemHelper.ConvertSqlToPathFolder(uow, _user, folder);
+                        var folderPath = CompositeFileSystemHelper.ConvertSqlToPathFolder(uow, _user, folderEntity);
 
-                        Log.Information($"'{callPath}' '{_user.UserName}' from '{node.Path}' to '{newPath}'");
+                        Log.Information($"'{callPath}' '{_user.UserName}' from '{node.Path}' to '{folderPath}'");
 
                         return new DirectoryNode(newName, node.Parent);
                     }
                     else if (node.NodeType == NodeType.File)
                     {
-                        var file = CompositeFileSystemHelper.ConvertPathToSqlFile(uow, _user, node.Path.StringPath);
+                        var fileEntity = CompositeFileSystemHelper.ConvertPathToSqlFile(uow, _user, node.Path.StringPath);
 
-                        file.VirtualName = newName;
+                        fileEntity.VirtualName = newName;
 
-                        uow.UserFiles.Update(file);
+                        uow.UserFiles.Update(fileEntity);
                         uow.Commit();
 
-                        var newPath = CompositeFileSystemHelper.ConvertSqlToPathFile(uow, _user, file);
+                        var filePath = CompositeFileSystemHelper.ConvertSqlToPathFile(uow, _user, fileEntity);
 
-                        Log.Information($"'{callPath}' '{_user.UserName}' from '{node.Path}' to '{newPath}'");
+                        Log.Information($"'{callPath}' '{_user.UserName}' from '{node.Path}' to '{filePath}'");
 
                         return new FileNode(newName, node.Parent);
                     }
@@ -592,18 +582,18 @@ namespace Bhbk.Daemon.Aurora.SSH.FileSystems
                         var conf = scope.ServiceProvider.GetRequiredService<IConfiguration>();
                         var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
 
-                        var fileData = CompositeFileSystemHelper.ConvertPathToSqlFile(uow, _user, node.Path.StringPath);
+                        var fileEntity = CompositeFileSystemHelper.ConvertPathToSqlFile(uow, _user, node.Path.StringPath);
                         var now = DateTime.UtcNow;
 
                         folder = new DirectoryInfo(conf["Storage:BaseLocalPath"]
-                            + Path.DirectorySeparatorChar + fileData.RealPath);
-
-                        file = new FileInfo(conf["Storage:BaseLocalPath"]
-                            + Path.DirectorySeparatorChar + fileData.RealPath
-                            + Path.DirectorySeparatorChar + fileData.RealFileName);
+                            + Path.DirectorySeparatorChar + fileEntity.RealPath);
 
                         if (!folder.Exists)
                             folder.Create();
+
+                        file = new FileInfo(conf["Storage:BaseLocalPath"]
+                            + Path.DirectorySeparatorChar + fileEntity.RealPath
+                            + Path.DirectorySeparatorChar + fileEntity.RealFileName);
 
                         using (var fs = new FileStream(file.FullName, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite))
                             content.GetStream().CopyTo(fs);
@@ -613,14 +603,14 @@ namespace Bhbk.Daemon.Aurora.SSH.FileSystems
                         {
                             var hash = sha256.ComputeHash(fs);
 
-                            fileData.FileSize = fs.Length;
-                            fileData.FileHashSHA256 = HashHelper.GetHexString(hash);
-                            fileData.FileReadOnly = false;
-                            fileData.Created = now;
-                            fileData.LastAccessed = null;
-                            fileData.LastUpdated = null;
+                            fileEntity.FileSize = fs.Length;
+                            fileEntity.FileHashSHA256 = HashHelper.GetHexString(hash);
+                            fileEntity.FileReadOnly = false;
+                            fileEntity.Created = now;
+                            fileEntity.LastAccessed = null;
+                            fileEntity.LastUpdated = null;
 
-                            uow.UserFiles.Update(fileData);
+                            uow.UserFiles.Update(fileEntity);
                             uow.Commit();
                         }
 
@@ -662,22 +652,22 @@ namespace Bhbk.Daemon.Aurora.SSH.FileSystems
 
                     if (node.NodeType == NodeType.Directory)
                     {
-                        var folder = CompositeFileSystemHelper.ConvertPathToSqlFolder(uow, _user, node.Path.StringPath);
+                        var folderEntity = CompositeFileSystemHelper.ConvertPathToSqlFolder(uow, _user, node.Path.StringPath);
 
-                        folder.ReadOnly = attributes.IsReadOnly;
+                        folderEntity.ReadOnly = attributes.IsReadOnly;
 
-                        uow.UserFolders.Update(folder);
+                        uow.UserFolders.Update(folderEntity);
                         uow.Commit();
 
                         return node;
                     }
                     else if (node.NodeType == NodeType.File)
                     {
-                        var file = CompositeFileSystemHelper.ConvertPathToSqlFile(uow, _user, node.Path.StringPath);
+                        var fileEntity = CompositeFileSystemHelper.ConvertPathToSqlFile(uow, _user, node.Path.StringPath);
 
-                        file.FileReadOnly = attributes.IsReadOnly;
+                        fileEntity.FileReadOnly = attributes.IsReadOnly;
 
-                        uow.UserFiles.Update(file);
+                        uow.UserFiles.Update(fileEntity);
                         uow.Commit();
 
                         return node;
@@ -703,24 +693,24 @@ namespace Bhbk.Daemon.Aurora.SSH.FileSystems
 
                     if (node.NodeType == NodeType.Directory)
                     {
-                        var folder = CompositeFileSystemHelper.ConvertPathToSqlFolder(uow, _user, node.Path.StringPath);
+                        var folderEntity = CompositeFileSystemHelper.ConvertPathToSqlFolder(uow, _user, node.Path.StringPath);
 
-                        folder.LastAccessed = timeInfo.LastAccessTime;
-                        folder.LastUpdated = timeInfo.LastWriteTime;
+                        folderEntity.LastAccessed = timeInfo.LastAccessTime;
+                        folderEntity.LastUpdated = timeInfo.LastWriteTime;
 
-                        uow.UserFolders.Update(folder);
+                        uow.UserFolders.Update(folderEntity);
                         uow.Commit();
 
                         return node;
                     }
                     else if (node.NodeType == NodeType.File)
                     {
-                        var file = CompositeFileSystemHelper.ConvertPathToSqlFile(uow, _user, node.Path.StringPath);
+                        var fileEntity = CompositeFileSystemHelper.ConvertPathToSqlFile(uow, _user, node.Path.StringPath);
 
-                        file.LastAccessed = timeInfo.LastAccessTime;
-                        file.LastUpdated = timeInfo.LastWriteTime;
+                        fileEntity.LastAccessed = timeInfo.LastAccessTime;
+                        fileEntity.LastUpdated = timeInfo.LastWriteTime;
 
-                        uow.UserFiles.Update(file);
+                        uow.UserFiles.Update(fileEntity);
                         uow.Commit();
 
                         return node;

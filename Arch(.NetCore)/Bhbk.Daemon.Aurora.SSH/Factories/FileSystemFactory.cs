@@ -34,7 +34,7 @@ namespace Bhbk.Daemon.Aurora.SSH.Factories
                 fsSettings.LogWriter = new LogWriterHelper(logger, user, fsLogLevel);
             }
 
-            if (!Enum.TryParse<FileSystemTypes>(user.FileSystem, true, out fsType))
+            if (!Enum.TryParse<FileSystemTypes>(user.FileSystemType, true, out fsType))
                 throw new InvalidCastException();
 
             var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
@@ -43,9 +43,18 @@ namespace Bhbk.Daemon.Aurora.SSH.Factories
             {
                 case FileSystemTypes.Composite:
                     {
-                        Log.Information($"'{callPath}' '{user.UserName}' initialize '{typeof(CompositeReadWriteFileSystem).Name}'");
+                        if (!user.FileSystemReadOnly)
+                        {
+                            Log.Information($"'{callPath}' '{user.UserName}' initialize '{typeof(CompositeReadWriteFileSystem).Name}'");
 
-                        return new CompositeReadWriteFileSystem(fsSettings, factory, user);
+                            return new CompositeReadWriteFileSystem(fsSettings, factory, user);
+                        }
+                        else
+                        {
+                            Log.Information($"'{callPath}' '{user.UserName}' initialize '{typeof(CompositeReadOnlyFileSystem).Name}'");
+
+                            return new CompositeReadOnlyFileSystem(fsSettings, factory, user);
+                        }
                     }
 
                 case FileSystemTypes.Memory:
@@ -57,9 +66,18 @@ namespace Bhbk.Daemon.Aurora.SSH.Factories
 
                 case FileSystemTypes.SMB:
                     {
-                        Log.Information($"'{callPath}' '{user.UserName}' initialize '{typeof(SmbReadWriteFileSystem).Name}'");
+                        if (!user.FileSystemReadOnly)
+                        {
+                            Log.Information($"'{callPath}' '{user.UserName}' initialize '{typeof(SmbReadWriteFileSystem).Name}'");
 
-                        return new SmbReadWriteFileSystem(fsSettings, factory, user);
+                            return new SmbReadWriteFileSystem(fsSettings, factory, user);
+                        }
+                        else
+                        {
+                            Log.Information($"'{callPath}' '{user.UserName}' initialize '{typeof(SmbReadOnlyFileSystem).Name}'");
+
+                            return new SmbReadOnlyFileSystem(fsSettings, factory, user);
+                        }
                     }
 
                 default:

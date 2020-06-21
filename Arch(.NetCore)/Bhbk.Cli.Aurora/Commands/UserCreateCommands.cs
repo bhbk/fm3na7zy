@@ -73,7 +73,7 @@ namespace Bhbk.Cli.Aurora.Commands
                     {
                         Id = Guid.NewGuid(),
                         UserName = _userName,
-                        FileSystem = _filesystemType.ToString(),
+                        FileSystemType = _filesystemType.ToString(),
                         Enabled = true,
                         Created = DateTime.Now,
                         Immutable = false,

@@ -43,7 +43,7 @@ namespace Bhbk.Daemon.Aurora.SSH
         {
             _factory = factory;
             _conf = conf;
-            _delay = int.Parse(_conf["Tasks:SshWorker:PollingDelay"]);
+            _delay = int.Parse(_conf["Daemons:SshWorker:PollingDelay"]);
             _server = new FileServer();
 
             if (!Enum.TryParse<LogLevel>(_conf["Rebex:LogLevel"], true, out _logLevel))
@@ -60,7 +60,6 @@ namespace Bhbk.Daemon.Aurora.SSH
                 Log.Information($"'{callPath}' sleeping for {TimeSpan.FromSeconds(_delay)}");
 #endif
                 await Task.Delay(TimeSpan.FromSeconds(_delay), cancellationToken);
-
 #if DEBUG
                 Log.Information($"'{callPath}' running");
 #endif
@@ -118,7 +117,7 @@ namespace Bhbk.Daemon.Aurora.SSH
             await ExecuteAsync(cancellationToken);
         }
 
-        public async Task StopAsync(CancellationToken cancellationToken)
+        public Task StopAsync(CancellationToken cancellationToken)
         {
             try
             {
@@ -135,6 +134,8 @@ namespace Bhbk.Daemon.Aurora.SSH
             {
                 Log.Error(ex.ToString());
             }
+
+            return Task.CompletedTask;
         }
 
         private void ServerInitializeLicenseKeys()
@@ -142,7 +143,6 @@ namespace Bhbk.Daemon.Aurora.SSH
             /*
              * https://www.rebex.net/support/trial/
              */
-
             try
             {
                 using (var scope = _factory.CreateScope())
@@ -448,7 +448,7 @@ namespace Bhbk.Daemon.Aurora.SSH
             {
                 var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
 
-                Log.Information($"'{callPath}' '{e.User.Name}' from {e.Session.ClientEndPoint} after {e.Session.Duration}");
+                Log.Information($"'{callPath}' '{ServerSession.Current.UserName}' from {e.Session.ClientEndPoint} after {e.Session.Duration}");
             }
             catch (Exception ex)
             {
@@ -462,7 +462,7 @@ namespace Bhbk.Daemon.Aurora.SSH
             {
                 var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
 
-                Log.Information($"'{callPath}' '{e.User.Name}' file '/{e.FullPath}' bytes {e.BytesTransferred} to {e.Session.ClientEndPoint}");
+                Log.Information($"'{callPath}' '{ServerSession.Current.UserName}' file '/{e.FullPath}' bytes {e.BytesTransferred} to {e.Session.ClientEndPoint}");
             }
             catch (Exception ex)
             {
@@ -476,7 +476,7 @@ namespace Bhbk.Daemon.Aurora.SSH
             {
                 var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
 
-                Log.Information($"'{callPath}' '{e.User.Name}' file '/{e.FullPath}' bytes {e.BytesTransferred} from {e.Session.ClientEndPoint}");
+                Log.Information($"'{callPath}' '{ServerSession.Current.UserName}' file '/{e.FullPath}' bytes {e.BytesTransferred} from {e.Session.ClientEndPoint}");
             }
             catch (Exception ex)
             {

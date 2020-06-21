@@ -83,5 +83,10 @@
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Infrastructure_DIRECT\" />
+    <Folder Include="Models_DIRECT\" />
+    <Folder Include="Repositories_DIRECT\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

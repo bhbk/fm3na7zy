@@ -11,10 +11,13 @@
     [Created]        DATETIME2 (7)    NOT NULL,
     [LastAccessed]   DATETIME2 (7)    NULL,
     [LastUpdated]    DATETIME2 (7)    NULL,
+    [LastVerified]   DATETIME2 (7)    NOT NULL,
     CONSTRAINT [PK_tbl_UserFiles] PRIMARY KEY CLUSTERED ([Id] ASC),
     CONSTRAINT [FK_tbl_UserFiles_FolderID] FOREIGN KEY ([FolderId]) REFERENCES [dbo].[tbl_UserFolders] ([Id]),
     CONSTRAINT [FK_tbl_UserFiles_UserID] FOREIGN KEY ([UserId]) REFERENCES [dbo].[tbl_Users] ([Id]) ON DELETE CASCADE ON UPDATE CASCADE
 );
+
+
 
 
 

@@ -5,8 +5,9 @@ using System.Runtime.InteropServices;
 
 /*
  * https://docs.microsoft.com/en-us/windows/win32/secauthn/logonuserexexw
- * https://github.com/dotnet/runtime/issues/29935
  * https://stackoverflow.com/questions/60839845/net-core-windowsidentity-impersonation-does-not-seem-to-be-working
+ * https://daoudisamir.com/impersonate-users-in-c/
+ * https://github.com/dotnet/runtime/issues/29935
  */
 
 namespace Bhbk.Lib.Aurora.Domain.Helpers
