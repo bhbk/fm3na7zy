@@ -1,5 +1,5 @@
 using AutoMapper;
-using Bhbk.Lib.Aurora.Data.EFCore.Infrastructure_DIRECT;
+using Bhbk.Lib.Aurora.Data.Infrastructure_DIRECT;
 using Bhbk.Lib.Aurora.Domain.Infrastructure;
 using Bhbk.Lib.Common.Primitives.Enums;
 using Bhbk.Lib.Common.Services;
@@ -31,7 +31,8 @@ namespace Bhbk.Daemon.Aurora.FTP
                 {
                     return new UnitOfWork(_conf["Databases:AuroraEntities"], _instance);
                 });
-                options.AddSingleton<IHostedService, Daemon>();
+                options.AddSingleton<IHostedService, FtpServer>();
+                options.AddSingleton<IHostedService, FtpWorker>();
             });
 
         public static IHostBuilder CreateWindowsHostBuilder(string[] args) =>
@@ -46,10 +47,11 @@ namespace Bhbk.Daemon.Aurora.FTP
                 {
                     return new UnitOfWork(_conf["Databases:AuroraEntities"], _instance);
                 });
-                options.AddSingleton<IHostedService, Daemon>();
+                options.AddSingleton<IHostedService, FtpServer>();
+                options.AddSingleton<IHostedService, FtpWorker>();
             });
 
-        public static void Main(string[] args)
+        public static void Main(string[] args = null)
         {
             _mapper = new MapperConfiguration(x => x.AddProfile<AutoMapperProfile_DIRECT>())
                 .CreateMapper();
@@ -64,7 +66,8 @@ namespace Bhbk.Daemon.Aurora.FTP
             Log.Logger = new LoggerConfiguration()
                 .ReadFrom.Configuration(_conf)
                 .WriteTo.Console()
-                .WriteTo.RollingFile(Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + "appdebug.log", retainedFileCountLimit: 7)
+                .WriteTo.RollingFile(Directory.GetCurrentDirectory() 
+                    + Path.DirectorySeparatorChar + "appdebug.log", retainedFileCountLimit: 7, fileSizeLimitBytes: 10485760)
                 .Enrich.FromLogContext()
                 .CreateLogger();
 

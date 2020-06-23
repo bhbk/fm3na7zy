@@ -19,15 +19,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bhbk.Daemon.Aurora.FTP", "B
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bhbk.Daemon.Aurora.FTP.Tests", "Bhbk.Daemon.Aurora.FTP.Tests\Bhbk.Daemon.Aurora.FTP.Tests.csproj", "{F44C7A63-8853-4F41-A41A-C232191AEAAC}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bhbk.Daemon.Aurora.SSH", "Bhbk.Daemon.Aurora.SSH\Bhbk.Daemon.Aurora.SSH.csproj", "{18D764DB-22CA-427D-9DB5-0FCDAACC2AC9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bhbk.Daemon.Aurora.SFTP", "Bhbk.Daemon.Aurora.SFTP\Bhbk.Daemon.Aurora.SFTP.csproj", "{18D764DB-22CA-427D-9DB5-0FCDAACC2AC9}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bhbk.Daemon.Aurora.SSH.Tests", "Bhbk.Daemon.Aurora.SSH.Tests\Bhbk.Daemon.Aurora.SSH.Tests.csproj", "{158C7CBC-E279-4EC4-8BD8-F86EEEA0203B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bhbk.Daemon.Aurora.SFTP.Tests", "Bhbk.Daemon.Aurora.SFTP.Tests\Bhbk.Daemon.Aurora.SFTP.Tests.csproj", "{158C7CBC-E279-4EC4-8BD8-F86EEEA0203B}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bhbk.Lib.Aurora", "Bhbk.Lib.Aurora\Bhbk.Lib.Aurora.csproj", "{4C03C157-FC79-407A-A0EB-713E0844573D}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bhbk.Lib.Aurora.Data.EFCore", "Bhbk.Lib.Aurora.Data.EFCore\Bhbk.Lib.Aurora.Data.EFCore.csproj", "{5B04D6FC-0B7C-4BE8-AC41-C8F5434AD5B8}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bhbk.Lib.Aurora.Data.EF6", "Bhbk.Lib.Aurora.Data.EF6\Bhbk.Lib.Aurora.Data.EF6.csproj", "{05666376-18C4-4F4F-90AD-27F9C1D0D349}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bhbk.Lib.Aurora.Data", "Bhbk.Lib.Aurora.Data\Bhbk.Lib.Aurora.Data.csproj", "{5B04D6FC-0B7C-4BE8-AC41-C8F5434AD5B8}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bhbk.Lib.Aurora.Domain", "Bhbk.Lib.Aurora.Domain\Bhbk.Lib.Aurora.Domain.csproj", "{952EF791-0DB3-40B0-823B-8DAF85802E50}"
 EndProject
@@ -36,6 +34,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bhbk.WebApi.Aurora", "Bhbk.WebApi.Aurora\Bhbk.WebApi.Aurora.csproj", "{6E50706C-502E-433B-B8D1-24480BCFA5C8}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bhbk.WebApi.Aurora.Tests", "Bhbk.WebApi.Aurora.Tests\Bhbk.WebApi.Aurora.Tests.csproj", "{4EE6A97C-CFE7-4539-A7D0-680ED8AE9683}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bhbk.Lib.Aurora.Domain.Tests", "Bhbk.Lib.Aurora.Domain.Tests\Bhbk.Lib.Aurora.Domain.Tests.csproj", "{B5301479-0992-4B9A-810E-243DBD57F86F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -131,18 +131,6 @@ Global
 		{5B04D6FC-0B7C-4BE8-AC41-C8F5434AD5B8}.Release|x64.Build.0 = Release|x64
 		{5B04D6FC-0B7C-4BE8-AC41-C8F5434AD5B8}.Release|x86.ActiveCfg = Release|x86
 		{5B04D6FC-0B7C-4BE8-AC41-C8F5434AD5B8}.Release|x86.Build.0 = Release|x86
-		{05666376-18C4-4F4F-90AD-27F9C1D0D349}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{05666376-18C4-4F4F-90AD-27F9C1D0D349}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{05666376-18C4-4F4F-90AD-27F9C1D0D349}.Debug|x64.ActiveCfg = Debug|x64
-		{05666376-18C4-4F4F-90AD-27F9C1D0D349}.Debug|x64.Build.0 = Debug|x64
-		{05666376-18C4-4F4F-90AD-27F9C1D0D349}.Debug|x86.ActiveCfg = Debug|x86
-		{05666376-18C4-4F4F-90AD-27F9C1D0D349}.Debug|x86.Build.0 = Debug|x86
-		{05666376-18C4-4F4F-90AD-27F9C1D0D349}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{05666376-18C4-4F4F-90AD-27F9C1D0D349}.Release|Any CPU.Build.0 = Release|Any CPU
-		{05666376-18C4-4F4F-90AD-27F9C1D0D349}.Release|x64.ActiveCfg = Release|x64
-		{05666376-18C4-4F4F-90AD-27F9C1D0D349}.Release|x64.Build.0 = Release|x64
-		{05666376-18C4-4F4F-90AD-27F9C1D0D349}.Release|x86.ActiveCfg = Release|Any CPU
-		{05666376-18C4-4F4F-90AD-27F9C1D0D349}.Release|x86.Build.0 = Release|Any CPU
 		{952EF791-0DB3-40B0-823B-8DAF85802E50}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{952EF791-0DB3-40B0-823B-8DAF85802E50}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{952EF791-0DB3-40B0-823B-8DAF85802E50}.Debug|x64.ActiveCfg = Debug|x64
@@ -187,6 +175,18 @@ Global
 		{4EE6A97C-CFE7-4539-A7D0-680ED8AE9683}.Release|x64.Build.0 = Release|x64
 		{4EE6A97C-CFE7-4539-A7D0-680ED8AE9683}.Release|x86.ActiveCfg = Release|x86
 		{4EE6A97C-CFE7-4539-A7D0-680ED8AE9683}.Release|x86.Build.0 = Release|x86
+		{B5301479-0992-4B9A-810E-243DBD57F86F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B5301479-0992-4B9A-810E-243DBD57F86F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B5301479-0992-4B9A-810E-243DBD57F86F}.Debug|x64.ActiveCfg = Debug|x64
+		{B5301479-0992-4B9A-810E-243DBD57F86F}.Debug|x64.Build.0 = Debug|x64
+		{B5301479-0992-4B9A-810E-243DBD57F86F}.Debug|x86.ActiveCfg = Debug|x86
+		{B5301479-0992-4B9A-810E-243DBD57F86F}.Debug|x86.Build.0 = Debug|x86
+		{B5301479-0992-4B9A-810E-243DBD57F86F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B5301479-0992-4B9A-810E-243DBD57F86F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B5301479-0992-4B9A-810E-243DBD57F86F}.Release|x64.ActiveCfg = Release|Any CPU
+		{B5301479-0992-4B9A-810E-243DBD57F86F}.Release|x64.Build.0 = Release|Any CPU
+		{B5301479-0992-4B9A-810E-243DBD57F86F}.Release|x86.ActiveCfg = Release|Any CPU
+		{B5301479-0992-4B9A-810E-243DBD57F86F}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

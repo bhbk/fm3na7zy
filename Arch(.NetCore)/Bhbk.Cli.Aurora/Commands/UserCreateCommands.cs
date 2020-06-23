@@ -1,5 +1,5 @@
-﻿using Bhbk.Lib.Aurora.Data.EFCore.Infrastructure_DIRECT;
-using Bhbk.Lib.Aurora.Data.EFCore.Models_DIRECT;
+﻿using Bhbk.Lib.Aurora.Data.Infrastructure_DIRECT;
+using Bhbk.Lib.Aurora.Data.Models_DIRECT;
 using Bhbk.Lib.Aurora.Primitives.Enums;
 using Bhbk.Lib.CommandLine.IO;
 using Bhbk.Lib.Common.FileSystem;
@@ -90,8 +90,8 @@ namespace Bhbk.Cli.Aurora.Commands
                     {
                         UserId = user.Id,
                         ConcurrencyStamp = Guid.NewGuid().ToString(),
-                        PasswordHashPBKDF2 = PBKDF2.Create(_userPass),
-                        PasswordHashSHA256 = SHA256.Create(_userPass),
+                        HashPBKDF2 = PBKDF2.Create(_userPass),
+                        HashSHA256 = SHA256.Create(_userPass),
                         SecurityStamp = Guid.NewGuid().ToString(),
                         Enabled = true,
                         Created = DateTime.Now,

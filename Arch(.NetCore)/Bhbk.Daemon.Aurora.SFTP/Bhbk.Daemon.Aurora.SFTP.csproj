@@ -1,0 +1,43 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Worker">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <UserSecretsId>dotnet-Bhbk.Daemon.Aurora-9CE2E886-D943-4175-BC63-93EA471BA3BF</UserSecretsId>
+    <OutputType>Exe</OutputType>
+    <Platforms>AnyCPU;x64;x86</Platforms>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="9.0.0" />
+    <PackageReference Include="Bhbk.Lib.Common" Version="2020.3.8.2030" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.CommandLine" Version="3.1.5" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="3.1.5" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="3.1.4" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.Systemd" Version="3.1.4" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="3.1.4" />
+    <PackageReference Include="Rebex.Elliptic.Castle" Version="1.2.1" />
+    <PackageReference Include="Rebex.Elliptic.Curve25519" Version="1.2.1" />
+    <PackageReference Include="Rebex.Elliptic.Ed25519" Version="1.2.1" />
+    <PackageReference Include="Rebex.FileServer" Version="5.0.7450" />
+    <PackageReference Include="Rebex.FileSystem" Version="5.0.7450" />
+    <PackageReference Include="Rebex.FileTransfer" Version="5.0.7450" />
+    <PackageReference Include="Rebex.Security" Version="5.0.7450" />
+    <PackageReference Include="Rebex.Sftp" Version="5.0.7450" />
+    <PackageReference Include="Serilog.AspNetCore" Version="3.2.0" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="3.1.1" />
+    <PackageReference Include="Serilog.Sinks.RollingFile" Version="3.3.0" />
+    <PackageReference Include="System.DirectoryServices.Protocols" Version="4.7.0" />
+    <PackageReference Include="System.Linq.Dynamic.Core" Version="1.1.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Bhbk.Cli.Aurora\Bhbk.Cli.Aurora.csproj" />
+    <ProjectReference Include="..\Bhbk.Lib.Aurora.Domain\Bhbk.Lib.Aurora.Domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Update="appsettings.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+</Project>

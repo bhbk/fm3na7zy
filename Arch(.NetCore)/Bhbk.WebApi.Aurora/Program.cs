@@ -39,7 +39,8 @@ namespace Bhbk.WebApi.Aurora
             Log.Logger = new LoggerConfiguration()
                 .ReadFrom.Configuration(conf)
                 .WriteTo.Console()
-                .WriteTo.RollingFile(Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + "appdebug.log", retainedFileCountLimit: 7)
+                .WriteTo.RollingFile(Directory.GetCurrentDirectory() 
+                    + Path.DirectorySeparatorChar + "appdebug.log", retainedFileCountLimit: 7, fileSizeLimitBytes: 10485760)
                 .Enrich.FromLogContext()
                 .CreateLogger();
 

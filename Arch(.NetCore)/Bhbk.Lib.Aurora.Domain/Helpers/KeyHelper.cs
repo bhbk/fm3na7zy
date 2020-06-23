@@ -1,5 +1,5 @@
-﻿using Bhbk.Lib.Aurora.Data.EFCore.Infrastructure_DIRECT;
-using Bhbk.Lib.Aurora.Data.EFCore.Models_DIRECT;
+﻿using Bhbk.Lib.Aurora.Data.Infrastructure_DIRECT;
+using Bhbk.Lib.Aurora.Data.Models_DIRECT;
 using Bhbk.Lib.QueryExpression.Extensions;
 using Bhbk.Lib.QueryExpression.Factories;
 using Rebex.Net;
@@ -15,7 +15,8 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 {
 	public class KeyHelper
 	{
-		public static SshPrivateKey GenerateSshPrivateKey(IUnitOfWork uow, tbl_Users user, SshHostKeyAlgorithm keyAlgo, int keySize, string keyPass, SignatureHashAlgorithm hashAlgo, string hostname)
+		public static SshPrivateKey GenerateSshPrivateKey(IUnitOfWork uow, tbl_Users user, 
+			SshHostKeyAlgorithm keyAlgo, int keySize, string keyPass, SignatureHashAlgorithm hashAlgo, string hostname)
 		{
 			var pubId = Guid.NewGuid();
 			var privId = Guid.NewGuid();
@@ -47,12 +48,36 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 					Enabled = true,
 					Created = DateTime.Now
 				});
-			uow.Commit();
 
 			return keyPair;
 		}
 
-		public static SshPrivateKey ExportSshPrivateKey(tbl_Users user, tbl_UserPrivateKeys key, SshPrivateKeyFormat keyFormat, string keyPass, FileInfo outputFile)
+		public static tbl_SysPrivateKeys GenerateSshPrivateKey(IUnitOfWork uow,
+			SshHostKeyAlgorithm keyAlgo, int keySize, string keyPass, SshPrivateKeyFormat keyFormat)
+		{
+			var stream = new MemoryStream();
+			var keyPair = SshPrivateKey.Generate(keyAlgo, keySize);
+
+			keyPair.Save(stream, keyPass, keyFormat);
+
+			var sysKey = uow.SysPrivateKeys.Create(
+				new tbl_SysPrivateKeys
+				{
+					Id = Guid.NewGuid(),
+					KeyValueBase64 = Encoding.ASCII.GetString(stream.ToArray()),
+					KeyValueAlgo = keyAlgo.ToString(),
+					KeyValuePass = keyPass,
+					KeyValueFormat = keyFormat.ToString(),
+					Enabled = true,
+					Created = DateTime.Now,
+					Immutable = true
+				});
+
+			return sysKey;
+		}
+
+		public static SshPrivateKey ExportSshPrivateKey(tbl_Users user, tbl_UserPrivateKeys key, 
+			SshPrivateKeyFormat keyFormat, string keyPass, FileInfo outputFile)
 		{
 			using (var stream = new MemoryStream())
 			{
@@ -65,7 +90,8 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 			}
 		}
 
-		public static SshPublicKey ExportSshPublicKey(tbl_Users user, tbl_UserPublicKeys key, SshPublicKeyFormat keyFormat, FileInfo outputFile)
+		public static SshPublicKey ExportSshPublicKey(tbl_Users user, tbl_UserPublicKeys key, 
+			SshPublicKeyFormat keyFormat, FileInfo outputFile)
 		{
 			using (var stream = new MemoryStream())
 			{
@@ -114,7 +140,8 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 			return pubKeys;
 		}
 
-		public static SshPrivateKey ImportSshPrivateKey(IUnitOfWork uow, tbl_Users user, SignatureHashAlgorithm hashAlgo, string keyPass, string hostname, FileInfo inputFile)
+		public static SshPrivateKey ImportSshPrivateKey(IUnitOfWork uow, tbl_Users user, 
+			SignatureHashAlgorithm hashAlgo, string keyPass, string hostname, FileInfo inputFile)
 		{
 			var key = new SshPrivateKey(inputFile.FullName, keyPass);
 
@@ -157,7 +184,6 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 						Enabled = true,
 						Created = DateTime.Now
 					});
-				uow.Commit();
 			}
 			else if (privKeyExists != null && pubKeyExists == null)
 			{
@@ -175,7 +201,6 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 						Enabled = true,
 						Created = DateTime.Now
 					});
-				uow.Commit();
 			}
 			else if (privKeyExists == null && pubKeyExists != null)
 			{
@@ -191,13 +216,13 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 						Enabled = true,
 						Created = DateTime.Now
 					});
-				uow.Commit();
 			}
 
 			return key;
 		}
 
-		public static SshPublicKey ImportSshPublicKey(IUnitOfWork uow, tbl_Users user, SignatureHashAlgorithm hashAlgo, string hostname, FileInfo inputFile)
+		public static SshPublicKey ImportSshPublicKey(IUnitOfWork uow, tbl_Users user, 
+			SignatureHashAlgorithm hashAlgo, string hostname, FileInfo inputFile)
 		{
 			var pubKey = new SshPublicKey(inputFile.FullName);
 			var pubKeyBase64 = Convert.ToBase64String(pubKey.GetPublicKey(), Base64FormattingOptions.None);
@@ -220,7 +245,6 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 						Enabled = true,
 						Created = DateTime.Now
 					});
-				uow.Commit();
 			}
 
 			return pubKey;
@@ -230,7 +254,8 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 		 * openssh uses base64 and special formatting for public keys
 		 * https://man.openbsd.org/ssh-keygen
 		 */
-		public static SshPublicKey ImportSshPublicKeyBase64(IUnitOfWork uow, tbl_Users user, SignatureHashAlgorithm hashAlgo, FileInfo inputFile)
+		public static SshPublicKey ImportSshPublicKeyBase64(IUnitOfWork uow, tbl_Users user, 
+			SignatureHashAlgorithm hashAlgo, FileInfo inputFile)
 		{
 			var file = File.ReadAllText(inputFile.FullName);
 			var base64 = file.Split(" ");
@@ -257,7 +282,6 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 						Enabled = true,
 						Created = DateTime.Now
 					});
-				uow.Commit();
 			}
 
 			return pubKey;
@@ -267,7 +291,8 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 		 * openssh uses base64 and special formatting for public keys
 		 * https://man.openbsd.org/ssh-keygen
 		 */
-		public static ICollection<SshPublicKey> ImportSshPublicKeysBase64(IUnitOfWork uow, tbl_Users user, SignatureHashAlgorithm hashAlgo, FileInfo inputFile)
+		public static ICollection<SshPublicKey> ImportSshPublicKeysBase64(IUnitOfWork uow, tbl_Users user, 
+			SignatureHashAlgorithm hashAlgo, FileInfo inputFile)
 		{
 			var lines = File.ReadAllLines(inputFile.FullName);
 			var pubKeys = new List<SshPublicKey>();
@@ -300,7 +325,6 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 							Enabled = true,
 							Created = DateTime.Now
 						});
-					uow.Commit();
 				}
 			}
 

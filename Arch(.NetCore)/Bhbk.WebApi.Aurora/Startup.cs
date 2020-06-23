@@ -2,7 +2,7 @@ using AutoMapper;
 using Bhbk.Lib.Common.Primitives.Enums;
 using Bhbk.Lib.Common.Services;
 using Bhbk.Lib.Aurora.Domain.Infrastructure;
-using Bhbk.Lib.Aurora.Data.EFCore.Infrastructure_DIRECT;
+using Bhbk.Lib.Aurora.Data.Infrastructure_DIRECT;
 using Bhbk.WebApi.Aurora.Tasks;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;

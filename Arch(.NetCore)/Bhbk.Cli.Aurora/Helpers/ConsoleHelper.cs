@@ -1,4 +1,4 @@
-﻿using Bhbk.Lib.Aurora.Data.EFCore.Models_DIRECT;
+﻿using Bhbk.Lib.Aurora.Data.Models_DIRECT;
 using System;
 using System.Collections.Generic;
 

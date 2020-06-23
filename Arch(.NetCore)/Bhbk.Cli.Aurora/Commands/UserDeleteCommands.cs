@@ -1,5 +1,5 @@
-﻿using Bhbk.Lib.Aurora.Data.EFCore.Infrastructure_DIRECT;
-using Bhbk.Lib.Aurora.Data.EFCore.Models_DIRECT;
+﻿using Bhbk.Lib.Aurora.Data.Infrastructure_DIRECT;
+using Bhbk.Lib.Aurora.Data.Models_DIRECT;
 using Bhbk.Lib.CommandLine.IO;
 using Bhbk.Lib.Common.FileSystem;
 using Bhbk.Lib.Common.Primitives.Enums;

@@ -1,5 +1,5 @@
-﻿using Bhbk.Lib.Aurora.Data.EFCore.Infrastructure_DIRECT;
-using Bhbk.Lib.Aurora.Data.EFCore.Models_DIRECT;
+﻿using Bhbk.Lib.Aurora.Data.Infrastructure_DIRECT;
+using Bhbk.Lib.Aurora.Data.Models_DIRECT;
 using Bhbk.Lib.Aurora.Domain.Helpers;
 using Bhbk.Lib.CommandLine.IO;
 using Bhbk.Lib.Common.FileSystem;
@@ -113,6 +113,8 @@ namespace Bhbk.Cli.Aurora.Commands
                     _keyDns = Dns.GetHostName();
 
                 var key = KeyHelper.GenerateSshPrivateKey(_uow, _user, _keyType, _keySize, _keyPass, _sigType, _keyDns);
+
+                _uow.Commit();
 
                 Console.Out.WriteLine();
                 Console.Out.WriteLine("  *** Private key (base64 format) ***"

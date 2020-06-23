@@ -9,6 +9,7 @@
   <ItemGroup>
     <PackageReference Include="Bhbk.Lib.CommandLine" Version="2020.3.8.2030" />
     <PackageReference Include="Bhbk.Lib.Common" Version="2020.3.8.2030" />
+    <PackageReference Include="Bhbk.Lib.Cryptography" Version="2020.3.8.2030" />
     <PackageReference Include="ManyConsole" Version="2.0.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.5" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="3.1.5">
