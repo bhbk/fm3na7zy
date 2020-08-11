@@ -8,19 +8,18 @@ using System.Threading;
 using System.Threading.Tasks;
 using Quartz;
 
-namespace Bhbk.Daemon.Aurora.Simulator.Jobs
+namespace Bhbk.Daemon.Aurora.SFTP.Jobs
 {
     [DisallowConcurrentExecution]
-    public class UploadJob : IJob
+    public class ServiceJobA : IJob
     {
         private readonly IServiceScopeFactory _factory;
 
-        public UploadJob(IServiceScopeFactory factory) => _factory = factory;
+        public ServiceJobA(IServiceScopeFactory factory) => _factory = factory;
 
         public Task Execute(IJobExecutionContext context)
         {
             var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
-
 #if DEBUG
             Log.Information($"'{callPath}' running");
 #endif
@@ -40,11 +39,9 @@ namespace Bhbk.Daemon.Aurora.Simulator.Jobs
             {
                 Log.Error(ex.ToString());
             }
-
 #if DEBUG
             Log.Information($"'{callPath}' completed");
 #endif
-
             return Task.CompletedTask;
         }
     }

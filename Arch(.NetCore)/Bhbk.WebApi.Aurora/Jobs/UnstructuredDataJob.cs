@@ -1,6 +1,6 @@
 ﻿using Bhbk.Lib.Aurora.Data.Infrastructure_DIRECT;
 using Bhbk.Lib.Aurora.Data.Models_DIRECT;
-using Bhbk.Lib.Aurora.Domain.Helpers;
+using Bhbk.Lib.Common.Primitives;
 using Bhbk.Lib.QueryExpression.Extensions;
 using Bhbk.Lib.QueryExpression.Factories;
 using Microsoft.Extensions.Configuration;
@@ -56,7 +56,7 @@ namespace Bhbk.WebApi.Aurora.Tasks
                             using (var fs = new FileStream(filePath.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
                             {
                                 var hash = sha256.ComputeHash(fs);
-                                var hashCheck = HashHelper.GetHexString(hash);
+                                var hashCheck = Strings.GetHexString(hash);
 
                                 if (file.HashSHA256 != hashCheck)
                                 {

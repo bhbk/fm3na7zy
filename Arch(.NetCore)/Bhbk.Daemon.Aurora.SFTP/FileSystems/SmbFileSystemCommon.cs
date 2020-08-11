@@ -3,16 +3,16 @@ using System.IO;
 
 namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
 {
-    public static class SmbFileSystemResolver
+    internal static class SmbFileSystemCommon
     {
-        public static DirectoryInfo ConvertPathToCifsFolder(string path)
+        internal static DirectoryInfo ConvertPathToCifsFolder(string path)
         {
             path = path.Replace("/", @"\");
 
             return new DirectoryInfo(path);
         }
 
-        public static FileInfo ConvertPathToCifsFile(string path)
+        internal static FileInfo ConvertPathToCifsFile(string path)
         {
             path = path.Replace("/", @"\");
 

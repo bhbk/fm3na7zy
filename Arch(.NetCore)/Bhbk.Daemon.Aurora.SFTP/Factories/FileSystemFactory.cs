@@ -61,15 +61,15 @@ namespace Bhbk.Daemon.Aurora.SFTP.Factories
                     {
                         if (!user.FileSystemReadOnly)
                         {
-                            Log.Information($"'{callPath}' '{user.UserName}' initialize '{typeof(MemoryFileSystemProvider).Name}'");
+                            Log.Information($"'{callPath}' '{user.UserName}' initialize '{typeof(MemoryReadWriteFileSystem).Name}'");
 
-                            return new MemoryFileSystemProvider();
+                            return new MemoryReadWriteFileSystem(fsSettings, factory, user);
                         }
                         else
                         {
-                            Log.Information($"'{callPath}' '{user.UserName}' initialize '{typeof(MemoryFileSystemProvider).Name}'");
+                            Log.Information($"'{callPath}' '{user.UserName}' initialize '{typeof(MemoryReadOnlyFileSystem).Name}'");
 
-                            throw new NotImplementedException();
+                            return new MemoryReadOnlyFileSystem(fsSettings, factory, user);
                         }
                     }
 

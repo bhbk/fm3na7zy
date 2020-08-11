@@ -52,7 +52,7 @@ namespace Bhbk.WebApi.Aurora
                     threads.MaxConcurrency = 1;
                 });
 
-                var dataJobKey = new JobKey(JobType.Data.ToString(), GroupType.Sftp.ToString());
+                var dataJobKey = new JobKey(JobType.UnstructuredData.ToString(), GroupType.Services.ToString());
                 jobs.AddJob<UnstructuredDataJob>(opt => opt
                     .StoreDurably()
                     .WithIdentity(dataJobKey)

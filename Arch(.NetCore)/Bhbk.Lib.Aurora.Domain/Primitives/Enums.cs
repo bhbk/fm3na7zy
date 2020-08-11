@@ -4,13 +4,15 @@ namespace Bhbk.Lib.Aurora.Domain.Primitives.Enums
 {
     public enum GroupType
     {
-        Sftp
+        Services,
+        Users,
     }
 
     public enum JobType
     {
-        Data,
-        DownloadJob,
-        UploadJob
+        ServiceJobA,
+        ServiceJobB,
+        ServiceJobC,
+        UnstructuredData,
     }
 }

@@ -1,35 +1,49 @@
 ﻿using Bhbk.Lib.Aurora.Data.Infrastructure_DIRECT;
 using Bhbk.Lib.Aurora.Data.Models_DIRECT;
+using Bhbk.Lib.Common.Primitives;
 using Bhbk.Lib.QueryExpression.Extensions;
+using Microsoft.Extensions.Configuration;
 using Serilog;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Security.Cryptography;
 
 namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
 {
-    internal class CompositeFileSystemResolver
+    internal class CompositeFileSystemCommon
     {
-        internal static tbl_UserFolders ConvertPathToSqlFolder(IUnitOfWork uow, tbl_Users user, string path)
+        internal static tbl_UserFiles CommitFileContent(IConfiguration conf, Stream content, tbl_UserFiles fileEntity)
         {
-            if (path.FirstOrDefault() == '/')
-                path = path.Substring(1);
+            var folder = new DirectoryInfo(conf["Storage:BaseLocalPath"]
+                + Path.DirectorySeparatorChar + fileEntity.RealPath);
 
-            var folder = uow.UserFolders.Get(x => x.UserId == user.Id
-                && x.ParentId == null).SingleOrDefault();
+            if (!folder.Exists)
+                folder.Create();
 
-            if (string.IsNullOrWhiteSpace(path))
-                return folder;
+            var file = new FileInfo(conf["Storage:BaseLocalPath"]
+                + Path.DirectorySeparatorChar + fileEntity.RealPath
+                + Path.DirectorySeparatorChar + fileEntity.RealFileName);
 
-            foreach (var entry in path.Split("/"))
+            using (var fs = new FileStream(file.FullName, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite))
+                content.CopyTo(fs);
+
+            using (var sha256 = new SHA256Managed())
+            using (var fs = new FileStream(file.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
             {
-                folder = uow.UserFolders.Get(x => x.UserId == user.Id
-                    && x.ParentId == folder.Id
-                    && x.VirtualName == entry).SingleOrDefault();
-            };
+                var hash = sha256.ComputeHash(fs);
 
-            return folder;
+                fileEntity.RealFileSize = fs.Length;
+                fileEntity.HashSHA256 = Strings.GetHexString(hash);
+                fileEntity.ReadOnly = false;
+                fileEntity.Created = DateTime.UtcNow;
+                fileEntity.LastAccessed = null;
+                fileEntity.LastUpdated = null;
+            }
+
+            return fileEntity;
         }
 
         internal static tbl_UserFiles ConvertPathToSqlFile(IUnitOfWork uow, tbl_Users user, string path)
@@ -53,21 +67,25 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
             return file;
         }
 
-        internal static string ConvertSqlToPathFolder(IUnitOfWork uow, tbl_Users user, tbl_UserFolders folder)
+        internal static tbl_UserFolders ConvertPathToSqlFolder(IUnitOfWork uow, tbl_Users user, string path)
         {
-            var path = string.Empty;
-            var paths = new List<string> { };
+            if (path.FirstOrDefault() == '/')
+                path = path.Substring(1);
 
-            while (folder.ParentId != null)
+            var folder = uow.UserFolders.Get(x => x.UserId == user.Id
+                && x.ParentId == null).SingleOrDefault();
+
+            if (string.IsNullOrWhiteSpace(path))
+                return folder;
+
+            foreach (var entry in path.Split("/"))
             {
-                paths.Add(folder.VirtualName);
-                folder = folder.Parent;
-            }
+                folder = uow.UserFolders.Get(x => x.UserId == user.Id
+                    && x.ParentId == folder.Id
+                    && x.VirtualName == entry).SingleOrDefault();
+            };
 
-            for (int i = paths.Count() - 1; i >= 0; i--)
-                path += "/" + paths.ElementAt(i);
-
-            return path;
+            return folder;
         }
 
         internal static string ConvertSqlToPathFile(IUnitOfWork uow, tbl_Users user, tbl_UserFiles file)
@@ -88,6 +106,23 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                 path += "/" + paths.ElementAt(i);
 
             path += "/" + file.VirtualName;
+
+            return path;
+        }
+
+        internal static string ConvertSqlToPathFolder(IUnitOfWork uow, tbl_Users user, tbl_UserFolders folder)
+        {
+            var path = string.Empty;
+            var paths = new List<string> { };
+
+            while (folder.ParentId != null)
+            {
+                paths.Add(folder.VirtualName);
+                folder = folder.Parent;
+            }
+
+            for (int i = paths.Count() - 1; i >= 0; i--)
+                path += "/" + paths.ElementAt(i);
 
             return path;
         }

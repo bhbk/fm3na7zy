@@ -8,7 +8,7 @@
 
   <ItemGroup>
     <PackageReference Include="AutoMapper" Version="10.0.0" />
-    <PackageReference Include="Bhbk.Lib.Common" Version="2020.3.15.2130" />
+    <PackageReference Include="Bhbk.Lib.Common" Version="2020.8.11.1945" />
     <PackageReference Include="FubarDev.FtpServer" Version="3.1.1" />
     <PackageReference Include="FubarDev.FtpServer.Abstractions" Version="3.1.1" />
     <PackageReference Include="FubarDev.FtpServer.Commands" Version="3.1.1" />

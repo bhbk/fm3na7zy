@@ -29,30 +29,90 @@ namespace Bhbk.Daemon.Aurora.SFTP
         public static IHostBuilder CreateLinuxHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
             .UseSystemd()
-            .ConfigureServices((hostContext, options) =>
+            .ConfigureServices((hostContext, sc) =>
             {
-                options.AddSingleton<IConfiguration>(_conf);
-                options.AddSingleton<IContextService>(_instance);
-                options.AddSingleton<ILogger>(_logger);
-                options.AddSingleton<IMapper>(_mapper);
-                options.AddTransient<IUnitOfWork, UnitOfWork>(_ =>
+                sc.AddSingleton<IConfiguration>(_conf);
+                sc.AddSingleton<IContextService>(_instance);
+                sc.AddSingleton<ILogger>(_logger);
+                sc.AddSingleton<IMapper>(_mapper);
+                sc.AddTransient<IUnitOfWork, UnitOfWork>(_ =>
                 {
                     return new UnitOfWork(_conf["Databases:AuroraEntities"], _instance);
                 });
-                options.AddSingleton<IHostedService, SftpService>();
-                options.AddTransient<IAdminService, AdminService>(_ =>
+                sc.AddTransient<IAdminService, AdminService>(_ =>
                 {
                     var admin = new AdminService(_conf);
                     admin.Grant = new ResourceOwnerGrantV2(_conf);
 
                     return admin;
                 });
-                options.AddTransient<IAlertService, AlertService>(_ =>
+                sc.AddTransient<IAlertService, AlertService>(_ =>
                 {
                     var alert = new AlertService(_conf);
                     alert.Grant = new ResourceOwnerGrantV2(_conf);
 
                     return alert;
+                });
+                sc.AddTransient<IMeService, MeService>(_ =>
+                {
+                    var me = new MeService(_conf);
+                    me.Grant = new ResourceOwnerGrantV2(_conf);
+
+                    return me;
+                });
+                sc.AddSingleton<IHostedService, SftpService>();
+                sc.AddQuartz(jobs =>
+                {
+                    jobs.SchedulerId = Guid.NewGuid().ToString();
+
+                    //jobs.UseMicrosoftDependencyInjectionScopedJobFactory();
+                    jobs.UseMicrosoftDependencyInjectionJobFactory(options =>
+                    {
+                        options.AllowDefaultConstructor = false;
+                    });
+
+                    jobs.UseSimpleTypeLoader();
+                    jobs.UseInMemoryStore();
+                    jobs.UseDefaultThreadPool(threads =>
+                    {
+                        threads.MaxConcurrency = 2;
+                    });
+
+                    var serviceJobAKey = new JobKey(JobType.ServiceJobA.ToString(), GroupType.Services.ToString());
+                    jobs.AddJob<ServiceJobB>(opt => opt
+                        .StoreDurably()
+                        .WithIdentity(serviceJobAKey)
+                    );
+
+                    foreach (var cron in _conf.GetSection("Jobs:ServiceJobA:Schedules").GetChildren()
+                        .Select(x => x.Value).ToList())
+                    {
+                        jobs.AddTrigger(opt => opt
+                            .ForJob(serviceJobAKey)
+                            .StartNow()
+                            .WithCronSchedule(cron)
+                        );
+                    }
+
+                    var serviceJobBKey = new JobKey(JobType.ServiceJobB.ToString(), GroupType.Services.ToString());
+                    jobs.AddJob<ServiceJobB>(opt => opt
+                        .StoreDurably()
+                        .WithIdentity(serviceJobBKey)
+                    );
+
+                    foreach (var cron in _conf.GetSection("Jobs:ServiceJobB:Schedules").GetChildren()
+                        .Select(x => x.Value).ToList())
+                    {
+                        jobs.AddTrigger(opt => opt
+                            .ForJob(serviceJobBKey)
+                            .StartNow()
+                            .WithCronSchedule(cron)
+                        );
+                    }
+                });
+                sc.AddQuartzServer(options =>
+                {
+                    options.WaitForJobsToComplete = true;
                 });
             });
 
@@ -79,6 +139,13 @@ namespace Bhbk.Daemon.Aurora.SFTP
 
                     return alert;
                 });
+                sc.AddTransient<IMeService, MeService>(_ =>
+                {
+                    var me = new MeService(_conf);
+                    me.Grant = new ResourceOwnerGrantV2(_conf);
+
+                    return me;
+                });
                 sc.AddTransient<IUnitOfWork, UnitOfWork>(_ =>
                 {
                     return new UnitOfWork(_conf["Databases:AuroraEntities"], _instance);
@@ -98,36 +165,36 @@ namespace Bhbk.Daemon.Aurora.SFTP
                     jobs.UseInMemoryStore();
                     jobs.UseDefaultThreadPool(threads =>
                     {
-                        threads.MaxConcurrency = 3;
+                        threads.MaxConcurrency = 2;
                     });
 
-                    var downloadJobKey = new JobKey(JobType.DownloadJob.ToString(), GroupType.Sftp.ToString());
-                    jobs.AddJob<UploadJob>(opt => opt
+                    var serviceJobAKey = new JobKey(JobType.ServiceJobA.ToString(), GroupType.Services.ToString());
+                    jobs.AddJob<ServiceJobB>(opt => opt
                         .StoreDurably()
-                        .WithIdentity(downloadJobKey)
+                        .WithIdentity(serviceJobAKey)
                     );
 
-                    foreach (var cron in _conf.GetSection("Jobs:SftpDownload:Schedules").GetChildren()
+                    foreach (var cron in _conf.GetSection("Jobs:ServiceJobA:Schedules").GetChildren()
                         .Select(x => x.Value).ToList())
                     {
                         jobs.AddTrigger(opt => opt
-                            .ForJob(downloadJobKey)
+                            .ForJob(serviceJobAKey)
                             .StartNow()
                             .WithCronSchedule(cron)
                         );
                     }
 
-                    var uploadJobKey = new JobKey(JobType.UploadJob.ToString(), GroupType.Sftp.ToString());
-                    jobs.AddJob<UploadJob>(opt => opt
+                    var serviceJobBKey = new JobKey(JobType.ServiceJobB.ToString(), GroupType.Services.ToString());
+                    jobs.AddJob<ServiceJobB>(opt => opt
                         .StoreDurably()
-                        .WithIdentity(uploadJobKey)
+                        .WithIdentity(serviceJobBKey)
                     );
 
-                    foreach (var cron in _conf.GetSection("Jobs:SftpUpload:Schedules").GetChildren()
+                    foreach (var cron in _conf.GetSection("Jobs:ServiceJobB:Schedules").GetChildren()
                         .Select(x => x.Value).ToList())
                     {
                         jobs.AddTrigger(opt => opt
-                            .ForJob(uploadJobKey)
+                            .ForJob(serviceJobBKey)
                             .StartNow()
                             .WithCronSchedule(cron)
                         );

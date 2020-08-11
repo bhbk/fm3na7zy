@@ -19,14 +19,14 @@ using System.Security.Principal;
 
 namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
 {
-    public class SmbReadWriteFileSystem : ReadWriteFileSystemProvider
+    internal class SmbReadWriteFileSystem : ReadWriteFileSystemProvider
     {
         private readonly IServiceScopeFactory _factory;
+        private readonly SafeAccessTokenHandle _userToken;
+        private readonly tbl_Users _user;
         private readonly string _userMountPath;
-        private SafeAccessTokenHandle _userToken;
-        private tbl_Users _user;
 
-        public SmbReadWriteFileSystem(FileSystemProviderSettings settings, IServiceScopeFactory factory, tbl_Users user)
+        internal SmbReadWriteFileSystem(FileSystemProviderSettings settings, IServiceScopeFactory factory, tbl_Users user)
             : base(settings)
         {
             /*
@@ -71,7 +71,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
             {
                 WindowsIdentity.RunImpersonated(_userToken, () =>
                 {
-                    var folder = SmbFileSystemResolver.ConvertPathToCifsFolder(_userMountPath + child.Path.StringPath);
+                    var folder = SmbFileSystemCommon.ConvertPathToCifsFolder(_userMountPath + child.Path.StringPath);
                     folder.Create();
                 });
 
@@ -92,12 +92,12 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
             {
                 WindowsIdentity.RunImpersonated(_userToken, () =>
                 {
-                    var folder = SmbFileSystemResolver.ConvertPathToCifsFolder(_userMountPath + parent.Path.StringPath);
+                    var folder = SmbFileSystemCommon.ConvertPathToCifsFolder(_userMountPath + parent.Path.StringPath);
 
                     if (!folder.Exists)
                         folder.Create();
 
-                    var file = SmbFileSystemResolver.ConvertPathToCifsFile(_userMountPath + child.Path.StringPath);
+                    var file = SmbFileSystemCommon.ConvertPathToCifsFile(_userMountPath + child.Path.StringPath);
 
                     using (var fs = new FileStream(file.FullName, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite)) { }
                 });
@@ -124,7 +124,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                 {
                     WindowsIdentity.RunImpersonated(_userToken, () =>
                     {
-                        var folder = SmbFileSystemResolver.ConvertPathToCifsFolder(_userMountPath + node.Path.StringPath);
+                        var folder = SmbFileSystemCommon.ConvertPathToCifsFolder(_userMountPath + node.Path.StringPath);
                         folder.Delete();
 
                         Log.Information($"'{callPath}' '{_user.UserName}' folder '{node.Path}' from '{folder.FullName}'" +
@@ -135,7 +135,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                 {
                     WindowsIdentity.RunImpersonated(_userToken, () =>
                     {
-                        var file = SmbFileSystemResolver.ConvertPathToCifsFile(_userMountPath + node.Path.StringPath);
+                        var file = SmbFileSystemCommon.ConvertPathToCifsFile(_userMountPath + node.Path.StringPath);
                         file.Delete();
 
                         Log.Information($"'{callPath}' '{_user.UserName}' file '{node.Path}' from '{file.FullName}'" +
@@ -164,7 +164,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                 {
                     WindowsIdentity.RunImpersonated(_userToken, () =>
                     {
-                        var folder = SmbFileSystemResolver.ConvertPathToCifsFolder(_userMountPath + path.StringPath);
+                        var folder = SmbFileSystemCommon.ConvertPathToCifsFolder(_userMountPath + path.StringPath);
 
                         if (folder.Exists)
                             exists = true;
@@ -174,7 +174,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                 {
                     WindowsIdentity.RunImpersonated(_userToken, () =>
                     {
-                        var file = SmbFileSystemResolver.ConvertPathToCifsFile(_userMountPath + path.StringPath);
+                        var file = SmbFileSystemCommon.ConvertPathToCifsFile(_userMountPath + path.StringPath);
 
                         if (file.Exists)
                             exists = true;
@@ -205,7 +205,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                 {
                     WindowsIdentity.RunImpersonated(_userToken, () =>
                     {
-                        var folder = SmbFileSystemResolver.ConvertPathToCifsFolder(_userMountPath + node.Path.StringPath);
+                        var folder = SmbFileSystemCommon.ConvertPathToCifsFolder(_userMountPath + node.Path.StringPath);
 
                         attributes = new NodeAttributes(FileAttributes.Directory);
                     });
@@ -214,7 +214,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                 {
                     WindowsIdentity.RunImpersonated(_userToken, () =>
                     {
-                        var file = SmbFileSystemResolver.ConvertPathToCifsFile(_userMountPath + node.Path.StringPath);
+                        var file = SmbFileSystemCommon.ConvertPathToCifsFile(_userMountPath + node.Path.StringPath);
 
                         attributes = new NodeAttributes(FileAttributes.Normal);
                     });
@@ -239,14 +239,14 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
 
                 WindowsIdentity.RunImpersonated(_userToken, () =>
                 {
-                    var folder = SmbFileSystemResolver.ConvertPathToCifsFolder(_userMountPath + parent.Path.StringPath
+                    var folder = SmbFileSystemCommon.ConvertPathToCifsFolder(_userMountPath + parent.Path.StringPath
                         + Path.DirectorySeparatorChar + name);
 
                     if (folder.Exists)
                         child = new DirectoryNode(name, parent,
                             new NodeTimeInfo(folder.CreationTime, folder.LastAccessTime, folder.LastWriteTime));
 
-                    var file = SmbFileSystemResolver.ConvertPathToCifsFile(_userMountPath + parent.Path.StringPath
+                    var file = SmbFileSystemCommon.ConvertPathToCifsFile(_userMountPath + parent.Path.StringPath
                         + Path.DirectorySeparatorChar + name);
 
                     if (file.Exists)
@@ -274,7 +274,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
 
                 WindowsIdentity.RunImpersonated(_userToken, () =>
                 {
-                    var parentFolder = SmbFileSystemResolver.ConvertPathToCifsFolder(_userMountPath + parent.Path.StringPath);
+                    var parentFolder = SmbFileSystemCommon.ConvertPathToCifsFolder(_userMountPath + parent.Path.StringPath);
 
                     foreach (var folderPath in Directory.GetDirectories(parentFolder.FullName))
                     {
@@ -317,7 +317,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                 {
                     WindowsIdentity.RunImpersonated(_userToken, () =>
                     {
-                        var file = SmbFileSystemResolver.ConvertPathToCifsFile(_userMountPath + node.Path.StringPath);
+                        var file = SmbFileSystemCommon.ConvertPathToCifsFile(_userMountPath + node.Path.StringPath);
 
                         content = NodeContent.CreateDelayedWriteContent(File.Open(file.FullName, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite));
                     });
@@ -344,7 +344,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                 {
                     WindowsIdentity.RunImpersonated(_userToken, () =>
                     {
-                        var file = SmbFileSystemResolver.ConvertPathToCifsFile(_userMountPath + node.Path.StringPath);
+                        var file = SmbFileSystemCommon.ConvertPathToCifsFile(_userMountPath + node.Path.StringPath);
 
                         length = file.Length;
                     });
@@ -371,7 +371,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                 {
                     WindowsIdentity.RunImpersonated(_userToken, () =>
                     {
-                        var folder = SmbFileSystemResolver.ConvertPathToCifsFolder(_userMountPath + node.Path.StringPath);
+                        var folder = SmbFileSystemCommon.ConvertPathToCifsFolder(_userMountPath + node.Path.StringPath);
 
                         timeInfo = new NodeTimeInfo(folder.CreationTime, folder.LastAccessTime, folder.LastWriteTime);
                     });
@@ -380,7 +380,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                 {
                     WindowsIdentity.RunImpersonated(_userToken, () =>
                     {
-                        var file = SmbFileSystemResolver.ConvertPathToCifsFile(_userMountPath + node.Path.StringPath);
+                        var file = SmbFileSystemCommon.ConvertPathToCifsFile(_userMountPath + node.Path.StringPath);
 
                         timeInfo = new NodeTimeInfo(file.CreationTime, file.LastAccessTime, file.LastWriteTime);
                     });
@@ -404,14 +404,14 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
             try
             {
                 NodeBase newNode = null;
-                var parentFolder = SmbFileSystemResolver.ConvertPathToCifsFolder(_userMountPath + toBeMovedNode.Parent.Path.StringPath);
+                var parentFolder = SmbFileSystemCommon.ConvertPathToCifsFolder(_userMountPath + toBeMovedNode.Parent.Path.StringPath);
 
                 if (toBeMovedNode.NodeType == NodeType.Directory)
                 {
                     WindowsIdentity.RunImpersonated(_userToken, () =>
                     {
-                        var folder = SmbFileSystemResolver.ConvertPathToCifsFolder(_userMountPath + toBeMovedNode.Path.StringPath);
-                        var newPath = SmbFileSystemResolver.ConvertPathToCifsFolder(_userMountPath + targetDirectory.Path.StringPath);
+                        var folder = SmbFileSystemCommon.ConvertPathToCifsFolder(_userMountPath + toBeMovedNode.Path.StringPath);
+                        var newPath = SmbFileSystemCommon.ConvertPathToCifsFolder(_userMountPath + targetDirectory.Path.StringPath);
 
                         folder.MoveTo(newPath.FullName);
 
@@ -425,8 +425,8 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                 {
                     WindowsIdentity.RunImpersonated(_userToken, () =>
                     {
-                        var file = SmbFileSystemResolver.ConvertPathToCifsFile(_userMountPath + toBeMovedNode.Path.StringPath);
-                        var newPath = SmbFileSystemResolver.ConvertPathToCifsFile(_userMountPath + targetDirectory.Path.StringPath);
+                        var file = SmbFileSystemCommon.ConvertPathToCifsFile(_userMountPath + toBeMovedNode.Path.StringPath);
+                        var newPath = SmbFileSystemCommon.ConvertPathToCifsFile(_userMountPath + targetDirectory.Path.StringPath);
 
                         file.MoveTo(newPath.FullName);
 
@@ -455,14 +455,14 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
             try
             {
                 NodeBase newNode = null;
-                var parentFolder = SmbFileSystemResolver.ConvertPathToCifsFolder(_userMountPath + node.Parent.Path.StringPath);
+                var parentFolder = SmbFileSystemCommon.ConvertPathToCifsFolder(_userMountPath + node.Parent.Path.StringPath);
 
                 if (node.NodeType == NodeType.Directory)
                 {
                     WindowsIdentity.RunImpersonated(_userToken, () =>
                     {
-                        var folder = SmbFileSystemResolver.ConvertPathToCifsFolder(_userMountPath + node.Path.StringPath);
-                        var newFolder = SmbFileSystemResolver.ConvertPathToCifsFolder(_userMountPath + node.Parent.Path.StringPath
+                        var folder = SmbFileSystemCommon.ConvertPathToCifsFolder(_userMountPath + node.Path.StringPath);
+                        var newFolder = SmbFileSystemCommon.ConvertPathToCifsFolder(_userMountPath + node.Parent.Path.StringPath
                             + Path.DirectorySeparatorChar + newName);
 
                         folder.MoveTo(newFolder.FullName);
@@ -477,8 +477,8 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                 {
                     WindowsIdentity.RunImpersonated(_userToken, () =>
                     {
-                        var file = SmbFileSystemResolver.ConvertPathToCifsFile(_userMountPath + node.Path.StringPath);
-                        var newFile = SmbFileSystemResolver.ConvertPathToCifsFile(_userMountPath + node.Parent.Path.StringPath
+                        var file = SmbFileSystemCommon.ConvertPathToCifsFile(_userMountPath + node.Path.StringPath);
+                        var newFile = SmbFileSystemCommon.ConvertPathToCifsFile(_userMountPath + node.Parent.Path.StringPath
                             + Path.DirectorySeparatorChar + newName);
 
                         file.MoveTo(newFile.FullName);
@@ -517,12 +517,12 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                 {
                     WindowsIdentity.RunImpersonated(_userToken, () =>
                     {
-                        folder = SmbFileSystemResolver.ConvertPathToCifsFolder(_userMountPath + node.Parent.Path.StringPath);
+                        folder = SmbFileSystemCommon.ConvertPathToCifsFolder(_userMountPath + node.Parent.Path.StringPath);
 
                         if (!folder.Exists)
                             folder.Create();
 
-                        file = SmbFileSystemResolver.ConvertPathToCifsFile(_userMountPath + node.Path.StringPath);
+                        file = SmbFileSystemCommon.ConvertPathToCifsFile(_userMountPath + node.Path.StringPath);
 
                         using (var fs = new FileStream(file.FullName, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite))
                             content.GetStream().CopyTo(fs);
@@ -564,7 +564,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                 {
                     WindowsIdentity.RunImpersonated(_userToken, () =>
                     {
-                        var folder = SmbFileSystemResolver.ConvertPathToCifsFolder(_userMountPath + node.Path.StringPath);
+                        var folder = SmbFileSystemCommon.ConvertPathToCifsFolder(_userMountPath + node.Path.StringPath);
 
                         folder.Attributes = attributes.FileAttributes;
                     });
@@ -573,7 +573,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                 {
                     WindowsIdentity.RunImpersonated(_userToken, () =>
                     {
-                        var file = SmbFileSystemResolver.ConvertPathToCifsFile(_userMountPath + node.Path.StringPath);
+                        var file = SmbFileSystemCommon.ConvertPathToCifsFile(_userMountPath + node.Path.StringPath);
 
                         file.Attributes = attributes.FileAttributes;
                     });
@@ -598,7 +598,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                 {
                     WindowsIdentity.RunImpersonated(_userToken, () =>
                     {
-                        var folder = SmbFileSystemResolver.ConvertPathToCifsFolder(_userMountPath + node.Path.StringPath);
+                        var folder = SmbFileSystemCommon.ConvertPathToCifsFolder(_userMountPath + node.Path.StringPath);
 
                         folder.CreationTime = newTimeInfo.CreationTime;
                         folder.LastAccessTime = newTimeInfo.LastAccessTime;
@@ -609,7 +609,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                 {
                     WindowsIdentity.RunImpersonated(_userToken, () =>
                     {
-                        var file = SmbFileSystemResolver.ConvertPathToCifsFile(_userMountPath + node.Path.StringPath);
+                        var file = SmbFileSystemCommon.ConvertPathToCifsFile(_userMountPath + node.Path.StringPath);
 
                         file.CreationTime = newTimeInfo.CreationTime;
                         file.LastAccessTime = newTimeInfo.LastAccessTime;
