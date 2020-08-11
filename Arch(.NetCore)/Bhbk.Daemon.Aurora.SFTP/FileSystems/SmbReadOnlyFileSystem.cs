@@ -1,7 +1,10 @@
-﻿using Bhbk.Lib.Aurora.Data.Infrastructure_DIRECT;
+﻿using Bhbk.Daemon.Aurora.SFTP.Helpers;
+using Bhbk.Lib.Aurora.Data.Infrastructure_DIRECT;
 using Bhbk.Lib.Aurora.Data.Models_DIRECT;
 using Bhbk.Lib.Aurora.Domain.Helpers;
 using Bhbk.Lib.Cryptography.Encryption;
+using Bhbk.Lib.QueryExpression.Extensions;
+using Bhbk.Lib.QueryExpression.Factories;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Win32.SafeHandles;
@@ -23,7 +26,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
         private readonly IServiceScopeFactory _factory;
         private readonly SafeAccessTokenHandle _userToken;
         private readonly tbl_Users _user;
-        private readonly string _userMountPath;
+        private readonly string _userMount;
 
         internal SmbReadOnlyFileSystem(FileSystemProviderSettings settings, IServiceScopeFactory factory, tbl_Users user)
             : base(settings)
@@ -42,14 +45,19 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
             {
                 var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
                 var conf = scope.ServiceProvider.GetRequiredService<IConfiguration>();
-                var userMount = uow.UserMounts.Get(x => x.UserId == _user.Id).SingleOrDefault();
+
+                var userMount = uow.UserMounts.Get(QueryExpressionFactory.GetQueryExpression<tbl_UserMounts>()
+                    .Where(x => x.UserId == _user.Id).ToLambda())
+                    .SingleOrDefault();
 
                 if (userMount == null)
                     throw new NetworkInformationException();
 
-                _userMountPath = userMount.ServerName + userMount.ServerPath;
+                _userMount = userMount.ServerName + userMount.ServerPath;
 
-                var userCred = uow.SysCredentials.Get(x => x.Id == userMount.CredentialId).Single();
+                var userCred = uow.SysCredentials.Get(QueryExpressionFactory.GetQueryExpression<tbl_SysCredentials>()
+                    .Where(x => x.Id == userMount.CredentialId).ToLambda())
+                    .Single();
 
                 var secret = conf["Databases:AuroraSecretKey"];
                 var plainText = AES.DecryptString(userCred.Password, secret);
@@ -72,7 +80,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                 {
                     WindowsIdentity.RunImpersonated(_userToken, () =>
                     {
-                        var folder = SmbFileSystemCommon.ConvertPathToCifsFolder(_userMountPath + path.StringPath);
+                        var folder = SmbFileSystemHelper.FolderPathToCIFS(_userMount + path.StringPath);
 
                         if (folder.Exists)
                             exists = true;
@@ -82,7 +90,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                 {
                     WindowsIdentity.RunImpersonated(_userToken, () =>
                     {
-                        var file = SmbFileSystemCommon.ConvertPathToCifsFile(_userMountPath + path.StringPath);
+                        var file = SmbFileSystemHelper.FilePathToCIFS(_userMount + path.StringPath);
 
                         if (file.Exists)
                             exists = true;
@@ -113,7 +121,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                 {
                     WindowsIdentity.RunImpersonated(_userToken, () =>
                     {
-                        var folder = SmbFileSystemCommon.ConvertPathToCifsFolder(_userMountPath + node.Path.StringPath);
+                        var folder = SmbFileSystemHelper.FolderPathToCIFS(_userMount + node.Path.StringPath);
 
                         attributes = new NodeAttributes(FileAttributes.Directory);
                     });
@@ -122,7 +130,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                 {
                     WindowsIdentity.RunImpersonated(_userToken, () =>
                     {
-                        var file = SmbFileSystemCommon.ConvertPathToCifsFile(_userMountPath + node.Path.StringPath);
+                        var file = SmbFileSystemHelper.FilePathToCIFS(_userMount + node.Path.StringPath);
 
                         attributes = new NodeAttributes(FileAttributes.Normal);
                     });
@@ -147,14 +155,14 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
 
                 WindowsIdentity.RunImpersonated(_userToken, () =>
                 {
-                    var folder = SmbFileSystemCommon.ConvertPathToCifsFolder(_userMountPath + parent.Path.StringPath
+                    var folder = SmbFileSystemHelper.FolderPathToCIFS(_userMount + parent.Path.StringPath
                         + Path.DirectorySeparatorChar + name);
 
                     if (folder.Exists)
                         child = new DirectoryNode(name, parent,
                             new NodeTimeInfo(folder.CreationTime, folder.LastAccessTime, folder.LastWriteTime));
 
-                    var file = SmbFileSystemCommon.ConvertPathToCifsFile(_userMountPath + parent.Path.StringPath
+                    var file = SmbFileSystemHelper.FilePathToCIFS(_userMount + parent.Path.StringPath
                         + Path.DirectorySeparatorChar + name);
 
                     if (file.Exists)
@@ -182,7 +190,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
 
                 WindowsIdentity.RunImpersonated(_userToken, () =>
                 {
-                    var parentFolder = SmbFileSystemCommon.ConvertPathToCifsFolder(_userMountPath + parent.Path.StringPath);
+                    var parentFolder = SmbFileSystemHelper.FolderPathToCIFS(_userMount + parent.Path.StringPath);
 
                     foreach (var folderPath in Directory.GetDirectories(parentFolder.FullName))
                     {
@@ -225,7 +233,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                 {
                     WindowsIdentity.RunImpersonated(_userToken, () =>
                     {
-                        var file = SmbFileSystemCommon.ConvertPathToCifsFile(_userMountPath + node.Path.StringPath);
+                        var file = SmbFileSystemHelper.FilePathToCIFS(_userMount + node.Path.StringPath);
 
                         content = NodeContent.CreateDelayedWriteContent(File.Open(file.FullName, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite));
                     });
@@ -252,7 +260,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                 {
                     WindowsIdentity.RunImpersonated(_userToken, () =>
                     {
-                        var file = SmbFileSystemCommon.ConvertPathToCifsFile(_userMountPath + node.Path.StringPath);
+                        var file = SmbFileSystemHelper.FilePathToCIFS(_userMount + node.Path.StringPath);
 
                         length = file.Length;
                     });
@@ -279,7 +287,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                 {
                     WindowsIdentity.RunImpersonated(_userToken, () =>
                     {
-                        var folder = SmbFileSystemCommon.ConvertPathToCifsFolder(_userMountPath + node.Path.StringPath);
+                        var folder = SmbFileSystemHelper.FolderPathToCIFS(_userMount + node.Path.StringPath);
 
                         timeInfo = new NodeTimeInfo(folder.CreationTime, folder.LastAccessTime, folder.LastWriteTime);
                     });
@@ -288,7 +296,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                 {
                     WindowsIdentity.RunImpersonated(_userToken, () =>
                     {
-                        var file = SmbFileSystemCommon.ConvertPathToCifsFile(_userMountPath + node.Path.StringPath);
+                        var file = SmbFileSystemHelper.FilePathToCIFS(_userMount + node.Path.StringPath);
 
                         timeInfo = new NodeTimeInfo(file.CreationTime, file.LastAccessTime, file.LastWriteTime);
                     });

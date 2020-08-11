@@ -1,19 +1,15 @@
-﻿using Rebex.IO.FileSystem;
+﻿using Bhbk.Daemon.Aurora.SFTP.Helpers;
+using Bhbk.Lib.Aurora.Data.Infrastructure_DIRECT;
+using Bhbk.Lib.Aurora.Data.Models_DIRECT;
+using Bhbk.Lib.Identity.Services;
+using Microsoft.Extensions.DependencyInjection;
+using Rebex.IO.FileSystem;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Bhbk.Lib.Aurora.Data.Infrastructure_DIRECT;
-using Bhbk.Lib.Aurora.Data.Models_DIRECT;
-using Bhbk.Lib.Common.Primitives;
-using Bhbk.Lib.QueryExpression.Extensions;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Serilog;
 using System.Reflection;
-using System.Security.Cryptography;
-using Hashing = Bhbk.Lib.Cryptography.Hashing;
 
 /*
  * https://forum.rebex.net/8453/implement-filesystem-almost-as-memoryfilesystemprovider
@@ -23,8 +19,8 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
     internal class MemoryReadWriteFileSystem : ReadWriteFileSystemProvider
     {
         private readonly IServiceScopeFactory _factory;
-        private readonly Dictionary<NodeBase, MemoryNodeData> _store;
         private readonly Dictionary<NodePath, NodeBase> _path;
+        private readonly Dictionary<NodeBase, MemoryNodeData> _store;
         private readonly tbl_Users _user;
 
         internal MemoryReadWriteFileSystem(FileSystemProviderSettings settings, IServiceScopeFactory factory, tbl_Users user)
@@ -33,27 +29,29 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
             _factory = factory;
             _user = user;
 
-            _store = new Dictionary<NodeBase, MemoryNodeData>();
             _path = new Dictionary<NodePath, NodeBase>();
+            _store = new Dictionary<NodeBase, MemoryNodeData>();
 
-            if (_store.Count == 0)
-            {
-                _store.Add(Root, new MemoryNodeData());
-                _path.Add(Root.Path, Root);
-            }
+            MemoryFileSystemHelper.EnsureRootExists(Root, _path, _store);
 
-            using (var scope = factory.CreateScope())
+            using (var scope = _factory.CreateScope())
             {
                 var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+                var me = scope.ServiceProvider.GetRequiredService<IMeService>();
 
+                MemoryFileSystemHelper.GenerateFileContent(Root, _path, _store, me);
             }
         }
 
         protected override DirectoryNode CreateDirectory(DirectoryNode parent, DirectoryNode child)
         {
+            var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
+
             _store.Add(child, new MemoryNodeData());
             _store[parent].Children.Add(child);
             _path.Add(child.Path, child);
+
+            Log.Information($"'{callPath}' '{_user.UserName}' folder '{child.Path}'");
 
             return child;
         }
@@ -72,9 +70,20 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
             if (!node.Exists())
                 return node;
 
+            var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
+
             _store.Remove(node);
-            _path.Remove(node.Path);
             _store[node.Parent].Children.Remove(node);
+            _path.Remove(node.Path);
+
+            if (node.NodeType == NodeType.Directory)
+                Log.Information($"'{callPath}' '{_user.UserName}' folder '{node.Path}'");
+
+            else if (node.NodeType == NodeType.File)
+                Log.Information($"'{callPath}' '{_user.UserName}' file '{node.Path}'");
+
+            else
+                throw new NotImplementedException();
 
             return node;
         }
@@ -82,6 +91,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
         protected override bool Exists(NodePath path, NodeType nodeType)
         {
             NodeBase node;
+
             _path.TryGetValue(path, out node);
 
             return node != null && node.NodeType == nodeType;
@@ -118,6 +128,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
 
             var resultStream = new MemoryStream();
             _store[node].Content.CopyTo(resultStream);
+
             resultStream.Position = 0;
             _store[node].Content.Position = 0;
 
@@ -146,13 +157,33 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
 
         protected override NodeBase Rename(NodeBase node, string newName)
         {
-            var isFile = node.NodeType == NodeType.File;
-            var newNode = isFile
-                ? (NodeBase)new FileNode(newName,
-                    node.Parent)
-                : new DirectoryNode(newName, node.Parent);
+            var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
 
-            Delete(node);
+            NodeBase newNode = null;
+            NodePath newNodePath = null;
+            MemoryNodeData newNodeData = null;
+
+            if (node.NodeType == NodeType.Directory)
+                newNode = new DirectoryNode(newName, node.Parent);
+
+            else if (node.NodeType == NodeType.File)
+                newNode = new FileNode(newName, node.Parent);
+
+            else
+                throw new NotImplementedException();
+
+            newNodeData = _store[node];
+            newNodePath = new NodePath(node.Path + newName);
+
+            _store.Add(newNode, newNodeData);
+            _store[node.Parent].Children.Add(newNode);
+            _path.Add(newNodePath, newNode);
+
+            _store.Remove(node);
+            _store[node.Parent].Children.Remove(node);
+            _path.Remove(node.Path);
+
+            Log.Information($"'{callPath}' '{_user.UserName}' from '{node.Path}' to '{node.Parent.Path}/{newName}'");
 
             return newNode;
         }
@@ -162,11 +193,15 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
             if (!node.Exists())
                 return node;
 
+            var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
+
             var newStream = new MemoryStream();
             content.GetStream().CopyTo(newStream);
             newStream.Position = 0;
 
             _store[node].Content = newStream;
+
+            Log.Information($"'{callPath}' '{_user.UserName}' file '{node.Path}'");
 
             return node;
         }

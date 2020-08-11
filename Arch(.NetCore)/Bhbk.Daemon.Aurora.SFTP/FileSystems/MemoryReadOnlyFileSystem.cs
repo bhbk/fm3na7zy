@@ -1,40 +1,16 @@
-﻿using Rebex.IO.FileSystem;
+﻿using Bhbk.Daemon.Aurora.SFTP.Helpers;
+using Bhbk.Lib.Aurora.Data.Infrastructure_DIRECT;
+using Bhbk.Lib.Aurora.Data.Models_DIRECT;
+using Bhbk.Lib.Identity.Services;
+using Microsoft.Extensions.DependencyInjection;
+using Rebex.IO.FileSystem;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Bhbk.Lib.Aurora.Data.Infrastructure_DIRECT;
-using Bhbk.Lib.Aurora.Data.Models_DIRECT;
-using Bhbk.Lib.Common.Primitives;
-using Bhbk.Lib.QueryExpression.Extensions;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Serilog;
-using System;
-using System.Reflection;
-using System.Security.Cryptography;
-using Hashing = Bhbk.Lib.Cryptography.Hashing;
-using AutoMapper;
-using Bhbk.Daemon.Aurora.SFTP.Jobs;
-using Bhbk.Lib.Aurora.Data.Infrastructure_DIRECT;
-using Bhbk.Lib.Aurora.Domain.Infrastructure;
-using Bhbk.Lib.Aurora.Domain.Primitives.Enums;
-using Bhbk.Lib.Common.Primitives.Enums;
-using Bhbk.Lib.Common.Services;
-using Bhbk.Lib.Identity.Grants;
-using Bhbk.Lib.Identity.Services;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Quartz;
-using Serilog;
-using System;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using Newtonsoft.Json;
 
+/*
+ * https://forum.rebex.net/8453/implement-filesystem-almost-as-memoryfilesystemprovider
+ */
 namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
 {
     internal class MemoryReadOnlyFileSystem : ReadOnlyFileSystemProvider
@@ -53,35 +29,21 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
             _path = new Dictionary<NodePath, NodeBase>();
             _store = new Dictionary<NodeBase, MemoryNodeData>();
 
-            if (_store.Count == 0)
-            {
-                _path.Add(Root.Path, Root);
-                _store.Add(Root, new MemoryNodeData());
-            }
+            MemoryFileSystemHelper.EnsureRootExists(Root, _path, _store);
 
-            using (var scope = factory.CreateScope())
+            using (var scope = _factory.CreateScope())
             {
+                var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
                 var me = scope.ServiceProvider.GetRequiredService<IMeService>();
 
-                var motd = me.Info_GetMOTDV1().Result;
-
-                var childFileName = "msg-" + DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss") + ".txt";
-                var childNodeData = new MemoryNodeData()
-                {
-                    Content = new MemoryStream(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(motd)))
-                };
-                var childNode = new FileNode(childFileName, Root);
-                var childPath = new NodePath(Root.Path + childFileName);
-
-                _path.Add(childPath, childNode);
-                _store.Add(childNode, childNodeData);
-                _store[Root].Children.Add(childNode);
+                MemoryFileSystemHelper.GenerateFileContent(Root, _path, _store, me);
             }
         }
 
         protected override bool Exists(NodePath path, NodeType nodeType)
         {
             NodeBase node;
+
             _path.TryGetValue(path, out node);
 
             return node != null && node.NodeType == nodeType;
@@ -110,6 +72,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
 
             var resultStream = new MemoryStream();
             _store[node].Content.CopyTo(resultStream);
+
             resultStream.Position = 0;
             _store[node].Content.Position = 0;
 
