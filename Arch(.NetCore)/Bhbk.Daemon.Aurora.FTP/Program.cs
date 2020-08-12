@@ -31,8 +31,7 @@ namespace Bhbk.Daemon.Aurora.FTP
                 {
                     return new UnitOfWork(_conf["Databases:AuroraEntities"], _instance);
                 });
-                options.AddSingleton<IHostedService, FtpServer>();
-                options.AddSingleton<IHostedService, FtpWorker>();
+                options.AddSingleton<IHostedService, FtpService>();
             });
 
         public static IHostBuilder CreateWindowsHostBuilder(string[] args) =>
@@ -47,8 +46,7 @@ namespace Bhbk.Daemon.Aurora.FTP
                 {
                     return new UnitOfWork(_conf["Databases:AuroraEntities"], _instance);
                 });
-                options.AddSingleton<IHostedService, FtpServer>();
-                options.AddSingleton<IHostedService, FtpWorker>();
+                options.AddSingleton<IHostedService, FtpService>();
             });
 
         public static void Main(string[] args = null)

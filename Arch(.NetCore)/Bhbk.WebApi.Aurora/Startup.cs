@@ -1,27 +1,18 @@
 using AutoMapper;
+using Bhbk.Lib.Aurora.Data.Infrastructure_DIRECT;
+using Bhbk.Lib.Aurora.Domain.Infrastructure;
+using Bhbk.Lib.Aurora.Domain.Primitives.Enums;
 using Bhbk.Lib.Common.Primitives.Enums;
 using Bhbk.Lib.Common.Services;
-using Bhbk.Lib.Aurora.Domain.Infrastructure;
-using Bhbk.Lib.Aurora.Data.Infrastructure_DIRECT;
 using Bhbk.WebApi.Aurora.Tasks;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
-using Newtonsoft.Json.Serialization;
-using Rebex;
-using Serilog;
+using Quartz;
 using System;
 using System.IO;
 using System.Linq;
-using System.Text;
 
 namespace Bhbk.WebApi.Aurora
 {
@@ -44,7 +35,43 @@ namespace Bhbk.WebApi.Aurora
             {
                 return new UnitOfWork(conf["Databases:AuroraEntities"], instance);
             });
-            sc.AddSingleton<IHostedService, UnstructuredDataTask>();
+            sc.AddQuartz(jobs =>
+            {
+                jobs.SchedulerId = Guid.NewGuid().ToString();
+
+                //jobs.UseMicrosoftDependencyInjectionScopedJobFactory();
+                jobs.UseMicrosoftDependencyInjectionJobFactory(options =>
+                {
+                    options.AllowDefaultConstructor = false;
+                });
+
+                jobs.UseSimpleTypeLoader();
+                jobs.UseInMemoryStore();
+                jobs.UseDefaultThreadPool(threads =>
+                {
+                    threads.MaxConcurrency = 1;
+                });
+
+                var dataJobKey = new JobKey(JobType.Data.ToString(), GroupType.Sftp.ToString());
+                jobs.AddJob<UnstructuredDataJob>(opt => opt
+                    .StoreDurably()
+                    .WithIdentity(dataJobKey)
+                );
+
+                foreach (var cron in conf.GetSection("Jobs:UnstructuredData:Schedules").GetChildren()
+                    .Select(x => x.Value).ToList())
+                {
+                    jobs.AddTrigger(opt => opt
+                        .ForJob(dataJobKey)
+                        .StartNow()
+                        .WithCronSchedule(cron)
+                    );
+                }
+            });
+            sc.AddQuartzServer(options =>
+            {
+                options.WaitForJobsToComplete = true;
+            });
 
             if (instance.InstanceType != InstanceContext.DeployedOrLocal)
                 throw new NotSupportedException();

@@ -8,4 +8,9 @@ namespace Bhbk.Lib.Aurora.Primitives.Enums
         Memory = 2,
         SMB = 3,
     }
+
+    public enum ConfigType
+    {
+        RebexLicense = 1
+    }
 }

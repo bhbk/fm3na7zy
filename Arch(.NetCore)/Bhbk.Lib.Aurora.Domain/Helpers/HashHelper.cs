@@ -17,9 +17,9 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
             int level2 = (hashCode >> 8) & mask;
 
             var hashPath = new StringBuilder()
-                .Append(string.Format("{0:X}", level1))
+                .Append(string.Format("{0:x}", level1))
                 .Append(Path.DirectorySeparatorChar)
-                .Append(string.Format("{0:X}", level2)).ToString();
+                .Append(string.Format("{0:x}", level2)).ToString();
 
             return hashPath;
         }

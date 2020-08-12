@@ -52,8 +52,8 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                 var userCred = uow.SysCredentials.Get(x => x.Id == userMount.CredentialId).Single();
 
                 var secret = conf["Databases:AuroraSecretKey"];
-                var plainText = AES.Decrypt(userCred.Password, secret);
-                var cipherText = AES.Encrypt(plainText, secret);
+                var plainText = AES.DecryptString(userCred.Password, secret);
+                var cipherText = AES.EncryptString(plainText, secret);
 
                 if (userCred.Password != cipherText)
                     throw new ArithmeticException();

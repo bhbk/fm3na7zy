@@ -2,8 +2,11 @@ using Bhbk.Daemon.Aurora.SFTP.Factories;
 using Bhbk.Lib.Aurora.Data.Infrastructure_DIRECT;
 using Bhbk.Lib.Aurora.Data.Models_DIRECT;
 using Bhbk.Lib.Aurora.Domain.Helpers;
+using Bhbk.Lib.Aurora.Domain.Primitives;
 using Bhbk.Lib.Cryptography.Entropy;
 using Bhbk.Lib.Cryptography.Hashing;
+using Bhbk.Lib.Identity.Models.Alert;
+using Bhbk.Lib.Identity.Services;
 using Bhbk.Lib.QueryExpression.Extensions;
 using Bhbk.Lib.QueryExpression.Factories;
 using Microsoft.Extensions.Configuration;
@@ -31,14 +34,14 @@ using System.Threading.Tasks;
 
 namespace Bhbk.Daemon.Aurora.SFTP
 {
-    public class SftpServer : IHostedService, IDisposable
+    public class SftpService : IHostedService, IDisposable
     {
         private readonly IServiceScopeFactory _factory;
         private readonly FileServer _server;
         private IEnumerable<string> _binding;
         private LogLevel _level;
 
-        public SftpServer(IServiceScopeFactory factory)
+        public SftpService(IServiceScopeFactory factory)
         {
             _factory = factory;
             _server = new FileServer();
@@ -62,7 +65,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                         if (!Enum.TryParse<LogLevel>(conf["Rebex:LogLevel"], true, out _level))
                             throw new InvalidCastException();
 
-                        _binding = conf.GetSection("Daemons:SftpServer:Bindings").GetChildren().Select(x => x.Value);
+                        _binding = conf.GetSection("Daemons:SftpService:Bindings").GetChildren().Select(x => x.Value);
 
                         /*
                          * https://www.rebex.net/support/trial/
@@ -147,14 +150,14 @@ namespace Bhbk.Daemon.Aurora.SFTP
 
                     _server.LogWriter = new ConsoleLogWriter(_level);
                     _server.Settings.AllowedAuthenticationMethods = AuthenticationMethods.PublicKey | AuthenticationMethods.Password;
-                    _server.Authentication += SessionAuthentication;
-                    _server.Connecting += SessionConnecting;
-                    _server.Disconnected += SessionDisconnected;
-                    _server.FileDownloaded += SessionFileDownloaded;
-                    _server.FileUploaded += SessionFileUploaded;
-                    _server.PathAccessAuthorization += SessionPathAccessAuthorization;
-                    _server.PreAuthentication += SessionPreAuthentication;
-                    _server.ShellCommand += SessionShellCommand;
+                    _server.Authentication += FsUser_Authentication;
+                    _server.Connecting += FsUser_Connecting;
+                    _server.Disconnected += FsUser_Disconnected;
+                    _server.FileDownloaded += FsUser_FileDownloaded;
+                    _server.FileUploaded += FsUser_FileUploaded;
+                    _server.PathAccessAuthorization += FsUser_PathAccessAuthorization;
+                    _server.PreAuthentication += FsUser_PreAuthentication;
+                    _server.ShellCommand += FsUser_ShellCommand;
 
                     foreach (var binding in _binding)
                     {
@@ -200,7 +203,92 @@ namespace Bhbk.Daemon.Aurora.SFTP
             }, cancellationToken);
         }
 
-        private void SessionAuthentication(object sender, AuthenticationEventArgs e)
+        private void FsNotify_CreateCompleted(object sender, SingleNodeOperationEventArgs e)
+        {
+            try
+            {
+                if (e.ResultNode.IsFile)
+                {
+                    var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
+
+                    Log.Information($"'{callPath}' '{ServerSession.Current.UserName}' file '{e.ResultNode.Path.StringPath}'");
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex.ToString());
+            }
+        }
+
+        private void FsNotify_CreatePreview(object sender, PreviewSingleNodeOperationEventArgs e)
+        {
+            try
+            {
+                if (e.Node.IsFile)
+                {
+                    var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
+
+                    Log.Information($"'{callPath}' '{ServerSession.Current.UserName}' file '{e.Node.Path.StringPath}'");
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex.ToString());
+            }
+        }
+
+        private void FsNotify_DeleteCompleted(object sender, SingleNodeOperationEventArgs e)
+        {
+            try
+            {
+                if (e.ResultNode.IsFile)
+                {
+                    var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
+
+                    Log.Information($"'{callPath}' '{ServerSession.Current.UserName}' file '{e.ResultNode.Path.StringPath}'");
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex.ToString());
+            }
+        }
+
+        private void FsNotify_DeletePreview(object sender, PreviewSingleNodeOperationEventArgs e)
+        {
+            try
+            {
+                if (e.Node.IsFile)
+                {
+                    var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
+
+                    Log.Information($"'{callPath}' '{ServerSession.Current.UserName}' file '{e.Node.Path.StringPath}'");
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex.ToString());
+            }
+        }
+
+        private void FsNotify_GetContentSurrogate(object sender, GetContentEventArgs e)
+        {
+            try
+            {
+                if (e.Node.IsFile)
+                {
+                    var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
+
+                    Log.Information($"'{callPath}' '{ServerSession.Current.UserName}' file '{e.Node.Path.StringPath}'");
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex.ToString());
+            }
+        }
+
+        private void FsUser_Authentication(object sender, AuthenticationEventArgs e)
         {
             /*
              * https://www.rebex.net/file-server/features/events.aspx#authentication
@@ -237,10 +325,11 @@ namespace Bhbk.Daemon.Aurora.SFTP
                             fsUser.SetFileSystem(fs);
 
                             var fsNotify = fs.GetFileSystemNotifier();
-                            fsNotify.CreatePreview += SessionNotifyCreatePreview;
-                            fsNotify.CreateCompleted += SessionNotifyCreateCompleted;
-                            fsNotify.DeletePreview += SessionNotifyDeletePreview;
-                            fsNotify.DeleteCompleted += SessionNotifyDeleteCompleted;
+                            fsNotify.GetContentSurrogate += FsNotify_GetContentSurrogate;
+                            fsNotify.CreatePreview += FsNotify_CreatePreview;
+                            fsNotify.CreateCompleted += FsNotify_CreateCompleted;
+                            fsNotify.DeletePreview += FsNotify_DeletePreview;
+                            fsNotify.DeleteCompleted += FsNotify_DeleteCompleted;
 
                             e.Accept(fsUser);
                             return;
@@ -282,10 +371,11 @@ namespace Bhbk.Daemon.Aurora.SFTP
                             fsUser.SetFileSystem(fs);
 
                             var fsNotify = fs.GetFileSystemNotifier();
-                            fsNotify.CreatePreview += SessionNotifyCreatePreview;
-                            fsNotify.CreateCompleted += SessionNotifyCreateCompleted;
-                            fsNotify.DeletePreview += SessionNotifyDeletePreview;
-                            fsNotify.DeleteCompleted += SessionNotifyDeleteCompleted;
+                            fsNotify.GetContentSurrogate += FsNotify_GetContentSurrogate;
+                            fsNotify.CreatePreview += FsNotify_CreatePreview;
+                            fsNotify.CreateCompleted += FsNotify_CreateCompleted;
+                            fsNotify.DeletePreview += FsNotify_DeletePreview;
+                            fsNotify.DeleteCompleted += FsNotify_DeleteCompleted;
 
                             e.Accept(fsUser);
                             return;
@@ -310,7 +400,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
             }
         }
 
-        private void SessionConnecting(object sender, ConnectingEventArgs e)
+        private void FsUser_Connecting(object sender, ConnectingEventArgs e)
         {
             /*
              * https://www.rebex.net/file-server/features/events.aspx#connecting
@@ -329,7 +419,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
             }
         }
 
-        private void SessionDisconnected(object sender, DisconnectedEventArgs e)
+        private void FsUser_Disconnected(object sender, DisconnectedEventArgs e)
         {
             /*
              * https://www.rebex.net/file-server/features/events.aspx#disconnected
@@ -346,7 +436,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
             }
         }
 
-        private void SessionFileDownloaded(object sender, FileTransferredEventArgs e)
+        private void FsUser_FileDownloaded(object sender, FileTransferredEventArgs e)
         {
             try
             {
@@ -360,29 +450,49 @@ namespace Bhbk.Daemon.Aurora.SFTP
             }
         }
 
-        private void SessionFileUploaded(object sender, FileTransferredEventArgs e)
+        private void FsUser_FileUploaded(object sender, FileTransferredEventArgs e)
         {
             try
             {
                 var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
 
                 Log.Information($"'{callPath}' '{ServerSession.Current.UserName}' file '/{e.FullPath}' bytes {e.BytesTransferred} from {e.Session.ClientEndPoint}");
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex.ToString());
-            }
-        }
 
-        private void SessionNotifyCreateCompleted(object sender, SingleNodeOperationEventArgs e)
-        {
-            try
-            {
-                if (e.ResultNode.IsFile)
+                using (var scope = _factory.CreateScope())
                 {
-                    var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
+                    var conf = scope.ServiceProvider.GetRequiredService<IConfiguration>();
+                    var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+                    var user = uow.Users.Get(QueryExpressionFactory.GetQueryExpression<tbl_Users>()
+                        .Where(x => x.UserName == ServerSession.Current.UserName).ToLambda()).Single();
 
-                    Log.Information($"'{callPath}' '{ServerSession.Current.UserName}' file '{e.ResultNode.Path.StringPath}'");
+                    if (user.IdentityId.HasValue)
+                    {
+                        var admin = scope.ServiceProvider.GetRequiredService<IAdminService>();
+                        var result = admin.User_GetV1(user.IdentityId.Value.ToString()).Result;
+
+                        var alert = scope.ServiceProvider.GetRequiredService<IAlertService>();
+
+                        alert.Email_EnqueueV1(new EmailV1()
+                        {
+                            FromEmail = conf["Notifications:SmtpSenderAddress"],
+                            FromDisplay = conf["Notifications:SmtpSenderDisplayName"],
+                            ToId = result.Id,
+                            ToEmail = result.Email,
+                            ToDisplay = $"{result.FirstName} {result.LastName}",
+                            Subject = "File Upload Notify",
+                            HtmlContent = Templates.NotifyEmailOnFileUpload(conf["Daemons:SftpService:Dns"], result.UserName, result.FirstName, result.LastName,
+                                e.FullPath, e.BytesTransferred.ToString())
+                        });
+
+                        alert.Text_EnqueueV1(new TextV1()
+                        {
+                            FromPhoneNumber = conf["Notifications:SmsSenderNumber"],
+                            ToId = result.Id,
+                            ToPhoneNumber = result.PhoneNumber,
+                            Body = conf["Notifications:SmsSenderDisplayName"] + Environment.NewLine
+                                + Templates.NotifyTextOnFileUpload(conf["Daemons:SftpService:Dns"], result.UserName, e.FullPath, e.BytesTransferred.ToString())
+                        });
+                    }
                 }
             }
             catch (Exception ex)
@@ -391,58 +501,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
             }
         }
 
-        private void SessionNotifyCreatePreview(object sender, PreviewSingleNodeOperationEventArgs e)
-        {
-            try
-            {
-                if (e.Node.IsFile)
-                {
-                    var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
-
-                    Log.Information($"'{callPath}' '{ServerSession.Current.UserName}' file '{e.Node.Path.StringPath}'");
-                }
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex.ToString());
-            }
-        }
-
-        private void SessionNotifyDeleteCompleted(object sender, SingleNodeOperationEventArgs e)
-        {
-            try
-            {
-                if (e.ResultNode.IsFile)
-                {
-                    var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
-
-                    Log.Information($"'{callPath}' '{ServerSession.Current.UserName}' file '{e.ResultNode.Path.StringPath}'");
-                }
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex.ToString());
-            }
-        }
-
-        private void SessionNotifyDeletePreview(object sender, PreviewSingleNodeOperationEventArgs e)
-        {
-            try
-            {
-                if (e.Node.IsFile)
-                {
-                    var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
-
-                    Log.Information($"'{callPath}' '{ServerSession.Current.UserName}' file '{e.Node.Path.StringPath}'");
-                }
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex.ToString());
-            }
-        }
-
-        private void SessionPathAccessAuthorization(object sender, PathAccessAuthorizationEventArgs e)
+        private void FsUser_PathAccessAuthorization(object sender, PathAccessAuthorizationEventArgs e)
         {
             /*
              * https://www.rebex.net/file-server/features/events.aspx#path-access-authorization
@@ -457,7 +516,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
             }
         }
 
-        private void SessionPreAuthentication(object sender, PreAuthenticationEventArgs e)
+        private void FsUser_PreAuthentication(object sender, PreAuthenticationEventArgs e)
         {
             /*
              * https://www.rebex.net/file-server/features/events.aspx#pre-authentication
@@ -527,7 +586,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
             }
         }
 
-        private void SessionShellCommand(object sender, ShellCommandEventArgs e)
+        private void FsUser_ShellCommand(object sender, ShellCommandEventArgs e)
         {
             /*
              * https://www.rebex.net/file-server/features/events.aspx#shell-command

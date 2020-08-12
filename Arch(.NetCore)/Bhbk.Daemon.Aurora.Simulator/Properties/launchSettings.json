@@ -1,0 +1,10 @@
+﻿{
+  "profiles": {
+    "Bhbk.Daemon.Aurora.Simulator": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    }
+  }
+}

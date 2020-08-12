@@ -31,7 +31,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Factories
                 if (!Enum.TryParse<LogLevel>(user.DebugLevel, true, out fsLogLevel))
                     throw new InvalidCastException();
 
-                fsSettings.LogWriter = new LogWriterHelper(logger, user, fsLogLevel);
+                fsSettings.LogWriter = new LogHelper(logger, user, fsLogLevel);
             }
 
             if (!Enum.TryParse<FileSystemTypes>(user.FileSystemType, true, out fsType))

@@ -37,7 +37,7 @@ namespace Bhbk.Lib.Aurora.Domain.Tests.RespositoryTests
              */
 
             _uow.Users.Delete(QueryExpressionFactory.GetQueryExpression<uvw_Users>()
-                .Where(x => x.UserName == Constants.ApiTestCompositeUser).ToLambda());
+                .Where(x => x.UserName == Constants.TestCompositeUser).ToLambda());
 
             _uow.Commit();
 

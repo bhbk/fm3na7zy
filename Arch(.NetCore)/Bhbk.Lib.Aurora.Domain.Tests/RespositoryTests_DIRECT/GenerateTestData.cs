@@ -88,7 +88,7 @@ namespace Bhbk.Lib.Aurora.Domain.Tests.RespositoryTests_DIRECT
              * create composite test users
              */
             var foundCompositeUser = _uow.Users.Get(QueryExpressionFactory.GetQueryExpression<tbl_Users>()
-                .Where(x => x.UserName == Constants.ApiTestCompositeUser).ToLambda())
+                .Where(x => x.UserName == Constants.TestCompositeUser).ToLambda())
                 .SingleOrDefault();
 
             if (foundCompositeUser == null)
@@ -97,7 +97,7 @@ namespace Bhbk.Lib.Aurora.Domain.Tests.RespositoryTests_DIRECT
                     new tbl_Users()
                     {
                         Id = Guid.NewGuid(),
-                        UserName = Constants.ApiTestCompositeUser,
+                        UserName = Constants.TestCompositeUser,
                         FileSystemType = FileSystemTypes.Composite.ToString(),
                         Enabled = true,
                         Created = DateTime.Now,
@@ -109,8 +109,8 @@ namespace Bhbk.Lib.Aurora.Domain.Tests.RespositoryTests_DIRECT
                     {
                         UserId = foundCompositeUser.Id,
                         ConcurrencyStamp = Guid.NewGuid().ToString(),
-                        HashPBKDF2 = PBKDF2.Create(Constants.ApiTestCompositeUserPass),
-                        HashSHA256 = SHA256.Create(Constants.ApiTestCompositeUserPass),
+                        HashPBKDF2 = PBKDF2.Create(Constants.TestCompositeUserPass),
+                        HashSHA256 = SHA256.Create(Constants.TestCompositeUserPass),
                         SecurityStamp = Guid.NewGuid().ToString(),
                         Enabled = true,
                         Created = DateTime.Now,
@@ -127,7 +127,7 @@ namespace Bhbk.Lib.Aurora.Domain.Tests.RespositoryTests_DIRECT
              * create memory test users
              */
             var foundMemoryUser = _uow.Users.Get(QueryExpressionFactory.GetQueryExpression<tbl_Users>()
-                .Where(x => x.UserName == Constants.ApiTestMemoryUser).ToLambda())
+                .Where(x => x.UserName == Constants.TestMemoryUser).ToLambda())
                 .SingleOrDefault();
 
             if (foundMemoryUser == null)
@@ -136,7 +136,7 @@ namespace Bhbk.Lib.Aurora.Domain.Tests.RespositoryTests_DIRECT
                     new tbl_Users()
                     {
                         Id = Guid.NewGuid(),
-                        UserName = Constants.ApiTestMemoryUser,
+                        UserName = Constants.TestMemoryUser,
                         FileSystemType = FileSystemTypes.Memory.ToString(),
                         Enabled = true,
                         Created = DateTime.Now,
@@ -148,8 +148,8 @@ namespace Bhbk.Lib.Aurora.Domain.Tests.RespositoryTests_DIRECT
                     {
                         UserId = foundMemoryUser.Id,
                         ConcurrencyStamp = Guid.NewGuid().ToString(),
-                        HashPBKDF2 = PBKDF2.Create(Constants.ApiTestMemoryUserPass),
-                        HashSHA256 = SHA256.Create(Constants.ApiTestMemoryUserPass),
+                        HashPBKDF2 = PBKDF2.Create(Constants.TestMemoryUserPass),
+                        HashSHA256 = SHA256.Create(Constants.TestMemoryUserPass),
                         SecurityStamp = Guid.NewGuid().ToString(),
                         Enabled = true,
                         Created = DateTime.Now,
@@ -166,7 +166,7 @@ namespace Bhbk.Lib.Aurora.Domain.Tests.RespositoryTests_DIRECT
              * create smb test users
              */
             var foundSmbUser = _uow.Users.Get(QueryExpressionFactory.GetQueryExpression<tbl_Users>()
-                .Where(x => x.UserName == Constants.ApiTestSmbUser).ToLambda())
+                .Where(x => x.UserName == Constants.TestSmbUser).ToLambda())
                 .SingleOrDefault();
 
             if (foundSmbUser == null)
@@ -175,7 +175,7 @@ namespace Bhbk.Lib.Aurora.Domain.Tests.RespositoryTests_DIRECT
                     new tbl_Users()
                     {
                         Id = Guid.NewGuid(),
-                        UserName = Constants.ApiTestSmbUser,
+                        UserName = Constants.TestSmbUser,
                         FileSystemType = FileSystemTypes.SMB.ToString(),
                         Enabled = true,
                         Created = DateTime.Now,
@@ -187,8 +187,8 @@ namespace Bhbk.Lib.Aurora.Domain.Tests.RespositoryTests_DIRECT
                     {
                         UserId = foundSmbUser.Id,
                         ConcurrencyStamp = Guid.NewGuid().ToString(),
-                        HashPBKDF2 = PBKDF2.Create(Constants.ApiTestSmbUserPass),
-                        HashSHA256 = SHA256.Create(Constants.ApiTestSmbUserPass),
+                        HashPBKDF2 = PBKDF2.Create(Constants.TestSmbUserPass),
+                        HashSHA256 = SHA256.Create(Constants.TestSmbUserPass),
                         SecurityStamp = Guid.NewGuid().ToString(),
                         Enabled = true,
                         Created = DateTime.Now,
@@ -211,9 +211,9 @@ namespace Bhbk.Lib.Aurora.Domain.Tests.RespositoryTests_DIRECT
              * delete test users
              */
             _uow.Users.Delete(QueryExpressionFactory.GetQueryExpression<tbl_Users>()
-                .Where(x => x.UserName == Constants.ApiTestCompositeUser 
-                    || x.UserName == Constants.ApiTestMemoryUser
-                    || x.UserName == Constants.ApiTestSmbUser).ToLambda());
+                .Where(x => x.UserName == Constants.TestCompositeUser 
+                    || x.UserName == Constants.TestMemoryUser
+                    || x.UserName == Constants.TestSmbUser).ToLambda());
 
             _uow.Commit();
 

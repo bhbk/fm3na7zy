@@ -14,5 +14,23 @@
   },
   "Storage": {
     "BaseLocalPath": "..\\.data"
+  },
+  "IdentityCredentials": {
+    "IssuerName": "Bhbk",
+    "AudienceName": "",
+    "UserName": "aurora@system.ochap.local",
+    "UserPass": "pa$$word01!"
+  },
+  "IdentityAdminUrls": {
+    "BaseApiUrl": "https://localhost:44359",
+    "BaseApiPath": "/api/identity/admin"
+  },
+  "IdentityMeUrls": {
+    "BaseApiUrl": "https://localhost:44348",
+    "BaseApiPath": "/api/identity/me"
+  },
+  "IdentityStsUrls": {
+    "BaseApiUrl": "https://localhost:44375",
+    "BaseApiPath": "/api/identity/sts"
   }
 }

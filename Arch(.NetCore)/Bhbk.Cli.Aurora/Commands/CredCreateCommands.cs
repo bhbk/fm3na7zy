@@ -76,8 +76,8 @@ namespace Bhbk.Cli.Aurora.Commands
                 }
 
                 var secret = _conf["Databases:AuroraSecretKey"];
-                var cipherText = AES.Encrypt(_credPass, secret);
-                var plainText = AES.Decrypt(cipherText, secret);
+                var cipherText = AES.EncryptString(_credPass, secret);
+                var plainText = AES.DecryptString(cipherText, secret);
 
                 if (_credPass != plainText)
                     throw new ArithmeticException();

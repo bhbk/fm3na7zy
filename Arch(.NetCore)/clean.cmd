@@ -27,6 +27,11 @@ cd ..\Bhbk.Daemon.Aurora.SFTP.Tests
 powershell -command "& { if (Test-Path .\bin) { Remove-Item .\bin -Recurse -Force } }"
 powershell -command "& { if (Test-Path .\obj) { Remove-Item .\obj -Recurse -Force } }"
 
+cd ..\Bhbk.Daemon.Aurora.Simulator
+powershell -command "& { if (Test-Path .\bin) { Remove-Item .\bin -Recurse -Force } }"
+powershell -command "& { if (Test-Path .\obj) { Remove-Item .\obj -Recurse -Force } }"
+powershell -command "& { if (Test-Path .\*.log) { Remove-Item .\*.log -Recurse -Force } }"
+
 cd ..\Bhbk.Lib.Aurora
 powershell -command "& { if (Test-Path .\bin) { Remove-Item .\bin -Recurse -Force } }"
 powershell -command "& { if (Test-Path .\obj) { Remove-Item .\obj -Recurse -Force } }"

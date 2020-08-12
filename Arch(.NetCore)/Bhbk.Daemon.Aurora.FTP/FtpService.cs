@@ -9,12 +9,12 @@ using System.Threading.Tasks;
 
 namespace Bhbk.Daemon.Aurora.FTP
 {
-    public class FtpServer : IHostedService, IDisposable
+    public class FtpService : IHostedService, IDisposable
     {
         private readonly IServiceScopeFactory _factory;
         private readonly IConfiguration _conf;
 
-        public FtpServer(IServiceScopeFactory factory, IConfiguration conf)
+        public FtpService(IServiceScopeFactory factory, IConfiguration conf)
         {
             _factory = factory;
             _conf = conf;

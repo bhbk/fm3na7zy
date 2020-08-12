@@ -31,7 +31,7 @@ namespace Bhbk.Lib.Aurora.Domain.Infrastructure
              * delete default users
              */
             _uow.Users.Delete(QueryExpressionFactory.GetQueryExpression<tbl_Users>()
-                .Where(x => x.UserName == Constants.ApiDefaultUser).ToLambda());
+                .Where(x => x.UserName == Constants.DefaultUser).ToLambda());
 
             _uow.Commit();
 

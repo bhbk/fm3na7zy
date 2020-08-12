@@ -1,6 +1,5 @@
 using AutoMapper;
-using Bhbk.Daemon.Aurora.SFTP.Jobs;
-using Bhbk.Lib.Aurora.Data.Infrastructure_DIRECT;
+using Bhbk.Daemon.Aurora.Simulator.Jobs;
 using Bhbk.Lib.Aurora.Domain.Infrastructure;
 using Bhbk.Lib.Aurora.Domain.Primitives.Enums;
 using Bhbk.Lib.Common.Primitives.Enums;
@@ -17,7 +16,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 
-namespace Bhbk.Daemon.Aurora.SFTP
+namespace Bhbk.Daemon.Aurora.Simulator
 {
     public class Program
     {
@@ -35,11 +34,6 @@ namespace Bhbk.Daemon.Aurora.SFTP
                 options.AddSingleton<IContextService>(_instance);
                 options.AddSingleton<ILogger>(_logger);
                 options.AddSingleton<IMapper>(_mapper);
-                options.AddTransient<IUnitOfWork, UnitOfWork>(_ =>
-                {
-                    return new UnitOfWork(_conf["Databases:AuroraEntities"], _instance);
-                });
-                options.AddSingleton<IHostedService, SftpService>();
                 options.AddTransient<IAdminService, AdminService>(_ =>
                 {
                     var admin = new AdminService(_conf);
@@ -79,11 +73,6 @@ namespace Bhbk.Daemon.Aurora.SFTP
 
                     return alert;
                 });
-                sc.AddTransient<IUnitOfWork, UnitOfWork>(_ =>
-                {
-                    return new UnitOfWork(_conf["Databases:AuroraEntities"], _instance);
-                });
-                sc.AddSingleton<IHostedService, SftpService>();
                 sc.AddQuartz(jobs =>
                 {
                     jobs.SchedulerId = Guid.NewGuid().ToString();
@@ -107,7 +96,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                         .WithIdentity(downloadJobKey)
                     );
 
-                    foreach (var cron in _conf.GetSection("Jobs:SftpDownload:Schedules").GetChildren()
+                    foreach (var cron in _conf.GetSection("Jobs:SimDownload:Schedules").GetChildren()
                         .Select(x => x.Value).ToList())
                     {
                         jobs.AddTrigger(opt => opt
@@ -123,7 +112,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                         .WithIdentity(uploadJobKey)
                     );
 
-                    foreach (var cron in _conf.GetSection("Jobs:SftpUpload:Schedules").GetChildren()
+                    foreach (var cron in _conf.GetSection("Jobs:SimUpload:Schedules").GetChildren()
                         .Select(x => x.Value).ToList())
                     {
                         jobs.AddTrigger(opt => opt
@@ -151,7 +140,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
             Log.Logger = new LoggerConfiguration()
                 .ReadFrom.Configuration(_conf)
                 .WriteTo.Console()
-                .WriteTo.RollingFile(Directory.GetCurrentDirectory() 
+                .WriteTo.RollingFile(Directory.GetCurrentDirectory()
                     + Path.DirectorySeparatorChar + "appdebug.log", retainedFileCountLimit: 7, fileSizeLimitBytes: 10485760)
                 .Enrich.FromLogContext()
                 .CreateLogger();

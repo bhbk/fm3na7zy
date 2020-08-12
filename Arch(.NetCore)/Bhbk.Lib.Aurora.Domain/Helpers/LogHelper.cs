@@ -8,14 +8,14 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
     /*
      * https://forum.rebex.net/4157/logwriter-file-management
      */
-    public class LogWriterHelper : LogWriterBase
+    public class LogHelper : LogWriterBase
     {
         private readonly ILogger _logger;
         private readonly tbl_Users _user;
         private const string MessageTemplate = "{type} {user} {id} {area} {message}";
         private const string MessageTemplateWithData = "{type} {user} {id} {area} {message} {data}";
 
-        public LogWriterHelper(ILogger logger, tbl_Users user, LogLevel level)
+        public LogHelper(ILogger logger, tbl_Users user, LogLevel level)
         {
             Level = level;
             _user = user;

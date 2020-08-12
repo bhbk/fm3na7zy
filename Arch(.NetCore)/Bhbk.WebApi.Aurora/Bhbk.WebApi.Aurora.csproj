@@ -6,19 +6,21 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AutoMapper" Version="9.0.0" />
-    <PackageReference Include="Bhbk.Lib.Common" Version="2020.3.8.2030" />
-    <PackageReference Include="Bhbk.Lib.Cryptography" Version="2020.3.8.2030" />
-    <PackageReference Include="Bhbk.Lib.Hosting" Version="2020.3.8.2030" />
+    <PackageReference Include="AutoMapper" Version="10.0.0" />
+    <PackageReference Include="Bhbk.Lib.Common" Version="2020.3.15.2130" />
+    <PackageReference Include="Bhbk.Lib.Cryptography" Version="2020.3.15.2130" />
+    <PackageReference Include="Bhbk.Lib.Hosting" Version="2020.3.15.2130" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication" Version="2.2.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="3.1.5" />
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.1.5" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="3.1.5" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="5.4.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="3.1.7" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.1.7" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="3.1.7" />
+    <PackageReference Include="Quartz" Version="3.1.0" />
+    <PackageReference Include="Quartz.AspNetCore" Version="3.1.0" />
+    <PackageReference Include="Quartz.Extensions.DependencyInjection" Version="3.1.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="5.5.1" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Bhbk.Cli.Aurora\Bhbk.Cli.Aurora.csproj" />
     <ProjectReference Include="..\Bhbk.Lib.Aurora.Domain\Bhbk.Lib.Aurora.Domain.csproj" />
   </ItemGroup>
 

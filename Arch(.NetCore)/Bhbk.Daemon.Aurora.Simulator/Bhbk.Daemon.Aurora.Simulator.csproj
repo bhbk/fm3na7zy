@@ -2,16 +2,13 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <UserSecretsId>dotnet-Bhbk.Daemon.Aurora.FTP-48875A4B-ED02-4ACD-8217-C54E7A2D7C32</UserSecretsId>
+    <UserSecretsId>dotnet-Bhbk.Daemon.Aurora.SFTP.Clients-7150A69F-66E3-475E-B869-A741D0F784B1</UserSecretsId>
     <Platforms>AnyCPU;x64;x86</Platforms>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AutoMapper" Version="10.0.0" />
     <PackageReference Include="Bhbk.Lib.Common" Version="2020.3.15.2130" />
-    <PackageReference Include="FubarDev.FtpServer" Version="3.1.1" />
-    <PackageReference Include="FubarDev.FtpServer.Abstractions" Version="3.1.1" />
-    <PackageReference Include="FubarDev.FtpServer.Commands" Version="3.1.1" />
+    <PackageReference Include="Bhbk.Lib.Identity" Version="2020.3.16.2230" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="3.1.7" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="3.1.7" />
     <PackageReference Include="Microsoft.Extensions.Hosting.Systemd" Version="3.1.7" />
@@ -19,19 +16,10 @@
     <PackageReference Include="Quartz" Version="3.1.0" />
     <PackageReference Include="Quartz.AspNetCore" Version="3.1.0" />
     <PackageReference Include="Quartz.Extensions.DependencyInjection" Version="3.1.0" />
-    <PackageReference Include="Serilog.AspNetCore" Version="3.4.0" />
-    <PackageReference Include="Serilog.Sinks.Console" Version="3.1.1" />
-    <PackageReference Include="Serilog.Sinks.RollingFile" Version="3.3.0" />
-    <PackageReference Include="System.Linq.Dynamic.Core" Version="1.2.1" />
+    <PackageReference Include="Rebex.FileTransfer" Version="5.0.7501" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Bhbk.Lib.Aurora.Domain\Bhbk.Lib.Aurora.Domain.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Update="appsettings.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
 </Project>
