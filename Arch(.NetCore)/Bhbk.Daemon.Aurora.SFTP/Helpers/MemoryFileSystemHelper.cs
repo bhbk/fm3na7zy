@@ -21,7 +21,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Helpers
             }
         }
 
-        internal static void GenerateFileContent(DirectoryNode root, 
+        internal static void GenerateContentForMOTD(DirectoryNode root, 
             Dictionary<NodePath, NodeBase> path, 
             Dictionary<NodeBase, MemoryNodeData> store, 
             IMeService me)

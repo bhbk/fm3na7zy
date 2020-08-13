@@ -18,19 +18,19 @@ namespace Bhbk.Cli.Aurora.Commands
     {
         private static IConfiguration _conf;
         private static IUnitOfWork _uow;
-        private static FileInfo _file;
         private static tbl_Users _user;
+        private static FileInfo _file;
 
         public UserDeleteCommands()
         {
-            IsCommand("delete-user", "Delete user");
+            IsCommand("user-delete", "Delete user");
 
             HasRequiredOption("u|user=", "Enter user that exists already", arg =>
             {
                 if (string.IsNullOrEmpty(arg))
                     throw new ConsoleHelpAsException($"  *** No user name given ***");
 
-                _file = SearchRoots.ByAssemblyContext("clisettings.json");
+                _file = Search.ByAssemblyInvocation("clisettings.json");
 
                 _conf = (IConfiguration)new ConfigurationBuilder()
                     .SetBasePath(_file.DirectoryName)

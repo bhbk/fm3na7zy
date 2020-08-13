@@ -120,25 +120,27 @@
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\tbl_Users.sql" />
-    <Build Include="dbo\Tables\tbl_UserPublicKeys.sql" />
-    <Build Include="dbo\Tables\tbl_UserPrivateKeys.sql" />
     <Build Include="dbo\Tables\tbl_UserPasswords.sql" />
     <Build Include="dbo\Tables\tbl_UserFolders.sql" />
     <Build Include="dbo\Tables\tbl_UserFiles.sql" />
     <Build Include="dbo\Tables\tbl_UserMounts.sql" />
-    <Build Include="dbo\Tables\tbl_SysSettings.sql" />
-    <Build Include="dbo\Tables\tbl_SysPrivateKeys.sql" />
-    <Build Include="dbo\Tables\tbl_SysCredentials.sql" />
     <Build Include="svc\Views\uvw_UserPasswords.sql" />
     <Build Include="svc\Views\uvw_UserMounts.sql" />
     <Build Include="svc\Views\uvw_UserFolders.sql" />
     <Build Include="svc\Views\uvw_UserFiles.sql" />
-    <Build Include="svc\Views\uvw_SysSettings.sql" />
-    <Build Include="svc\Views\uvw_SysPrivateKeys.sql" />
-    <Build Include="svc\Views\uvw_SysCredentials.sql" />
+    <Build Include="svc\Views\uvw_Ambassadors.sql" />
     <Build Include="svc\Views\uvw_Users.sql" />
-    <Build Include="svc\Views\uvw_UserPublicKeys.sql" />
-    <Build Include="svc\Views\uvw_UserPrivateKeys.sql" />
+    <Build Include="svc\Views\uvw_PublicKeys.sql" />
+    <Build Include="svc\Views\uvw_PrivateKeys.sql" />
     <Build Include="Security\svc.sql" />
+    <Build Include="dbo\Tables\tbl_UserRealms.sql" />
+    <Build Include="dbo\Tables\tbl_Settings.sql" />
+    <Build Include="dbo\Tables\tbl_Realms.sql" />
+    <Build Include="dbo\Tables\tbl_PublicKeys.sql" />
+    <Build Include="dbo\Tables\tbl_PrivateKeys.sql" />
+    <Build Include="dbo\Tables\tbl_Ambassadors.sql" />
+    <Build Include="svc\Views\uvw_UserRealms.sql" />
+    <Build Include="svc\Views\uvw_Settings.sql" />
+    <Build Include="svc\Views\uvw_Realms.sql" />
   </ItemGroup>
 </Project>

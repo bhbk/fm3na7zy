@@ -15,15 +15,16 @@ namespace Bhbk.Lib.Aurora.Data.Models
         {
         }
 
-        public virtual DbSet<uvw_SysCredentials> uvw_SysCredentials { get; set; }
-        public virtual DbSet<uvw_SysPrivateKeys> uvw_SysPrivateKeys { get; set; }
-        public virtual DbSet<uvw_SysSettings> uvw_SysSettings { get; set; }
+        public virtual DbSet<uvw_Ambassadors> uvw_Ambassadors { get; set; }
+        public virtual DbSet<uvw_PrivateKeys> uvw_PrivateKeys { get; set; }
+        public virtual DbSet<uvw_PublicKeys> uvw_PublicKeys { get; set; }
+        public virtual DbSet<uvw_Realms> uvw_Realms { get; set; }
+        public virtual DbSet<uvw_Settings> uvw_Settings { get; set; }
         public virtual DbSet<uvw_UserFiles> uvw_UserFiles { get; set; }
         public virtual DbSet<uvw_UserFolders> uvw_UserFolders { get; set; }
         public virtual DbSet<uvw_UserMounts> uvw_UserMounts { get; set; }
         public virtual DbSet<uvw_UserPasswords> uvw_UserPasswords { get; set; }
-        public virtual DbSet<uvw_UserPrivateKeys> uvw_UserPrivateKeys { get; set; }
-        public virtual DbSet<uvw_UserPublicKeys> uvw_UserPublicKeys { get; set; }
+        public virtual DbSet<uvw_UserRealms> uvw_UserRealms { get; set; }
         public virtual DbSet<uvw_Users> uvw_Users { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -37,11 +38,11 @@ namespace Bhbk.Lib.Aurora.Data.Models
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<uvw_SysCredentials>(entity =>
+            modelBuilder.Entity<uvw_Ambassadors>(entity =>
             {
                 entity.HasNoKey();
 
-                entity.ToView("uvw_SysCredentials", "svc");
+                entity.ToView("uvw_Ambassadors", "svc");
 
                 entity.Property(e => e.Domain)
                     .HasMaxLength(128)
@@ -58,32 +59,70 @@ namespace Bhbk.Lib.Aurora.Data.Models
                     .IsUnicode(false);
             });
 
-            modelBuilder.Entity<uvw_SysPrivateKeys>(entity =>
+            modelBuilder.Entity<uvw_PrivateKeys>(entity =>
             {
                 entity.HasNoKey();
 
-                entity.ToView("uvw_SysPrivateKeys", "svc");
+                entity.ToView("uvw_PrivateKeys", "svc");
 
-                entity.Property(e => e.KeyValueAlgo)
+                entity.Property(e => e.KeyAlgo)
                     .IsRequired()
                     .HasMaxLength(16);
 
-                entity.Property(e => e.KeyValueBase64).IsRequired();
-
-                entity.Property(e => e.KeyValueFormat)
+                entity.Property(e => e.KeyFormat)
                     .IsRequired()
                     .HasMaxLength(16);
 
-                entity.Property(e => e.KeyValuePass)
+                entity.Property(e => e.KeyPass)
                     .IsRequired()
                     .HasMaxLength(1024);
+
+                entity.Property(e => e.KeyValue).IsRequired();
             });
 
-            modelBuilder.Entity<uvw_SysSettings>(entity =>
+            modelBuilder.Entity<uvw_PublicKeys>(entity =>
             {
                 entity.HasNoKey();
 
-                entity.ToView("uvw_SysSettings", "svc");
+                entity.ToView("uvw_PublicKeys", "svc");
+
+                entity.Property(e => e.Hostname).HasMaxLength(1024);
+
+                entity.Property(e => e.KeyAlgo)
+                    .IsRequired()
+                    .HasMaxLength(16);
+
+                entity.Property(e => e.KeyFormat)
+                    .IsRequired()
+                    .HasMaxLength(16);
+
+                entity.Property(e => e.KeyValue).IsRequired();
+
+                entity.Property(e => e.SigAlgo)
+                    .IsRequired()
+                    .HasMaxLength(16);
+
+                entity.Property(e => e.SigValue)
+                    .IsRequired()
+                    .HasMaxLength(512);
+            });
+
+            modelBuilder.Entity<uvw_Realms>(entity =>
+            {
+                entity.HasNoKey();
+
+                entity.ToView("uvw_Realms", "svc");
+
+                entity.Property(e => e.Name)
+                    .HasMaxLength(10)
+                    .IsFixedLength();
+            });
+
+            modelBuilder.Entity<uvw_Settings>(entity =>
+            {
+                entity.HasNoKey();
+
+                entity.ToView("uvw_Settings", "svc");
 
                 entity.Property(e => e.ConfigKey)
                     .IsRequired()
@@ -133,12 +172,12 @@ namespace Bhbk.Lib.Aurora.Data.Models
                     .HasMaxLength(16)
                     .IsUnicode(false);
 
-                entity.Property(e => e.ServerName)
+                entity.Property(e => e.ServerAddress)
                     .IsRequired()
                     .HasMaxLength(256)
                     .IsUnicode(false);
 
-                entity.Property(e => e.ServerPath)
+                entity.Property(e => e.ServerShare)
                     .IsRequired()
                     .HasMaxLength(256)
                     .IsUnicode(false);
@@ -154,55 +193,20 @@ namespace Bhbk.Lib.Aurora.Data.Models
                     .IsRequired()
                     .HasMaxLength(1024);
 
-                entity.Property(e => e.PasswordHashPBKDF2).HasMaxLength(2048);
+                entity.Property(e => e.HashPBKDF2).HasMaxLength(2048);
 
-                entity.Property(e => e.PasswordHashSHA256).HasMaxLength(2048);
+                entity.Property(e => e.HashSHA256).HasMaxLength(2048);
 
                 entity.Property(e => e.SecurityStamp)
                     .IsRequired()
                     .HasMaxLength(1024);
             });
 
-            modelBuilder.Entity<uvw_UserPrivateKeys>(entity =>
+            modelBuilder.Entity<uvw_UserRealms>(entity =>
             {
                 entity.HasNoKey();
 
-                entity.ToView("uvw_UserPrivateKeys", "svc");
-
-                entity.Property(e => e.KeyValueAlgo)
-                    .IsRequired()
-                    .HasMaxLength(16);
-
-                entity.Property(e => e.KeyValueBase64).IsRequired();
-
-                entity.Property(e => e.KeyValuePass)
-                    .IsRequired()
-                    .HasMaxLength(1024);
-            });
-
-            modelBuilder.Entity<uvw_UserPublicKeys>(entity =>
-            {
-                entity.HasNoKey();
-
-                entity.ToView("uvw_UserPublicKeys", "svc");
-
-                entity.Property(e => e.Hostname)
-                    .IsRequired()
-                    .HasMaxLength(1024);
-
-                entity.Property(e => e.KeySig)
-                    .IsRequired()
-                    .HasMaxLength(512);
-
-                entity.Property(e => e.KeySigAlgo)
-                    .IsRequired()
-                    .HasMaxLength(16);
-
-                entity.Property(e => e.KeyValueAlgo)
-                    .IsRequired()
-                    .HasMaxLength(16);
-
-                entity.Property(e => e.KeyValueBase64).IsRequired();
+                entity.ToView("uvw_UserRealms", "svc");
             });
 
             modelBuilder.Entity<uvw_Users>(entity =>

@@ -39,7 +39,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                 var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
                 var me = scope.ServiceProvider.GetRequiredService<IMeService>();
 
-                MemoryFileSystemHelper.GenerateFileContent(Root, _path, _store, me);
+                MemoryFileSystemHelper.GenerateContentForMOTD(Root, _path, _store, me);
             }
         }
 

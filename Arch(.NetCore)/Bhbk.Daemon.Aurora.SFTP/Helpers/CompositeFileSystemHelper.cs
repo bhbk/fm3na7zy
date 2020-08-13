@@ -11,6 +11,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Security.Cryptography;
+using Rebex.IO.FileSystem;
 
 namespace Bhbk.Daemon.Aurora.SFTP.Helpers
 {
@@ -131,13 +132,13 @@ namespace Bhbk.Daemon.Aurora.SFTP.Helpers
 
         internal static tbl_UserFiles SaveFileStream(IConfiguration conf, Stream content, tbl_UserFiles fileEntity)
         {
-            var folder = new DirectoryInfo(conf["Storage:BaseLocalPath"]
+            var folder = new DirectoryInfo(conf["Storage:UnstructuredDataPath"]
                 + Path.DirectorySeparatorChar + fileEntity.RealPath);
 
             if (!folder.Exists)
                 folder.Create();
 
-            var file = new FileInfo(conf["Storage:BaseLocalPath"]
+            var file = new FileInfo(conf["Storage:UnstructuredDataPath"]
                 + Path.DirectorySeparatorChar + fileEntity.RealPath
                 + Path.DirectorySeparatorChar + fileEntity.RealFileName);
 

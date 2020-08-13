@@ -212,7 +212,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                             .Where(x => x.UserId == _user.Id && x.FolderId == folderEntity.Id && x.VirtualName == node.Name).ToLambda())
                             .Single();
 
-                        var file = new FileInfo(conf["Storage:BaseLocalPath"]
+                        var file = new FileInfo(conf["Storage:UnstructuredDataPath"]
                             + Path.DirectorySeparatorChar + fileEntity.RealPath
                             + Path.DirectorySeparatorChar + fileEntity.RealFileName);
 

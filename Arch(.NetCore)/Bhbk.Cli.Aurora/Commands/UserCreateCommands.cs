@@ -21,19 +21,19 @@ namespace Bhbk.Cli.Aurora.Commands
         private static IUnitOfWork _uow;
         private static string _userName;
         private static string _userPass;
-        private static FileSystemTypes _filesystemType;
-        private static string _filesystemTypeList = string.Join(", ", Enum.GetNames(typeof(FileSystemTypes)));
+        private static FileSystemTypes _fileSystem;
+        private static string _fileSystemList = string.Join(", ", Enum.GetNames(typeof(FileSystemTypes)));
 
         public UserCreateCommands()
         {
-            IsCommand("create-user", "Create user");
+            IsCommand("user-create", "Create user");
 
             HasRequiredOption("u|user=", "Enter user that does not exist already", arg =>
             {
                 if (string.IsNullOrEmpty(arg))
                     throw new ConsoleHelpAsException($"  *** No user given ***");
 
-                var file = SearchRoots.ByAssemblyContext("clisettings.json");
+                var file = Search.ByAssemblyInvocation("clisettings.json");
 
                 _conf = (IConfiguration)new ConfigurationBuilder()
                     .SetBasePath(file.DirectoryName)
@@ -54,8 +54,8 @@ namespace Bhbk.Cli.Aurora.Commands
 
             HasRequiredOption("f|filesystem=", "Enter type of filesystem for user", arg =>
             {
-                if (!Enum.TryParse(arg, out _filesystemType))
-                    throw new ConsoleHelpAsException($"*** Invalid filesystem type. Options are '{_filesystemTypeList}' ***");
+                if (!Enum.TryParse(arg, out _fileSystem))
+                    throw new ConsoleHelpAsException($"*** Invalid filesystem type. Options are '{_fileSystemList}' ***");
             });
 
             HasOption("p|pass=", "Enter password for user", arg =>
@@ -68,22 +68,22 @@ namespace Bhbk.Cli.Aurora.Commands
         {
             try
             {
+                if (string.IsNullOrEmpty(_userPass))
+                {
+                    Console.Out.Write("  *** Enter password for to use *** : ");
+                    _userPass = StandardInput.GetHiddenInput();
+                }
+
                 var user = _uow.Users.Create(
                     new tbl_Users
                     {
                         Id = Guid.NewGuid(),
                         UserName = _userName,
-                        FileSystemType = _filesystemType.ToString(),
+                        FileSystemType = _fileSystem.ToString(),
                         Enabled = true,
                         Created = DateTime.Now,
                         Immutable = false,
                     });
-
-                if (string.IsNullOrEmpty(_userPass))
-                {
-                    Console.Out.Write("  *** Enter password for the new user *** : ");
-                    _userPass = StandardInput.GetHiddenInput();
-                }
 
                 _uow.UserPasswords.Create(
                     new tbl_UserPasswords

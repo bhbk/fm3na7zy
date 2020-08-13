@@ -13,7 +13,7 @@
     "AuroraSecretKey": "ArjIkORpBGdZDprSZI1uEKKT+c4Lyi1r"
   },
   "Storage": {
-    "BaseLocalPath": "..\\.data"
+    "UnstructuredDataPath": "..\\.data"
   },
   "IdentityCredentials": {
     "IssuerName": "Bhbk",

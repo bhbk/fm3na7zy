@@ -4,15 +4,14 @@ namespace Bhbk.Lib.Aurora.Domain.Primitives.Enums
 {
     public enum GroupType
     {
-        Services,
+        Daemons,
         Users,
     }
 
     public enum JobType
     {
-        ServiceJobA,
-        ServiceJobB,
-        ServiceJobC,
+        MOTDDownloadJob,
+        MOTDUploadJob,
         UnstructuredData,
     }
 }

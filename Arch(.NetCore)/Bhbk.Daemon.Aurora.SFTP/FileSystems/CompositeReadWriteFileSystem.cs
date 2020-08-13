@@ -92,13 +92,13 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                     var fileName = Hashing.MD5.Create(Guid.NewGuid().ToString());
                     var now = DateTime.UtcNow;
 
-                    var folder = new DirectoryInfo(conf["Storage:BaseLocalPath"]
+                    var folder = new DirectoryInfo(conf["Storage:UnstructuredDataPath"]
                         + Path.DirectorySeparatorChar + filePath);
 
                     if (!folder.Exists)
                         folder.Create();
 
-                    file = new FileInfo(conf["Storage:BaseLocalPath"]
+                    file = new FileInfo(conf["Storage:UnstructuredDataPath"]
                         + Path.DirectorySeparatorChar + filePath
                         + Path.DirectorySeparatorChar + fileName);
 
@@ -177,7 +177,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
 
                         var fileEntity = CompositeFileSystemHelper.FilePathToEntity(uow, _user, node.Path.StringPath);
 
-                        var file = new FileInfo(conf["Storage:BaseLocalPath"]
+                        var file = new FileInfo(conf["Storage:UnstructuredDataPath"]
                             + Path.DirectorySeparatorChar + fileEntity.RealPath
                             + Path.DirectorySeparatorChar + fileEntity.RealFileName);
 
@@ -377,7 +377,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                             .Where(x => x.UserId == _user.Id && x.FolderId == folderEntity.Id && x.VirtualName == node.Name).ToLambda())
                             .Single();
 
-                        var file = new FileInfo(conf["Storage:BaseLocalPath"]
+                        var file = new FileInfo(conf["Storage:UnstructuredDataPath"]
                             + Path.DirectorySeparatorChar + fileEntity.RealPath
                             + Path.DirectorySeparatorChar + fileEntity.RealFileName);
 
@@ -585,7 +585,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
 
                         var fileEntity = CompositeFileSystemHelper.FilePathToEntity(uow, _user, node.Path.StringPath);
 
-                        file = new FileInfo(conf["Storage:BaseLocalPath"]
+                        file = new FileInfo(conf["Storage:UnstructuredDataPath"]
                             + Path.DirectorySeparatorChar + fileEntity.RealPath
                             + Path.DirectorySeparatorChar + fileEntity.RealFileName);
 

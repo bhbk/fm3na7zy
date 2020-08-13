@@ -36,53 +36,10 @@ namespace Bhbk.Lib.Aurora.Domain.Tests.RespositoryTests_DIRECT
             /*
              * create key pairs for daemons
              */
-            var dsaKey = _uow.SysPrivateKeys.Get(QueryExpressionFactory.GetQueryExpression<tbl_SysPrivateKeys>()
-                .Where(x => x.KeyValueAlgo == SshHostKeyAlgorithm.DSS.ToString()).ToLambda())
-                .OrderBy(x => x.Created).LastOrDefault();
-
-            if (dsaKey == null)
-            {
-                dsaKey = KeyHelper.GenerateSshPrivateKey(_uow,
-                    SshHostKeyAlgorithm.DSS, 1024, AlphaNumeric.CreateString(32), SshPrivateKeyFormat.Pkcs8);
-
-                _uow.Commit();
-            }
-
-            var rsaKey = _uow.SysPrivateKeys.Get(QueryExpressionFactory.GetQueryExpression<tbl_SysPrivateKeys>()
-                .Where(x => x.KeyValueAlgo == SshHostKeyAlgorithm.RSA.ToString()).ToLambda())
-                .OrderBy(x => x.Created).LastOrDefault();
-
-            if (rsaKey == null)
-            {
-                rsaKey = KeyHelper.GenerateSshPrivateKey(_uow,
-                    SshHostKeyAlgorithm.RSA, 2048, AlphaNumeric.CreateString(32), SshPrivateKeyFormat.Pkcs8);
-
-                _uow.Commit();
-            }
-
-            var ecdsaKey = _uow.SysPrivateKeys.Get(QueryExpressionFactory.GetQueryExpression<tbl_SysPrivateKeys>()
-                .Where(x => x.KeyValueAlgo == SshHostKeyAlgorithm.ECDsaNistP521.ToString()).ToLambda())
-                .OrderBy(x => x.Created).LastOrDefault();
-
-            if (ecdsaKey == null)
-            {
-                ecdsaKey = KeyHelper.GenerateSshPrivateKey(_uow,
-                    SshHostKeyAlgorithm.ECDsaNistP521, 521, AlphaNumeric.CreateString(32), SshPrivateKeyFormat.Pkcs8);
-
-                _uow.Commit();
-            }
-
-            var ed25519Key = _uow.SysPrivateKeys.Get(QueryExpressionFactory.GetQueryExpression<tbl_SysPrivateKeys>()
-                .Where(x => x.KeyValueAlgo == SshHostKeyAlgorithm.ED25519.ToString()).ToLambda())
-                .OrderBy(x => x.Created).LastOrDefault();
-
-            if (ed25519Key == null)
-            {
-                ed25519Key = KeyHelper.GenerateSshPrivateKey(_uow,
-                    SshHostKeyAlgorithm.ED25519, 256, AlphaNumeric.CreateString(32), SshPrivateKeyFormat.Pkcs8);
-
-                _uow.Commit();
-            }
+            KeyHelper.CheckDaemonSshPrivKey(_uow, SshHostKeyAlgorithm.DSS, 1024, AlphaNumeric.CreateString(32), SignatureHashAlgorithm.SHA256);
+            KeyHelper.CheckDaemonSshPrivKey(_uow, SshHostKeyAlgorithm.RSA, 2048, AlphaNumeric.CreateString(32), SignatureHashAlgorithm.SHA256);
+            KeyHelper.CheckDaemonSshPrivKey(_uow, SshHostKeyAlgorithm.ECDsaNistP521, 521, AlphaNumeric.CreateString(32), SignatureHashAlgorithm.SHA256);
+            KeyHelper.CheckDaemonSshPrivKey(_uow, SshHostKeyAlgorithm.ED25519, 256, AlphaNumeric.CreateString(32), SignatureHashAlgorithm.SHA256);
 
             /*
              * create composite test users
@@ -117,10 +74,11 @@ namespace Bhbk.Lib.Aurora.Domain.Tests.RespositoryTests_DIRECT
                         Immutable = false,
                     });
 
-                var key = KeyHelper.GenerateSshPrivateKey(_uow, foundCompositeUser, 
-                    SshHostKeyAlgorithm.RSA, 2048, AlphaNumeric.CreateString(32), SignatureHashAlgorithm.SHA256, Dns.GetHostName());
-
                 _uow.Commit();
+
+                KeyHelper.CreateUserSshPrivKey(_uow, foundCompositeUser,
+                    SshPrivateKeyFormat.Pkcs8, SshHostKeyAlgorithm.RSA, 2048, AlphaNumeric.CreateString(32),
+                    SshPublicKeyFormat.Pkcs8, SignatureHashAlgorithm.SHA256, Dns.GetHostName());
             }
 
             /*
@@ -156,10 +114,11 @@ namespace Bhbk.Lib.Aurora.Domain.Tests.RespositoryTests_DIRECT
                         Immutable = false,
                     });
 
-                var key = KeyHelper.GenerateSshPrivateKey(_uow, foundMemoryUser,
-                    SshHostKeyAlgorithm.RSA, 2048, AlphaNumeric.CreateString(32), SignatureHashAlgorithm.SHA256, Dns.GetHostName());
-
                 _uow.Commit();
+
+                KeyHelper.CreateUserSshPrivKey(_uow, foundMemoryUser,
+                    SshPrivateKeyFormat.Pkcs8, SshHostKeyAlgorithm.RSA, 2048, AlphaNumeric.CreateString(32),
+                    SshPublicKeyFormat.Pkcs8, SignatureHashAlgorithm.SHA256, Dns.GetHostName());
             }
 
             /*
@@ -195,10 +154,11 @@ namespace Bhbk.Lib.Aurora.Domain.Tests.RespositoryTests_DIRECT
                         Immutable = false,
                     });
 
-                var key = KeyHelper.GenerateSshPrivateKey(_uow, foundSmbUser,
-                    SshHostKeyAlgorithm.RSA, 2048, AlphaNumeric.CreateString(32), SignatureHashAlgorithm.SHA256, Dns.GetHostName());
-
                 _uow.Commit();
+
+                KeyHelper.CreateUserSshPrivKey(_uow, foundSmbUser,
+                    SshPrivateKeyFormat.Pkcs8, SshHostKeyAlgorithm.RSA, 2048, AlphaNumeric.CreateString(32),
+                    SshPublicKeyFormat.Pkcs8, SignatureHashAlgorithm.SHA256, Dns.GetHostName());
             }
         }
 
@@ -220,11 +180,11 @@ namespace Bhbk.Lib.Aurora.Domain.Tests.RespositoryTests_DIRECT
             /*
              * delete key pairs for daemons
              */
-            _uow.SysPrivateKeys.Delete(QueryExpressionFactory.GetQueryExpression<tbl_SysPrivateKeys>()
-                .Where(x => x.KeyValueAlgo == SshHostKeyAlgorithm.DSS.ToString()
-                    || x.KeyValueAlgo == SshHostKeyAlgorithm.RSA.ToString()
-                    || x.KeyValueAlgo == SshHostKeyAlgorithm.ECDsaNistP521.ToString()
-                    || x.KeyValueAlgo == SshHostKeyAlgorithm.ED25519.ToString()).ToLambda());
+            _uow.PrivateKeys.Delete(QueryExpressionFactory.GetQueryExpression<tbl_PrivateKeys>()
+                .Where(x => (x.KeyAlgo == SshHostKeyAlgorithm.DSS.ToString()
+                    || x.KeyAlgo == SshHostKeyAlgorithm.RSA.ToString()
+                    || x.KeyAlgo == SshHostKeyAlgorithm.ECDsaNistP521.ToString()
+                    || x.KeyAlgo == SshHostKeyAlgorithm.ED25519.ToString()) && x.UserId == null).ToLambda());
 
             _uow.Commit();
         }

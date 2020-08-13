@@ -22,8 +22,8 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
                 new SqlParameter("@UserId", SqlDbType.UniqueIdentifier) { Value = entity.UserId },
                 new SqlParameter("@CredentialId", SqlDbType.UniqueIdentifier) { Value = entity.CredentialId },
                 new SqlParameter("@AuthType", SqlDbType.NVarChar) { Value = entity.AuthType },
-                new SqlParameter("@ServerName", SqlDbType.NVarChar) { Value = entity.ServerName },
-                new SqlParameter("@ServerPath", SqlDbType.NVarChar) { Value = entity.ServerPath },
+                new SqlParameter("@ServerName", SqlDbType.NVarChar) { Value = entity.ServerAddress },
+                new SqlParameter("@ServerPath", SqlDbType.NVarChar) { Value = entity.ServerShare },
                 new SqlParameter("@Enabled", SqlDbType.Bit) { Value = entity.Enabled },
                 new SqlParameter("@Immutable", SqlDbType.Bit) { Value = entity.Immutable }
             };
@@ -100,8 +100,8 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
                 new SqlParameter("@UserId", SqlDbType.UniqueIdentifier) { Value = entity.UserId },
                 new SqlParameter("@CredentialId", SqlDbType.UniqueIdentifier) { Value = entity.CredentialId },
                 new SqlParameter("@AuthType", SqlDbType.NVarChar) { Value = entity.AuthType },
-                new SqlParameter("@ServerName", SqlDbType.NVarChar) { Value = entity.ServerName },
-                new SqlParameter("@ServerPath", SqlDbType.NVarChar) { Value = entity.ServerPath },
+                new SqlParameter("@ServerName", SqlDbType.NVarChar) { Value = entity.ServerAddress },
+                new SqlParameter("@ServerPath", SqlDbType.NVarChar) { Value = entity.ServerShare },
                 new SqlParameter("@Enabled", SqlDbType.Bit) { Value = entity.Enabled },
                 new SqlParameter("@Immutable", SqlDbType.Bit) { Value = entity.Immutable }
             };

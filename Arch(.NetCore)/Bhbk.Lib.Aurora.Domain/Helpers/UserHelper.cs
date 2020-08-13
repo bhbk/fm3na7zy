@@ -1,7 +1,13 @@
-﻿using Microsoft.Win32.SafeHandles;
+﻿using Bhbk.Lib.Aurora.Data.Models_DIRECT;
+using Microsoft.Win32.SafeHandles;
+using Rebex.Net;
+using Rebex.Security.Cryptography.Pkcs;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 using System.Runtime.InteropServices;
+using System.Text;
 
 /*
  * https://docs.microsoft.com/en-us/windows/win32/secauthn/logonuserexexw
@@ -29,6 +35,32 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
                 throw new Win32Exception(Marshal.GetLastWin32Error());
 
             return safeAccessTokenHandle;
+        }
+
+        public static bool ValidatePubKey(ICollection<tbl_PublicKeys> userKeys, SshPublicKey loginKey)
+        {
+            var loginStream = new MemoryStream();
+            loginKey.SavePublicKey(loginStream, SshPublicKeyFormat.Pkcs8);
+
+            var login = Encoding.ASCII.GetString(loginStream.ToArray());
+
+            foreach (var userKey in userKeys)
+            {
+                var pubBytes = Encoding.ASCII.GetBytes(userKey.KeyValue);
+                var pubKeyInfo = new PublicKeyInfo();
+                pubKeyInfo.Load(new MemoryStream(pubBytes));
+
+                var pubStream = new MemoryStream();
+                var pubKey = new SshPublicKey(pubKeyInfo);
+                pubKey.SavePublicKey(pubStream, SshPublicKeyFormat.Pkcs8);
+
+                var pubResult = Encoding.ASCII.GetString(pubStream.ToArray());
+
+                if (login == pubResult)
+                    return true;
+            }
+
+            return false;
         }
 
         [DllImport("advapi32.dll", SetLastError = true, CharSet = CharSet.Unicode)]

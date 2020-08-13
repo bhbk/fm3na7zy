@@ -7,10 +7,10 @@ namespace Bhbk.Lib.Aurora.Data.Models_DIRECT
     {
         public tbl_Users()
         {
+            tbl_PrivateKeys = new HashSet<tbl_PrivateKeys>();
+            tbl_PublicKeys = new HashSet<tbl_PublicKeys>();
             tbl_UserFiles = new HashSet<tbl_UserFiles>();
             tbl_UserFolders = new HashSet<tbl_UserFolders>();
-            tbl_UserPrivateKeys = new HashSet<tbl_UserPrivateKeys>();
-            tbl_UserPublicKeys = new HashSet<tbl_UserPublicKeys>();
         }
 
         public Guid Id { get; set; }
@@ -25,9 +25,9 @@ namespace Bhbk.Lib.Aurora.Data.Models_DIRECT
 
         public virtual tbl_UserMounts tbl_UserMounts { get; set; }
         public virtual tbl_UserPasswords tbl_UserPasswords { get; set; }
+        public virtual ICollection<tbl_PrivateKeys> tbl_PrivateKeys { get; set; }
+        public virtual ICollection<tbl_PublicKeys> tbl_PublicKeys { get; set; }
         public virtual ICollection<tbl_UserFiles> tbl_UserFiles { get; set; }
         public virtual ICollection<tbl_UserFolders> tbl_UserFolders { get; set; }
-        public virtual ICollection<tbl_UserPrivateKeys> tbl_UserPrivateKeys { get; set; }
-        public virtual ICollection<tbl_UserPublicKeys> tbl_UserPublicKeys { get; set; }
     }
 }

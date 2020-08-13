@@ -2,7 +2,7 @@
   "profiles": {
     "Bhbk.Cli.Aurora": {
       "commandName": "Project",
-      "commandLineArgs": " create-credential -d test.local -l tester -p Password01!"
+      "commandLineArgs": " sys-keys-export -d .system"
     }
   }
 }

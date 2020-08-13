@@ -47,25 +47,25 @@ namespace Bhbk.WebApi.Aurora
 
                 jobs.UseSimpleTypeLoader();
                 jobs.UseInMemoryStore();
-                jobs.UseDefaultThreadPool(threads =>
-                {
-                    threads.MaxConcurrency = 1;
-                });
+                jobs.UseDefaultThreadPool();
 
-                var dataJobKey = new JobKey(JobType.UnstructuredData.ToString(), GroupType.Services.ToString());
-                jobs.AddJob<UnstructuredDataJob>(opt => opt
-                    .StoreDurably()
-                    .WithIdentity(dataJobKey)
-                );
-
-                foreach (var cron in conf.GetSection("Jobs:UnstructuredData:Schedules").GetChildren()
-                    .Select(x => x.Value).ToList())
+                if (bool.Parse(conf["Jobs:UnstructuredData:Enable"]))
                 {
-                    jobs.AddTrigger(opt => opt
-                        .ForJob(dataJobKey)
-                        .StartNow()
-                        .WithCronSchedule(cron)
+                    var dataJobKey = new JobKey(JobType.UnstructuredData.ToString(), GroupType.Daemons.ToString());
+                    jobs.AddJob<UnstructuredDataJob>(opt => opt
+                        .StoreDurably()
+                        .WithIdentity(dataJobKey)
                     );
+
+                    foreach (var cron in conf.GetSection("Jobs:UnstructuredData:Schedules").GetChildren()
+                        .Select(x => x.Value).ToList())
+                    {
+                        jobs.AddTrigger(opt => opt
+                            .ForJob(dataJobKey)
+                            .StartNow()
+                            .WithCronSchedule(cron)
+                        );
+                    }
                 }
             });
             sc.AddQuartzServer(options =>
@@ -83,7 +83,7 @@ namespace Bhbk.WebApi.Aurora
 
             var seeds = new UnitOfWork(conf["Databases:AuroraEntities"], instance);
 
-            var key = seeds.SysSettings.Get(x => x.ConfigKey == "RebexLicense")
+            var key = seeds.Settings.Get(x => x.ConfigKey == "RebexLicense")
                 .OrderBy(x => x.Created).Last();
 
             Rebex.Licensing.Key = key.ConfigValue;

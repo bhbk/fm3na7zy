@@ -3,6 +3,7 @@ using Bhbk.Daemon.Aurora.SFTP.Jobs;
 using Bhbk.Lib.Aurora.Data.Infrastructure_DIRECT;
 using Bhbk.Lib.Aurora.Domain.Infrastructure;
 using Bhbk.Lib.Aurora.Domain.Primitives.Enums;
+using Bhbk.Lib.Common.FileSystem;
 using Bhbk.Lib.Common.Primitives.Enums;
 using Bhbk.Lib.Common.Services;
 using Bhbk.Lib.Identity.Grants;
@@ -60,7 +61,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
 
                     return me;
                 });
-                sc.AddSingleton<IHostedService, SftpService>();
+                sc.AddSingleton<IHostedService, Daemon>();
                 sc.AddQuartz(jobs =>
                 {
                     jobs.SchedulerId = Guid.NewGuid().ToString();
@@ -73,41 +74,25 @@ namespace Bhbk.Daemon.Aurora.SFTP
 
                     jobs.UseSimpleTypeLoader();
                     jobs.UseInMemoryStore();
-                    jobs.UseDefaultThreadPool(threads =>
-                    {
-                        threads.MaxConcurrency = 2;
-                    });
+                    jobs.UseDefaultThreadPool();
 
-                    var serviceJobAKey = new JobKey(JobType.ServiceJobA.ToString(), GroupType.Services.ToString());
-                    jobs.AddJob<ServiceJobB>(opt => opt
-                        .StoreDurably()
-                        .WithIdentity(serviceJobAKey)
-                    );
-
-                    foreach (var cron in _conf.GetSection("Jobs:ServiceJobA:Schedules").GetChildren()
-                        .Select(x => x.Value).ToList())
+                    if (bool.Parse(_conf["Jobs:MOTDJob:Enable"]))
                     {
-                        jobs.AddTrigger(opt => opt
-                            .ForJob(serviceJobAKey)
-                            .StartNow()
-                            .WithCronSchedule(cron)
+                        var motdJobKey = new JobKey(JobType.MOTDDownloadJob.ToString(), GroupType.Daemons.ToString());
+                        jobs.AddJob<MOTDDownloadJob>(opt => opt
+                            .StoreDurably()
+                            .WithIdentity(motdJobKey)
                         );
-                    }
 
-                    var serviceJobBKey = new JobKey(JobType.ServiceJobB.ToString(), GroupType.Services.ToString());
-                    jobs.AddJob<ServiceJobB>(opt => opt
-                        .StoreDurably()
-                        .WithIdentity(serviceJobBKey)
-                    );
-
-                    foreach (var cron in _conf.GetSection("Jobs:ServiceJobB:Schedules").GetChildren()
-                        .Select(x => x.Value).ToList())
-                    {
-                        jobs.AddTrigger(opt => opt
-                            .ForJob(serviceJobBKey)
-                            .StartNow()
-                            .WithCronSchedule(cron)
-                        );
+                        foreach (var cron in _conf.GetSection("Jobs:MOTDJob:Schedules").GetChildren()
+                            .Select(x => x.Value).ToList())
+                        {
+                            jobs.AddTrigger(opt => opt
+                                .ForJob(motdJobKey)
+                                .StartNow()
+                                .WithCronSchedule(cron)
+                            );
+                        }
                     }
                 });
                 sc.AddQuartzServer(options =>
@@ -150,7 +135,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                 {
                     return new UnitOfWork(_conf["Databases:AuroraEntities"], _instance);
                 });
-                sc.AddSingleton<IHostedService, SftpService>();
+                sc.AddSingleton<IHostedService, Daemon>();
                 sc.AddQuartz(jobs =>
                 {
                     jobs.SchedulerId = Guid.NewGuid().ToString();
@@ -163,41 +148,43 @@ namespace Bhbk.Daemon.Aurora.SFTP
 
                     jobs.UseSimpleTypeLoader();
                     jobs.UseInMemoryStore();
-                    jobs.UseDefaultThreadPool(threads =>
-                    {
-                        threads.MaxConcurrency = 2;
-                    });
+                    jobs.UseDefaultThreadPool();
 
-                    var serviceJobAKey = new JobKey(JobType.ServiceJobA.ToString(), GroupType.Services.ToString());
-                    jobs.AddJob<ServiceJobB>(opt => opt
-                        .StoreDurably()
-                        .WithIdentity(serviceJobAKey)
-                    );
-
-                    foreach (var cron in _conf.GetSection("Jobs:ServiceJobA:Schedules").GetChildren()
-                        .Select(x => x.Value).ToList())
+                    if (bool.Parse(_conf["Jobs:MOTDDownloadJob:Enable"]))
                     {
-                        jobs.AddTrigger(opt => opt
-                            .ForJob(serviceJobAKey)
-                            .StartNow()
-                            .WithCronSchedule(cron)
+                        var motdPullJobKey = new JobKey(JobType.MOTDDownloadJob.ToString(), GroupType.Daemons.ToString());
+                        jobs.AddJob<MOTDDownloadJob>(opt => opt
+                            .StoreDurably()
+                            .WithIdentity(motdPullJobKey)
                         );
+
+                        foreach (var cron in _conf.GetSection("Jobs:MOTDDownloadJob:Schedules").GetChildren()
+                            .Select(x => x.Value).ToList())
+                        {
+                            jobs.AddTrigger(opt => opt
+                                .ForJob(motdPullJobKey)
+                                .StartNow()
+                                .WithCronSchedule(cron)
+                            );
+                        }
                     }
-
-                    var serviceJobBKey = new JobKey(JobType.ServiceJobB.ToString(), GroupType.Services.ToString());
-                    jobs.AddJob<ServiceJobB>(opt => opt
-                        .StoreDurably()
-                        .WithIdentity(serviceJobBKey)
-                    );
-
-                    foreach (var cron in _conf.GetSection("Jobs:ServiceJobB:Schedules").GetChildren()
-                        .Select(x => x.Value).ToList())
+                    if (bool.Parse(_conf["Jobs:MOTDUploadJob:Enable"]))
                     {
-                        jobs.AddTrigger(opt => opt
-                            .ForJob(serviceJobBKey)
-                            .StartNow()
-                            .WithCronSchedule(cron)
+                        var motdPushJobKey = new JobKey(JobType.MOTDUploadJob.ToString(), GroupType.Daemons.ToString());
+                        jobs.AddJob<MOTDUploadJob>(opt => opt
+                            .StoreDurably()
+                            .WithIdentity(motdPushJobKey)
                         );
+
+                        foreach (var cron in _conf.GetSection("Jobs:MOTDUploadJob:Schedules").GetChildren()
+                            .Select(x => x.Value).ToList())
+                        {
+                            jobs.AddTrigger(opt => opt
+                                .ForJob(motdPushJobKey)
+                                .StartNow()
+                                .WithCronSchedule(cron)
+                            );
+                        }
                     }
                 });
                 sc.AddQuartzServer(options =>
@@ -208,10 +195,33 @@ namespace Bhbk.Daemon.Aurora.SFTP
 
         public static void Main(string[] args = null)
         {
-            _conf = (IConfiguration)new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-                .Build();
+            /*
+             * https://ss64.com/nt/sc.html
+             * 
+             * when running as background service on windows, the current working directory resolves 
+             * to c:\windows\system32\. does not matter where the assemblies are running from.
+             * 
+             * use reflection to look at other working directories based on entry points in our quest
+             * to locate configuration data needed to start backgroun service.
+             */
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                var conf = Search.ByAssemblyInvocation("appsettings.json");
+
+                _conf = (IConfiguration)new ConfigurationBuilder()
+                    .SetBasePath(conf.DirectoryName)
+                    .AddJsonFile(conf.Name, optional: false, reloadOnChange: true)
+                    .Build();
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                _conf = (IConfiguration)new ConfigurationBuilder()
+                    .SetBasePath(Directory.GetCurrentDirectory())
+                    .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                    .Build();
+            }
+            else
+                throw new NotSupportedException();
 
             _instance = new ContextService(InstanceContext.DeployedOrLocal);
 
@@ -228,11 +238,11 @@ namespace Bhbk.Daemon.Aurora.SFTP
             _mapper = new MapperConfiguration(x => x.AddProfile<AutoMapperProfile_DIRECT>())
                 .CreateMapper();
 
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-                CreateLinuxHostBuilder(args).Build().Run();
-
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 CreateWindowsHostBuilder(args).Build().Run();
+
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                CreateLinuxHostBuilder(args).Build().Run();
 
             else
                 throw new NotSupportedException();

@@ -37,16 +37,16 @@ namespace Bhbk.WebApi.Aurora.Tasks
                     var conf = scope.ServiceProvider.GetRequiredService<IConfiguration>();
                     var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
 
-                    var verifyDelay = int.Parse(conf["Tasks:UnstructuredData:VerifyDelay"]);
+                    var staggerVerify = int.Parse(conf["Tasks:UnstructuredData:StaggerVerify"]);
 
                     var files = uow.UserFiles.Get(QueryExpressionFactory.GetQueryExpression<tbl_UserFiles>()
-                        .Where(x => x.LastVerified < DateTime.UtcNow.AddSeconds(-verifyDelay)).ToLambda());
+                        .Where(x => x.LastVerified < DateTime.UtcNow.AddSeconds(-staggerVerify)).ToLambda());
 
                     var problems = new List<tbl_UserFiles>();
 
                     foreach (var file in files)
                     {
-                        var filePath = new FileInfo(conf["Storage:BaseLocalPath"]
+                        var filePath = new FileInfo(conf["Storage:UnstructuredDataPath"]
                             + Path.DirectorySeparatorChar + file.RealPath
                             + Path.DirectorySeparatorChar + file.RealFileName);
 

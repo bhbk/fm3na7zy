@@ -15,15 +15,16 @@ namespace Bhbk.Lib.Aurora.Data.Models_DIRECT
         {
         }
 
-        public virtual DbSet<tbl_SysCredentials> tbl_SysCredentials { get; set; }
-        public virtual DbSet<tbl_SysPrivateKeys> tbl_SysPrivateKeys { get; set; }
-        public virtual DbSet<tbl_SysSettings> tbl_SysSettings { get; set; }
+        public virtual DbSet<tbl_Ambassadors> tbl_Ambassadors { get; set; }
+        public virtual DbSet<tbl_PrivateKeys> tbl_PrivateKeys { get; set; }
+        public virtual DbSet<tbl_PublicKeys> tbl_PublicKeys { get; set; }
+        public virtual DbSet<tbl_Realms> tbl_Realms { get; set; }
+        public virtual DbSet<tbl_Settings> tbl_Settings { get; set; }
         public virtual DbSet<tbl_UserFiles> tbl_UserFiles { get; set; }
         public virtual DbSet<tbl_UserFolders> tbl_UserFolders { get; set; }
         public virtual DbSet<tbl_UserMounts> tbl_UserMounts { get; set; }
         public virtual DbSet<tbl_UserPasswords> tbl_UserPasswords { get; set; }
-        public virtual DbSet<tbl_UserPrivateKeys> tbl_UserPrivateKeys { get; set; }
-        public virtual DbSet<tbl_UserPublicKeys> tbl_UserPublicKeys { get; set; }
+        public virtual DbSet<tbl_UserRealms> tbl_UserRealms { get; set; }
         public virtual DbSet<tbl_Users> tbl_Users { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -37,7 +38,7 @@ namespace Bhbk.Lib.Aurora.Data.Models_DIRECT
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<tbl_SysCredentials>(entity =>
+            modelBuilder.Entity<tbl_Ambassadors>(entity =>
             {
                 entity.HasIndex(e => e.Id)
                     .HasName("IX_tbl_SysCredentials")
@@ -60,30 +61,85 @@ namespace Bhbk.Lib.Aurora.Data.Models_DIRECT
                     .IsUnicode(false);
             });
 
-            modelBuilder.Entity<tbl_SysPrivateKeys>(entity =>
+            modelBuilder.Entity<tbl_PrivateKeys>(entity =>
             {
                 entity.HasIndex(e => e.Id)
-                    .HasName("IX_tbl_PrivateKeys")
+                    .HasName("IX_tbl_UserPrivateKeys")
                     .IsUnique();
 
                 entity.Property(e => e.Id).ValueGeneratedNever();
 
-                entity.Property(e => e.KeyValueAlgo)
+                entity.Property(e => e.KeyAlgo)
                     .IsRequired()
                     .HasMaxLength(16);
 
-                entity.Property(e => e.KeyValueBase64).IsRequired();
-
-                entity.Property(e => e.KeyValueFormat)
+                entity.Property(e => e.KeyFormat)
                     .IsRequired()
                     .HasMaxLength(16);
 
-                entity.Property(e => e.KeyValuePass)
+                entity.Property(e => e.KeyPass)
                     .IsRequired()
                     .HasMaxLength(1024);
+
+                entity.Property(e => e.KeyValue).IsRequired();
+
+                entity.HasOne(d => d.User)
+                    .WithMany(p => p.tbl_PrivateKeys)
+                    .HasForeignKey(d => d.UserId)
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .HasConstraintName("FK_tbl_UserPrivateKeys_UserID");
             });
 
-            modelBuilder.Entity<tbl_SysSettings>(entity =>
+            modelBuilder.Entity<tbl_PublicKeys>(entity =>
+            {
+                entity.HasIndex(e => e.Id)
+                    .HasName("IX_tbl_UserPublicKeys")
+                    .IsUnique();
+
+                entity.Property(e => e.Id).ValueGeneratedNever();
+
+                entity.Property(e => e.Hostname).HasMaxLength(1024);
+
+                entity.Property(e => e.KeyAlgo)
+                    .IsRequired()
+                    .HasMaxLength(16);
+
+                entity.Property(e => e.KeyFormat)
+                    .IsRequired()
+                    .HasMaxLength(16);
+
+                entity.Property(e => e.KeyValue).IsRequired();
+
+                entity.Property(e => e.SigAlgo)
+                    .IsRequired()
+                    .HasMaxLength(16);
+
+                entity.Property(e => e.SigValue)
+                    .IsRequired()
+                    .HasMaxLength(512);
+
+                entity.HasOne(d => d.PrivateKey)
+                    .WithMany(p => p.tbl_PublicKeys)
+                    .HasForeignKey(d => d.PrivateKeyId)
+                    .HasConstraintName("FK_tbl_UserPublicKeys_UserPrivateID");
+
+                entity.HasOne(d => d.User)
+                    .WithMany(p => p.tbl_PublicKeys)
+                    .HasForeignKey(d => d.UserId)
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .HasConstraintName("FK_tbl_UserPublicKeys_UserID");
+            });
+
+            modelBuilder.Entity<tbl_Realms>(entity =>
+            {
+                entity.HasNoKey();
+
+                entity.Property(e => e.Name)
+                    .HasMaxLength(10)
+                    .IsFixedLength();
+            });
+
+            modelBuilder.Entity<tbl_Settings>(entity =>
             {
                 entity.Property(e => e.Id).ValueGeneratedNever();
 
@@ -163,12 +219,12 @@ namespace Bhbk.Lib.Aurora.Data.Models_DIRECT
                     .HasMaxLength(16)
                     .IsUnicode(false);
 
-                entity.Property(e => e.ServerName)
+                entity.Property(e => e.ServerAddress)
                     .IsRequired()
                     .HasMaxLength(256)
                     .IsUnicode(false);
 
-                entity.Property(e => e.ServerPath)
+                entity.Property(e => e.ServerShare)
                     .IsRequired()
                     .HasMaxLength(256)
                     .IsUnicode(false);
@@ -212,69 +268,9 @@ namespace Bhbk.Lib.Aurora.Data.Models_DIRECT
                     .HasConstraintName("FK_tbl_UserPasswords_UserID");
             });
 
-            modelBuilder.Entity<tbl_UserPrivateKeys>(entity =>
+            modelBuilder.Entity<tbl_UserRealms>(entity =>
             {
-                entity.HasIndex(e => e.Id)
-                    .HasName("IX_tbl_UserPrivateKeys")
-                    .IsUnique();
-
-                entity.HasIndex(e => e.PublicKeyId)
-                    .HasName("IX_tbl_UserPrivateKeys_PublicKeyID")
-                    .IsUnique();
-
-                entity.Property(e => e.Id).ValueGeneratedNever();
-
-                entity.Property(e => e.KeyValueAlgo)
-                    .IsRequired()
-                    .HasMaxLength(16);
-
-                entity.Property(e => e.KeyValueBase64).IsRequired();
-
-                entity.Property(e => e.KeyValuePass)
-                    .IsRequired()
-                    .HasMaxLength(1024);
-
-                entity.HasOne(d => d.User)
-                    .WithMany(p => p.tbl_UserPrivateKeys)
-                    .HasForeignKey(d => d.UserId)
-                    .HasConstraintName("FK_tbl_UserPrivateKeys_UserID");
-            });
-
-            modelBuilder.Entity<tbl_UserPublicKeys>(entity =>
-            {
-                entity.HasIndex(e => e.Id)
-                    .HasName("IX_tbl_UserPublicKeys")
-                    .IsUnique();
-
-                entity.Property(e => e.Id).ValueGeneratedNever();
-
-                entity.Property(e => e.Hostname)
-                    .IsRequired()
-                    .HasMaxLength(1024);
-
-                entity.Property(e => e.KeySig)
-                    .IsRequired()
-                    .HasMaxLength(512);
-
-                entity.Property(e => e.KeySigAlgo)
-                    .IsRequired()
-                    .HasMaxLength(16);
-
-                entity.Property(e => e.KeyValueAlgo)
-                    .IsRequired()
-                    .HasMaxLength(16);
-
-                entity.Property(e => e.KeyValueBase64).IsRequired();
-
-                entity.HasOne(d => d.PrivateKey)
-                    .WithMany(p => p.tbl_UserPublicKeys)
-                    .HasForeignKey(d => d.PrivateKeyId)
-                    .HasConstraintName("FK_tbl_UserPublicKeys_UserPrivateID");
-
-                entity.HasOne(d => d.User)
-                    .WithMany(p => p.tbl_UserPublicKeys)
-                    .HasForeignKey(d => d.UserId)
-                    .HasConstraintName("FK_tbl_UserPublicKeys_UserID");
+                entity.HasNoKey();
             });
 
             modelBuilder.Entity<tbl_Users>(entity =>

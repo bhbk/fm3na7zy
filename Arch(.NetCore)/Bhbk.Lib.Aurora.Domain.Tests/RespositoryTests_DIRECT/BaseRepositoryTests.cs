@@ -19,7 +19,7 @@ namespace Bhbk.Lib.Aurora.Domain.Tests.RespositoryTests_DIRECT
 
         public BaseRepositoryTests()
         {
-            var file = SearchRoots.ByAssemblyContext("appsettings.json");
+            var file = Search.ByAssemblyInvocation("appsettings.json");
 
             var conf = (IConfiguration)new ConfigurationBuilder()
                 .SetBasePath(file.DirectoryName)

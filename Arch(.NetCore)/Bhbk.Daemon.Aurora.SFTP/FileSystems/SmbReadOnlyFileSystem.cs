@@ -53,9 +53,9 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                 if (userMount == null)
                     throw new NetworkInformationException();
 
-                _userMount = userMount.ServerName + userMount.ServerPath;
+                _userMount = userMount.ServerAddress + userMount.ServerShare;
 
-                var userCred = uow.SysCredentials.Get(QueryExpressionFactory.GetQueryExpression<tbl_SysCredentials>()
+                var userCred = uow.Ambassadors.Get(QueryExpressionFactory.GetQueryExpression<tbl_Ambassadors>()
                     .Where(x => x.Id == userMount.CredentialId).ToLambda())
                     .Single();
 

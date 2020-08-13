@@ -21,8 +21,8 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
             {
                 new SqlParameter("@UserId", SqlDbType.UniqueIdentifier) { Value = entity.UserId },
                 new SqlParameter("@ConcurrencyStamp", SqlDbType.NVarChar) { Value = entity.ConcurrencyStamp },
-                new SqlParameter("@PasswordHashPBKDF2", SqlDbType.NVarChar) { Value = (object)entity.PasswordHashPBKDF2 ?? DBNull.Value },
-                new SqlParameter("@PasswordHashSHA256", SqlDbType.NVarChar) { Value = (object)entity.PasswordHashSHA256 ?? DBNull.Value },
+                new SqlParameter("@PasswordHashPBKDF2", SqlDbType.NVarChar) { Value = (object)entity.HashPBKDF2 ?? DBNull.Value },
+                new SqlParameter("@PasswordHashSHA256", SqlDbType.NVarChar) { Value = (object)entity.HashSHA256 ?? DBNull.Value },
                 new SqlParameter("@SecurityStamp", SqlDbType.NVarChar) { Value = entity.SecurityStamp },
                 new SqlParameter("@Enabled", SqlDbType.Bit) { Value = entity.Enabled },
                 new SqlParameter("@Immutable", SqlDbType.Bit) { Value = entity.Immutable }
@@ -99,8 +99,8 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
             {
                 new SqlParameter("@UserId", SqlDbType.UniqueIdentifier) { Value = entity.UserId },
                 new SqlParameter("@ConcurrencyStamp", SqlDbType.NVarChar) { Value = entity.ConcurrencyStamp },
-                new SqlParameter("@PasswordHashPBKDF2", SqlDbType.NVarChar) { Value = (object)entity.PasswordHashPBKDF2 ?? DBNull.Value },
-                new SqlParameter("@PasswordHashSHA256", SqlDbType.NVarChar) { Value = (object)entity.PasswordHashSHA256 ?? DBNull.Value },
+                new SqlParameter("@PasswordHashPBKDF2", SqlDbType.NVarChar) { Value = (object)entity.HashPBKDF2 ?? DBNull.Value },
+                new SqlParameter("@PasswordHashSHA256", SqlDbType.NVarChar) { Value = (object)entity.HashSHA256 ?? DBNull.Value },
                 new SqlParameter("@SecurityStamp", SqlDbType.NVarChar) { Value = entity.SecurityStamp },
                 new SqlParameter("@Enabled", SqlDbType.Bit) { Value = entity.Enabled },
                 new SqlParameter("@Immutable", SqlDbType.Bit) { Value = entity.Immutable }
