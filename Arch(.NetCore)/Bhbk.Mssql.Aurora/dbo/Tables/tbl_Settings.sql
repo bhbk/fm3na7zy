@@ -1,13 +1,17 @@
 ﻿CREATE TABLE [dbo].[tbl_Settings] (
     [Id]          UNIQUEIDENTIFIER NOT NULL,
-    [UserId]      UNIQUEIDENTIFIER NULL,
+    [IdentityId]  UNIQUEIDENTIFIER NULL,
     [ConfigKey]   VARCHAR (128)    NOT NULL,
     [ConfigValue] VARCHAR (256)    NOT NULL,
     [Created]     DATETIME2 (7)    NOT NULL,
     [Immutable]   BIT              CONSTRAINT [DF_tbl_Settings_Immutable] DEFAULT ((0)) NOT NULL,
     CONSTRAINT [PK_tbl_Settings] PRIMARY KEY CLUSTERED ([Id] ASC),
-    CONSTRAINT [FK_tbl_Settings_UserID] FOREIGN KEY ([UserId]) REFERENCES [dbo].[tbl_Users] ([Id]) ON DELETE CASCADE ON UPDATE CASCADE
+    CONSTRAINT [FK_tbl_Settings_IdentityID] FOREIGN KEY ([IdentityId]) REFERENCES [dbo].[tbl_Users] ([IdentityId]) ON DELETE CASCADE ON UPDATE CASCADE
 );
+
+
+
+
 
 
 

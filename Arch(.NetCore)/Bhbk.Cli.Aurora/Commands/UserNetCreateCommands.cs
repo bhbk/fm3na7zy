@@ -1,5 +1,4 @@
-﻿using Bhbk.Cli.Aurora.Helpers;
-using Bhbk.Lib.Aurora.Data.Infrastructure_DIRECT;
+﻿using Bhbk.Lib.Aurora.Data.Infrastructure_DIRECT;
 using Bhbk.Lib.Aurora.Data.Models_DIRECT;
 using Bhbk.Lib.Aurora.Domain.Primitives.Enums;
 using Bhbk.Lib.CommandLine.IO;
@@ -43,7 +42,7 @@ namespace Bhbk.Cli.Aurora.Commands
                 _uow = new UnitOfWork(_conf["Databases:AuroraEntities"], instance);
 
                 _user = _uow.Users.Get(QueryExpressionFactory.GetQueryExpression<tbl_Users>()
-                    .Where(x => x.UserName == arg).ToLambda(),
+                    .Where(x => x.IdentityAlias == arg).ToLambda(),
                         new List<Expression<Func<tbl_Users, object>>>()
                         {
                             x => x.tbl_UserMounts
@@ -70,16 +69,11 @@ namespace Bhbk.Cli.Aurora.Commands
         {
             try
             {
-                var nets = _uow.Networks.Get(QueryExpressionFactory.GetQueryExpression<tbl_Networks>()
-                    .Where(x => x.UserId == _user.Id).ToLambda());
-
-                ConsoleHelper.StdOutNetworks(nets);
-
                 _uow.Networks.Create(
                     new tbl_Networks
                     {
                         Id = Guid.NewGuid(),
-                        UserId = _user.Id,
+                        IdentityId = _user.IdentityId,
                         Address = _cidr.ToString(),
                         Action = _actionType.ToString(),
                         Enabled = true,

@@ -19,14 +19,14 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
         {
             var pvalues = new List<SqlParameter>
             {
-                new SqlParameter("@UserId", SqlDbType.UniqueIdentifier) { Value = entity.UserId },
+                new SqlParameter("@IdentityId", SqlDbType.UniqueIdentifier) { Value = entity.IdentityId },
                 new SqlParameter("@Address", SqlDbType.NVarChar) { Value = entity.Address },
                 new SqlParameter("@Action", SqlDbType.NVarChar) { Value = entity.Action },
                 new SqlParameter("@Enabled", SqlDbType.Bit) { Value = entity.Enabled },
             };
 
             return _context.Set<uvw_Networks>().FromSqlRaw("[svc].[usp_Network_Insert]"
-                + "@UserId, @Address, @Action, @Enabled", pvalues.ToArray())
+                + "@IdentityId, @Address, @Action, @Enabled", pvalues.ToArray())
                     .AsEnumerable().Single();
 
             /*
@@ -95,14 +95,14 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
             var pvalues = new List<SqlParameter>
             {
                 new SqlParameter("@Id", SqlDbType.UniqueIdentifier) { Value = entity.Id },
-                new SqlParameter("@UserId", SqlDbType.UniqueIdentifier) { Value = entity.UserId },
+                new SqlParameter("@IdentityId", SqlDbType.UniqueIdentifier) { Value = entity.IdentityId },
                 new SqlParameter("@Address", SqlDbType.NVarChar) { Value = entity.Address },
                 new SqlParameter("@Action", SqlDbType.NVarChar) { Value = entity.Action },
                 new SqlParameter("@Enabled", SqlDbType.Bit) { Value = entity.Enabled },
             };
 
             return _context.Set<uvw_Networks>().FromSqlRaw("[svc].[usp_Network_Update]"
-                + "@Id, @UserId, @Address, @Action, @Enabled", pvalues.ToArray())
+                + "@Id, @IdentityId, @Address, @Action, @Enabled", pvalues.ToArray())
                     .AsEnumerable().Single();
         }
 

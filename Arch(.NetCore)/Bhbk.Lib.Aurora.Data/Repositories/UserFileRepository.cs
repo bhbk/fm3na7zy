@@ -19,7 +19,7 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
         {
             var pvalues = new List<SqlParameter>
             {
-                new SqlParameter("@UserId", SqlDbType.UniqueIdentifier) { Value = entity.UserId },
+                new SqlParameter("@IdentityId", SqlDbType.UniqueIdentifier) { Value = entity.IdentityId },
                 new SqlParameter("@FolderId", SqlDbType.UniqueIdentifier) { Value = entity.FolderId.HasValue ? (object)entity.FolderId.Value : DBNull.Value },
                 new SqlParameter("@VirtualName", SqlDbType.NVarChar) { Value = entity.VirtualName },
                 new SqlParameter("@ReadOnly", SqlDbType.Bit) { Value = entity.ReadOnly },
@@ -30,7 +30,7 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
             };
 
             return _context.Set<uvw_UserFiles>().FromSqlRaw("[svc].[usp_UserFile_Insert]"
-                + "@UserId, @FolderId, @VirtualName, @ReadOnly, @RealPath, @RealFileName, @RealFileSize, @HashSHA256", pvalues.ToArray())
+                + "@IdentityId, @FolderId, @VirtualName, @ReadOnly, @RealPath, @RealFileName, @RealFileSize, @HashSHA256", pvalues.ToArray())
                     .AsEnumerable().Single();
 
             /*
@@ -99,7 +99,7 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
             var pvalues = new List<SqlParameter>
             {
                 new SqlParameter("@Id", SqlDbType.UniqueIdentifier) { Value = entity.Id },
-                new SqlParameter("@UserId", SqlDbType.UniqueIdentifier) { Value = entity.UserId },
+                new SqlParameter("@IdentityId", SqlDbType.UniqueIdentifier) { Value = entity.IdentityId },
                 new SqlParameter("@FolderId", SqlDbType.UniqueIdentifier) { Value = entity.FolderId.HasValue ? (object)entity.FolderId.Value : DBNull.Value },
                 new SqlParameter("@VirtualName", SqlDbType.NVarChar) { Value = entity.VirtualName },
                 new SqlParameter("@ReadOnly", SqlDbType.Bit) { Value = entity.ReadOnly },
@@ -113,7 +113,7 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
             };
 
             return _context.Set<uvw_UserFiles>().FromSqlRaw("[svc].[usp_UserFile_Update]"
-                + "@Id, @UserId, @FolderId, @VirtualName, @ReadOnly, @RealPath, @RealFileName, @RealFileSize, @FileHashSHA256, "
+                + "@Id, @IdentityId, @FolderId, @VirtualName, @ReadOnly, @RealPath, @RealFileName, @RealFileSize, @FileHashSHA256, "
                 + "@LastAccessed, @LastUpdated, @LastVerified", pvalues.ToArray())
                     .AsEnumerable().Single();
         }

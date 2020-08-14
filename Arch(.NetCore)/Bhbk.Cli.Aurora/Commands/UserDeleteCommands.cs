@@ -20,7 +20,6 @@ namespace Bhbk.Cli.Aurora.Commands
         private static IConfiguration _conf;
         private static IUnitOfWork _uow;
         private static tbl_Users _user;
-        private static FileInfo _file;
 
         public UserDeleteCommands()
         {
@@ -39,7 +38,7 @@ namespace Bhbk.Cli.Aurora.Commands
                 _uow = new UnitOfWork(_conf["Databases:AuroraEntities"], instance);
 
                 _user = _uow.Users.Get(QueryExpressionFactory.GetQueryExpression<tbl_Users>()
-                    .Where(x => x.UserName == arg && x.Immutable == false).ToLambda(),
+                    .Where(x => x.IdentityAlias == arg && x.Immutable == false).ToLambda(),
                         new List<Expression<Func<tbl_Users, object>>>()
                         {
                             x => x.tbl_UserFiles,

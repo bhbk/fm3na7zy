@@ -16,6 +16,7 @@ namespace Bhbk.Lib.Aurora.Data.Models
         }
 
         public virtual DbSet<uvw_Credentials> uvw_Credentials { get; set; }
+        public virtual DbSet<uvw_Networks> uvw_Networks { get; set; }
         public virtual DbSet<uvw_PrivateKeys> uvw_PrivateKeys { get; set; }
         public virtual DbSet<uvw_PublicKeys> uvw_PublicKeys { get; set; }
         public virtual DbSet<uvw_Settings> uvw_Settings { get; set; }
@@ -54,6 +55,21 @@ namespace Bhbk.Lib.Aurora.Data.Models
                     .IsRequired()
                     .HasMaxLength(128)
                     .IsUnicode(false);
+            });
+
+            modelBuilder.Entity<uvw_Networks>(entity =>
+            {
+                entity.HasNoKey();
+
+                entity.ToView("uvw_Networks", "svc");
+
+                entity.Property(e => e.Action)
+                    .IsRequired()
+                    .HasMaxLength(8);
+
+                entity.Property(e => e.Address)
+                    .IsRequired()
+                    .HasMaxLength(128);
             });
 
             modelBuilder.Entity<uvw_PrivateKeys>(entity =>
@@ -184,7 +200,7 @@ namespace Bhbk.Lib.Aurora.Data.Models
                     .HasMaxLength(16)
                     .IsUnicode(false);
 
-                entity.Property(e => e.UserName)
+                entity.Property(e => e.IdentityAlias)
                     .IsRequired()
                     .HasMaxLength(128)
                     .IsUnicode(false);

@@ -21,13 +21,13 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
         private readonly IServiceScopeFactory _factory;
         private readonly Dictionary<NodePath, NodeBase> _path;
         private readonly Dictionary<NodeBase, MemoryNodeData> _store;
-        private readonly tbl_Users _user;
+        private readonly tbl_Users _userEntity;
 
-        internal MemoryReadWriteFileSystem(FileSystemProviderSettings settings, IServiceScopeFactory factory, tbl_Users user)
+        internal MemoryReadWriteFileSystem(FileSystemProviderSettings settings, IServiceScopeFactory factory, tbl_Users userEntity)
             : base(settings)
         {
             _factory = factory;
-            _user = user;
+            _userEntity = userEntity;
 
             _path = new Dictionary<NodePath, NodeBase>();
             _store = new Dictionary<NodeBase, MemoryNodeData>();
@@ -51,7 +51,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
             _store[parent].Children.Add(child);
             _path.Add(child.Path, child);
 
-            Log.Information($"'{callPath}' '{_user.UserName}' folder '{child.Path}'");
+            Log.Information($"'{callPath}' '{_userEntity.IdentityAlias}' folder '{child.Path}'");
 
             return child;
         }
@@ -77,10 +77,10 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
             _path.Remove(node.Path);
 
             if (node.NodeType == NodeType.Directory)
-                Log.Information($"'{callPath}' '{_user.UserName}' folder '{node.Path}'");
+                Log.Information($"'{callPath}' '{_userEntity.IdentityAlias}' folder '{node.Path}'");
 
             else if (node.NodeType == NodeType.File)
-                Log.Information($"'{callPath}' '{_user.UserName}' file '{node.Path}'");
+                Log.Information($"'{callPath}' '{_userEntity.IdentityAlias}' file '{node.Path}'");
 
             else
                 throw new NotImplementedException();
@@ -183,7 +183,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
             _store[node.Parent].Children.Remove(node);
             _path.Remove(node.Path);
 
-            Log.Information($"'{callPath}' '{_user.UserName}' from '{node.Path}' to '{node.Parent.Path}/{newName}'");
+            Log.Information($"'{callPath}' '{_userEntity.IdentityAlias}' from '{node.Path}' to '{node.Parent.Path}/{newName}'");
 
             return newNode;
         }
@@ -201,7 +201,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
 
             _store[node].Content = newStream;
 
-            Log.Information($"'{callPath}' '{_user.UserName}' file '{node.Path}'");
+            Log.Information($"'{callPath}' '{_userEntity.IdentityAlias}' file '{node.Path}'");
 
             return node;
         }

@@ -38,7 +38,7 @@ namespace Bhbk.Cli.Aurora.Commands
                 _uow = new UnitOfWork(_conf["Databases:AuroraEntities"], instance);
 
                 _user = _uow.Users.Get(QueryExpressionFactory.GetQueryExpression<tbl_Users>()
-                    .Where(x => x.UserName == arg).ToLambda(),
+                    .Where(x => x.IdentityAlias == arg).ToLambda(),
                         new List<Expression<Func<tbl_Users, object>>>()
                         {
                             x => x.tbl_UserMounts,
@@ -56,6 +56,7 @@ namespace Bhbk.Cli.Aurora.Commands
             try
             {
                 ConsoleHelper.StdOutKeyPairs(_user.tbl_PublicKeys);
+                Console.Out.WriteLine();
                 ConsoleHelper.StdOutUserMounts(new List<tbl_UserMounts> { _user.tbl_UserMounts });
 
                 return StandardOutput.FondFarewell();

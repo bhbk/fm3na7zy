@@ -19,7 +19,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Helpers
         internal static void EnsureRootExists(IUnitOfWork uow, tbl_Users user)
         {
             var folder = uow.UserFolders.Get(QueryExpressionFactory.GetQueryExpression<tbl_UserFolders>()
-                .Where(x => x.UserId == user.Id && x.ParentId == null).ToLambda())
+                .Where(x => x.IdentityId == user.IdentityId && x.ParentId == null).ToLambda())
                 .SingleOrDefault();
 
             if (folder == null)
@@ -30,7 +30,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Helpers
                     new tbl_UserFolders
                     {
                         Id = Guid.NewGuid(),
-                        UserId = user.Id,
+                        IdentityId = user.IdentityId,
                         ParentId = null,
                         VirtualName = string.Empty,
                         Created = now,
@@ -42,7 +42,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Helpers
 
                 var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
 
-                Log.Information($"'{callPath}' '{user.UserName}' initialize '/'");
+                Log.Information($"'{callPath}' '{user.IdentityAlias}' initialize '/'");
             }
         }
 
@@ -61,7 +61,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Helpers
             var folder = FolderPathToEntity(uow, user, folderPath);
 
             var file = uow.UserFiles.Get(QueryExpressionFactory.GetQueryExpression<tbl_UserFiles>()
-                .Where(x => x.UserId == user.Id && x.FolderId == folder.Id && x.VirtualName == filePath).ToLambda())
+                .Where(x => x.IdentityId == user.IdentityId && x.FolderId == folder.Id && x.VirtualName == filePath).ToLambda())
                 .SingleOrDefault();
 
             return file;
@@ -73,7 +73,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Helpers
                 path = path.Substring(1);
 
             var folder = uow.UserFolders.Get(QueryExpressionFactory.GetQueryExpression<tbl_UserFolders>()
-                .Where(x => x.UserId == user.Id && x.ParentId == null).ToLambda())
+                .Where(x => x.IdentityId == user.IdentityId && x.ParentId == null).ToLambda())
                 .SingleOrDefault();
 
             if (string.IsNullOrWhiteSpace(path))
@@ -82,7 +82,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Helpers
             foreach (var entry in path.Split("/"))
             {
                 folder = uow.UserFolders.Get(QueryExpressionFactory.GetQueryExpression<tbl_UserFolders>()
-                    .Where(x => x.UserId == user.Id && x.ParentId == folder.Id && x.VirtualName == entry).ToLambda())
+                    .Where(x => x.IdentityId == user.IdentityId && x.ParentId == folder.Id && x.VirtualName == entry).ToLambda())
                     .SingleOrDefault();
             };
 
@@ -95,7 +95,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Helpers
             var paths = new List<string> { };
 
             var folder = uow.UserFolders.Get(QueryExpressionFactory.GetQueryExpression<tbl_UserFolders>()
-                .Where(x => x.UserId == user.Id && x.Id == file.FolderId).ToLambda())
+                .Where(x => x.IdentityId == user.IdentityId && x.Id == file.FolderId).ToLambda())
                 .Single();
 
             while (folder.ParentId != null)

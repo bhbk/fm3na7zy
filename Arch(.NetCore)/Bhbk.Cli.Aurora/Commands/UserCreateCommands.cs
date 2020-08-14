@@ -23,8 +23,8 @@ namespace Bhbk.Cli.Aurora.Commands
         private static IConfiguration _conf;
         private static IUnitOfWork _uow;
         private static FileSystemTypes _fileSystem;
-        private static string _userName;
         private static string _fileSystemList = string.Join(", ", Enum.GetNames(typeof(FileSystemTypes)));
+        private static string _userName;
 
         public UserCreateCommands()
         {
@@ -43,7 +43,7 @@ namespace Bhbk.Cli.Aurora.Commands
                 _uow = new UnitOfWork(_conf["Databases:AuroraEntities"], instance);
 
                 var user = _uow.Users.Get(QueryExpressionFactory.GetQueryExpression<tbl_Users>()
-                    .Where(x => x.UserName == arg).ToLambda()).SingleOrDefault();
+                    .Where(x => x.IdentityAlias == arg).ToLambda()).SingleOrDefault();
 
                 if (user != null)
                     throw new ConsoleHelpAsException($"  *** The user '{arg}' alreay exists ***");
@@ -76,7 +76,7 @@ namespace Bhbk.Cli.Aurora.Commands
                 }).Result;
 
                 foreach(var entry in users.Data)
-                    Console.Out.WriteLine($"  Username '{entry.UserName}' with GUID '{entry.Id}'");
+                    Console.Out.WriteLine($"  User '{entry.UserName}' with GUID '{entry.Id}'");
 
                 Console.Out.WriteLine();
                 Console.Out.Write("  *** Enter GUID of (identity) user to use *** : ");
@@ -85,8 +85,8 @@ namespace Bhbk.Cli.Aurora.Commands
                 var user = _uow.Users.Create(
                     new tbl_Users
                     {
-                        Id = Guid.Parse(input),
-                        UserName = _userName,
+                        IdentityId = Guid.Parse(input),
+                        IdentityAlias = _userName,
                         AllowPassword = true,
                         FileSystemType = _fileSystem.ToString(),
                         Enabled = true,

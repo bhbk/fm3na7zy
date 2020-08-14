@@ -27,16 +27,16 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
             string template = (data == null) ? MessageTemplate : MessageTemplateWithData;
 
             if (level <= LogLevel.Verbose)
-                _logger.Verbose(template, objectType, _user.UserName, objectId, area, message, data);
+                _logger.Verbose(template, objectType, _user.IdentityAlias, objectId, area, message, data);
 
             else if (level <= LogLevel.Debug)
-                _logger.Debug(template, objectType, _user.UserName, objectId, area, message, data);
+                _logger.Debug(template, objectType, _user.IdentityAlias, objectId, area, message, data);
 
             else if (level <= LogLevel.Info)
-                _logger.Information(template, objectType, _user.UserName, objectId, area, message, data);
+                _logger.Information(template, objectType, _user.IdentityAlias, objectId, area, message, data);
 
             else if (level <= LogLevel.Error)
-                _logger.Error(template, objectType, _user.UserName, objectId, area, message, data);
+                _logger.Error(template, objectType, _user.IdentityAlias, objectId, area, message, data);
         }
 
         public override void Write(LogLevel level, Type objectType, int objectId, string area, string message)

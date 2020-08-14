@@ -15,8 +15,8 @@ namespace Bhbk.Lib.Aurora.Data.Models_DIRECT
             tbl_UserFolders = new HashSet<tbl_UserFolders>();
         }
 
-        public Guid Id { get; set; }
-        public string UserName { get; set; }
+        public Guid IdentityId { get; set; }
+        public string IdentityAlias { get; set; }
         public bool AllowPassword { get; set; }
         public string FileSystemType { get; set; }
         public bool FileSystemReadOnly { get; set; }

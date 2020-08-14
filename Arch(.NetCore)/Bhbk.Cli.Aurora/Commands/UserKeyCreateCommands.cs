@@ -25,12 +25,12 @@ namespace Bhbk.Cli.Aurora.Commands
         private static IUnitOfWork _uow;
         private static tbl_Users _user;
         private static int _privKeySize;
-        private static string _privKeyPass;
-        private static string _pubKeyDns;
         private static SshHostKeyAlgorithm _keyAlgo;
         private static SignatureHashAlgorithm _sigAlgo;
         private static string _keyAlgoList = string.Join(", ", Enum.GetNames(typeof(SshHostKeyAlgorithm)));
         private static string _sigAlgoList = string.Join(", ", Enum.GetNames(typeof(SignatureHashAlgorithm)));
+        private static string _privKeyPass;
+        private static string _pubKeyDns;
 
         public UserKeyCreateCommands()
         {
@@ -49,7 +49,7 @@ namespace Bhbk.Cli.Aurora.Commands
                 _uow = new UnitOfWork(_conf["Databases:AuroraEntities"], instance);
 
                 _user = _uow.Users.Get(QueryExpressionFactory.GetQueryExpression<tbl_Users>()
-                    .Where(x => x.UserName == arg).ToLambda(),
+                    .Where(x => x.IdentityAlias == arg).ToLambda(),
                         new List<Expression<Func<tbl_Users, object>>>()
                         {
                             x => x.tbl_PrivateKeys,
@@ -93,8 +93,6 @@ namespace Bhbk.Cli.Aurora.Commands
         {
             try
             {
-                Console.Out.WriteLine();
-
                 if (!string.IsNullOrEmpty(_privKeyPass))
                 {
                     Console.Out.Write("  *** Enter password for the private key *** : ");
@@ -117,6 +115,7 @@ namespace Bhbk.Cli.Aurora.Commands
                     .Where(x => x.PrivateKeyId == privKey.Id).ToLambda())
                     .Single();
 
+                Console.Out.WriteLine();
                 Console.Out.WriteLine($"{privKey.KeyValue}");
                 Console.Out.WriteLine($"{pubKey.KeyValue}");
 

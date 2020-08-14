@@ -19,7 +19,7 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
         {
             var pvalues = new List<SqlParameter>
             {
-                new SqlParameter("@UserId", SqlDbType.UniqueIdentifier) { Value = entity.UserId },
+                new SqlParameter("@IdentityId", SqlDbType.UniqueIdentifier) { Value = entity.IdentityId },
                 new SqlParameter("@CredentialId", SqlDbType.UniqueIdentifier) { Value = entity.CredentialId },
                 new SqlParameter("@AuthType", SqlDbType.NVarChar) { Value = entity.AuthType },
                 new SqlParameter("@ServerName", SqlDbType.NVarChar) { Value = entity.ServerAddress },
@@ -29,7 +29,7 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
             };
 
             return _context.Set<uvw_UserMounts>().FromSqlRaw("[svc].[usp_UserMount_Insert]"
-                + "@UserId, @CredentialId, @AuthType, @ServerName, @ServerPath, @Enabled, @Immutable", pvalues.ToArray())
+                + "@IdentityId, @CredentialId, @AuthType, @ServerName, @ServerPath, @Enabled, @Immutable", pvalues.ToArray())
                     .AsEnumerable().Single();
 
             /*
@@ -67,10 +67,10 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
         {
             var pvalues = new List<SqlParameter>
             {
-                new SqlParameter("@UserId", SqlDbType.UniqueIdentifier) { Value = entity.UserId }
+                new SqlParameter("@IdentityId", SqlDbType.UniqueIdentifier) { Value = entity.IdentityId }
             };
 
-            return _context.Set<uvw_UserMounts>().FromSqlRaw("[svc].[usp_UserMount_Delete] @UserId", pvalues.ToArray())
+            return _context.Set<uvw_UserMounts>().FromSqlRaw("[svc].[usp_UserMount_Delete] @IdentityId", pvalues.ToArray())
                 .AsEnumerable().Single();
         }
 
@@ -97,7 +97,7 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
         {
             var pvalues = new List<SqlParameter>
             {
-                new SqlParameter("@UserId", SqlDbType.UniqueIdentifier) { Value = entity.UserId },
+                new SqlParameter("@IdentityId", SqlDbType.UniqueIdentifier) { Value = entity.IdentityId },
                 new SqlParameter("@CredentialId", SqlDbType.UniqueIdentifier) { Value = entity.CredentialId },
                 new SqlParameter("@AuthType", SqlDbType.NVarChar) { Value = entity.AuthType },
                 new SqlParameter("@ServerName", SqlDbType.NVarChar) { Value = entity.ServerAddress },
@@ -107,7 +107,7 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
             };
 
             return _context.Set<uvw_UserMounts>().FromSqlRaw("[svc].[usp_UserMount_Update]"
-                + "@UserId, @CredentialId, @AuthType, @ServerName, @ServerPath, @Enabled, @Immutable", pvalues.ToArray())
+                + "@IdentityId, @CredentialId, @AuthType, @ServerName, @ServerPath, @Enabled, @Immutable", pvalues.ToArray())
                     .AsEnumerable().Single();
         }
 

@@ -20,7 +20,7 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 		{
 			var keyAlgoStr = keyAlgo.ToString();
 			var privKey = uow.PrivateKeys.Get(QueryExpressionFactory.GetQueryExpression<tbl_PrivateKeys>()
-				.Where(x => x.KeyAlgo == keyAlgoStr && x.UserId == null && x.Immutable == true).ToLambda())
+				.Where(x => x.KeyAlgo == keyAlgoStr && x.IdentityId == null && x.Immutable == true).ToLambda())
 				.SingleOrDefault();
 
 			if (privKey == null)
@@ -51,7 +51,7 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 				{
 					Id = privId,
 					PublicKeyId = pubId,
-					UserId = null,
+					IdentityId = null,
 					KeyValue = Encoding.ASCII.GetString(privStream.ToArray()),
 					KeyAlgo = keyAlgo.ToString(),
 					KeyPass = privKeyPass,
@@ -67,7 +67,7 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 				{
 					Id = pubId,
 					PrivateKeyId = privId,
-					UserId = null,
+					IdentityId = null,
 					KeyValue = Encoding.ASCII.GetString(pubStream.ToArray()),
 					KeyAlgo = keyAlgo.ToString(),
 					KeyFormat = pubKeyFormat.ToString(),
@@ -102,7 +102,7 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 				{
 					Id = privId,
 					PublicKeyId = pubId,
-					UserId = user.Id,
+					IdentityId = user.IdentityId,
 					KeyValue = Encoding.ASCII.GetString(privStream.ToArray()),
 					KeyAlgo = keyAlgo.ToString(),
 					KeyPass = privKeyPass,
@@ -118,7 +118,7 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 				{
 					Id = pubId,
 					PrivateKeyId = privId,
-					UserId = user.Id,
+					IdentityId = user.IdentityId,
 					KeyValue = Encoding.ASCII.GetString(pubStream.ToArray()),
 					KeyAlgo = keyAlgo.ToString(),
 					KeyFormat = pubKeyFormat.ToString(),
@@ -257,7 +257,7 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 			var pubKey = new SshPublicKey(pubKeyInfo);
 			pubKey.SavePublicKey(pubStream, SshPublicKeyFormat.Pkcs8);
 
-			var data = new string($"ssh-rsa {Convert.ToBase64String(pubKey.GetPublicKey())} {user.UserName}@{key.Hostname}");
+			var data = new string($"ssh-rsa {Convert.ToBase64String(pubKey.GetPublicKey())} {user.IdentityAlias}@{key.Hostname}");
 
 			File.WriteAllText(outputFile.FullName, data);
 
@@ -283,7 +283,7 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 				var pubKey = new SshPublicKey(pubKeyInfo);
 				pubKey.SavePublicKey(pubStream, SshPublicKeyFormat.Pkcs8);
 
-				sb.AppendLine(new string($"ssh-rsa {Convert.ToBase64String(pubKey.GetPublicKey())} {user.UserName}@{key.Hostname}"));
+				sb.AppendLine(new string($"ssh-rsa {Convert.ToBase64String(pubKey.GetPublicKey())} {user.IdentityAlias}@{key.Hostname}"));
 				pubKeys.Add(pubKey);
 			}
 
@@ -324,7 +324,7 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 					{
 						Id = privId,
 						PublicKeyId = pubId,
-						UserId = user.Id,
+						IdentityId = user.IdentityId,
 						KeyValue = privKeyValue,
 						KeyAlgo = keyAlgo.ToString(),
 						KeyPass = privKeyPass,
@@ -340,7 +340,7 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 					{
 						Id = pubId,
 						PrivateKeyId = privId,
-						UserId = user.Id,
+						IdentityId = user.IdentityId,
 						KeyValue = pubKeyValue,
 						KeyAlgo = keyAlgo.ToString(),
 						KeyFormat = pubKeyFormat.ToString(),
@@ -361,7 +361,7 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 					{
 						Id = pubId,
 						PrivateKeyId = privKeyFound.Id,
-						UserId = user.Id,
+						IdentityId = user.IdentityId,
 						KeyValue = pubKeyValue,
 						KeyAlgo = keyAlgo.ToString(),
 						KeyFormat = pubKeyFormat.ToString(),
@@ -382,7 +382,7 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 					{
 						Id = privId,
 						PublicKeyId = pubKeyFound.Id,
-						UserId = user.Id,
+						IdentityId = user.IdentityId,
 						KeyValue = privKeyValue,
 						KeyAlgo = sigAlgo.ToString(),
 						KeyPass = privKeyPass,
@@ -416,7 +416,7 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 					new tbl_PublicKeys
 					{
 						Id = Guid.NewGuid(),
-						UserId = user.Id,
+						IdentityId = user.IdentityId,
 						KeyValue = pubKeyValue,
 						KeyAlgo = keyAlgo.ToString(),
 						KeyFormat = keyFormat.ToString(),
@@ -458,7 +458,7 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 					new tbl_PublicKeys
 					{
 						Id = Guid.NewGuid(),
-						UserId = user.Id,
+						IdentityId = user.IdentityId,
 						KeyValue = pubKeyBase64,
 						KeyAlgo = pubKey.KeyAlgorithm.ToString(),
 						SigValue = pubKey.Fingerprint.ToString(sigAlgo, false),
@@ -503,7 +503,7 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 						new tbl_PublicKeys
 						{
 							Id = Guid.NewGuid(),
-							UserId = user.Id,
+							IdentityId = user.IdentityId,
 							KeyValue = pubKeyBase64,
 							KeyAlgo = pubKey.KeyAlgorithm.ToString(),
 							SigValue = pubKey.Fingerprint.ToString(sigAlgo, false),

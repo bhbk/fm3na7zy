@@ -45,7 +45,7 @@ namespace Bhbk.Lib.Aurora.Domain.Tests.RespositoryTests_DIRECT
              * create composite test users
              */
             var foundCompositeUser = _uow.Users.Get(QueryExpressionFactory.GetQueryExpression<tbl_Users>()
-                .Where(x => x.UserName == Constants.TestCompositeUser).ToLambda())
+                .Where(x => x.IdentityAlias == Constants.TestCompositeUser).ToLambda())
                 .SingleOrDefault();
 
             if (foundCompositeUser == null)
@@ -53,8 +53,8 @@ namespace Bhbk.Lib.Aurora.Domain.Tests.RespositoryTests_DIRECT
                 foundCompositeUser = _uow.Users.Create(
                     new tbl_Users()
                     {
-                        Id = Guid.NewGuid(),
-                        UserName = Constants.TestCompositeUser,
+                        IdentityId = Guid.NewGuid(),
+                        IdentityAlias = Constants.TestCompositeUser,
                         AllowPassword = true,
                         FileSystemType = FileSystemTypes.Composite.ToString(),
                         Enabled = true,
@@ -73,7 +73,7 @@ namespace Bhbk.Lib.Aurora.Domain.Tests.RespositoryTests_DIRECT
              * create memory test users
              */
             var foundMemoryUser = _uow.Users.Get(QueryExpressionFactory.GetQueryExpression<tbl_Users>()
-                .Where(x => x.UserName == Constants.TestMemoryUser).ToLambda())
+                .Where(x => x.IdentityAlias == Constants.TestMemoryUser).ToLambda())
                 .SingleOrDefault();
 
             if (foundMemoryUser == null)
@@ -81,8 +81,8 @@ namespace Bhbk.Lib.Aurora.Domain.Tests.RespositoryTests_DIRECT
                 foundMemoryUser = _uow.Users.Create(
                     new tbl_Users()
                     {
-                        Id = Guid.NewGuid(),
-                        UserName = Constants.TestMemoryUser,
+                        IdentityId = Guid.NewGuid(),
+                        IdentityAlias = Constants.TestMemoryUser,
                         AllowPassword = true,
                         FileSystemType = FileSystemTypes.Memory.ToString(),
                         Enabled = true,
@@ -101,7 +101,7 @@ namespace Bhbk.Lib.Aurora.Domain.Tests.RespositoryTests_DIRECT
              * create smb test users
              */
             var foundSmbUser = _uow.Users.Get(QueryExpressionFactory.GetQueryExpression<tbl_Users>()
-                .Where(x => x.UserName == Constants.TestSmbUser).ToLambda())
+                .Where(x => x.IdentityAlias == Constants.TestSmbUser).ToLambda())
                 .SingleOrDefault();
 
             if (foundSmbUser == null)
@@ -109,8 +109,8 @@ namespace Bhbk.Lib.Aurora.Domain.Tests.RespositoryTests_DIRECT
                 foundSmbUser = _uow.Users.Create(
                     new tbl_Users()
                     {
-                        Id = Guid.NewGuid(),
-                        UserName = Constants.TestSmbUser,
+                        IdentityId = Guid.NewGuid(),
+                        IdentityAlias = Constants.TestSmbUser,
                         AllowPassword = true,
                         FileSystemType = FileSystemTypes.SMB.ToString(),
                         Enabled = true,
@@ -135,9 +135,9 @@ namespace Bhbk.Lib.Aurora.Domain.Tests.RespositoryTests_DIRECT
              * delete test users
              */
             _uow.Users.Delete(QueryExpressionFactory.GetQueryExpression<tbl_Users>()
-                .Where(x => x.UserName == Constants.TestCompositeUser 
-                    || x.UserName == Constants.TestMemoryUser
-                    || x.UserName == Constants.TestSmbUser).ToLambda());
+                .Where(x => x.IdentityAlias == Constants.TestCompositeUser 
+                    || x.IdentityAlias == Constants.TestMemoryUser
+                    || x.IdentityAlias == Constants.TestSmbUser).ToLambda());
 
             _uow.Commit();
 
@@ -148,7 +148,7 @@ namespace Bhbk.Lib.Aurora.Domain.Tests.RespositoryTests_DIRECT
                 .Where(x => (x.KeyAlgo == SshHostKeyAlgorithm.DSS.ToString()
                     || x.KeyAlgo == SshHostKeyAlgorithm.RSA.ToString()
                     || x.KeyAlgo == SshHostKeyAlgorithm.ECDsaNistP521.ToString()
-                    || x.KeyAlgo == SshHostKeyAlgorithm.ED25519.ToString()) && x.UserId == null).ToLambda());
+                    || x.KeyAlgo == SshHostKeyAlgorithm.ED25519.ToString()) && x.IdentityId == null).ToLambda());
 
             _uow.Commit();
         }

@@ -46,7 +46,7 @@ namespace Bhbk.Cli.Aurora.Commands
             try
             {
                 var keys = _uow.PublicKeys.Get(QueryExpressionFactory.GetQueryExpression<tbl_PublicKeys>()
-                    .Where(x => x.UserId == null && x.Immutable == true).ToLambda()).OrderBy(x => x.Created).ToList();
+                    .Where(x => x.IdentityId == null && x.Immutable == true).ToLambda()).OrderBy(x => x.Created).ToList();
 
                 if (_delete)
                 {
@@ -74,10 +74,10 @@ namespace Bhbk.Cli.Aurora.Commands
                     ConsoleHelper.StdOutKeyPairs(keys);
 
                     _uow.PublicKeys.Delete(QueryExpressionFactory.GetQueryExpression<tbl_PublicKeys>()
-                        .Where(x => x.UserId == null && x.Immutable == true).ToLambda());
+                        .Where(x => x.IdentityId == null && x.Immutable == true).ToLambda());
 
                     _uow.PrivateKeys.Delete(QueryExpressionFactory.GetQueryExpression<tbl_PrivateKeys>()
-                        .Where(x => x.UserId == null && x.Immutable == true).ToLambda());
+                        .Where(x => x.IdentityId == null && x.Immutable == true).ToLambda());
 
                     _uow.Commit();
                 }

@@ -27,7 +27,8 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
         private readonly tbl_Users _user;
         private readonly string _userMount;
 
-        internal SmbReadOnlyFileSystem(FileSystemProviderSettings settings, IServiceScopeFactory factory, tbl_Users user, string pass)
+        internal SmbReadOnlyFileSystem(FileSystemProviderSettings settings, IServiceScopeFactory factory, tbl_Users user, 
+            string identityUser, string identityPass)
             : base(settings)
         {
             /*
@@ -46,7 +47,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                 var conf = scope.ServiceProvider.GetRequiredService<IConfiguration>();
 
                 var userMount = uow.UserMounts.Get(QueryExpressionFactory.GetQueryExpression<tbl_UserMounts>()
-                    .Where(x => x.UserId == _user.Id).ToLambda())
+                    .Where(x => x.IdentityId == _user.IdentityId).ToLambda())
                     .Single();
 
                 if (userMount.CredentialId.HasValue)
@@ -67,7 +68,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                 }
                 else
                 {
-                    _userToken = UserHelper.GetSafeAccessTokenHandle(null, user.UserName, pass);
+                    _userToken = UserHelper.GetSafeAccessTokenHandle(null, identityUser, identityPass);
                 }
 
                 _userMount = userMount.ServerAddress + userMount.ServerShare;

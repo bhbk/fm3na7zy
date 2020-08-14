@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[tbl_UserFiles] (
     [Id]           UNIQUEIDENTIFIER NOT NULL,
-    [UserId]       UNIQUEIDENTIFIER NOT NULL,
+    [IdentityId]   UNIQUEIDENTIFIER NOT NULL,
     [FolderId]     UNIQUEIDENTIFIER NULL,
     [VirtualName]  NVARCHAR (MAX)   NOT NULL,
     [ReadOnly]     BIT              CONSTRAINT [DF_tbl_UserFiles_FileReadOnly] DEFAULT ((0)) NOT NULL,
@@ -14,8 +14,12 @@
     [LastVerified] DATETIME2 (7)    NOT NULL,
     CONSTRAINT [PK_tbl_UserFiles] PRIMARY KEY CLUSTERED ([Id] ASC),
     CONSTRAINT [FK_tbl_UserFiles_FolderID] FOREIGN KEY ([FolderId]) REFERENCES [dbo].[tbl_UserFolders] ([Id]),
-    CONSTRAINT [FK_tbl_UserFiles_UserID] FOREIGN KEY ([UserId]) REFERENCES [dbo].[tbl_Users] ([Id]) ON DELETE CASCADE ON UPDATE CASCADE
+    CONSTRAINT [FK_tbl_UserFiles_IdentityID] FOREIGN KEY ([IdentityId]) REFERENCES [dbo].[tbl_Users] ([IdentityId]) ON DELETE CASCADE ON UPDATE CASCADE
 );
+
+
+
+
 
 
 

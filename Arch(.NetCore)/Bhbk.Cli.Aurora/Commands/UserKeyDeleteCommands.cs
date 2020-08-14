@@ -39,7 +39,7 @@ namespace Bhbk.Cli.Aurora.Commands
                 _uow = new UnitOfWork(_conf["Databases:AuroraEntities"], instance);
 
                 _user = _uow.Users.Get(QueryExpressionFactory.GetQueryExpression<tbl_Users>()
-                    .Where(x => x.UserName == arg).ToLambda(),
+                    .Where(x => x.IdentityAlias == arg).ToLambda(),
                         new List<Expression<Func<tbl_Users, object>>>()
                         {
                             x => x.tbl_PrivateKeys,
@@ -66,7 +66,7 @@ namespace Bhbk.Cli.Aurora.Commands
             try
             {
                 var keys = _uow.PublicKeys.Delete(QueryExpressionFactory.GetQueryExpression<tbl_PublicKeys>()
-                    .Where(x => x.UserId == _user.Id && x.Immutable == false).ToLambda());
+                    .Where(x => x.IdentityId == _user.IdentityId && x.Immutable == false).ToLambda());
 
                 ConsoleHelper.StdOutKeyPairs(keys);
 
@@ -76,16 +76,16 @@ namespace Bhbk.Cli.Aurora.Commands
                     var input = Guid.Parse(StandardInput.GetInput());
 
                     var key = _uow.PublicKeys.Get(QueryExpressionFactory.GetQueryExpression<tbl_PublicKeys>()
-                        .Where(x => x.UserId == _user.Id && x.Id == input).ToLambda())
+                        .Where(x => x.IdentityId == _user.IdentityId && x.Id == input).ToLambda())
                         .SingleOrDefault();
 
                     if(key != null)
                     {
                         _uow.PublicKeys.Delete(QueryExpressionFactory.GetQueryExpression<tbl_PublicKeys>()
-                            .Where(x => x.UserId == _user.Id && !x.Immutable && x.Id == key.Id).ToLambda());
+                            .Where(x => x.IdentityId == _user.IdentityId && !x.Immutable && x.Id == key.Id).ToLambda());
 
                         _uow.PrivateKeys.Delete(QueryExpressionFactory.GetQueryExpression<tbl_PrivateKeys>()
-                            .Where(x => x.UserId == _user.Id && !x.Immutable && x.Id == key.PrivateKeyId).ToLambda());
+                            .Where(x => x.IdentityId == _user.IdentityId && !x.Immutable && x.Id == key.PrivateKeyId).ToLambda());
 
                         _uow.Commit();
                     }
@@ -93,10 +93,10 @@ namespace Bhbk.Cli.Aurora.Commands
                 else if (_deleteAll)
                 {
                     _uow.PublicKeys.Delete(QueryExpressionFactory.GetQueryExpression<tbl_PublicKeys>()
-                        .Where(x => x.UserId == _user.Id && !x.Immutable).ToLambda());
+                        .Where(x => x.IdentityId == _user.IdentityId && !x.Immutable).ToLambda());
 
                     _uow.PrivateKeys.Delete(QueryExpressionFactory.GetQueryExpression<tbl_PrivateKeys>()
-                        .Where(x => x.UserId == _user.Id && !x.Immutable).ToLambda());
+                        .Where(x => x.IdentityId == _user.IdentityId && !x.Immutable).ToLambda());
 
                     _uow.Commit();
                 }

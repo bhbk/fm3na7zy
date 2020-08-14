@@ -6,7 +6,7 @@ namespace Bhbk.Lib.Aurora.Data.Models_DIRECT
     public partial class tbl_UserFiles
     {
         public Guid Id { get; set; }
-        public Guid UserId { get; set; }
+        public Guid IdentityId { get; set; }
         public Guid? FolderId { get; set; }
         public string VirtualName { get; set; }
         public bool ReadOnly { get; set; }
@@ -20,6 +20,6 @@ namespace Bhbk.Lib.Aurora.Data.Models_DIRECT
         public DateTime LastVerified { get; set; }
 
         public virtual tbl_UserFolders Folder { get; set; }
-        public virtual tbl_Users User { get; set; }
+        public virtual tbl_Users Identity { get; set; }
     }
 }

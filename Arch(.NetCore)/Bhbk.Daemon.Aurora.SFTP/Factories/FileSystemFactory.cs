@@ -13,7 +13,8 @@ namespace Bhbk.Daemon.Aurora.SFTP.Factories
 {
     internal static class FileSystemFactory
     {
-        internal static FileSystemProvider CreateFileSystem(IServiceScopeFactory factory, ILogger logger, tbl_Users user, string pass = null)
+        internal static FileSystemProvider CreateFileSystem(IServiceScopeFactory factory, ILogger logger, tbl_Users user, 
+            string identityUser, string identityPass)
         {
             LogLevel fsLogLevel;
             FileSystemTypes fsType;
@@ -45,13 +46,13 @@ namespace Bhbk.Daemon.Aurora.SFTP.Factories
                     {
                         if (!user.FileSystemReadOnly)
                         {
-                            Log.Information($"'{callPath}' '{user.UserName}' initialize '{typeof(CompositeReadWriteFileSystem).Name}'");
+                            Log.Information($"'{callPath}' '{user.IdentityAlias}' initialize '{typeof(CompositeReadWriteFileSystem).Name}'");
 
                             return new CompositeReadWriteFileSystem(fsSettings, factory, user);
                         }
                         else
                         {
-                            Log.Information($"'{callPath}' '{user.UserName}' initialize '{typeof(CompositeReadOnlyFileSystem).Name}'");
+                            Log.Information($"'{callPath}' '{user.IdentityAlias}' initialize '{typeof(CompositeReadOnlyFileSystem).Name}'");
 
                             return new CompositeReadOnlyFileSystem(fsSettings, factory, user);
                         }
@@ -61,13 +62,13 @@ namespace Bhbk.Daemon.Aurora.SFTP.Factories
                     {
                         if (!user.FileSystemReadOnly)
                         {
-                            Log.Information($"'{callPath}' '{user.UserName}' initialize '{typeof(MemoryReadWriteFileSystem).Name}'");
+                            Log.Information($"'{callPath}' '{user.IdentityAlias}' initialize '{typeof(MemoryReadWriteFileSystem).Name}'");
 
                             return new MemoryReadWriteFileSystem(fsSettings, factory, user);
                         }
                         else
                         {
-                            Log.Information($"'{callPath}' '{user.UserName}' initialize '{typeof(MemoryReadOnlyFileSystem).Name}'");
+                            Log.Information($"'{callPath}' '{user.IdentityAlias}' initialize '{typeof(MemoryReadOnlyFileSystem).Name}'");
 
                             return new MemoryReadOnlyFileSystem(fsSettings, factory, user);
                         }
@@ -77,15 +78,15 @@ namespace Bhbk.Daemon.Aurora.SFTP.Factories
                     {
                         if (!user.FileSystemReadOnly)
                         {
-                            Log.Information($"'{callPath}' '{user.UserName}' initialize '{typeof(SmbReadWriteFileSystem).Name}'");
+                            Log.Information($"'{callPath}' '{user.IdentityAlias}' initialize '{typeof(SmbReadWriteFileSystem).Name}'");
 
-                            return new SmbReadWriteFileSystem(fsSettings, factory, user, pass);
+                            return new SmbReadWriteFileSystem(fsSettings, factory, user, identityUser, identityPass);
                         }
                         else
                         {
-                            Log.Information($"'{callPath}' '{user.UserName}' initialize '{typeof(SmbReadOnlyFileSystem).Name}'");
+                            Log.Information($"'{callPath}' '{user.IdentityAlias}' initialize '{typeof(SmbReadOnlyFileSystem).Name}'");
 
-                            return new SmbReadOnlyFileSystem(fsSettings, factory, user, pass);
+                            return new SmbReadOnlyFileSystem(fsSettings, factory, user, identityUser, identityPass);
                         }
                     }
 

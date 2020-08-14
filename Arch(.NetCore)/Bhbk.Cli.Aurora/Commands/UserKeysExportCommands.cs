@@ -41,7 +41,7 @@ namespace Bhbk.Cli.Aurora.Commands
                 _uow = new UnitOfWork(_conf["Databases:AuroraEntities"], instance);
 
                 _user = _uow.Users.Get(QueryExpressionFactory.GetQueryExpression<tbl_Users>()
-                    .Where(x => x.UserName == arg).ToLambda())
+                    .Where(x => x.IdentityAlias == arg).ToLambda())
                     .SingleOrDefault();
 
                 if (_user == null)
@@ -53,13 +53,13 @@ namespace Bhbk.Cli.Aurora.Commands
         {
             try
             {
-                var dir = $"{Directory.GetCurrentDirectory()}{Path.DirectorySeparatorChar}.{_user.UserName}";
+                var dir = $"{Directory.GetCurrentDirectory()}{Path.DirectorySeparatorChar}.{_user.IdentityAlias}";
 
                 if (!Directory.Exists(dir))
                     Directory.CreateDirectory(dir);
 
                 var pubKeys = _uow.PublicKeys.Get(QueryExpressionFactory.GetQueryExpression<tbl_PublicKeys>()
-                    .Where(x => x.UserId == _user.Id).ToLambda(),
+                    .Where(x => x.IdentityId == _user.IdentityId).ToLambda(),
                         new List<Expression<Func<tbl_PublicKeys, object>>>()
                         {
                             x => x.PrivateKey,

@@ -38,7 +38,7 @@ namespace Bhbk.Cli.Aurora.Commands
                 _uow = new UnitOfWork(_conf["Databases:AuroraEntities"], instance);
 
                 _user = _uow.Users.Get(QueryExpressionFactory.GetQueryExpression<tbl_Users>()
-                    .Where(x => x.UserName == arg).ToLambda(),
+                    .Where(x => x.IdentityAlias == arg).ToLambda(),
                         new List<Expression<Func<tbl_Users, object>>>()
                         {
                             x => x.tbl_UserMounts
@@ -53,11 +53,7 @@ namespace Bhbk.Cli.Aurora.Commands
         {
             try
             {
-                var mount = _user.tbl_UserMounts;
-
-                ConsoleHelper.StdOutUserMounts(new List<tbl_UserMounts> { mount });
-
-                _uow.UserMounts.Delete(mount);
+                _uow.UserMounts.Delete(_user.tbl_UserMounts);
                 _uow.Commit();
 
                 return StandardOutput.FondFarewell();

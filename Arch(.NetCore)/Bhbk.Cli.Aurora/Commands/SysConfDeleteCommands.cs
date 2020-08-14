@@ -49,8 +49,6 @@ namespace Bhbk.Cli.Aurora.Commands
                 {
                     Console.Out.Write("  *** Enter GUID of config to delete *** : ");
                     _configID = Guid.Parse(StandardInput.GetInput());
-
-                    Console.Out.WriteLine();
                 }
 
                 _uow.Settings.Delete(QueryExpressionFactory.GetQueryExpression<tbl_Settings>()

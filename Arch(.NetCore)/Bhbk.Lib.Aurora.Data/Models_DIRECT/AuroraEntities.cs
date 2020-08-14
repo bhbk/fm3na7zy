@@ -75,10 +75,10 @@ namespace Bhbk.Lib.Aurora.Data.Models_DIRECT
                     .IsRequired()
                     .HasMaxLength(128);
 
-                entity.HasOne(d => d.User)
+                entity.HasOne(d => d.Identity)
                     .WithMany(p => p.tbl_Networks)
-                    .HasForeignKey(d => d.UserId)
-                    .HasConstraintName("FK_tbl_Networks_UserID");
+                    .HasForeignKey(d => d.IdentityId)
+                    .HasConstraintName("FK_tbl_Networks_IdentityID");
             });
 
             modelBuilder.Entity<tbl_PrivateKeys>(entity =>
@@ -103,11 +103,11 @@ namespace Bhbk.Lib.Aurora.Data.Models_DIRECT
 
                 entity.Property(e => e.KeyValue).IsRequired();
 
-                entity.HasOne(d => d.User)
+                entity.HasOne(d => d.Identity)
                     .WithMany(p => p.tbl_PrivateKeys)
-                    .HasForeignKey(d => d.UserId)
+                    .HasForeignKey(d => d.IdentityId)
                     .OnDelete(DeleteBehavior.Cascade)
-                    .HasConstraintName("FK_tbl_PrivateKeys_UserID");
+                    .HasConstraintName("FK_tbl_PrivateKeys_IdentityID");
             });
 
             modelBuilder.Entity<tbl_PublicKeys>(entity =>
@@ -138,16 +138,16 @@ namespace Bhbk.Lib.Aurora.Data.Models_DIRECT
                     .IsRequired()
                     .HasMaxLength(512);
 
+                entity.HasOne(d => d.Identity)
+                    .WithMany(p => p.tbl_PublicKeys)
+                    .HasForeignKey(d => d.IdentityId)
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .HasConstraintName("FK_tbl_PublicKeys_IdentityID");
+
                 entity.HasOne(d => d.PrivateKey)
                     .WithMany(p => p.tbl_PublicKeys)
                     .HasForeignKey(d => d.PrivateKeyId)
                     .HasConstraintName("FK_tbl_PublicKeys_PrivateKeyID");
-
-                entity.HasOne(d => d.User)
-                    .WithMany(p => p.tbl_PublicKeys)
-                    .HasForeignKey(d => d.UserId)
-                    .OnDelete(DeleteBehavior.Cascade)
-                    .HasConstraintName("FK_tbl_PublicKeys_UserID");
             });
 
             modelBuilder.Entity<tbl_Settings>(entity =>
@@ -168,11 +168,11 @@ namespace Bhbk.Lib.Aurora.Data.Models_DIRECT
                     .HasMaxLength(256)
                     .IsUnicode(false);
 
-                entity.HasOne(d => d.User)
+                entity.HasOne(d => d.Identity)
                     .WithMany(p => p.tbl_Settings)
-                    .HasForeignKey(d => d.UserId)
+                    .HasForeignKey(d => d.IdentityId)
                     .OnDelete(DeleteBehavior.Cascade)
-                    .HasConstraintName("FK_tbl_Settings_UserID");
+                    .HasConstraintName("FK_tbl_Settings_IdentityID");
             });
 
             modelBuilder.Entity<tbl_UserFiles>(entity =>
@@ -196,10 +196,10 @@ namespace Bhbk.Lib.Aurora.Data.Models_DIRECT
                     .HasForeignKey(d => d.FolderId)
                     .HasConstraintName("FK_tbl_UserFiles_FolderID");
 
-                entity.HasOne(d => d.User)
+                entity.HasOne(d => d.Identity)
                     .WithMany(p => p.tbl_UserFiles)
-                    .HasForeignKey(d => d.UserId)
-                    .HasConstraintName("FK_tbl_UserFiles_UserID");
+                    .HasForeignKey(d => d.IdentityId)
+                    .HasConstraintName("FK_tbl_UserFiles_IdentityID");
             });
 
             modelBuilder.Entity<tbl_UserFolders>(entity =>
@@ -214,26 +214,26 @@ namespace Bhbk.Lib.Aurora.Data.Models_DIRECT
                     .IsRequired()
                     .IsUnicode(false);
 
+                entity.HasOne(d => d.Identity)
+                    .WithMany(p => p.tbl_UserFolders)
+                    .HasForeignKey(d => d.IdentityId)
+                    .HasConstraintName("FK_tbl_UserFolders_IdentityID");
+
                 entity.HasOne(d => d.Parent)
                     .WithMany(p => p.InverseParent)
                     .HasForeignKey(d => d.ParentId)
                     .HasConstraintName("FK_tbl_UserFolders_ParentID");
-
-                entity.HasOne(d => d.User)
-                    .WithMany(p => p.tbl_UserFolders)
-                    .HasForeignKey(d => d.UserId)
-                    .HasConstraintName("FK_tbl_UserFolders_UserID");
             });
 
             modelBuilder.Entity<tbl_UserMounts>(entity =>
             {
-                entity.HasKey(e => e.UserId);
+                entity.HasKey(e => e.IdentityId);
 
-                entity.HasIndex(e => e.UserId)
+                entity.HasIndex(e => e.IdentityId)
                     .HasName("IX_tbl_UserMounts")
                     .IsUnique();
 
-                entity.Property(e => e.UserId).ValueGeneratedNever();
+                entity.Property(e => e.IdentityId).ValueGeneratedNever();
 
                 entity.Property(e => e.AuthType)
                     .IsRequired()
@@ -256,19 +256,21 @@ namespace Bhbk.Lib.Aurora.Data.Models_DIRECT
                     .OnDelete(DeleteBehavior.Cascade)
                     .HasConstraintName("FK_tbl_UserMounts_CredentialID");
 
-                entity.HasOne(d => d.User)
+                entity.HasOne(d => d.Identity)
                     .WithOne(p => p.tbl_UserMounts)
-                    .HasForeignKey<tbl_UserMounts>(d => d.UserId)
-                    .HasConstraintName("FK_tbl_UserMounts_UserID");
+                    .HasForeignKey<tbl_UserMounts>(d => d.IdentityId)
+                    .HasConstraintName("FK_tbl_UserMounts_IdentityID");
             });
 
             modelBuilder.Entity<tbl_Users>(entity =>
             {
-                entity.HasIndex(e => e.Id)
+                entity.HasKey(e => e.IdentityId);
+
+                entity.HasIndex(e => e.IdentityId)
                     .HasName("IX_tbl_Users")
                     .IsUnique();
 
-                entity.Property(e => e.Id).ValueGeneratedNever();
+                entity.Property(e => e.IdentityId).ValueGeneratedNever();
 
                 entity.Property(e => e.DebugLevel)
                     .HasMaxLength(16)
@@ -279,7 +281,7 @@ namespace Bhbk.Lib.Aurora.Data.Models_DIRECT
                     .HasMaxLength(16)
                     .IsUnicode(false);
 
-                entity.Property(e => e.UserName)
+                entity.Property(e => e.IdentityAlias)
                     .IsRequired()
                     .HasMaxLength(128)
                     .IsUnicode(false);

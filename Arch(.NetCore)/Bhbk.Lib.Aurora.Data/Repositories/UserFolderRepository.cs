@@ -19,14 +19,14 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
         {
             var pvalues = new List<SqlParameter>
             {
-                new SqlParameter("@UserId", SqlDbType.UniqueIdentifier) { Value = entity.UserId },
+                new SqlParameter("@IdentityId", SqlDbType.UniqueIdentifier) { Value = entity.IdentityId },
                 new SqlParameter("@ParentId", SqlDbType.UniqueIdentifier) { Value = entity.ParentId.HasValue ? (object)entity.ParentId.Value : DBNull.Value },
                 new SqlParameter("@VirtualName", SqlDbType.NVarChar) { Value = entity.VirtualName },
                 new SqlParameter("@ReadOnly", SqlDbType.Bit) { Value = entity.ReadOnly }
             };
 
             return _context.Set<uvw_UserFolders>().FromSqlRaw("[svc].[usp_UserFolder_Insert]"
-                + "@UserId, @ParentId, @VirtualName, @ReadOnly", pvalues.ToArray())
+                + "@IdentityId, @ParentId, @VirtualName, @ReadOnly", pvalues.ToArray())
                     .AsEnumerable().Single();
 
             /*
@@ -67,7 +67,7 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
                 new SqlParameter("@Id", SqlDbType.UniqueIdentifier) { Value = entity.Id }
             };
 
-            return _context.Set<uvw_UserFolders>().FromSqlRaw("[svc].[usp_UserFolder_Delete] @UserId", pvalues.ToArray())
+            return _context.Set<uvw_UserFolders>().FromSqlRaw("[svc].[usp_UserFolder_Delete] @IdentityId", pvalues.ToArray())
                 .AsEnumerable().Single();
         }
 
@@ -95,7 +95,7 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
             var pvalues = new List<SqlParameter>
             {
                 new SqlParameter("@Id", SqlDbType.UniqueIdentifier) { Value = entity.Id },
-                new SqlParameter("@UserId", SqlDbType.UniqueIdentifier) { Value = entity.UserId },
+                new SqlParameter("@IdentityId", SqlDbType.UniqueIdentifier) { Value = entity.IdentityId },
                 new SqlParameter("@ParentId", SqlDbType.UniqueIdentifier) { Value = entity.ParentId.HasValue ? (object)entity.ParentId.Value : DBNull.Value },
                 new SqlParameter("@VirtualName", SqlDbType.NVarChar) { Value = entity.VirtualName },
                 new SqlParameter("@ReadOnly", SqlDbType.Bit) { Value = entity.ReadOnly },
@@ -104,7 +104,7 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
             };
 
             return _context.Set<uvw_UserFolders>().FromSqlRaw("[svc].[usp_UserFolder_Update]"
-                + "@Id, @UserId, @ParentId, @VirtualName, @ReadOnly, @LastAccessed, @LastUpdated", pvalues.ToArray())
+                + "@Id, @IdentityId, @ParentId, @VirtualName, @ReadOnly, @LastAccessed, @LastUpdated", pvalues.ToArray())
                     .AsEnumerable().Single();
         }
 

@@ -18,13 +18,13 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
         private readonly IServiceScopeFactory _factory;
         private readonly Dictionary<NodePath, NodeBase> _path;
         private readonly Dictionary<NodeBase, MemoryNodeData> _store;
-        private readonly tbl_Users _user;
+        private readonly tbl_Users _userEntity;
 
-        internal MemoryReadOnlyFileSystem(FileSystemProviderSettings settings, IServiceScopeFactory factory, tbl_Users user)
+        internal MemoryReadOnlyFileSystem(FileSystemProviderSettings settings, IServiceScopeFactory factory, tbl_Users userEntity)
             : base(settings)
         {
             _factory = factory;
-            _user = user;
+            _userEntity = userEntity;
 
             _path = new Dictionary<NodePath, NodeBase>();
             _store = new Dictionary<NodeBase, MemoryNodeData>();

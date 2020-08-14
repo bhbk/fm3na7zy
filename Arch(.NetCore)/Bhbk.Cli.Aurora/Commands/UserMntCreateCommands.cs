@@ -43,7 +43,7 @@ namespace Bhbk.Cli.Aurora.Commands
                 _uow = new UnitOfWork(_conf["Databases:AuroraEntities"], instance);
 
                 _user = _uow.Users.Get(QueryExpressionFactory.GetQueryExpression<tbl_Users>()
-                    .Where(x => x.UserName == arg).ToLambda(),
+                    .Where(x => x.IdentityAlias == arg).ToLambda(),
                         new List<Expression<Func<tbl_Users, object>>>()
                         {
                             x => x.tbl_UserMounts
@@ -82,7 +82,6 @@ namespace Bhbk.Cli.Aurora.Commands
                 if (_user.tbl_UserMounts != null)
                 {
                     Console.Out.WriteLine("  *** The user already has a mount ***");
-                    Console.Out.WriteLine();
                     ConsoleHelper.StdOutUserMounts(new List<tbl_UserMounts> { _user.tbl_UserMounts });
 
                     return StandardOutput.FondFarewell();
@@ -94,13 +93,14 @@ namespace Bhbk.Cli.Aurora.Commands
 
                     ConsoleHelper.StdOutCredentials(credentials);
 
+                    Console.Out.WriteLine();
                     Console.Out.Write("  *** Enter GUID of credential to use for mount *** : ");
                     var input = StandardInput.GetInput();
 
                     _uow.UserMounts.Create(
                         new tbl_UserMounts
                         {
-                            UserId = _user.Id,
+                            IdentityId = _user.IdentityId,
                             CredentialId = Guid.Parse(input),
                             AuthType = _authType.ToString(),
                             ServerAddress = _serverAddress,
@@ -115,7 +115,7 @@ namespace Bhbk.Cli.Aurora.Commands
                     _uow.UserMounts.Create(
                         new tbl_UserMounts
                         {
-                            UserId = _user.Id,
+                            IdentityId = _user.IdentityId,
                             CredentialId = null,
                             AuthType = _authType.ToString(),
                             ServerAddress = _serverAddress,

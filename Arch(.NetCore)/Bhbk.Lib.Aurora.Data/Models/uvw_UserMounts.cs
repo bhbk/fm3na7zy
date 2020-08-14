@@ -5,8 +5,8 @@ namespace Bhbk.Lib.Aurora.Data.Models
 {
     public partial class uvw_UserMounts
     {
-        public Guid UserId { get; set; }
-        public Guid CredentialId { get; set; }
+        public Guid IdentityId { get; set; }
+        public Guid? CredentialId { get; set; }
         public string AuthType { get; set; }
         public string ServerAddress { get; set; }
         public string ServerShare { get; set; }

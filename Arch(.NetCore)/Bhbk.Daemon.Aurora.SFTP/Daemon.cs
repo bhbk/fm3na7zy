@@ -81,7 +81,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
 
                         var dsaStr = SshHostKeyAlgorithm.DSS.ToString();
                         var dsaPrivKey = uow.PrivateKeys.Get(QueryExpressionFactory.GetQueryExpression<tbl_PrivateKeys>()
-                            .Where(x => x.KeyAlgo == dsaStr && x.UserId == null).ToLambda()).OrderBy(x => x.Created)
+                            .Where(x => x.KeyAlgo == dsaStr && x.IdentityId == null).ToLambda()).OrderBy(x => x.Created)
                             .Single();
 
                         var dsaBytes = Encoding.ASCII.GetBytes(dsaPrivKey.KeyValue);
@@ -89,7 +89,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
 
                         var rsaStr = SshHostKeyAlgorithm.RSA.ToString();
                         var rsaPrivKey = uow.PrivateKeys.Get(QueryExpressionFactory.GetQueryExpression<tbl_PrivateKeys>()
-                            .Where(x => x.KeyAlgo == rsaStr && x.UserId == null).ToLambda()).OrderBy(x => x.Created)
+                            .Where(x => x.KeyAlgo == rsaStr && x.IdentityId == null).ToLambda()).OrderBy(x => x.Created)
                             .Single();
 
                         var rsaBytes = Encoding.ASCII.GetBytes(rsaPrivKey.KeyValue);
@@ -97,7 +97,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
 
                         var ecdsaStr = SshHostKeyAlgorithm.ECDsaNistP521.ToString();
                         var ecdsaPrivKey = uow.PrivateKeys.Get(QueryExpressionFactory.GetQueryExpression<tbl_PrivateKeys>()
-                            .Where(x => x.KeyAlgo == ecdsaStr && x.UserId == null).ToLambda()).OrderBy(x => x.Created)
+                            .Where(x => x.KeyAlgo == ecdsaStr && x.IdentityId == null).ToLambda()).OrderBy(x => x.Created)
                             .Single();
 
                         var ecdsaBytes = Encoding.ASCII.GetBytes(ecdsaPrivKey.KeyValue);
@@ -105,7 +105,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
 
                         var ed25519Str = SshHostKeyAlgorithm.ED25519.ToString();
                         var ed25519PrivKey = uow.PrivateKeys.Get(QueryExpressionFactory.GetQueryExpression<tbl_PrivateKeys>()
-                            .Where(x => x.KeyAlgo == ed25519Str && x.UserId == null).ToLambda()).OrderBy(x => x.Created)
+                            .Where(x => x.KeyAlgo == ed25519Str && x.IdentityId == null).ToLambda()).OrderBy(x => x.Created)
                             .Single();
 
                         var ed25519Bytes = Encoding.ASCII.GetBytes(ed25519PrivKey.KeyValue);
@@ -204,13 +204,13 @@ namespace Bhbk.Daemon.Aurora.SFTP
                         var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
 
                         var user = uow.Users.Get(QueryExpressionFactory.GetQueryExpression<tbl_Users>()
-                            .Where(x => x.UserName == ServerSession.Current.UserName).ToLambda())
+                            .Where(x => x.IdentityAlias == ServerSession.Current.UserName).ToLambda())
                             .Single();
 
                         var admin = scope.ServiceProvider.GetRequiredService<IAdminService>();
                         var alert = scope.ServiceProvider.GetRequiredService<IAlertService>();
 
-                        var identity = admin.User_GetV1(user.Id.ToString()).Result;
+                        var identity = admin.User_GetV1(user.IdentityId.ToString()).Result;
 
                         alert.Email_EnqueueV1(new EmailV1()
                         {
@@ -289,12 +289,21 @@ namespace Bhbk.Daemon.Aurora.SFTP
                 {
                     var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
                     var user = uow.Users.Get(QueryExpressionFactory.GetQueryExpression<tbl_Users>()
-                        .Where(x => x.UserName == e.UserName && x.Enabled).ToLambda(),
+                        .Where(x => x.IdentityAlias == e.UserName && x.Enabled).ToLambda(),
                             new List<Expression<Func<tbl_Users, object>>>()
                             {
                                 x => x.tbl_Networks,
                                 x => x.tbl_PublicKeys,
                             }).SingleOrDefault();
+
+                    if (user == null
+                        || user.Enabled == false)
+                    {
+                        Log.Warning($"'{callPath}' '{e.UserName}' not found or not enabled");
+
+                        e.Reject();
+                        return;
+                    }
 
                     var action = NetworkAction.Deny.ToString();
                     if (NetworkHelper.ValidateAddress(user.tbl_Networks.Where(x => x.Action == action && x.Enabled), e.ClientAddress))
@@ -315,13 +324,6 @@ namespace Bhbk.Daemon.Aurora.SFTP
                     }
 
                     Log.Information($"'{callPath}' '{e.UserName}' allowed from '{e.ClientEndPoint}' running '{e.ClientSoftwareIdentifier}'");
-
-                    if (user == null
-                        || user.Enabled == false)
-                    {
-                        e.Reject();
-                        return;
-                    }
 
                     var keys = user.tbl_PublicKeys.Where(x => x.Enabled);
 
@@ -381,7 +383,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                     var log = scope.ServiceProvider.GetRequiredService<ILogger>();
                     var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
                     var user = uow.Users.Get(QueryExpressionFactory.GetQueryExpression<tbl_Users>()
-                        .Where(x => x.UserName == e.UserName).ToLambda(),
+                        .Where(x => x.IdentityAlias == e.UserName).ToLambda(),
                             new List<Expression<Func<tbl_Users, object>>>()
                             {
                                     x => x.tbl_PublicKeys,
@@ -396,7 +398,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
 
                         if (UserHelper.ValidatePubKey(user.tbl_PublicKeys.Where(x => x.Enabled).ToList(), e.Key))
                         {
-                            if (!admin.User_VerifyV1(user.Id).Result)
+                            if (!admin.User_VerifyV1(user.IdentityId).Result)
                             {
                                 Log.Warning($"'{callPath}' '{e.UserName}' failure with public key");
 
@@ -406,7 +408,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
 
                             Log.Information($"'{callPath}' '{e.UserName}' success with public key");
 
-                            var fs = FileSystemFactory.CreateFileSystem(_factory, log, user, e.Password);
+                            var fs = FileSystemFactory.CreateFileSystem(_factory, log, user, e.UserName, e.Password);
                             var fsUser = new FileServerUser(e.UserName, e.Password);
                             fsUser.SetFileSystem(fs);
 
@@ -430,9 +432,14 @@ namespace Bhbk.Daemon.Aurora.SFTP
                     {
                         Log.Information($"'{callPath}' '{e.UserName}' in-progress with password");
 
+                        string identityUser = string.Empty, identityPass = string.Empty;
+
                         try
                         {
-                            var identity = admin.User_GetV1(user.Id.ToString()).Result;
+                            var identity = admin.User_GetV1(user.IdentityId.ToString()).Result;
+
+                            identityUser = identity.UserName;
+                            identityPass = e.Password;
 
                             var auth = sts.ResourceOwner_GrantV2(
                                 new ResourceOwnerV2()
@@ -440,8 +447,8 @@ namespace Bhbk.Daemon.Aurora.SFTP
                                     issuer = conf["IdentityCredentials:IssuerName"],
                                     client = conf["IdentityCredentials:AudienceName"],
                                     grant_type = "password",
-                                    user = identity.UserName,
-                                    password = e.Password,
+                                    user = identityUser,
+                                    password = identityPass,
                                 }).Result;
                         }
                         catch (HttpRequestException)
@@ -454,7 +461,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
 
                         Log.Information($"'{callPath}' '{e.UserName}' success with password");
 
-                        var fs = FileSystemFactory.CreateFileSystem(_factory, log, user, e.Password);
+                        var fs = FileSystemFactory.CreateFileSystem(_factory, log, user, identityUser, identityPass);
                         var fsUser = new FileServerUser(e.UserName, e.Password);
                         fsUser.SetFileSystem(fs);
 

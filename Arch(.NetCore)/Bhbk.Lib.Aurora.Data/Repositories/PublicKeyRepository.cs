@@ -19,7 +19,7 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
         {
             var pvalues = new List<SqlParameter>
             {
-                new SqlParameter("@UserId", SqlDbType.UniqueIdentifier) { Value = entity.UserId },
+                new SqlParameter("@IdentityId", SqlDbType.UniqueIdentifier) { Value = entity.IdentityId },
                 new SqlParameter("@PrivateKeyId", SqlDbType.UniqueIdentifier) { Value = entity.PrivateKeyId.HasValue ? (object)entity.PrivateKeyId.Value : DBNull.Value },
                 new SqlParameter("@KeyValueBase64", SqlDbType.NVarChar) { Value = entity.KeyValue },
                 new SqlParameter("@KeyValueAlgo", SqlDbType.NVarChar) { Value = entity.KeyAlgo },
@@ -31,7 +31,7 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
             };
 
             return _context.Set<uvw_PublicKeys>().FromSqlRaw("[svc].[usp_PublicKey_Insert]"
-                + "@UserId, @PrivateKeyId, @KeyValueBase64, @KeyValueAlgo, @KeySig, @KeySigAlgo, @Hostname, @Enabled, @Immutable", pvalues.ToArray())
+                + "@IdentityId, @PrivateKeyId, @KeyValueBase64, @KeyValueAlgo, @KeySig, @KeySigAlgo, @Hostname, @Enabled, @Immutable", pvalues.ToArray())
                     .AsEnumerable().Single();
 
             /*
@@ -100,7 +100,7 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
             var pvalues = new List<SqlParameter>
             {
                 new SqlParameter("@Id", SqlDbType.UniqueIdentifier) { Value = entity.Id },
-                new SqlParameter("@UserId", SqlDbType.UniqueIdentifier) { Value = entity.UserId },
+                new SqlParameter("@IdentityId", SqlDbType.UniqueIdentifier) { Value = entity.IdentityId },
                 new SqlParameter("@PrivateKeyId", SqlDbType.UniqueIdentifier) { Value = entity.PrivateKeyId.HasValue ? (object)entity.PrivateKeyId.Value : DBNull.Value },
                 new SqlParameter("@KeyValueBase64", SqlDbType.NVarChar) { Value = entity.KeyValue },
                 new SqlParameter("@KeyValueAlgo", SqlDbType.NVarChar) { Value = entity.KeyAlgo },
@@ -112,7 +112,7 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
             };
 
             return _context.Set<uvw_PublicKeys>().FromSqlRaw("[svc].[usp_PublicKey_Update]"
-                + "@Id, @UserId, @PrivateKeyId, @KeyValueBase64, @KeyValueAlgo, @KeySig, @KeySigAlgo, @Hostname, @Enabled, @Immutable", pvalues.ToArray())
+                + "@Id, @IdentityId, @PrivateKeyId, @KeyValueBase64, @KeyValueAlgo, @KeySig, @KeySigAlgo, @Hostname, @Enabled, @Immutable", pvalues.ToArray())
                     .AsEnumerable().Single();
         }
 

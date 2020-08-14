@@ -47,10 +47,9 @@ namespace Bhbk.Cli.Aurora.Commands
 
                 if (_credID == Guid.Empty)
                 {
+                    Console.Out.WriteLine();
                     Console.Out.Write("  *** Enter GUID of credential to delete *** : ");
                     _credID = Guid.Parse(StandardInput.GetInput());
-
-                    Console.Out.WriteLine();
                 }
 
                 var mounts = _uow.UserMounts.Get(QueryExpressionFactory.GetQueryExpression<tbl_UserMounts>()
@@ -58,6 +57,7 @@ namespace Bhbk.Cli.Aurora.Commands
 
                 if (mounts.Any())
                 {
+                    Console.Out.WriteLine();
                     Console.Out.WriteLine("  *** The credential can not be deleted while in use ***");
                     Console.Out.WriteLine();
                     ConsoleHelper.StdOutUserMounts(mounts);
