@@ -1,16 +1,18 @@
 ﻿using Bhbk.Lib.Aurora.Data.Models_DIRECT;
+using Bhbk.Lib.Aurora.Domain.Primitives.Enums;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Bhbk.Cli.Aurora.Helpers
 {
     public class ConsoleHelper
     {
-        public static void StdOutAmbassadors(IEnumerable<tbl_Credentials> creds)
+        public static void StdOutCredentials(IEnumerable<tbl_Credentials> creds)
         {
             foreach (var cred in creds)
             {
-                Console.Out.WriteLine($"  Ambassador GUID '{cred.Id}'{(cred.Immutable ? " is immutable" : null)}");
+                Console.Out.WriteLine($"  Credential GUID '{cred.Id}'{(cred.Immutable ? " is immutable" : null)}");
                 Console.Out.WriteLine($"    Login domain '{cred.Domain}' Login user '{cred.UserName}'");
                 Console.Out.WriteLine();
             }
@@ -33,6 +35,19 @@ namespace Bhbk.Cli.Aurora.Helpers
 
                 Console.Out.WriteLine();
             };
+        }
+
+        public static void StdOutNetworks(IEnumerable<tbl_Networks> nets)
+        {
+            foreach (var net in nets.Where(x => x.Action == NetworkAction.Deny.ToString()).OrderBy(x => x.Address))
+                Console.Out.WriteLine($"  Deny {net.Address} with GUID '{net.Id}'");
+
+            Console.Out.WriteLine();
+
+            foreach (var net in nets.Where(x => x.Action == NetworkAction.Allow.ToString()).OrderBy(x => x.Address))
+                Console.Out.WriteLine($"  Allow {net.Address} with GUID '{net.Id}'");
+
+            Console.Out.WriteLine();
         }
 
         public static void StdOutSettings(IEnumerable<tbl_Settings> configs)

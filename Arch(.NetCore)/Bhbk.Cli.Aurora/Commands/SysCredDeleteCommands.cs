@@ -2,7 +2,6 @@
 using Bhbk.Lib.Aurora.Data.Infrastructure_DIRECT;
 using Bhbk.Lib.Aurora.Data.Models_DIRECT;
 using Bhbk.Lib.CommandLine.IO;
-using Bhbk.Lib.Common.FileSystem;
 using Bhbk.Lib.Common.Primitives.Enums;
 using Bhbk.Lib.Common.Services;
 using Bhbk.Lib.QueryExpression.Extensions;
@@ -29,11 +28,8 @@ namespace Bhbk.Cli.Aurora.Commands
                 _credID = Guid.Parse(arg);
             });
 
-            var file = Search.ByAssemblyInvocation("clisettings.json");
-
             _conf = (IConfiguration)new ConfigurationBuilder()
-                .SetBasePath(file.DirectoryName)
-                .AddJsonFile(file.Name, optional: false, reloadOnChange: true)
+                .AddJsonFile("clisettings.json", optional: false, reloadOnChange: true)
                 .Build();
 
             var instance = new ContextService(InstanceContext.DeployedOrLocal);
@@ -47,7 +43,7 @@ namespace Bhbk.Cli.Aurora.Commands
                 var credentials = _uow.Credentials.Get(QueryExpressionFactory.GetQueryExpression<tbl_Credentials>()
                     .Where(x => x.Immutable == false).ToLambda());
 
-                ConsoleHelper.StdOutAmbassadors(credentials);
+                ConsoleHelper.StdOutCredentials(credentials);
 
                 if (_credID == Guid.Empty)
                 {

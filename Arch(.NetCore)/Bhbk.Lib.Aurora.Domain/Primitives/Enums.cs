@@ -14,4 +14,10 @@ namespace Bhbk.Lib.Aurora.Domain.Primitives.Enums
         MOTDUploadJob,
         UnstructuredData,
     }
+
+    public enum NetworkAction
+    {
+        Allow,
+        Deny,
+    }
 }

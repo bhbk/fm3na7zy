@@ -2,7 +2,6 @@
 using Bhbk.Lib.Aurora.Data.Infrastructure_DIRECT;
 using Bhbk.Lib.Aurora.Data.Models_DIRECT;
 using Bhbk.Lib.CommandLine.IO;
-using Bhbk.Lib.Common.FileSystem;
 using Bhbk.Lib.Common.Primitives.Enums;
 using Bhbk.Lib.Common.Services;
 using Bhbk.Lib.Cryptography.Encryption;
@@ -40,11 +39,8 @@ namespace Bhbk.Cli.Aurora.Commands
                 _credPass = arg;
             });
 
-            var file = Search.ByAssemblyInvocation("clisettings.json");
-
             _conf = (IConfiguration)new ConfigurationBuilder()
-                .SetBasePath(file.DirectoryName)
-                .AddJsonFile(file.Name, optional: false, reloadOnChange: true)
+                .AddJsonFile("clisettings.json", optional: false, reloadOnChange: true)
                 .Build();
 
             var instance = new ContextService(InstanceContext.DeployedOrLocal);
@@ -62,7 +58,7 @@ namespace Bhbk.Cli.Aurora.Commands
                 {
                     Console.Out.WriteLine("  *** The credential entered already exists ***");
                     Console.Out.WriteLine();
-                    ConsoleHelper.StdOutAmbassadors(credentials);
+                    ConsoleHelper.StdOutCredentials(credentials);
 
                     return StandardOutput.FondFarewell();
                 }
@@ -97,7 +93,7 @@ namespace Bhbk.Cli.Aurora.Commands
                 _uow.Commit();
 
                 Console.Out.WriteLine();
-                ConsoleHelper.StdOutAmbassadors(credentials);
+                ConsoleHelper.StdOutCredentials(credentials);
 
                 return StandardOutput.FondFarewell();
             }

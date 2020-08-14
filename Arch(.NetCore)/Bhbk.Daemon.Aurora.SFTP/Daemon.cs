@@ -3,6 +3,7 @@ using Bhbk.Lib.Aurora.Data.Infrastructure_DIRECT;
 using Bhbk.Lib.Aurora.Data.Models_DIRECT;
 using Bhbk.Lib.Aurora.Domain.Helpers;
 using Bhbk.Lib.Aurora.Domain.Primitives;
+using Bhbk.Lib.Aurora.Domain.Primitives.Enums;
 using Bhbk.Lib.Cryptography.Entropy;
 using Bhbk.Lib.Identity.Models.Alert;
 using Bhbk.Lib.Identity.Models.Sts;
@@ -295,7 +296,8 @@ namespace Bhbk.Daemon.Aurora.SFTP
                                 x => x.tbl_PublicKeys,
                             }).SingleOrDefault();
 
-                    if (NetworkHelper.ValidateAddress(user.tbl_Networks.Where(x => x.Action == "Deny" && x.Enabled), e.ClientAddress))
+                    var action = NetworkAction.Deny.ToString();
+                    if (NetworkHelper.ValidateAddress(user.tbl_Networks.Where(x => x.Action == action && x.Enabled), e.ClientAddress))
                     {
                         Log.Warning($"'{callPath}' '{e.UserName}' is denied from '{e.ClientEndPoint}' running '{e.ClientSoftwareIdentifier}'");
 
@@ -303,7 +305,8 @@ namespace Bhbk.Daemon.Aurora.SFTP
                         return;
                     }
 
-                    if (!NetworkHelper.ValidateAddress(user.tbl_Networks.Where(x => x.Action == "Allow" && x.Enabled), e.ClientAddress))
+                    action = NetworkAction.Allow.ToString();
+                    if (!NetworkHelper.ValidateAddress(user.tbl_Networks.Where(x => x.Action == action && x.Enabled), e.ClientAddress))
                     {
                         Log.Warning($"'{callPath}' '{e.UserName}' is not allowed from '{e.ClientEndPoint}' running '{e.ClientSoftwareIdentifier}'");
 

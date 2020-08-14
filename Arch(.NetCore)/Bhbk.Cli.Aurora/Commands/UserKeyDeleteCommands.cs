@@ -2,7 +2,6 @@
 using Bhbk.Lib.Aurora.Data.Infrastructure_DIRECT;
 using Bhbk.Lib.Aurora.Data.Models_DIRECT;
 using Bhbk.Lib.CommandLine.IO;
-using Bhbk.Lib.Common.FileSystem;
 using Bhbk.Lib.Common.Primitives.Enums;
 using Bhbk.Lib.Common.Services;
 using Bhbk.Lib.QueryExpression.Extensions;
@@ -32,11 +31,8 @@ namespace Bhbk.Cli.Aurora.Commands
                 if (string.IsNullOrEmpty(arg))
                     throw new ConsoleHelpAsException($"  *** No user name given ***");
 
-                var file = Search.ByAssemblyInvocation("clisettings.json");
-
                 _conf = (IConfiguration)new ConfigurationBuilder()
-                    .SetBasePath(file.DirectoryName)
-                    .AddJsonFile(file.Name, optional: false, reloadOnChange: true)
+                    .AddJsonFile("clisettings.json", optional: false, reloadOnChange: true)
                     .Build();
 
                 var instance = new ContextService(InstanceContext.DeployedOrLocal);

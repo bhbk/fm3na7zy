@@ -2,7 +2,6 @@
 using Bhbk.Lib.Aurora.Data.Models_DIRECT;
 using Bhbk.Lib.Aurora.Primitives.Enums;
 using Bhbk.Lib.CommandLine.IO;
-using Bhbk.Lib.Common.FileSystem;
 using Bhbk.Lib.Common.Primitives.Enums;
 using Bhbk.Lib.Common.Services;
 using Bhbk.Lib.DataState.Interfaces;
@@ -36,11 +35,8 @@ namespace Bhbk.Cli.Aurora.Commands
                 if (string.IsNullOrEmpty(arg))
                     throw new ConsoleHelpAsException($"  *** No user given ***");
 
-                var file = Search.ByAssemblyInvocation("clisettings.json");
-
                 _conf = (IConfiguration)new ConfigurationBuilder()
-                    .SetBasePath(file.DirectoryName)
-                    .AddJsonFile(file.Name, optional: false, reloadOnChange: true)
+                    .AddJsonFile("clisettings.json", optional: false, reloadOnChange: true)
                     .Build();
 
                 var instance = new ContextService(InstanceContext.DeployedOrLocal);
@@ -96,17 +92,6 @@ namespace Bhbk.Cli.Aurora.Commands
                         Enabled = true,
                         Created = DateTime.Now,
                         Immutable = false,
-                    });
-
-                _uow.Networks.Create(
-                    new tbl_Networks
-                    {
-                        Id = Guid.NewGuid(),
-                        UserId = user.Id,
-                        Address = "0.0.0.0/0",
-                        Action = "Allow",
-                        Enabled = true,
-                        Created = DateTime.UtcNow,
                     });
 
                 _uow.Commit();

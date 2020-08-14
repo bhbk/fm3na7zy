@@ -1,6 +1,7 @@
 ﻿using Bhbk.Cli.Aurora.Helpers;
 using Bhbk.Lib.Aurora.Data.Infrastructure_DIRECT;
 using Bhbk.Lib.Aurora.Data.Models_DIRECT;
+using Bhbk.Lib.Aurora.Domain.Primitives.Enums;
 using Bhbk.Lib.CommandLine.IO;
 using Bhbk.Lib.Common.Primitives.Enums;
 using Bhbk.Lib.Common.Services;
@@ -10,25 +11,26 @@ using ManyConsole;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
-using System.DirectoryServices.Protocols;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Net;
 
 namespace Bhbk.Cli.Aurora.Commands
 {
-    public class UserMntEditCommands : ConsoleCommand
+    public class UserNetCreateCommands : ConsoleCommand
     {
         private static IConfiguration _conf;
         private static IUnitOfWork _uow;
         private static tbl_Users _user;
-        private static AuthType _authType;
-        private static string _authTypeList = string.Join(", ", Enum.GetNames(typeof(AuthType)));
-        
-        public UserMntEditCommands()
-        {
-            IsCommand("user-mount-edit", "Edit user mount");
+        private static IPNetwork _cidr;
+        private static NetworkAction _actionType;
+        private static string _actionTypeList = string.Join(", ", Enum.GetNames(typeof(NetworkAction)));
 
-            HasRequiredOption("u|user=", "Enter user that exists already", arg =>
+        public UserNetCreateCommands()
+        {
+            IsCommand("user-net-create", "Create allow/deny for user network");
+
+            HasRequiredOption("u|user=", "Enter user that already exists", arg =>
             {
                 if (string.IsNullOrEmpty(arg))
                     throw new ConsoleHelpAsException($"  *** No user name given ***");
@@ -51,25 +53,16 @@ namespace Bhbk.Cli.Aurora.Commands
                     throw new ConsoleHelpAsException($"  *** Invalid user '{arg}' ***");
             });
 
-            HasOption("s|server=", "Enter server DNS/IP address", arg =>
+            HasRequiredOption("c|cidr=", "Enter CIDR address to use", arg =>
             {
-                if(_user != null)
-                    _user.tbl_UserMounts.ServerAddress = arg;
+                if(!IPNetwork.TryParse(arg, out _cidr))
+                    throw new ConsoleHelpAsException($"*** Invalid cidr address ***");
             });
 
-            HasOption("p|path=", "Enter server share path", arg =>
+            HasRequiredOption("a|action=", "Enter type of action to use", arg =>
             {
-                if (_user != null)
-                    _user.tbl_UserMounts.ServerShare = arg;
-            });
-
-            HasOption("a|auth=", "Enter type of auth to use", arg =>
-            {
-                if (!Enum.TryParse(arg, out _authType))
-                    throw new ConsoleHelpAsException($"*** Invalid auth type. Options are '{_authTypeList}' ***");
-
-                if (_user != null)
-                    _user.tbl_UserMounts.AuthType = _authType.ToString();
+                if (!Enum.TryParse(arg, out _actionType))
+                    throw new ConsoleHelpAsException($"*** Invalid auth type. Options are '{_actionTypeList}' ***");
             });
         }
 
@@ -77,25 +70,22 @@ namespace Bhbk.Cli.Aurora.Commands
         {
             try
             {
-                if (_user.tbl_UserMounts != null)
-                {
-                    Console.Out.WriteLine("  *** The user already has a mount ***");
-                    Console.Out.WriteLine();
-                    ConsoleHelper.StdOutUserMounts(new List<tbl_UserMounts> { _user.tbl_UserMounts });
+                var nets = _uow.Networks.Get(QueryExpressionFactory.GetQueryExpression<tbl_Networks>()
+                    .Where(x => x.UserId == _user.Id).ToLambda());
 
-                    return StandardOutput.FondFarewell();
-                }
+                ConsoleHelper.StdOutNetworks(nets);
 
-                var credentials = _uow.Credentials.Get();
+                _uow.Networks.Create(
+                    new tbl_Networks
+                    {
+                        Id = Guid.NewGuid(),
+                        UserId = _user.Id,
+                        Address = _cidr.ToString(),
+                        Action = _actionType.ToString(),
+                        Enabled = true,
+                        Created = DateTime.UtcNow,
+                    });
 
-                ConsoleHelper.StdOutCredentials(credentials);
-
-                Console.Out.Write("  *** Enter GUID of credential to use for mount *** : ");
-                var input = StandardInput.GetInput();
-
-                _user.tbl_UserMounts.CredentialId = Guid.Parse(input);
-
-                _uow.Users.Update(_user);
                 _uow.Commit();
 
                 return StandardOutput.FondFarewell();

@@ -65,11 +65,8 @@ namespace Bhbk.Cli.Aurora.Commands
         {
             try
             {
-                var file = Search.ByAssemblyInvocation("clisettings.json");
-
                 _conf = (IConfiguration)new ConfigurationBuilder()
-                    .SetBasePath(file.DirectoryName)
-                    .AddJsonFile(file.Name, optional: false, reloadOnChange: true)
+                    .AddJsonFile("clisettings.json", optional: false, reloadOnChange: true)
                     .Build();
 
                 var instance = new ContextService(InstanceContext.DeployedOrLocal);
