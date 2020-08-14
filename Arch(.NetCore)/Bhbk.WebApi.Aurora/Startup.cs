@@ -39,7 +39,6 @@ namespace Bhbk.WebApi.Aurora
             {
                 jobs.SchedulerId = Guid.NewGuid().ToString();
 
-                //jobs.UseMicrosoftDependencyInjectionScopedJobFactory();
                 jobs.UseMicrosoftDependencyInjectionJobFactory(options =>
                 {
                     options.AllowDefaultConstructor = false;

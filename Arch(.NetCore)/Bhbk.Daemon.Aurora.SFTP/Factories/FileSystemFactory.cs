@@ -11,9 +11,9 @@ using System.Reflection;
 
 namespace Bhbk.Daemon.Aurora.SFTP.Factories
 {
-    public static class FileSystemFactory
+    internal static class FileSystemFactory
     {
-        public static FileSystemProvider CreateFileSystem(IServiceScopeFactory factory, tbl_Users user, ILogger logger)
+        internal static FileSystemProvider CreateFileSystem(IServiceScopeFactory factory, ILogger logger, tbl_Users user, string pass = null)
         {
             LogLevel fsLogLevel;
             FileSystemTypes fsType;
@@ -79,13 +79,13 @@ namespace Bhbk.Daemon.Aurora.SFTP.Factories
                         {
                             Log.Information($"'{callPath}' '{user.UserName}' initialize '{typeof(SmbReadWriteFileSystem).Name}'");
 
-                            return new SmbReadWriteFileSystem(fsSettings, factory, user);
+                            return new SmbReadWriteFileSystem(fsSettings, factory, user, pass);
                         }
                         else
                         {
                             Log.Information($"'{callPath}' '{user.UserName}' initialize '{typeof(SmbReadOnlyFileSystem).Name}'");
 
-                            return new SmbReadOnlyFileSystem(fsSettings, factory, user);
+                            return new SmbReadOnlyFileSystem(fsSettings, factory, user, pass);
                         }
                     }
 

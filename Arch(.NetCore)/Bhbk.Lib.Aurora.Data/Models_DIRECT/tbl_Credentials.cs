@@ -3,9 +3,9 @@ using System.Collections.Generic;
 
 namespace Bhbk.Lib.Aurora.Data.Models_DIRECT
 {
-    public partial class tbl_Ambassadors
+    public partial class tbl_Credentials
     {
-        public tbl_Ambassadors()
+        public tbl_Credentials()
         {
             tbl_UserMounts = new HashSet<tbl_UserMounts>();
         }

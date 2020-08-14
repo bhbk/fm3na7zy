@@ -90,7 +90,7 @@ namespace Bhbk.Cli.Aurora.Commands
                     return StandardOutput.FondFarewell();
                 }
 
-                var credentials = _uow.Ambassadors.Get();
+                var credentials = _uow.Credentials.Get();
 
                 ConsoleHelper.StdOutAmbassadors(credentials);
 

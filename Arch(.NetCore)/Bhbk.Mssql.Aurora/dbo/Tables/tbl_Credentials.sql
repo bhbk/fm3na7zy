@@ -1,4 +1,4 @@
-﻿CREATE TABLE [dbo].[tbl_Ambassadors] (
+CREATE TABLE [dbo].[tbl_Credentials] (
     [Id]        UNIQUEIDENTIFIER NOT NULL,
     [Domain]    VARCHAR (128)    NULL,
     [UserName]  VARCHAR (128)    NOT NULL,
@@ -10,7 +10,9 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE NONCLUSTERED INDEX [IX_tbl_SysCredentials]
-    ON [dbo].[tbl_Ambassadors]([Id] ASC);
+    ON [dbo].[tbl_Credentials]([Id] ASC);
 

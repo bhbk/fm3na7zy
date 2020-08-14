@@ -14,7 +14,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net.NetworkInformation;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
@@ -28,7 +27,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
         private readonly tbl_Users _user;
         private readonly string _userMount;
 
-        internal SmbReadWriteFileSystem(FileSystemProviderSettings settings, IServiceScopeFactory factory, tbl_Users user)
+        internal SmbReadWriteFileSystem(FileSystemProviderSettings settings, IServiceScopeFactory factory, tbl_Users user, string pass)
             : base(settings)
         {
             /*
@@ -48,25 +47,30 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
 
                 var userMount = uow.UserMounts.Get(QueryExpressionFactory.GetQueryExpression<tbl_UserMounts>()
                     .Where(x => x.UserId == _user.Id).ToLambda())
-                    .SingleOrDefault();
-
-                if (userMount == null)
-                    throw new NetworkInformationException();
-
-                _userMount = userMount.ServerAddress + userMount.ServerShare;
-
-                var userCred = uow.Ambassadors.Get(QueryExpressionFactory.GetQueryExpression<tbl_Ambassadors>()
-                    .Where(x => x.Id == userMount.CredentialId).ToLambda())
                     .Single();
 
-                var secret = conf["Databases:AuroraSecretKey"];
-                var plainText = AES.DecryptString(userCred.Password, secret);
-                var cipherText = AES.EncryptString(plainText, secret);
+                if (userMount.CredentialId.HasValue)
+                {
+                    var userCred = uow.Credentials.Get(QueryExpressionFactory.GetQueryExpression<tbl_Credentials>()
+                        .Where(x => x.Id == userMount.CredentialId).ToLambda())
+                        .Single();
 
-                if (userCred.Password != cipherText)
-                    throw new ArithmeticException();
+                    var secret = conf["Databases:AuroraSecretKey"];
 
-                _userToken = UserHelper.GetSafeAccessTokenHandle(userCred.Domain, userCred.UserName, plainText);
+                    var plainText = AES.DecryptString(userCred.Password, secret);
+                    var cipherText = AES.EncryptString(plainText, secret);
+
+                    if (userCred.Password != cipherText)
+                        throw new UnauthorizedAccessException();
+
+                    _userToken = UserHelper.GetSafeAccessTokenHandle(userCred.Domain, userCred.UserName, plainText);
+                }
+                else
+                {
+                    _userToken = UserHelper.GetSafeAccessTokenHandle(null, user.UserName, pass);
+                }
+
+                _userMount = userMount.ServerAddress + userMount.ServerShare;
             }
         }
 

@@ -30,7 +30,7 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
                 new SqlParameter("@Immutable", SqlDbType.Bit) { Value = entity.Immutable }
             };
 
-            return _context.Set<uvw_PublicKeys>().FromSqlRaw("[svc].[usp_UserPublicKey_Insert]"
+            return _context.Set<uvw_PublicKeys>().FromSqlRaw("[svc].[usp_PublicKey_Insert]"
                 + "@UserId, @PrivateKeyId, @KeyValueBase64, @KeyValueAlgo, @KeySig, @KeySigAlgo, @Hostname, @Enabled, @Immutable", pvalues.ToArray())
                     .AsEnumerable().Single();
 
@@ -46,7 +46,7 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
 
                 var reader = cmd.ExecuteReader();
 
-                return reader.Cast<uvw_UserPublicKeys>().Single();
+                return reader.Cast<uvw_PublicKeys>().Single();
             }
             */
         }
@@ -72,7 +72,7 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
                 new SqlParameter("@Id", SqlDbType.UniqueIdentifier) { Value = entity.Id }
             };
 
-            return _context.Set<uvw_PublicKeys>().FromSqlRaw("[svc].[usp_UserPublicKey_Delete] @Id", pvalues.ToArray())
+            return _context.Set<uvw_PublicKeys>().FromSqlRaw("[svc].[usp_PublicKey_Delete] @Id", pvalues.ToArray())
                 .AsEnumerable().Single();
         }
 
@@ -111,7 +111,7 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
                 new SqlParameter("@Immutable", SqlDbType.Bit) { Value = entity.Immutable }
             };
 
-            return _context.Set<uvw_PublicKeys>().FromSqlRaw("[svc].[usp_UserPublicKey_Update]"
+            return _context.Set<uvw_PublicKeys>().FromSqlRaw("[svc].[usp_PublicKey_Update]"
                 + "@Id, @UserId, @PrivateKeyId, @KeyValueBase64, @KeyValueAlgo, @KeySig, @KeySigAlgo, @Hostname, @Enabled, @Immutable", pvalues.ToArray())
                     .AsEnumerable().Single();
         }

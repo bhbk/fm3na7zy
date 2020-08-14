@@ -11,7 +11,6 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Security.Cryptography;
-using Rebex.IO.FileSystem;
 
 namespace Bhbk.Daemon.Aurora.SFTP.Helpers
 {

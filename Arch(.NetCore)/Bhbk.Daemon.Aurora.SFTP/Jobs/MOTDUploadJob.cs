@@ -17,28 +17,24 @@ namespace Bhbk.Daemon.Aurora.SFTP.Jobs
         public Task Execute(IJobExecutionContext context)
         {
             var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
-#if DEBUG
             Log.Information($"'{callPath}' running");
-#endif
+
             try
             {
                 using (var scope = _factory.CreateScope())
                 {
 
                 }
-
-                /*
-                 * https://docs.microsoft.com/en-us/aspnet/core/performance/memory?view=aspnetcore-3.1
-                 */
-                GC.Collect();
             }
             catch (Exception ex)
             {
                 Log.Error(ex.ToString());
             }
-#if DEBUG
+
+            GC.Collect();
             Log.Information($"'{callPath}' completed");
-#endif
+            Log.Information($"'{callPath}' will run again at {context.NextFireTimeUtc.Value.LocalDateTime}");
+
             return Task.CompletedTask;
         }
     }

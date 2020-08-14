@@ -22,9 +22,9 @@ namespace Bhbk.Cli.Aurora.Commands
         private static IConfiguration _conf;
         private static IUnitOfWork _uow;
         private static tbl_Users _user;
-        private static string _serverAddress;
-        private static string _serverShare;
         private static AuthType _authType;
+        private static bool _alternateCredential;
+        private static string _serverAddress, _serverShare;
         private static string _authTypeList = string.Join(", ", Enum.GetNames(typeof(AuthType)));
 
         public UserMntCreateCommands()
@@ -72,6 +72,11 @@ namespace Bhbk.Cli.Aurora.Commands
                 if (!Enum.TryParse(arg, out _authType))
                     throw new ConsoleHelpAsException($"*** Invalid auth type. Options are '{_authTypeList}' ***");
             });
+
+            HasOption("c|credential=", "Enter to use alternate credential for mount", arg =>
+            {
+                _alternateCredential = true;
+            });
         }
 
         public override int Run(string[] remainingArguments)
@@ -87,25 +92,43 @@ namespace Bhbk.Cli.Aurora.Commands
                     return StandardOutput.FondFarewell();
                 }
 
-                var credentials = _uow.Ambassadors.Get();
+                if (_alternateCredential)
+                {
+                    var credentials = _uow.Credentials.Get();
 
-                ConsoleHelper.StdOutAmbassadors(credentials);
+                    ConsoleHelper.StdOutAmbassadors(credentials);
 
-                Console.Out.Write("  *** Enter GUID of credential to use for mount *** : ");
-                var input = StandardInput.GetInput();
+                    Console.Out.Write("  *** Enter GUID of credential to use for mount *** : ");
+                    var input = StandardInput.GetInput();
 
-                var mount = _uow.UserMounts.Create(
-                    new tbl_UserMounts
-                    {
-                        UserId = _user.Id,
-                        CredentialId = Guid.Parse(input),
-                        AuthType = _authType.ToString(),
-                        ServerAddress = _serverAddress,
-                        ServerShare = _serverShare,
-                        Enabled = true,
-                        Created = DateTime.Now,
-                        Immutable = false,
-                    });
+                    _uow.UserMounts.Create(
+                        new tbl_UserMounts
+                        {
+                            UserId = _user.Id,
+                            CredentialId = Guid.Parse(input),
+                            AuthType = _authType.ToString(),
+                            ServerAddress = _serverAddress,
+                            ServerShare = _serverShare,
+                            Enabled = true,
+                            Created = DateTime.Now,
+                            Immutable = false,
+                        });
+                }
+                else
+                {
+                    _uow.UserMounts.Create(
+                        new tbl_UserMounts
+                        {
+                            UserId = _user.Id,
+                            CredentialId = null,
+                            AuthType = _authType.ToString(),
+                            ServerAddress = _serverAddress,
+                            ServerShare = _serverShare,
+                            Enabled = true,
+                            Created = DateTime.Now,
+                            Immutable = false,
+                        });
+                }
 
                 _uow.Commit();
 

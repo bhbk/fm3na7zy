@@ -6,7 +6,7 @@ namespace Bhbk.Cli.Aurora.Helpers
 {
     public class ConsoleHelper
     {
-        public static void StdOutAmbassadors(IEnumerable<tbl_Ambassadors> creds)
+        public static void StdOutAmbassadors(IEnumerable<tbl_Credentials> creds)
         {
             foreach (var cred in creds)
             {

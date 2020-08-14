@@ -46,7 +46,6 @@ namespace Bhbk.Cli.Aurora.Commands
                     .Where(x => x.UserName == arg).ToLambda(),
                         new List<Expression<Func<tbl_Users, object>>>()
                         {
-                            x => x.tbl_UserPasswords,
                             x => x.tbl_PrivateKeys,
                             x => x.tbl_PublicKeys
                         }).SingleOrDefault();
@@ -70,10 +69,13 @@ namespace Bhbk.Cli.Aurora.Commands
         {
             try
             {
+                var keys = _uow.PublicKeys.Delete(QueryExpressionFactory.GetQueryExpression<tbl_PublicKeys>()
+                    .Where(x => x.UserId == _user.Id && x.Immutable == false).ToLambda());
+
+                ConsoleHelper.StdOutKeyPairs(keys);
+
                 if (_delete)
                 {
-                    ConsoleHelper.StdOutKeyPairs(_user.tbl_PublicKeys.Where(x => x.Immutable == false));
-
                     Console.Out.Write("  *** Enter GUID of public key to delete *** : ");
                     var input = Guid.Parse(StandardInput.GetInput());
 
@@ -94,8 +96,6 @@ namespace Bhbk.Cli.Aurora.Commands
                 }
                 else if (_deleteAll)
                 {
-                    ConsoleHelper.StdOutKeyPairs(_user.tbl_PublicKeys.Where(x => x.Immutable == false));
-
                     _uow.PublicKeys.Delete(QueryExpressionFactory.GetQueryExpression<tbl_PublicKeys>()
                         .Where(x => x.UserId == _user.Id && !x.Immutable).ToLambda());
 
@@ -103,10 +103,6 @@ namespace Bhbk.Cli.Aurora.Commands
                         .Where(x => x.UserId == _user.Id && !x.Immutable).ToLambda());
 
                     _uow.Commit();
-                }
-                else
-                {
-                    ConsoleHelper.StdOutKeyPairs(_user.tbl_PublicKeys.Where(x => x.Immutable == false));
                 }
 
                 return StandardOutput.FondFarewell();

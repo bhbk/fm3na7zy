@@ -15,8 +15,8 @@ namespace Bhbk.Cli.Aurora.Commands
     {
         private static IConfiguration _conf;
         private static IUnitOfWork _uow;
-        private static string _configValue;
         private static ConfigType _configType;
+        private static string _configValue;
         private static string _configTypeList = string.Join(", ", Enum.GetNames(typeof(ConfigType)));
 
         public SysConfCreateCommands()

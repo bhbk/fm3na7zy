@@ -55,20 +55,8 @@ namespace Bhbk.Lib.Aurora.Domain.Tests.RespositoryTests_DIRECT
                     {
                         Id = Guid.NewGuid(),
                         UserName = Constants.TestCompositeUser,
+                        AllowPassword = true,
                         FileSystemType = FileSystemTypes.Composite.ToString(),
-                        Enabled = true,
-                        Created = DateTime.Now,
-                        Immutable = false,
-                    });
-
-                _uow.UserPasswords.Create(
-                    new tbl_UserPasswords
-                    {
-                        UserId = foundCompositeUser.Id,
-                        ConcurrencyStamp = Guid.NewGuid().ToString(),
-                        HashPBKDF2 = PBKDF2.Create(Constants.TestCompositeUserPass),
-                        HashSHA256 = SHA256.Create(Constants.TestCompositeUserPass),
-                        SecurityStamp = Guid.NewGuid().ToString(),
                         Enabled = true,
                         Created = DateTime.Now,
                         Immutable = false,
@@ -95,20 +83,8 @@ namespace Bhbk.Lib.Aurora.Domain.Tests.RespositoryTests_DIRECT
                     {
                         Id = Guid.NewGuid(),
                         UserName = Constants.TestMemoryUser,
+                        AllowPassword = true,
                         FileSystemType = FileSystemTypes.Memory.ToString(),
-                        Enabled = true,
-                        Created = DateTime.Now,
-                        Immutable = false,
-                    });
-
-                _uow.UserPasswords.Create(
-                    new tbl_UserPasswords
-                    {
-                        UserId = foundMemoryUser.Id,
-                        ConcurrencyStamp = Guid.NewGuid().ToString(),
-                        HashPBKDF2 = PBKDF2.Create(Constants.TestMemoryUserPass),
-                        HashSHA256 = SHA256.Create(Constants.TestMemoryUserPass),
-                        SecurityStamp = Guid.NewGuid().ToString(),
                         Enabled = true,
                         Created = DateTime.Now,
                         Immutable = false,
@@ -135,20 +111,8 @@ namespace Bhbk.Lib.Aurora.Domain.Tests.RespositoryTests_DIRECT
                     {
                         Id = Guid.NewGuid(),
                         UserName = Constants.TestSmbUser,
+                        AllowPassword = true,
                         FileSystemType = FileSystemTypes.SMB.ToString(),
-                        Enabled = true,
-                        Created = DateTime.Now,
-                        Immutable = false,
-                    });
-
-                _uow.UserPasswords.Create(
-                    new tbl_UserPasswords
-                    {
-                        UserId = foundSmbUser.Id,
-                        ConcurrencyStamp = Guid.NewGuid().ToString(),
-                        HashPBKDF2 = PBKDF2.Create(Constants.TestSmbUserPass),
-                        HashSHA256 = SHA256.Create(Constants.TestSmbUserPass),
-                        SecurityStamp = Guid.NewGuid().ToString(),
                         Enabled = true,
                         Created = DateTime.Now,
                         Immutable = false,

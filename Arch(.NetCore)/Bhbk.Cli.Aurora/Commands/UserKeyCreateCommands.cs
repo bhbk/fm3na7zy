@@ -56,9 +56,8 @@ namespace Bhbk.Cli.Aurora.Commands
                     .Where(x => x.UserName == arg).ToLambda(),
                         new List<Expression<Func<tbl_Users, object>>>()
                         {
-                            x => x.tbl_UserPasswords,
                             x => x.tbl_PrivateKeys,
-                            x => x.tbl_PublicKeys
+                            x => x.tbl_PublicKeys,
                         }).SingleOrDefault();
 
                 if (_user == null)
@@ -98,6 +97,8 @@ namespace Bhbk.Cli.Aurora.Commands
         {
             try
             {
+                Console.Out.WriteLine();
+
                 if (!string.IsNullOrEmpty(_privKeyPass))
                 {
                     Console.Out.Write("  *** Enter password for the private key *** : ");

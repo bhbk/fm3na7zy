@@ -18,7 +18,7 @@ namespace Bhbk.Cli.Aurora.Commands
     {
         private static IConfiguration _conf;
         private static IUnitOfWork _uow;
-        private static Guid _configId;
+        private static Guid _configID;
 
         public SysConfDeleteCommands()
         {
@@ -26,7 +26,7 @@ namespace Bhbk.Cli.Aurora.Commands
 
             HasOption("i|id=", "Enter GUID of config to delete", arg =>
             {
-                _configId = Guid.Parse(arg);
+                _configID = Guid.Parse(arg);
             });
 
             var file = Search.ByAssemblyInvocation("clisettings.json");
@@ -49,16 +49,16 @@ namespace Bhbk.Cli.Aurora.Commands
 
                 ConsoleHelper.StdOutSettings(configs);
 
-                if (_configId == Guid.Empty)
+                if (_configID == Guid.Empty)
                 {
                     Console.Out.Write("  *** Enter GUID of config to delete *** : ");
-                    _configId = Guid.Parse(StandardInput.GetInput());
+                    _configID = Guid.Parse(StandardInput.GetInput());
 
                     Console.Out.WriteLine();
                 }
 
                 _uow.Settings.Delete(QueryExpressionFactory.GetQueryExpression<tbl_Settings>()
-                    .Where(x => x.Id == _configId && x.Immutable == false).ToLambda());
+                    .Where(x => x.Id == _configID && x.Immutable == false).ToLambda());
 
                 _uow.Commit();
 

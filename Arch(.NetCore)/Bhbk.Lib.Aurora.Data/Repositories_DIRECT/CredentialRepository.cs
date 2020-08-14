@@ -3,9 +3,9 @@ using Bhbk.Lib.DataAccess.EFCore.Repositories;
 
 namespace Bhbk.Lib.Aurora.Data.Repositories_DIRECT
 {
-    public class AmbassadorRepository : GenericRepository<tbl_Ambassadors>
+    public class CredentialRepository : GenericRepository<tbl_Credentials>
     {
-        public AmbassadorRepository(AuroraEntities context)
+        public CredentialRepository(AuroraEntities context)
             : base(context) { }
     }
 }

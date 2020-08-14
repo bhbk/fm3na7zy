@@ -44,7 +44,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Helpers
 
     internal class MemoryNodeData
     {
-        public MemoryNodeData()
+        internal MemoryNodeData()
         {
             Content = new MemoryStream();
             TimeInfo = new NodeTimeInfo();
@@ -52,25 +52,25 @@ namespace Bhbk.Daemon.Aurora.SFTP.Helpers
             Attributes = new NodeAttributes(FileAttributes.Offline);
         }
 
-        public NodeAttributes Attributes
+        internal NodeAttributes Attributes
         {
             get;
             set;
         }
 
-        public NodeTimeInfo TimeInfo
+        internal NodeTimeInfo TimeInfo
         {
             get;
             set;
         }
 
-        public List<NodeBase> Children
+        internal List<NodeBase> Children
         {
             get;
             set;
         }
 
-        public long Length
+        internal long Length
         {
             get
             {
@@ -78,7 +78,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Helpers
             }
         }
 
-        public MemoryStream Content
+        internal MemoryStream Content
         {
             get;
             set;

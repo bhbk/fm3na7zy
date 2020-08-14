@@ -3,14 +3,14 @@ using System.Collections.Generic;
 
 namespace Bhbk.Lib.Aurora.Data.Models
 {
-    public partial class uvw_Ambassadors
+    public partial class uvw_Networks
     {
         public Guid Id { get; set; }
-        public string Domain { get; set; }
-        public string UserName { get; set; }
-        public string Password { get; set; }
+        public Guid UserId { get; set; }
+        public string Address { get; set; }
+        public string Action { get; set; }
         public bool Enabled { get; set; }
         public DateTime Created { get; set; }
-        public bool Immutable { get; set; }
+        public DateTime? LastUpdated { get; set; }
     }
 }

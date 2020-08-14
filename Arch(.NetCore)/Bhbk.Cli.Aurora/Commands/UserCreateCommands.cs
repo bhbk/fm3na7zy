@@ -5,12 +5,16 @@ using Bhbk.Lib.CommandLine.IO;
 using Bhbk.Lib.Common.FileSystem;
 using Bhbk.Lib.Common.Primitives.Enums;
 using Bhbk.Lib.Common.Services;
-using Bhbk.Lib.Cryptography.Hashing;
+using Bhbk.Lib.DataState.Interfaces;
+using Bhbk.Lib.DataState.Models;
+using Bhbk.Lib.Identity.Grants;
+using Bhbk.Lib.Identity.Services;
 using Bhbk.Lib.QueryExpression.Extensions;
 using Bhbk.Lib.QueryExpression.Factories;
 using ManyConsole;
 using Microsoft.Extensions.Configuration;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Bhbk.Cli.Aurora.Commands
@@ -19,9 +23,8 @@ namespace Bhbk.Cli.Aurora.Commands
     {
         private static IConfiguration _conf;
         private static IUnitOfWork _uow;
-        private static string _userName;
-        private static string _userPass;
         private static FileSystemTypes _fileSystem;
+        private static string _userName;
         private static string _fileSystemList = string.Join(", ", Enum.GetNames(typeof(FileSystemTypes)));
 
         public UserCreateCommands()
@@ -57,45 +60,53 @@ namespace Bhbk.Cli.Aurora.Commands
                 if (!Enum.TryParse(arg, out _fileSystem))
                     throw new ConsoleHelpAsException($"*** Invalid filesystem type. Options are '{_fileSystemList}' ***");
             });
-
-            HasOption("p|pass=", "Enter password for user", arg =>
-            {
-                _userPass = arg;
-            });
         }
 
         public override int Run(string[] remainingArguments)
         {
             try
             {
-                if (string.IsNullOrEmpty(_userPass))
+                var admin = new AdminService(_conf);
+                admin.Grant = new ResourceOwnerGrantV2(_conf);
+
+                var users = admin.User_GetV1(new DataStateV1()
                 {
-                    Console.Out.Write("  *** Enter password for to use *** : ");
-                    _userPass = StandardInput.GetHiddenInput();
-                }
+                    Sort = new List<IDataStateSort>()
+                        {
+                            new DataStateV1Sort() { Field = "userName", Dir = "asc" }
+                        },
+                    Skip = 0,
+                    Take = 100,
+                }).Result;
+
+                foreach(var entry in users.Data)
+                    Console.Out.WriteLine($"  Username '{entry.UserName}' with GUID '{entry.Id}'");
+
+                Console.Out.WriteLine();
+                Console.Out.Write("  *** Enter GUID of (identity) user to use *** : ");
+                var input = StandardInput.GetInput();
 
                 var user = _uow.Users.Create(
                     new tbl_Users
                     {
-                        Id = Guid.NewGuid(),
+                        Id = Guid.Parse(input),
                         UserName = _userName,
+                        AllowPassword = true,
                         FileSystemType = _fileSystem.ToString(),
                         Enabled = true,
                         Created = DateTime.Now,
                         Immutable = false,
                     });
 
-                _uow.UserPasswords.Create(
-                    new tbl_UserPasswords
+                _uow.Networks.Create(
+                    new tbl_Networks
                     {
+                        Id = Guid.NewGuid(),
                         UserId = user.Id,
-                        ConcurrencyStamp = Guid.NewGuid().ToString(),
-                        HashPBKDF2 = PBKDF2.Create(_userPass),
-                        HashSHA256 = SHA256.Create(_userPass),
-                        SecurityStamp = Guid.NewGuid().ToString(),
+                        Address = "0.0.0.0/0",
+                        Action = "Allow",
                         Enabled = true,
-                        Created = DateTime.Now,
-                        Immutable = false,
+                        Created = DateTime.UtcNow,
                     });
 
                 _uow.Commit();

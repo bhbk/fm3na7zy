@@ -10,12 +10,12 @@ using System.Linq.Expressions;
 
 namespace Bhbk.Lib.Aurora.Data.Repositories
 {
-    public class AmbassadorRepository : GenericRepository<uvw_Ambassadors>
+    public class CredentialRepository : GenericRepository<uvw_Credentials>
     {
-        public AmbassadorRepository(AuroraEntities context)
+        public CredentialRepository(AuroraEntities context)
             : base(context) { }
 
-        public override uvw_Ambassadors Create(uvw_Ambassadors entity)
+        public override uvw_Credentials Create(uvw_Credentials entity)
         {
             var pvalues = new List<SqlParameter>
             {
@@ -26,7 +26,7 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
                 new SqlParameter("@Immutable", SqlDbType.Bit) { Value = entity.Immutable }
             };
 
-            return _context.Set<uvw_Ambassadors>().FromSqlRaw("[svc].[usp_SysCredential_Insert]"
+            return _context.Set<uvw_Credentials>().FromSqlRaw("[svc].[usp_Credential_Insert]"
                 + "@Domain, @UserName, @Password, @Enabled, @Immutable", pvalues.ToArray())
                     .AsEnumerable().Single();
 
@@ -35,21 +35,21 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
             {
                 var cmd = conn.CreateCommand();
                 cmd.CommandType = CommandType.StoredProcedure;
-                cmd.CommandText = "[svc].[usp_SysCredential_Insert]";
+                cmd.CommandText = "[svc].[usp_Credential_Insert]";
                 cmd.Parameters.AddRange(pvalues.ToArray());
                 cmd.Connection = conn;
                 conn.Open();
 
                 var reader = cmd.ExecuteReader();
 
-                return reader.Cast<uvw_SysCredentials>().Single();
+                return reader.Cast<uvw_Credentials>().Single();
             }
             */
         }
 
-        public override IEnumerable<uvw_Ambassadors> Create(IEnumerable<uvw_Ambassadors> entities)
+        public override IEnumerable<uvw_Credentials> Create(IEnumerable<uvw_Credentials> entities)
         {
-            var results = new List<uvw_Ambassadors>();
+            var results = new List<uvw_Credentials>();
 
             foreach (var entity in entities)
             {
@@ -61,20 +61,20 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
             return results;
         }
 
-        public override uvw_Ambassadors Delete(uvw_Ambassadors entity)
+        public override uvw_Credentials Delete(uvw_Credentials entity)
         {
             var pvalues = new List<SqlParameter>
             {
                 new SqlParameter("@Id", SqlDbType.UniqueIdentifier) { Value = entity.Id }
             };
 
-            return _context.Set<uvw_Ambassadors>().FromSqlRaw("[svc].[usp_SysCredential_Delete] @Id", pvalues.ToArray())
+            return _context.Set<uvw_Credentials>().FromSqlRaw("[svc].[usp_Credential_Delete] @Id", pvalues.ToArray())
                 .AsEnumerable().Single();
         }
 
-        public override IEnumerable<uvw_Ambassadors> Delete(IEnumerable<uvw_Ambassadors> entities)
+        public override IEnumerable<uvw_Credentials> Delete(IEnumerable<uvw_Credentials> entities)
         {
-            var results = new List<uvw_Ambassadors>();
+            var results = new List<uvw_Credentials>();
 
             foreach (var entity in entities)
             {
@@ -86,12 +86,12 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
             return results;
         }
 
-        public override IEnumerable<uvw_Ambassadors> Delete(LambdaExpression lambda)
+        public override IEnumerable<uvw_Credentials> Delete(LambdaExpression lambda)
         {
             throw new NotImplementedException();
         }
 
-        public override uvw_Ambassadors Update(uvw_Ambassadors entity)
+        public override uvw_Credentials Update(uvw_Credentials entity)
         {
             var pvalues = new List<SqlParameter>
             {
@@ -103,14 +103,14 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
                 new SqlParameter("@Immutable", SqlDbType.Bit) { Value = entity.Immutable }
             };
 
-            return _context.Set<uvw_Ambassadors>().FromSqlRaw("[svc].[usp_SysCredential_Update]"
+            return _context.Set<uvw_Credentials>().FromSqlRaw("[svc].[usp_Credential_Update]"
                 + "@Id, @Domain, @UserName, @Password, @Enabled, @Immutable", pvalues.ToArray())
                     .AsEnumerable().Single();
         }
 
-        public override IEnumerable<uvw_Ambassadors> Update(IEnumerable<uvw_Ambassadors> entities)
+        public override IEnumerable<uvw_Credentials> Update(IEnumerable<uvw_Credentials> entities)
         {
-            var results = new List<uvw_Ambassadors>();
+            var results = new List<uvw_Credentials>();
 
             foreach (var entity in entities)
             {

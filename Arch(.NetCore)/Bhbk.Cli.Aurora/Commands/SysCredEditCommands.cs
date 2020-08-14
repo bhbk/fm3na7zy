@@ -56,7 +56,7 @@ namespace Bhbk.Cli.Aurora.Commands
         {
             try
             {
-                var credential = _uow.Ambassadors.Get(QueryExpressionFactory.GetQueryExpression<tbl_Ambassadors>()
+                var credential = _uow.Credentials.Get(QueryExpressionFactory.GetQueryExpression<tbl_Credentials>()
                     .Where(x => x.Domain == _credDomain && x.UserName == _credLogin).ToLambda())
                     .SingleOrDefault();
 
@@ -78,7 +78,7 @@ namespace Bhbk.Cli.Aurora.Commands
                 if (_credPass != plainText)
                     throw new ArithmeticException();
 
-                _uow.Ambassadors.Update(credential);
+                _uow.Credentials.Update(credential);
                 _uow.Commit();
 
                 return StandardOutput.FondFarewell();

@@ -55,7 +55,7 @@ namespace Bhbk.Cli.Aurora.Commands
         {
             try
             {
-                var credentials = _uow.Ambassadors.Get();
+                var credentials = _uow.Credentials.Get();
 
                 if (credentials.Where(x => x.Domain == _credDomain 
                     && x.UserName == _credLogin).Any())
@@ -82,8 +82,8 @@ namespace Bhbk.Cli.Aurora.Commands
                 if (_credPass != plainText)
                     throw new ArithmeticException();
 
-                var credential = _uow.Ambassadors.Create(
-                    new tbl_Ambassadors
+                var credential = _uow.Credentials.Create(
+                    new tbl_Credentials
                     {
                         Id = Guid.NewGuid(),
                         Domain = _credDomain,

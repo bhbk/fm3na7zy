@@ -46,7 +46,6 @@ namespace Bhbk.Cli.Aurora.Commands
                         new List<Expression<Func<tbl_Users, object>>>()
                         {
                             x => x.tbl_UserMounts,
-                            x => x.tbl_UserPasswords,
                             x => x.tbl_PrivateKeys,
                             x => x.tbl_PublicKeys,
                         }).SingleOrDefault();

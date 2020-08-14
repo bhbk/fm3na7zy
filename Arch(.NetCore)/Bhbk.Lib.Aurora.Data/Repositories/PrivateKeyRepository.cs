@@ -28,7 +28,7 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
                 new SqlParameter("@Immutable", SqlDbType.Bit) { Value = entity.Immutable }
             };
 
-            return _context.Set<uvw_PrivateKeys>().FromSqlRaw("[svc].[usp_UserPrivateKey_Insert]"
+            return _context.Set<uvw_PrivateKeys>().FromSqlRaw("[svc].[usp_PrivateKey_Insert]"
                 + "@UserId, @PublicKeyId, @KeyValueBase64, @KeyValueAlgo, @KeyValuePass, @Enabled, @Immutable", pvalues.ToArray())
                     .AsEnumerable().Single();
 
@@ -37,14 +37,14 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
             {
                 var cmd = conn.CreateCommand();
                 cmd.CommandType = CommandType.StoredProcedure;
-                cmd.CommandText = "[svc].[usp_UserPrivateKey_Insert]";
+                cmd.CommandText = "[svc].[usp_PrivateKey_Insert]";
                 cmd.Parameters.AddRange(pvalues.ToArray());
                 cmd.Connection = conn;
                 conn.Open();
 
                 var reader = cmd.ExecuteReader();
 
-                return reader.Cast<uvw_UserPrivateKeys>().Single();
+                return reader.Cast<uvw_PrivateKeys>().Single();
             }
             */
         }
@@ -70,7 +70,7 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
                 new SqlParameter("@Id", SqlDbType.UniqueIdentifier) { Value = entity.Id }
             };
 
-            return _context.Set<uvw_PrivateKeys>().FromSqlRaw("[svc].[usp_UserPrivateKey_Delete] @Id", pvalues.ToArray())
+            return _context.Set<uvw_PrivateKeys>().FromSqlRaw("[svc].[usp_PrivateKey_Delete] @Id", pvalues.ToArray())
                 .AsEnumerable().Single();
         }
 
@@ -107,7 +107,7 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
                 new SqlParameter("@Immutable", SqlDbType.Bit) { Value = entity.Immutable }
             };
 
-            return _context.Set<uvw_PrivateKeys>().FromSqlRaw("[svc].[usp_UserPrivateKey_Insert]"
+            return _context.Set<uvw_PrivateKeys>().FromSqlRaw("[svc].[usp_PrivateKey_Insert]"
                 + "@Id, @UserId, @PublicKeyId, @KeyValueBase64, @KeyValueAlgo, @KeyValuePass, @Enabled, @Immutable", pvalues.ToArray())
                     .AsEnumerable().Single();
         }

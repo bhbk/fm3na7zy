@@ -14,14 +14,14 @@ namespace Bhbk.Lib.Aurora.Data.Infrastructure
         private readonly AuroraEntities _context;
         private readonly ILoggerFactory _logger;
         public InstanceContext InstanceType { get; private set; }
-        public AmbassadorRepository Ambassadors { get; private set; }
+        public CredentialRepository Credentials { get; private set; }
+        public NetworkRepository Networks { get; private set; }
         public PrivateKeyRepository PrivateKeys { get; private set; }
         public PublicKeyRepository PublicKeys { get; private set; }
         public SettingRepository Settings { get; private set; }
         public UserFileRepository UserFiles { get; private set; }
         public UserFolderRepository UserFolders { get; private set; }
         public UserMountRepository UserMounts { get; private set; }
-        public UserPasswordRepository UserPasswords { get; private set; }
         public UserRepository Users { get; private set; }
 
         public UnitOfWork(string connection)
@@ -80,14 +80,14 @@ namespace Bhbk.Lib.Aurora.Data.Infrastructure
 
             InstanceType = instance.InstanceType;
 
-            Ambassadors = new AmbassadorRepository(_context);
+            Credentials = new CredentialRepository(_context);
+            Networks = new NetworkRepository(_context);
             PrivateKeys = new PrivateKeyRepository(_context);
             PublicKeys = new PublicKeyRepository(_context);
             Settings = new SettingRepository(_context);
             UserFiles = new UserFileRepository(_context);
             UserFolders = new UserFolderRepository(_context);
             UserMounts = new UserMountRepository(_context);
-            UserPasswords = new UserPasswordRepository(_context);
             Users = new UserRepository(_context);
         }
 

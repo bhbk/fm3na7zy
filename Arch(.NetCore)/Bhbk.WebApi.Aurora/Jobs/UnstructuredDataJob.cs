@@ -27,9 +27,8 @@ namespace Bhbk.WebApi.Aurora.Tasks
         public Task Execute(IJobExecutionContext context)
         {
             var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
-#if DEBUG
             Log.Information($"'{callPath}' running");
-#endif
+
             try
             {
                 using (var scope = _factory.CreateScope())
@@ -37,7 +36,7 @@ namespace Bhbk.WebApi.Aurora.Tasks
                     var conf = scope.ServiceProvider.GetRequiredService<IConfiguration>();
                     var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
 
-                    var staggerVerify = int.Parse(conf["Tasks:UnstructuredData:StaggerVerify"]);
+                    var staggerVerify = int.Parse(conf["Jobs:UnstructuredData:StaggerVerify"]);
 
                     var files = uow.UserFiles.Get(QueryExpressionFactory.GetQueryExpression<tbl_UserFiles>()
                         .Where(x => x.LastVerified < DateTime.UtcNow.AddSeconds(-staggerVerify)).ToLambda());
@@ -97,13 +96,10 @@ namespace Bhbk.WebApi.Aurora.Tasks
                 Log.Error(ex.ToString());
             }
 
-            /*
-             * https://docs.microsoft.com/en-us/aspnet/core/performance/memory?view=aspnetcore-3.1
-             */
             GC.Collect();
-#if DEBUG
             Log.Information($"'{callPath}' completed");
-#endif
+            Log.Information($"'{callPath}' will run again at {context.NextFireTimeUtc.Value.LocalDateTime}");
+
             return Task.CompletedTask;
         }
     }

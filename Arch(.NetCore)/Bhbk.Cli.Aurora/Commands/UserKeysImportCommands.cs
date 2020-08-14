@@ -27,9 +27,9 @@ namespace Bhbk.Cli.Aurora.Commands
         private static IUnitOfWork _uow;
         private static FileInfo _path;
         private static tbl_Users _user;
-        private static string _privKeyPass;
         private static SshHostKeyAlgorithm _keyAlgo;
         private static SignatureHashAlgorithm _sigAlgo;
+        private static string _privKeyPass;
         private static string _keyAlgoList = string.Join(", ", Enum.GetNames(typeof(SshHostKeyAlgorithm)));
         private static string _sigAlgoList = string.Join(", ", Enum.GetNames(typeof(SignatureHashAlgorithm)));
 

@@ -18,7 +18,7 @@ namespace Bhbk.Cli.Aurora.Commands
     {
         private static IConfiguration _conf;
         private static IUnitOfWork _uow;
-        private static Guid _credId;
+        private static Guid _credID;
 
         public SysCredDeleteCommands()
         {
@@ -26,7 +26,7 @@ namespace Bhbk.Cli.Aurora.Commands
 
             HasOption("i|id=", "Enter GUID of credential to delete", arg =>
             {
-                _credId = Guid.Parse(arg);
+                _credID = Guid.Parse(arg);
             });
 
             var file = Search.ByAssemblyInvocation("clisettings.json");
@@ -44,20 +44,21 @@ namespace Bhbk.Cli.Aurora.Commands
         {
             try
             {
-                var credentials = _uow.Ambassadors.Get(QueryExpressionFactory.GetQueryExpression<tbl_Ambassadors>()
+                var credentials = _uow.Credentials.Get(QueryExpressionFactory.GetQueryExpression<tbl_Credentials>()
                     .Where(x => x.Immutable == false).ToLambda());
 
                 ConsoleHelper.StdOutAmbassadors(credentials);
 
-                if (_credId == Guid.Empty)
+                if (_credID == Guid.Empty)
                 {
                     Console.Out.Write("  *** Enter GUID of credential to delete *** : ");
-                    _credId = Guid.Parse(StandardInput.GetInput());
+                    _credID = Guid.Parse(StandardInput.GetInput());
 
                     Console.Out.WriteLine();
                 }
 
-                var mounts = _uow.UserMounts.Get(x => x.CredentialId == _credId);
+                var mounts = _uow.UserMounts.Get(QueryExpressionFactory.GetQueryExpression<tbl_UserMounts>()
+                    .Where(x => x.CredentialId == _credID).ToLambda());
 
                 if (mounts.Any())
                 {
@@ -68,8 +69,8 @@ namespace Bhbk.Cli.Aurora.Commands
                     return StandardOutput.FondFarewell();
                 }
 
-                _uow.Ambassadors.Delete(QueryExpressionFactory.GetQueryExpression<tbl_Ambassadors>()
-                    .Where(x => x.Id == _credId && x.Immutable == false).ToLambda());
+                _uow.Credentials.Delete(QueryExpressionFactory.GetQueryExpression<tbl_Credentials>()
+                    .Where(x => x.Id == _credID && x.Immutable == false).ToLambda());
 
                 _uow.Commit();
 

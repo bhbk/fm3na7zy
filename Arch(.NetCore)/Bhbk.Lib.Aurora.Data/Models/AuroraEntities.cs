@@ -15,16 +15,13 @@ namespace Bhbk.Lib.Aurora.Data.Models
         {
         }
 
-        public virtual DbSet<uvw_Ambassadors> uvw_Ambassadors { get; set; }
+        public virtual DbSet<uvw_Credentials> uvw_Credentials { get; set; }
         public virtual DbSet<uvw_PrivateKeys> uvw_PrivateKeys { get; set; }
         public virtual DbSet<uvw_PublicKeys> uvw_PublicKeys { get; set; }
-        public virtual DbSet<uvw_Realms> uvw_Realms { get; set; }
         public virtual DbSet<uvw_Settings> uvw_Settings { get; set; }
         public virtual DbSet<uvw_UserFiles> uvw_UserFiles { get; set; }
         public virtual DbSet<uvw_UserFolders> uvw_UserFolders { get; set; }
         public virtual DbSet<uvw_UserMounts> uvw_UserMounts { get; set; }
-        public virtual DbSet<uvw_UserPasswords> uvw_UserPasswords { get; set; }
-        public virtual DbSet<uvw_UserRealms> uvw_UserRealms { get; set; }
         public virtual DbSet<uvw_Users> uvw_Users { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -38,11 +35,11 @@ namespace Bhbk.Lib.Aurora.Data.Models
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<uvw_Ambassadors>(entity =>
+            modelBuilder.Entity<uvw_Credentials>(entity =>
             {
                 entity.HasNoKey();
 
-                entity.ToView("uvw_Ambassadors", "svc");
+                entity.ToView("uvw_Credentials", "svc");
 
                 entity.Property(e => e.Domain)
                     .HasMaxLength(128)
@@ -105,17 +102,6 @@ namespace Bhbk.Lib.Aurora.Data.Models
                 entity.Property(e => e.SigValue)
                     .IsRequired()
                     .HasMaxLength(512);
-            });
-
-            modelBuilder.Entity<uvw_Realms>(entity =>
-            {
-                entity.HasNoKey();
-
-                entity.ToView("uvw_Realms", "svc");
-
-                entity.Property(e => e.Name)
-                    .HasMaxLength(10)
-                    .IsFixedLength();
             });
 
             modelBuilder.Entity<uvw_Settings>(entity =>
@@ -181,32 +167,6 @@ namespace Bhbk.Lib.Aurora.Data.Models
                     .IsRequired()
                     .HasMaxLength(256)
                     .IsUnicode(false);
-            });
-
-            modelBuilder.Entity<uvw_UserPasswords>(entity =>
-            {
-                entity.HasNoKey();
-
-                entity.ToView("uvw_UserPasswords", "svc");
-
-                entity.Property(e => e.ConcurrencyStamp)
-                    .IsRequired()
-                    .HasMaxLength(1024);
-
-                entity.Property(e => e.HashPBKDF2).HasMaxLength(2048);
-
-                entity.Property(e => e.HashSHA256).HasMaxLength(2048);
-
-                entity.Property(e => e.SecurityStamp)
-                    .IsRequired()
-                    .HasMaxLength(1024);
-            });
-
-            modelBuilder.Entity<uvw_UserRealms>(entity =>
-            {
-                entity.HasNoKey();
-
-                entity.ToView("uvw_UserRealms", "svc");
             });
 
             modelBuilder.Entity<uvw_Users>(entity =>

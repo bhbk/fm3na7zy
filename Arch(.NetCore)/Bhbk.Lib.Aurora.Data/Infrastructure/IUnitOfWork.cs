@@ -5,14 +5,14 @@ namespace Bhbk.Lib.Aurora.Data.Infrastructure
 {
     public interface IUnitOfWork : IGenericUnitOfWork
     {
-        public AmbassadorRepository Ambassadors { get; }
+        public CredentialRepository Credentials { get; }
+        public NetworkRepository Networks { get; }
         public PrivateKeyRepository PrivateKeys { get; }
         public PublicKeyRepository PublicKeys { get; }
         public SettingRepository Settings { get; }
         public UserFileRepository UserFiles { get; }
         public UserFolderRepository UserFolders { get; }
         public UserMountRepository UserMounts { get; }
-        public UserPasswordRepository UserPasswords { get; }
         public UserRepository Users { get; }
     }
 }

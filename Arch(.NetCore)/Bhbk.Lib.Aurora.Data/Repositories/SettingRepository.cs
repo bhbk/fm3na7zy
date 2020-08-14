@@ -24,7 +24,7 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
                 new SqlParameter("@Immutable", SqlDbType.Bit) { Value = entity.Immutable }
             };
 
-            return _context.Set<uvw_Settings>().FromSqlRaw("[svc].[usp_SysSetting_Insert]"
+            return _context.Set<uvw_Settings>().FromSqlRaw("[svc].[usp_Setting_Insert]"
                 + "@ConfigKey, @ConfigValue, @Immutable", pvalues.ToArray())
                     .AsEnumerable().Single();
 
@@ -33,14 +33,14 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
             {
                 var cmd = conn.CreateCommand();
                 cmd.CommandType = CommandType.StoredProcedure;
-                cmd.CommandText = "[svc].[usp_SysSetting_Insert]";
+                cmd.CommandText = "[svc].[usp_Setting_Insert]";
                 cmd.Parameters.AddRange(pvalues.ToArray());
                 cmd.Connection = conn;
                 conn.Open();
 
                 var reader = cmd.ExecuteReader();
 
-                return reader.Cast<uvw_SysSettings>().Single();
+                return reader.Cast<uvw_Settings>().Single();
             }
             */
         }
@@ -66,7 +66,7 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
                 new SqlParameter("@Id", SqlDbType.UniqueIdentifier) { Value = entity.Id }
             };
 
-            return _context.Set<uvw_Settings>().FromSqlRaw("[svc].[usp_SysSetting_Delete] @Id", pvalues.ToArray())
+            return _context.Set<uvw_Settings>().FromSqlRaw("[svc].[usp_Setting_Delete] @Id", pvalues.ToArray())
                 .AsEnumerable().Single();
         }
 
@@ -99,7 +99,7 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
                 new SqlParameter("@Immutable", SqlDbType.Bit) { Value = entity.Immutable }
             };
 
-            return _context.Set<uvw_Settings>().FromSqlRaw("[svc].[usp_SysSetting_Update]"
+            return _context.Set<uvw_Settings>().FromSqlRaw("[svc].[usp_Setting_Update]"
                 + "@Id, @ConfigKey, @ConfigValue, @Immutable", pvalues.ToArray())
                     .AsEnumerable().Single();
         }

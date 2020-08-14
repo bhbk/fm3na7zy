@@ -11,8 +11,10 @@
     [LastUpdated] DATETIME2 (7)    NULL,
     [Immutable]   BIT              CONSTRAINT [DF_tbl_UserPrivateKeys_Immutable] DEFAULT ((0)) NOT NULL,
     CONSTRAINT [PK_tbl_UserPrivateKeys] PRIMARY KEY CLUSTERED ([Id] ASC),
-    CONSTRAINT [FK_tbl_UserPrivateKeys_UserID] FOREIGN KEY ([UserId]) REFERENCES [dbo].[tbl_Users] ([Id]) ON DELETE CASCADE ON UPDATE CASCADE
+    CONSTRAINT [FK_tbl_PrivateKeys_UserID] FOREIGN KEY ([UserId]) REFERENCES [dbo].[tbl_Users] ([Id]) ON DELETE CASCADE ON UPDATE CASCADE
 );
+
+
 
 
 

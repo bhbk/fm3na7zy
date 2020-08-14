@@ -4,8 +4,8 @@ using Bhbk.Lib.Aurora.Data.Models_DIRECT;
 using Bhbk.Lib.Aurora.Domain.Helpers;
 using Bhbk.Lib.Aurora.Domain.Primitives;
 using Bhbk.Lib.Cryptography.Entropy;
-using Bhbk.Lib.Cryptography.Hashing;
 using Bhbk.Lib.Identity.Models.Alert;
+using Bhbk.Lib.Identity.Models.Sts;
 using Bhbk.Lib.Identity.Services;
 using Bhbk.Lib.QueryExpression.Extensions;
 using Bhbk.Lib.QueryExpression.Factories;
@@ -24,6 +24,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Net;
+using System.Net.Http;
 using System.Reflection;
 using System.Text;
 using System.Threading;
@@ -66,8 +67,9 @@ namespace Bhbk.Daemon.Aurora.SFTP
                         if (!Enum.TryParse<LogLevel>(conf["Rebex:LogLevel"], true, out _level))
                             throw new InvalidCastException();
 
-                        var license = uow.Settings.Get(x => x.ConfigKey == "RebexLicense")
-                            .OrderBy(x => x.Created).Last();
+                        var license = uow.Settings.Get(QueryExpressionFactory.GetQueryExpression<tbl_Settings>()
+                            .Where(x => x.ConfigKey == "RebexLicense").ToLambda()).OrderBy(x => x.Created)
+                            .Last();
 
                         Rebex.Licensing.Key = license.ConfigValue;
 
@@ -204,35 +206,32 @@ namespace Bhbk.Daemon.Aurora.SFTP
                             .Where(x => x.UserName == ServerSession.Current.UserName).ToLambda())
                             .Single();
 
-                        if (user.IdentityId.HasValue)
+                        var admin = scope.ServiceProvider.GetRequiredService<IAdminService>();
+                        var alert = scope.ServiceProvider.GetRequiredService<IAlertService>();
+
+                        var identity = admin.User_GetV1(user.Id.ToString()).Result;
+
+                        alert.Email_EnqueueV1(new EmailV1()
                         {
-                            var admin = scope.ServiceProvider.GetRequiredService<IAdminService>();
-                            var alert = scope.ServiceProvider.GetRequiredService<IAlertService>();
+                            FromEmail = conf["Notifications:SmtpSenderAddress"],
+                            FromDisplay = conf["Notifications:SmtpSenderDisplayName"],
+                            ToId = identity.Id,
+                            ToEmail = identity.Email,
+                            ToDisplay = $"{identity.FirstName} {identity.LastName}",
+                            Subject = "File Upload Notify",
+                            HtmlContent = Templates.NotifyEmailOnFileUpload(conf["Daemons:SftpService:Dns"],
+                                identity.UserName, identity.FirstName, identity.LastName, e.ResultNode.Path.StringPath, e.ResultNode.Length.ToString())
+                        });
 
-                            var identity = admin.User_GetV1(user.IdentityId.Value.ToString()).Result;
-
-                            alert.Email_EnqueueV1(new EmailV1()
-                            {
-                                FromEmail = conf["Notifications:SmtpSenderAddress"],
-                                FromDisplay = conf["Notifications:SmtpSenderDisplayName"],
-                                ToId = identity.Id,
-                                ToEmail = identity.Email,
-                                ToDisplay = $"{identity.FirstName} {identity.LastName}",
-                                Subject = "File Upload Notify",
-                                HtmlContent = Templates.NotifyEmailOnFileUpload(conf["Daemons:SftpService:Dns"], 
-                                    identity.UserName, identity.FirstName, identity.LastName, e.ResultNode.Path.StringPath, e.ResultNode.Length.ToString())
-                            });
-
-                            alert.Text_EnqueueV1(new TextV1()
-                            {
-                                FromPhoneNumber = conf["Notifications:SmsSenderNumber"],
-                                ToId = identity.Id,
-                                ToPhoneNumber = identity.PhoneNumber,
-                                Body = conf["Notifications:SmsSenderDisplayName"] + Environment.NewLine
-                                    + Templates.NotifyTextOnFileUpload(conf["Daemons:SftpService:Dns"], identity.UserName,
-                                    e.ResultNode.Path.StringPath, e.ResultNode.Length.ToString())
-                            });
-                        }
+                        alert.Text_EnqueueV1(new TextV1()
+                        {
+                            FromPhoneNumber = conf["Notifications:SmsSenderNumber"],
+                            ToId = identity.Id,
+                            ToPhoneNumber = identity.PhoneNumber,
+                            Body = conf["Notifications:SmsSenderDisplayName"] + Environment.NewLine
+                                + Templates.NotifyTextOnFileUpload(conf["Daemons:SftpService:Dns"], identity.UserName,
+                                e.ResultNode.Path.StringPath, e.ResultNode.Length.ToString())
+                        });
                     }
                 }
             }
@@ -292,9 +291,27 @@ namespace Bhbk.Daemon.Aurora.SFTP
                         .Where(x => x.UserName == e.UserName && x.Enabled).ToLambda(),
                             new List<Expression<Func<tbl_Users, object>>>()
                             {
-                                x => x.tbl_UserPasswords,
-                                x => x.tbl_PublicKeys
+                                x => x.tbl_Networks,
+                                x => x.tbl_PublicKeys,
                             }).SingleOrDefault();
+
+                    if (NetworkHelper.ValidateAddress(user.tbl_Networks.Where(x => x.Action == "Deny" && x.Enabled), e.ClientAddress))
+                    {
+                        Log.Warning($"'{callPath}' '{e.UserName}' is denied from '{e.ClientEndPoint}' running '{e.ClientSoftwareIdentifier}'");
+
+                        e.Reject();
+                        return;
+                    }
+
+                    if (!NetworkHelper.ValidateAddress(user.tbl_Networks.Where(x => x.Action == "Allow" && x.Enabled), e.ClientAddress))
+                    {
+                        Log.Warning($"'{callPath}' '{e.UserName}' is not allowed from '{e.ClientEndPoint}' running '{e.ClientSoftwareIdentifier}'");
+
+                        e.Reject();
+                        return;
+                    }
+
+                    Log.Information($"'{callPath}' '{e.UserName}' allowed from '{e.ClientEndPoint}' running '{e.ClientSoftwareIdentifier}'");
 
                     if (user == null
                         || user.Enabled == false)
@@ -304,40 +321,40 @@ namespace Bhbk.Daemon.Aurora.SFTP
                     }
 
                     var keys = user.tbl_PublicKeys.Where(x => x.Enabled);
-                    var pass = user.tbl_UserPasswords;
 
-                    if (pass != null
-                        && pass.Enabled
-                        && keys.Count() > 0)
+                    if (!user.AllowPassword)
                     {
-                        Log.Information($"'{callPath}' '{e.UserName}' allowed from '{e.ClientEndPoint}' running '{e.ClientSoftwareIdentifier}' with password or public key");
+                        if (keys.Count() > 0)
+                        {
+                            Log.Information($"'{callPath}' '{e.UserName}' allowed with public key");
 
-                        e.Accept(AuthenticationMethods.PublicKey | AuthenticationMethods.Password);
-                        return;
+                            e.Accept(AuthenticationMethods.PublicKey);
+                            return;
+                        }
                     }
 
-                    if (pass == null
-                        && keys.Count() > 0)
+                    if (user.AllowPassword)
                     {
-                        Log.Information($"'{callPath}' '{e.UserName}' allowed from '{e.ClientEndPoint}' running '{e.ClientSoftwareIdentifier}' with public key");
+                        if (keys.Count() > 0)
+                        {
+                            Log.Information($"'{callPath}' '{e.UserName}' allowed with public key or password");
 
-                        e.Accept(AuthenticationMethods.PublicKey);
-                        return;
+                            e.Accept(AuthenticationMethods.PublicKey | AuthenticationMethods.Password);
+                            return;
+                        }
+                        else
+                        {
+                            Log.Information($"'{callPath}' '{e.UserName}' allowed with password");
+
+                            e.Accept(AuthenticationMethods.Password);
+                            return;
+                        }
                     }
 
-                    if (pass != null
-                        && pass.Enabled
-                        && keys.Count() == 0)
-                    {
-                        Log.Information($"'{callPath}' '{e.UserName}' allowed from '{e.ClientEndPoint}' running '{e.ClientSoftwareIdentifier}' with password");
-
-                        e.Accept(AuthenticationMethods.Password);
-                        return;
-                    }
-
-                    Log.Error($"'{callPath}' '{e.UserName}' not allowed from '{e.ClientEndPoint}' running '{e.ClientSoftwareIdentifier}'");
+                    Log.Warning($"'{callPath}' '{e.UserName}' denied");
 
                     e.Reject();
+                    return;
                 }
             }
             catch (Exception ex)
@@ -355,26 +372,38 @@ namespace Bhbk.Daemon.Aurora.SFTP
             {
                 var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
 
-                if (e.Key != null)
+                using (var scope = _factory.CreateScope())
                 {
-                    Log.Information($"'{callPath}' '{e.UserName}' in-progress from '{e.ClientEndPoint}' running '{e.ClientSoftwareIdentifier}' with public key");
-
-                    using (var scope = _factory.CreateScope())
-                    {
-                        var logger = scope.ServiceProvider.GetRequiredService<ILogger>();
-                        var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
-                        var user = uow.Users.Get(QueryExpressionFactory.GetQueryExpression<tbl_Users>()
-                            .Where(x => x.UserName == e.UserName).ToLambda(),
-                                new List<Expression<Func<tbl_Users, object>>>()
-                                {
+                    var conf = scope.ServiceProvider.GetRequiredService<IConfiguration>();
+                    var log = scope.ServiceProvider.GetRequiredService<ILogger>();
+                    var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+                    var user = uow.Users.Get(QueryExpressionFactory.GetQueryExpression<tbl_Users>()
+                        .Where(x => x.UserName == e.UserName).ToLambda(),
+                            new List<Expression<Func<tbl_Users, object>>>()
+                            {
                                     x => x.tbl_PublicKeys,
-                                }).SingleOrDefault();
+                            }).SingleOrDefault();
+
+                    var admin = scope.ServiceProvider.GetRequiredService<IAdminService>();
+                    var sts = scope.ServiceProvider.GetRequiredService<IStsService>();
+
+                    if (e.Key != null)
+                    {
+                        Log.Information($"'{callPath}' '{e.UserName}' in-progress with public key");
 
                         if (UserHelper.ValidatePubKey(user.tbl_PublicKeys.Where(x => x.Enabled).ToList(), e.Key))
                         {
-                            Log.Information($"'{callPath}' '{e.UserName}' success from '{e.ClientEndPoint}' running '{e.ClientSoftwareIdentifier}' with public key");
+                            if (!admin.User_VerifyV1(user.Id).Result)
+                            {
+                                Log.Warning($"'{callPath}' '{e.UserName}' failure with public key");
 
-                            var fs = FileSystemFactory.CreateFileSystem(_factory, user, logger);
+                                e.Reject();
+                                return;
+                            }
+
+                            Log.Information($"'{callPath}' '{e.UserName}' success with public key");
+
+                            var fs = FileSystemFactory.CreateFileSystem(_factory, log, user, e.Password);
                             var fsUser = new FileServerUser(e.UserName, e.Password);
                             fsUser.SetFileSystem(fs);
 
@@ -387,60 +416,60 @@ namespace Bhbk.Daemon.Aurora.SFTP
                             e.Accept(fsUser);
                             return;
                         }
-                        else
-                        {
-                            Log.Error($"'{callPath}' '{e.UserName}' failure from '{e.ClientEndPoint}' running '{e.ClientSoftwareIdentifier}' with public key");
 
-                            e.Reject();
-                            return;
-                        }
+                        Log.Warning($"'{callPath}' '{e.UserName}' failure with public key");
+
+                        e.Reject();
+                        return;
                     }
-                }
-                else if (e.Password != null)
-                {
-                    Log.Information($"'{callPath}' '{e.UserName}' in-progress from '{e.ClientEndPoint}' running '{e.ClientSoftwareIdentifier}' with password");
 
-                    using (var scope = _factory.CreateScope())
+                    if (e.Password != null)
                     {
-                        var logger = scope.ServiceProvider.GetRequiredService<ILogger>();
-                        var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
-                        var user = uow.Users.Get(QueryExpressionFactory.GetQueryExpression<tbl_Users>()
-                            .Where(x => x.UserName == e.UserName).ToLambda(),
-                                new List<Expression<Func<tbl_Users, object>>>()
+                        Log.Information($"'{callPath}' '{e.UserName}' in-progress with password");
+
+                        try
+                        {
+                            var identity = admin.User_GetV1(user.Id.ToString()).Result;
+
+                            var auth = sts.ResourceOwner_GrantV2(
+                                new ResourceOwnerV2()
                                 {
-                                    x => x.tbl_UserPasswords,
-                                }).SingleOrDefault();
-
-                        if (PBKDF2.Validate(user.tbl_UserPasswords.HashPBKDF2, e.Password))
-                        {
-                            Log.Information($"'{callPath}' '{e.UserName}' success from '{e.ClientEndPoint}' running '{e.ClientSoftwareIdentifier}' with password");
-
-                            var fs = FileSystemFactory.CreateFileSystem(_factory, user, logger);
-                            var fsUser = new FileServerUser(e.UserName, e.Password);
-                            fsUser.SetFileSystem(fs);
-
-                            var fsNotify = fs.GetFileSystemNotifier();
-                            fsNotify.CreatePreview += FsNotify_CreatePreview;
-                            fsNotify.CreateCompleted += FsNotify_CreateCompleted;
-                            fsNotify.DeletePreview += FsNotify_DeletePreview;
-                            fsNotify.DeleteCompleted += FsNotify_DeleteCompleted;
-
-                            e.Accept(fsUser);
-                            return;
+                                    issuer = conf["IdentityCredentials:IssuerName"],
+                                    client = conf["IdentityCredentials:AudienceName"],
+                                    grant_type = "password",
+                                    user = identity.UserName,
+                                    password = e.Password,
+                                }).Result;
                         }
-                        else
+                        catch (HttpRequestException)
                         {
-                            Log.Error($"'{callPath}' '{e.UserName}' failure from '{e.ClientEndPoint}' running '{e.ClientSoftwareIdentifier}' with password");
+                            Log.Warning($"'{callPath}' '{e.UserName}' failure with password");
 
                             e.Reject();
                             return;
                         }
+
+                        Log.Information($"'{callPath}' '{e.UserName}' success with password");
+
+                        var fs = FileSystemFactory.CreateFileSystem(_factory, log, user, e.Password);
+                        var fsUser = new FileServerUser(e.UserName, e.Password);
+                        fsUser.SetFileSystem(fs);
+
+                        var fsNotify = fs.GetFileSystemNotifier();
+                        fsNotify.CreatePreview += FsNotify_CreatePreview;
+                        fsNotify.CreateCompleted += FsNotify_CreateCompleted;
+                        fsNotify.DeletePreview += FsNotify_DeletePreview;
+                        fsNotify.DeleteCompleted += FsNotify_DeleteCompleted;
+
+                        e.Accept(fsUser);
+                        return;
                     }
                 }
 
-                Log.Error($"'{callPath}' '{e.UserName}' not possible from '{e.ClientEndPoint}' running '{e.ClientSoftwareIdentifier}'");
+                Log.Warning($"'{callPath}' '{e.UserName}' denied");
 
                 e.Reject();
+                return;
             }
             catch (Exception ex)
             {
@@ -504,7 +533,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
             {
                 var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
 
-                Log.Information($"'{callPath}' '{ServerSession.Current.UserName}' from {e.Session.ClientEndPoint} after {e.Session.Duration}");
+                Log.Information($"'{callPath}' from {e.Session.ClientEndPoint} after {e.Session.Duration}");
             }
             catch (Exception ex)
             {
