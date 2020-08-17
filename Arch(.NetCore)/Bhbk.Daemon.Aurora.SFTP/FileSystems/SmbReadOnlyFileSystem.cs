@@ -20,12 +20,13 @@ using System.Security.Principal;
 
 namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
 {
-    internal class SmbReadOnlyFileSystem : ReadOnlyFileSystemProvider
+    internal class SmbReadOnlyFileSystem : ReadOnlyFileSystemProvider, IDisposable
     {
         private readonly IServiceScopeFactory _factory;
         private readonly SafeAccessTokenHandle _userToken;
         private readonly tbl_Users _userEntity;
         private readonly string _userMount;
+        private bool _disposed = false;
 
         internal SmbReadOnlyFileSystem(FileSystemProviderSettings settings, IServiceScopeFactory factory, tbl_Users userEntity, 
             string identityUser, string identityPass)
@@ -40,9 +41,6 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
 
             _factory = factory;
             _userEntity = userEntity;
-
-            var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
-            Log.Information($"'{callPath}' '{_userEntity.IdentityAlias}' initialize '{typeof(SmbReadOnlyFileSystem).Name}'");
 
             using (var scope = factory.CreateScope())
             {
@@ -328,10 +326,24 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
 
         protected override void Dispose(bool disposing)
         {
-            var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
-            Log.Information($"'{callPath}' '{_userEntity.IdentityAlias}' dispose '{typeof(SmbReadOnlyFileSystem).Name}'");
+            if (!_disposed)
+            {
+                if (disposing)
+                {
+                    // TODO: dispose managed state (managed objects)
 
-            base.Dispose(disposing);
+                }
+
+                // TODO: free unmanaged resources (unmanaged objects) and override finalizer
+                _disposed = true;
+            }
+        }
+
+        public new void Dispose()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
         }
     }
 }

@@ -6,12 +6,10 @@ using Bhbk.Lib.QueryExpression.Extensions;
 using Bhbk.Lib.QueryExpression.Factories;
 using Microsoft.Extensions.DependencyInjection;
 using Rebex.IO.FileSystem;
-using Serilog;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 
 /*
  * https://forum.rebex.net/8453/implement-filesystem-almost-as-memoryfilesystemprovider
@@ -24,6 +22,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
         private readonly Dictionary<NodePath, NodeBase> _path;
         private readonly Dictionary<NodeBase, MemoryNodeData> _store;
         private readonly tbl_Users _userEntity;
+        private bool _disposed = false;
 
         internal MemoryReadOnlyFileSystem(FileSystemProviderSettings settings, IServiceScopeFactory factory, tbl_Users userEntity)
             : base(settings)
@@ -33,9 +32,6 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
 
             _path = new Dictionary<NodePath, NodeBase>();
             _store = new Dictionary<NodeBase, MemoryNodeData>();
-
-            var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
-            Log.Information($"'{callPath}' '{_userEntity.IdentityAlias}' initialize '{typeof(MemoryReadOnlyFileSystem).Name}'");
 
             using (var scope = _factory.CreateScope())
             {
@@ -107,10 +103,24 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
 
         protected override void Dispose(bool disposing)
         {
-            var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
-            Log.Information($"'{callPath}' '{_userEntity.IdentityAlias}' dispose '{typeof(MemoryReadOnlyFileSystem).Name}'");
+            if (!_disposed)
+            {
+                if (disposing)
+                {
+                    // TODO: dispose managed state (managed objects)
 
-            base.Dispose(disposing);
+                }
+
+                // TODO: free unmanaged resources (unmanaged objects) and override finalizer
+                _disposed = true;
+            }
+        }
+
+        public new void Dispose()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
         }
     }
 }

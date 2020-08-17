@@ -25,13 +25,13 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
                 new SqlParameter("@KeyValueAlgo", SqlDbType.NVarChar) { Value = entity.KeyAlgo },
                 new SqlParameter("@KeySig", SqlDbType.NVarChar) { Value = entity.SigValue },
                 new SqlParameter("@KeySigAlgo", SqlDbType.NVarChar) { Value = entity.SigAlgo },
-                new SqlParameter("@Hostname", SqlDbType.NVarChar) { Value = entity.Comment },
+                new SqlParameter("@Comment", SqlDbType.NVarChar) { Value = entity.Comment },
                 new SqlParameter("@Enabled", SqlDbType.Bit) { Value = entity.Enabled },
                 new SqlParameter("@Immutable", SqlDbType.Bit) { Value = entity.Immutable }
             };
 
             return _context.Set<uvw_PublicKeys>().FromSqlRaw("[svc].[usp_PublicKey_Insert]"
-                + "@IdentityId, @PrivateKeyId, @KeyValueBase64, @KeyValueAlgo, @KeySig, @KeySigAlgo, @Hostname, @Enabled, @Immutable", pvalues.ToArray())
+                + "@IdentityId, @PrivateKeyId, @KeyValueBase64, @KeyValueAlgo, @KeySig, @KeySigAlgo, @Comment, @Enabled, @Immutable", pvalues.ToArray())
                     .AsEnumerable().Single();
 
             /*
@@ -106,13 +106,13 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
                 new SqlParameter("@KeyValueAlgo", SqlDbType.NVarChar) { Value = entity.KeyAlgo },
                 new SqlParameter("@KeySig", SqlDbType.NVarChar) { Value = entity.SigValue },
                 new SqlParameter("@KeySigAlgo", SqlDbType.NVarChar) { Value = entity.SigAlgo },
-                new SqlParameter("@Hostname", SqlDbType.NVarChar) { Value = entity.Comment },
+                new SqlParameter("@Comment", SqlDbType.NVarChar) { Value = entity.Comment },
                 new SqlParameter("@Enabled", SqlDbType.Bit) { Value = entity.Enabled },
                 new SqlParameter("@Immutable", SqlDbType.Bit) { Value = entity.Immutable }
             };
 
             return _context.Set<uvw_PublicKeys>().FromSqlRaw("[svc].[usp_PublicKey_Update]"
-                + "@Id, @IdentityId, @PrivateKeyId, @KeyValueBase64, @KeyValueAlgo, @KeySig, @KeySigAlgo, @Hostname, @Enabled, @Immutable", pvalues.ToArray())
+                + "@Id, @IdentityId, @PrivateKeyId, @KeyValueBase64, @KeyValueAlgo, @KeySig, @KeySigAlgo, @Comment, @Enabled, @Immutable", pvalues.ToArray())
                     .AsEnumerable().Single();
         }
 

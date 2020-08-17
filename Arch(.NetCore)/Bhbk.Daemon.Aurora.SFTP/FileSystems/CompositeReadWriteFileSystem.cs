@@ -24,15 +24,13 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
     {
         private readonly IServiceScopeFactory _factory;
         private readonly tbl_Users _userEntity;
+        private bool _disposed = false;
 
         internal CompositeReadWriteFileSystem(FileSystemProviderSettings settings, IServiceScopeFactory factory, tbl_Users userEntity)
             : base(settings)
         {
             _factory = factory;
             _userEntity = userEntity;
-
-            var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
-            Log.Information($"'{callPath}' '{_userEntity.IdentityAlias}' initialize '{typeof(CompositeReadWriteFileSystem).Name}'");
 
             using (var scope = _factory.CreateScope())
             {
@@ -712,10 +710,24 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
 
         protected override void Dispose(bool disposing)
         {
-            var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
-            Log.Information($"'{callPath}' '{_userEntity.IdentityAlias}' dispose '{typeof(CompositeReadWriteFileSystem).Name}'");
+            if (!_disposed)
+            {
+                if (disposing)
+                {
+                    // TODO: dispose managed state (managed objects)
 
-            base.Dispose(disposing);
+                }
+
+                // TODO: free unmanaged resources (unmanaged objects) and override finalizer
+                _disposed = true;
+            }
+        }
+
+        public new void Dispose()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
         }
     }
 }
