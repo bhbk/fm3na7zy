@@ -7,7 +7,7 @@
     [KeyFormat]    NVARCHAR (16)    NOT NULL,
     [SigValue]     NVARCHAR (512)   NOT NULL,
     [SigAlgo]      NVARCHAR (16)    NOT NULL,
-    [Hostname]     NVARCHAR (1024)  NULL,
+    [Comment]      NVARCHAR (1024)  NULL,
     [Enabled]      BIT              NOT NULL,
     [Created]      DATETIME2 (7)    NOT NULL,
     [LastUpdated]  DATETIME2 (7)    NULL,
@@ -16,6 +16,8 @@
     CONSTRAINT [FK_tbl_PublicKeys_IdentityID] FOREIGN KEY ([IdentityId]) REFERENCES [dbo].[tbl_Users] ([IdentityId]) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT [FK_tbl_PublicKeys_PrivateKeyID] FOREIGN KEY ([PrivateKeyId]) REFERENCES [dbo].[tbl_PrivateKeys] ([Id])
 );
+
+
 
 
 

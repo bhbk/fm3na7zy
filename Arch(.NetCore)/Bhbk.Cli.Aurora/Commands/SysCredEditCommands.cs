@@ -67,12 +67,15 @@ namespace Bhbk.Cli.Aurora.Commands
                     Console.Out.WriteLine();
                 }
 
-                var secret = _conf["Databases:AuroraSecretKey"];
+                var secret = _conf["Databases:AuroraSecret"];
                 var cipherText = AES.EncryptString(_credPass, secret);
                 var plainText = AES.DecryptString(cipherText, secret);
 
                 if (_credPass != plainText)
                     throw new ArithmeticException();
+
+                credential.Password = cipherText;
+                credential.LastUpdated = DateTime.Now;
 
                 _uow.Credentials.Update(credential);
                 _uow.Commit();

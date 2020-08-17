@@ -118,7 +118,7 @@ namespace Bhbk.Lib.Aurora.Data.Models_DIRECT
 
                 entity.Property(e => e.Id).ValueGeneratedNever();
 
-                entity.Property(e => e.Hostname).HasMaxLength(1024);
+                entity.Property(e => e.Comment).HasMaxLength(1024);
 
                 entity.Property(e => e.KeyAlgo)
                     .IsRequired()

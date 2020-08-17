@@ -13,7 +13,7 @@ namespace Bhbk.Lib.Aurora.Data.Models_DIRECT
         public string KeyFormat { get; set; }
         public string SigValue { get; set; }
         public string SigAlgo { get; set; }
-        public string Hostname { get; set; }
+        public string Comment { get; set; }
         public bool Enabled { get; set; }
         public DateTime Created { get; set; }
         public DateTime? LastUpdated { get; set; }

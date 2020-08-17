@@ -1,9 +1,12 @@
 ﻿using Bhbk.Lib.Aurora.Data.Infrastructure_DIRECT;
 using Bhbk.Lib.Aurora.Data.Models_DIRECT;
 using Bhbk.Lib.Common.Primitives;
+using Bhbk.Lib.Identity.Services;
 using Bhbk.Lib.QueryExpression.Extensions;
 using Bhbk.Lib.QueryExpression.Factories;
 using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json;
+using Rebex.IO.FileSystem;
 using Serilog;
 using System;
 using System.Collections.Generic;
@@ -11,6 +14,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Security.Cryptography;
+using System.Text;
 
 namespace Bhbk.Daemon.Aurora.SFTP.Helpers
 {

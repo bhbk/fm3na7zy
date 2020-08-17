@@ -21,7 +21,7 @@ namespace Bhbk.Cli.Aurora.Commands
 
         public SysConfDeleteCommands()
         {
-            IsCommand("sys-conf-delete", "Delete system config key/value pairs");
+            IsCommand("sys-conf-delete", "Delete config key/value pair");
 
             HasOption("i|id=", "Enter GUID of config to delete", arg =>
             {

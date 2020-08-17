@@ -9,7 +9,9 @@ using Bhbk.Lib.QueryExpression.Factories;
 using ManyConsole;
 using Microsoft.Extensions.Configuration;
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 
 namespace Bhbk.Cli.Aurora.Commands
 {
@@ -21,7 +23,7 @@ namespace Bhbk.Cli.Aurora.Commands
 
         public SysKeyDeleteCommands()
         {
-            IsCommand("sys-key-delete", "Delete system public/private key pairs");
+            IsCommand("sys-key-delete", "Delete private/public key for system");
 
             HasOption("d|delete", "Delete a public/private key pair for system", arg =>
             {
@@ -46,17 +48,25 @@ namespace Bhbk.Cli.Aurora.Commands
             try
             {
                 var keys = _uow.PublicKeys.Get(QueryExpressionFactory.GetQueryExpression<tbl_PublicKeys>()
-                    .Where(x => x.IdentityId == null && x.Immutable == true).ToLambda()).OrderBy(x => x.Created).ToList();
+                    .Where(x => x.IdentityId == null && x.Immutable == true).ToLambda(),
+                        new List<Expression<Func<tbl_PublicKeys, object>>>()
+                        {
+                            x => x.PrivateKey,
+                        });
 
                 if (_delete)
                 {
-                    ConsoleHelper.StdOutKeyPairs(keys);
+                    ConsoleHelper.StdOutKeyPairs(keys.OrderBy(x => x.Created));
 
                     Console.Out.Write("  *** Enter GUID of public key to delete *** : ");
                     var input = Guid.Parse(StandardInput.GetInput());
 
                     var pubKey = _uow.PublicKeys.Get(QueryExpressionFactory.GetQueryExpression<tbl_PublicKeys>()
-                        .Where(x => x.Id == input).ToLambda()).SingleOrDefault();
+                        .Where(x => x.Id == input).ToLambda(),
+                            new List<Expression<Func<tbl_PublicKeys, object>>>()
+                            {
+                                x => x.PrivateKey,
+                            }).SingleOrDefault();
 
                     if (pubKey != null)
                     {
@@ -71,7 +81,7 @@ namespace Bhbk.Cli.Aurora.Commands
                 }
                 else if (_deleteAll)
                 {
-                    ConsoleHelper.StdOutKeyPairs(keys);
+                    ConsoleHelper.StdOutKeyPairs(keys.OrderBy(x => x.Created));
 
                     _uow.PublicKeys.Delete(QueryExpressionFactory.GetQueryExpression<tbl_PublicKeys>()
                         .Where(x => x.IdentityId == null && x.Immutable == true).ToLambda());
@@ -82,7 +92,7 @@ namespace Bhbk.Cli.Aurora.Commands
                     _uow.Commit();
                 }
                 else
-                    ConsoleHelper.StdOutKeyPairs(keys);
+                    ConsoleHelper.StdOutKeyPairs(keys.OrderBy(x => x.Created));
 
                 return StandardOutput.FondFarewell();
             }

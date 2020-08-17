@@ -87,7 +87,8 @@ namespace Bhbk.Cli.Aurora.Commands
                     {
                         IdentityId = Guid.Parse(input),
                         IdentityAlias = _userName,
-                        AllowPassword = true,
+                        RequirePassword = true,
+                        RequirePublicKey = false,
                         FileSystemType = _fileSystem.ToString(),
                         Enabled = true,
                         Created = DateTime.Now,

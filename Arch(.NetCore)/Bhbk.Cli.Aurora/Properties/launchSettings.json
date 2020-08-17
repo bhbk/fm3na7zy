@@ -1,8 +1,7 @@
 {
   "profiles": {
     "Bhbk.Cli.Aurora": {
-      "commandName": "Project",
-      "commandLineArgs": " sys-keys-export -d .system"
+      "commandName": "Project"
     }
   }
 }

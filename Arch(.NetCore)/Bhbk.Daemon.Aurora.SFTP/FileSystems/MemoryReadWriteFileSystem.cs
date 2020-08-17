@@ -1,7 +1,9 @@
 ﻿using Bhbk.Daemon.Aurora.SFTP.Helpers;
 using Bhbk.Lib.Aurora.Data.Infrastructure_DIRECT;
 using Bhbk.Lib.Aurora.Data.Models_DIRECT;
-using Bhbk.Lib.Identity.Services;
+using Bhbk.Lib.Aurora.Domain.Helpers;
+using Bhbk.Lib.QueryExpression.Extensions;
+using Bhbk.Lib.QueryExpression.Factories;
 using Microsoft.Extensions.DependencyInjection;
 using Rebex.IO.FileSystem;
 using Serilog;
@@ -16,7 +18,7 @@ using System.Reflection;
  */
 namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
 {
-    internal class MemoryReadWriteFileSystem : ReadWriteFileSystemProvider
+    internal class MemoryReadWriteFileSystem : ReadWriteFileSystemProvider, IDisposable
     {
         private readonly IServiceScopeFactory _factory;
         private readonly Dictionary<NodePath, NodeBase> _path;
@@ -32,14 +34,20 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
             _path = new Dictionary<NodePath, NodeBase>();
             _store = new Dictionary<NodeBase, MemoryNodeData>();
 
-            MemoryFileSystemHelper.EnsureRootExists(Root, _path, _store);
+            var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
+            Log.Information($"'{callPath}' '{_userEntity.IdentityAlias}' initialize '{typeof(MemoryReadWriteFileSystem).Name}'");
 
             using (var scope = _factory.CreateScope())
             {
                 var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
-                var me = scope.ServiceProvider.GetRequiredService<IMeService>();
 
-                MemoryFileSystemHelper.GenerateContentForMOTD(Root, _path, _store, me);
+                var pubKeys = uow.PublicKeys.Get(QueryExpressionFactory.GetQueryExpression<tbl_PublicKeys>()
+                    .Where(x => x.IdentityId == _userEntity.IdentityId).ToLambda()).ToList();
+
+                var pubKeysContent = KeyHelper.ExportPubKeyBase64(_userEntity, pubKeys);
+
+                MemoryFileSystemHelper.EnsureRootExists(Root, _path, _store);
+                MemoryFileSystemHelper.CreatePubKeysFile(Root, _path, _store, _userEntity, pubKeysContent);
             }
         }
 
@@ -160,7 +168,6 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
             var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
 
             NodeBase newNode = null;
-            NodePath newNodePath = null;
             MemoryNodeData newNodeData = null;
 
             if (node.NodeType == NodeType.Directory)
@@ -173,17 +180,16 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                 throw new NotImplementedException();
 
             newNodeData = _store[node];
-            newNodePath = new NodePath(node.Path + newName);
 
             _store.Add(newNode, newNodeData);
             _store[node.Parent].Children.Add(newNode);
-            _path.Add(newNodePath, newNode);
+            _path.Add(newNode.Path, newNode);
 
             _store.Remove(node);
             _store[node.Parent].Children.Remove(node);
             _path.Remove(node.Path);
 
-            Log.Information($"'{callPath}' '{_userEntity.IdentityAlias}' from '{node.Path}' to '{node.Parent.Path}/{newName}'");
+            Log.Information($"'{callPath}' '{_userEntity.IdentityAlias}' from '{node.Path}' to '{newNode.Path}'");
 
             return newNode;
         }
@@ -218,6 +224,14 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
             _store[node].TimeInfo = newTimeInfo;
 
             return node;
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
+            Log.Information($"'{callPath}' '{_userEntity.IdentityAlias}' dispose '{typeof(MemoryReadWriteFileSystem).Name}'");
+
+            base.Dispose(disposing);
         }
     }
 }

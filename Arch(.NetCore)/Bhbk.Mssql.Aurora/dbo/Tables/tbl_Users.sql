@@ -1,7 +1,8 @@
 ﻿CREATE TABLE [dbo].[tbl_Users] (
     [IdentityId]         UNIQUEIDENTIFIER NOT NULL,
     [IdentityAlias]      VARCHAR (128)    NOT NULL,
-    [AllowPassword]      BIT              NOT NULL,
+    [RequirePassword]    BIT              CONSTRAINT [DF_tbl_Users_RequirePassword] DEFAULT ((0)) NOT NULL,
+    [RequirePublicKey]   BIT              CONSTRAINT [DF_tbl_Users_RequirePublicKey] DEFAULT ((0)) NOT NULL,
     [FileSystemType]     VARCHAR (16)     NOT NULL,
     [FileSystemReadOnly] BIT              CONSTRAINT [DF_tbl_Users_FileSystemReadOnly] DEFAULT ((0)) NOT NULL,
     [DebugLevel]         VARCHAR (16)     NULL,
@@ -10,6 +11,12 @@
     [Immutable]          BIT              CONSTRAINT [DF_tbl_Users_Immutable] DEFAULT ((0)) NOT NULL,
     CONSTRAINT [PK_tbl_Users] PRIMARY KEY CLUSTERED ([IdentityId] ASC)
 );
+
+
+
+
+
+
 
 
 

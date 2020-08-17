@@ -1,9 +1,9 @@
-﻿using Bhbk.Lib.Identity.Services;
-using Newtonsoft.Json;
+﻿using Bhbk.Lib.Aurora.Data.Models_DIRECT;
 using Rebex.IO.FileSystem;
-using System;
+using Serilog;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 using System.Text;
 
 namespace Bhbk.Daemon.Aurora.SFTP.Helpers
@@ -21,24 +21,32 @@ namespace Bhbk.Daemon.Aurora.SFTP.Helpers
             }
         }
 
-        internal static void GenerateContentForMOTD(DirectoryNode root, 
-            Dictionary<NodePath, NodeBase> path, 
-            Dictionary<NodeBase, MemoryNodeData> store, 
-            IMeService me)
+        internal static void CreatePubKeysFile(DirectoryNode root,
+            Dictionary<NodePath, NodeBase> path,
+            Dictionary<NodeBase, MemoryNodeData> store,
+            tbl_Users user,
+            StringBuilder content)
         {
-            var msg = me.Info_GetMOTDV1().Result;
+            var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
 
-            var childFileName = "msg-" + DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss") + ".txt";
-            var childNodeData = new MemoryNodeData()
-            {
-                Content = new MemoryStream(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(msg, Formatting.Indented)))
-            };
-            var childNode = new FileNode(childFileName, root);
-            var childPath = new NodePath(root.Path + childFileName);
+            var folderName = ".ssh";
+            var folderNode = new DirectoryNode(folderName, root);
+            var fileName = "authorized_users";
+            var fileNode = new FileNode(fileName, folderNode);
 
-            store.Add(childNode, childNodeData);
-            store[root].Children.Add(childNode);
-            path.Add(childPath, childNode);
+            store.Add(folderNode, new MemoryNodeData());
+            store[root].Children.Add(folderNode);
+            path.Add(folderNode.Path, folderNode);
+
+            store.Add(fileNode, 
+                new MemoryNodeData()
+                {
+                    Content = new MemoryStream(Encoding.UTF8.GetBytes(content.ToString()))
+                });
+            store[folderNode].Children.Add(fileNode);
+            path.Add(fileNode.Path, fileNode);
+
+            Log.Information($"'{callPath}' '{user.IdentityAlias}' file '{fileNode.Path}'");
         }
     }
 

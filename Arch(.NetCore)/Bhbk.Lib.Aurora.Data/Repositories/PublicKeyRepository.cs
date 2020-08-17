@@ -25,7 +25,7 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
                 new SqlParameter("@KeyValueAlgo", SqlDbType.NVarChar) { Value = entity.KeyAlgo },
                 new SqlParameter("@KeySig", SqlDbType.NVarChar) { Value = entity.SigValue },
                 new SqlParameter("@KeySigAlgo", SqlDbType.NVarChar) { Value = entity.SigAlgo },
-                new SqlParameter("@Hostname", SqlDbType.NVarChar) { Value = entity.Hostname },
+                new SqlParameter("@Hostname", SqlDbType.NVarChar) { Value = entity.Comment },
                 new SqlParameter("@Enabled", SqlDbType.Bit) { Value = entity.Enabled },
                 new SqlParameter("@Immutable", SqlDbType.Bit) { Value = entity.Immutable }
             };
@@ -106,7 +106,7 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
                 new SqlParameter("@KeyValueAlgo", SqlDbType.NVarChar) { Value = entity.KeyAlgo },
                 new SqlParameter("@KeySig", SqlDbType.NVarChar) { Value = entity.SigValue },
                 new SqlParameter("@KeySigAlgo", SqlDbType.NVarChar) { Value = entity.SigAlgo },
-                new SqlParameter("@Hostname", SqlDbType.NVarChar) { Value = entity.Hostname },
+                new SqlParameter("@Hostname", SqlDbType.NVarChar) { Value = entity.Comment },
                 new SqlParameter("@Enabled", SqlDbType.Bit) { Value = entity.Enabled },
                 new SqlParameter("@Immutable", SqlDbType.Bit) { Value = entity.Immutable }
             };

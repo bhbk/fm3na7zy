@@ -20,7 +20,7 @@ namespace Bhbk.Cli.Aurora.Commands
 
         public SysConfCreateCommands()
         {
-            IsCommand("sys-conf-create", "Create system config key/value pairs");
+            IsCommand("sys-conf-create", "Create config key/value pair");
 
             HasRequiredOption("k|key=", "Enter config key", arg =>
             {

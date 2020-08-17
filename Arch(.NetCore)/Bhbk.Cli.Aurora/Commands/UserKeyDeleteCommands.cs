@@ -24,7 +24,7 @@ namespace Bhbk.Cli.Aurora.Commands
 
         public UserKeyDeleteCommands()
         {
-            IsCommand("user-key-delete", "Delete user public/private key pairs");
+            IsCommand("user-key-delete", "Delete private/public key for user");
 
             HasRequiredOption("u|user=", "Enter existing user", arg =>
             {
@@ -68,7 +68,7 @@ namespace Bhbk.Cli.Aurora.Commands
                 var keys = _uow.PublicKeys.Delete(QueryExpressionFactory.GetQueryExpression<tbl_PublicKeys>()
                     .Where(x => x.IdentityId == _user.IdentityId && x.Immutable == false).ToLambda());
 
-                ConsoleHelper.StdOutKeyPairs(keys);
+                ConsoleHelper.StdOutKeyPairs(keys.OrderBy(x => x.Created));
 
                 if (_delete)
                 {

@@ -17,6 +17,10 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="3.1.7" />
+    <PackageReference Include="Rebex.Elliptic.Castle" Version="1.2.1" />
+    <PackageReference Include="Rebex.Elliptic.Curve25519" Version="1.2.1" />
+    <PackageReference Include="Rebex.Elliptic.Ed25519" Version="1.2.1" />
+    <PackageReference Include="Rebex.Security" Version="5.0.7501" />
     <PackageReference Include="System.DirectoryServices.Protocols" Version="4.7.0" />
   </ItemGroup>
 

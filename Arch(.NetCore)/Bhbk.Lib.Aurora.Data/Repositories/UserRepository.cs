@@ -20,7 +20,8 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
             var pvalues = new List<SqlParameter>
             {
                 new SqlParameter("@IdentityAlias", SqlDbType.NVarChar) { Value = entity.IdentityAlias },
-                new SqlParameter("@AllowPassword", SqlDbType.Bit) { Value = entity.AllowPassword },
+                new SqlParameter("@RequirePublicKey", SqlDbType.Bit) { Value = entity.RequirePublicKey },
+                new SqlParameter("@RequirePassword", SqlDbType.Bit) { Value = entity.RequirePassword },
                 new SqlParameter("@FileSystemType", SqlDbType.NVarChar) { Value = entity.FileSystemType },
                 new SqlParameter("@FileSystemReadOnly", SqlDbType.Bit) { Value = entity.FileSystemReadOnly },
                 new SqlParameter("@DebugLevel", SqlDbType.NVarChar) { Value = (object)entity.DebugLevel ?? DBNull.Value },
@@ -29,7 +30,7 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
             };
 
             return _context.Set<uvw_Users>().FromSqlRaw("[svc].[usp_User_Insert]"
-                + "@IdentityAlias, @AllowPassword, @FileSystemType, @FileSystemReadOnly, @DebugLevel, @Enabled, @Immutable", pvalues.ToArray())
+                + "@IdentityAlias, @RequirePublicKey, @RequirePassword, @FileSystemType, @FileSystemReadOnly, @DebugLevel, @Enabled, @Immutable", pvalues.ToArray())
                     .AsEnumerable().Single();
 
             /*
@@ -99,7 +100,8 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
             {
                 new SqlParameter("@IdentityId", SqlDbType.UniqueIdentifier) { Value = entity.IdentityId },
                 new SqlParameter("@IdentityAlias", SqlDbType.NVarChar) { Value = entity.IdentityAlias },
-                new SqlParameter("@AllowPassword", SqlDbType.Bit) { Value = entity.AllowPassword },
+                new SqlParameter("@RequirePublicKey", SqlDbType.Bit) { Value = entity.RequirePublicKey },
+                new SqlParameter("@RequirePassword", SqlDbType.Bit) { Value = entity.RequirePassword },
                 new SqlParameter("@FileSystemType", SqlDbType.NVarChar) { Value = entity.FileSystemType },
                 new SqlParameter("@FileSystemReadOnly", SqlDbType.Bit) { Value = entity.FileSystemReadOnly },
                 new SqlParameter("@DebugLevel", SqlDbType.NVarChar) { Value = (object)entity.DebugLevel ?? DBNull.Value },
@@ -108,7 +110,7 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
             };
 
             return _context.Set<uvw_Users>().FromSqlRaw("[svc].[usp_User_Update]"
-                + "@IdentityId, @IdentityId, @IdentityAlias, @AllowPassword, @FileSystemType, @FileSystemReadOnly, @DebugLevel, @Enabled, @Immutable", pvalues.ToArray())
+                + "@IdentityId, @IdentityId, @IdentityAlias, @RequirePublicKey, @RequirePassword, @FileSystemType, @FileSystemReadOnly, @DebugLevel, @Enabled, @Immutable", pvalues.ToArray())
                     .AsEnumerable().Single();
         }
 

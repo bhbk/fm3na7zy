@@ -24,10 +24,10 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
     {
         private readonly IServiceScopeFactory _factory;
         private readonly SafeAccessTokenHandle _userToken;
-        private readonly tbl_Users _user;
+        private readonly tbl_Users _userEntity;
         private readonly string _userMount;
 
-        internal SmbReadWriteFileSystem(FileSystemProviderSettings settings, IServiceScopeFactory factory, tbl_Users user, 
+        internal SmbReadWriteFileSystem(FileSystemProviderSettings settings, IServiceScopeFactory factory, tbl_Users userEntity,
             string identityUser, string identityPass)
             : base(settings)
         {
@@ -39,7 +39,10 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                 throw new NotImplementedException();
 
             _factory = factory;
-            _user = user;
+            _userEntity = userEntity;
+
+            var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
+            Log.Information($"'{callPath}' '{_userEntity.IdentityAlias}' initialize '{typeof(SmbReadWriteFileSystem).Name}'");
 
             using (var scope = factory.CreateScope())
             {
@@ -47,7 +50,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                 var conf = scope.ServiceProvider.GetRequiredService<IConfiguration>();
 
                 var userMount = uow.UserMounts.Get(QueryExpressionFactory.GetQueryExpression<tbl_UserMounts>()
-                    .Where(x => x.IdentityId == _user.IdentityId).ToLambda())
+                    .Where(x => x.IdentityId == _userEntity.IdentityId).ToLambda())
                     .Single();
 
                 if (userMount.CredentialId.HasValue)
@@ -56,7 +59,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                         .Where(x => x.Id == userMount.CredentialId).ToLambda())
                         .Single();
 
-                    var secret = conf["Databases:AuroraSecretKey"];
+                    var secret = conf["Databases:AuroraSecret"];
 
                     var plainText = AES.DecryptString(userCred.Password, secret);
                     var cipherText = AES.EncryptString(plainText, secret);
@@ -72,6 +75,11 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                 }
 
                 _userMount = userMount.ServerAddress + userMount.ServerShare;
+
+                var pubKeys = uow.PublicKeys.Get(QueryExpressionFactory.GetQueryExpression<tbl_PublicKeys>()
+                    .Where(x => x.IdentityId == _userEntity.IdentityId).ToLambda()).ToList();
+
+                var pubKeysContent = KeyHelper.ExportPubKeyBase64(_userEntity, pubKeys);
             }
         }
 
@@ -85,6 +93,8 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                 {
                     var folder = SmbFileSystemHelper.FolderPathToCIFS(_userMount + child.Path.StringPath);
                     folder.Create();
+
+                    Log.Information($"'{callPath}' '{_userEntity.IdentityAlias}' folder '{child.Path}'");
                 });
 
                 return child;
@@ -98,8 +108,6 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
 
         protected override FileNode CreateFile(DirectoryNode parent, FileNode child)
         {
-            var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
-
             try
             {
                 WindowsIdentity.RunImpersonated(_userToken, () =>
@@ -139,7 +147,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                         var folder = SmbFileSystemHelper.FolderPathToCIFS(_userMount + node.Path.StringPath);
                         folder.Delete();
 
-                        Log.Information($"'{callPath}' '{_user.IdentityAlias}' folder '{node.Path}' from '{folder.FullName}'" +
+                        Log.Information($"'{callPath}' '{_userEntity.IdentityAlias}' folder '{node.Path}' from '{folder.FullName}'" +
                             $" run as '{WindowsIdentity.GetCurrent().Name}'");
                     });
                 }
@@ -150,7 +158,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                         var file = SmbFileSystemHelper.FilePathToCIFS(_userMount + node.Path.StringPath);
                         file.Delete();
 
-                        Log.Information($"'{callPath}' '{_user.IdentityAlias}' file '{node.Path}' from '{file.FullName}'" +
+                        Log.Information($"'{callPath}' '{_userEntity.IdentityAlias}' file '{node.Path}' from '{file.FullName}'" +
                             $" run as '{WindowsIdentity.GetCurrent().Name}'");
                     });
                 }
@@ -427,7 +435,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
 
                         folder.MoveTo(newPath.FullName);
 
-                        Log.Information($"'{callPath}' '{_user.IdentityAlias}' from '{folder.Name}' [{folder.FullName}] to '{newPath.Name}' [{newPath.FullName}]" +
+                        Log.Information($"'{callPath}' '{_userEntity.IdentityAlias}' from '{folder.Name}' [{folder.FullName}] to '{newPath.Name}' [{newPath.FullName}]" +
                             $" run as '{WindowsIdentity.GetCurrent().Name}'");
                     });
 
@@ -442,7 +450,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
 
                         file.MoveTo(newPath.FullName);
 
-                        Log.Information($"'{callPath}' '{_user.IdentityAlias}' from '{file.Name}' [{file.FullName}] to '{newPath.Name}' [{newPath.FullName}]" +
+                        Log.Information($"'{callPath}' '{_userEntity.IdentityAlias}' from '{file.Name}' [{file.FullName}] to '{newPath.Name}' [{newPath.FullName}]" +
                             $" run as '{WindowsIdentity.GetCurrent().Name}'");
                     });
 
@@ -479,7 +487,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
 
                         folder.MoveTo(newFolder.FullName);
 
-                        Log.Information($"'{callPath}' '{_user.IdentityAlias}' from '{folder.Name}' [{folder.FullName}] to '{newFolder.Name}' [{newFolder.FullName}]" +
+                        Log.Information($"'{callPath}' '{_userEntity.IdentityAlias}' from '{folder.Name}' [{folder.FullName}] to '{newFolder.Name}' [{newFolder.FullName}]" +
                             $" run as '{WindowsIdentity.GetCurrent().Name}'");
                     });
 
@@ -495,7 +503,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
 
                         file.MoveTo(newFile.FullName);
 
-                        Log.Information($"'{callPath}' '{_user.IdentityAlias}' from '{file.Name}' [{file.FullName}] to '{newFile.Name}' [{newFile.FullName}]" +
+                        Log.Information($"'{callPath}' '{_userEntity.IdentityAlias}' from '{file.Name}' [{file.FullName}] to '{newFile.Name}' [{newFile.FullName}]" +
                             $" run as '{WindowsIdentity.GetCurrent().Name}'");
                     });
 
@@ -539,7 +547,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                         using (var fs = new FileStream(file.FullName, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite))
                             content.GetStream().CopyTo(fs);
 
-                        Log.Information($"'{callPath}' '{_user.IdentityAlias}' file '{node.Path}' to '{file.FullName}'" +
+                        Log.Information($"'{callPath}' '{_userEntity.IdentityAlias}' file '{node.Path}' to '{file.FullName}'" +
                             $" run as '{WindowsIdentity.GetCurrent().Name}'");
                     });
                 }
@@ -625,6 +633,14 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                 Log.Error(ex.ToString());
                 throw;
             }
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
+            Log.Information($"'{callPath}' '{_userEntity.IdentityAlias}' dispose '{typeof(SmbReadWriteFileSystem).Name}'");
+
+            base.Dispose(disposing);
         }
     }
 }

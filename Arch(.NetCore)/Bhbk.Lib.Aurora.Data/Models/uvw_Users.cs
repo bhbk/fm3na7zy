@@ -7,7 +7,8 @@ namespace Bhbk.Lib.Aurora.Data.Models
     {
         public Guid IdentityId { get; set; }
         public string IdentityAlias { get; set; }
-        public bool AllowPassword { get; set; }
+        public bool RequirePassword { get; set; }
+        public bool RequirePublicKey { get; set; }
         public string FileSystemType { get; set; }
         public bool FileSystemReadOnly { get; set; }
         public string DebugLevel { get; set; }

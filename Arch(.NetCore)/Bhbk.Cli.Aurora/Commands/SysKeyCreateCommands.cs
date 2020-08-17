@@ -23,13 +23,11 @@ namespace Bhbk.Cli.Aurora.Commands
         private static int _privKeySize;
         private static string _privKeyPass;
         private static SshHostKeyAlgorithm _keyAlgo;
-        private static SignatureHashAlgorithm _sigAlgo;
         private static string _keyAlgoList = string.Join(", ", Enum.GetNames(typeof(SshHostKeyAlgorithm)));
-        private static string _sigAlgoList = string.Join(", ", Enum.GetNames(typeof(SignatureHashAlgorithm)));
 
         public SysKeyCreateCommands()
         {
-            IsCommand("sys-key-create", "Create system public/private key pairs");
+            IsCommand("sys-key-create", "Create private/public key for system");
 
             HasRequiredOption("a|alg=", "Enter key algorithm", arg =>
             {
@@ -41,12 +39,6 @@ namespace Bhbk.Cli.Aurora.Commands
             {
                 if (!int.TryParse(arg, out _privKeySize))
                     throw new ConsoleHelpAsException($"  *** Invalid key size '{_privKeySize}' ***");
-            });
-
-            HasRequiredOption("h|hash=", "Enter signature algorithm", arg =>
-            {
-                if (!Enum.TryParse(arg, out _sigAlgo))
-                    throw new ConsoleHelpAsException($"  *** Invalid signature algorithm. Options are '{_sigAlgoList}' ***");
             });
 
             HasOption("p|pass=", "Enter private key password", arg =>
@@ -77,9 +69,7 @@ namespace Bhbk.Cli.Aurora.Commands
                     Console.Out.WriteLine($"  *** The password for the private key *** : {_privKeyPass}");
                 }
 
-                var privKey = KeyHelper.CreateDaemonSshPrivKey(_uow,
-                    SshPrivateKeyFormat.Pkcs8, _keyAlgo, _privKeySize, _privKeyPass,
-                    SshPublicKeyFormat.Pkcs8, _sigAlgo);
+                var privKey = KeyHelper.CreatePrivKey(_conf, _uow, _keyAlgo, _privKeySize, _privKeyPass, SignatureHashAlgorithm.SHA256);
 
                 var pubKey = _uow.PublicKeys.Get(QueryExpressionFactory.GetQueryExpression<tbl_PublicKeys>()
                     .Where(x => x.PrivateKeyId == privKey.Id).ToLambda())

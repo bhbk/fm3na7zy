@@ -99,7 +99,7 @@ namespace Bhbk.Lib.Aurora.Data.Models
 
                 entity.ToView("uvw_PublicKeys", "svc");
 
-                entity.Property(e => e.Hostname).HasMaxLength(1024);
+                entity.Property(e => e.Comment).HasMaxLength(1024);
 
                 entity.Property(e => e.KeyAlgo)
                     .IsRequired()

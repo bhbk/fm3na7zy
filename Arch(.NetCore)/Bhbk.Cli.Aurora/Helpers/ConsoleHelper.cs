@@ -17,6 +17,15 @@ namespace Bhbk.Cli.Aurora.Helpers
             }
         }
 
+        public static void StdOutCredentialSecrets(IEnumerable<tbl_Credentials> creds)
+        {
+            foreach (var cred in creds)
+            {
+                Console.Out.WriteLine($"  Credential GUID '{cred.Id}'{(cred.Immutable ? " is immutable" : null)}");
+                Console.Out.WriteLine($"    Pass ciphertext '{cred.Password}'");
+            }
+        }
+
         public static void StdOutKeyPairs(IEnumerable<tbl_PublicKeys> keys)
         {
             foreach (var key in keys)
@@ -24,7 +33,6 @@ namespace Bhbk.Cli.Aurora.Helpers
                 Console.Out.WriteLine($"  Public '{key.KeyAlgo}' key with GUID '{key.Id}'{(key.Immutable ? " is immutable" : null)}. " +
                     $"Created {key.Created}.");
                 Console.Out.WriteLine($"    Sig '{key.SigValue}'");
-                Console.Out.WriteLine();
 
                 if (key.PrivateKeyId != null)
                     Console.Out.WriteLine($"    Private '{key.KeyAlgo}' key GUID '{key.PrivateKeyId}'{(key.PrivateKey.Immutable ? " is immutable" : null)}. " +
@@ -34,12 +42,20 @@ namespace Bhbk.Cli.Aurora.Helpers
             };
         }
 
+        public static void StdOutKeyPairSecrets(IEnumerable<tbl_PrivateKeys> keys)
+        {
+            foreach (var key in keys)
+            {
+                Console.Out.WriteLine($"  Private '{key.KeyAlgo}' key with GUID '{key.Id}'{(key.Immutable ? " is immutable" : null)}. " +
+                    $"Created {key.Created}.");
+                Console.Out.WriteLine($"    Key pass ciphertext '{key.KeyPass}'");
+            };
+        }
+
         public static void StdOutNetworks(IEnumerable<tbl_Networks> nets)
         {
             foreach (var net in nets.Where(x => x.Action == NetworkAction.Deny.ToString()).OrderBy(x => x.Address))
                 Console.Out.WriteLine($"  Deny {net.Address} with GUID '{net.Id}'");
-
-            Console.Out.WriteLine();
 
             foreach (var net in nets.Where(x => x.Action == NetworkAction.Allow.ToString()).OrderBy(x => x.Address))
                 Console.Out.WriteLine($"  Allow {net.Address} with GUID '{net.Id}'");
@@ -56,7 +72,7 @@ namespace Bhbk.Cli.Aurora.Helpers
 
         public static void StdOutUserMounts(IEnumerable<tbl_UserMounts> mounts)
         {
-            foreach(var mount in mounts)
+            foreach (var mount in mounts)
             {
                 Console.Out.WriteLine($"  Mount for user GUID '{mount.IdentityId}'{(mount.Immutable ? " is immutable" : null)}");
                 Console.Out.WriteLine($"    Mount '{mount.ServerAddress}{mount.ServerShare}' using '{mount.AuthType}' protocol");

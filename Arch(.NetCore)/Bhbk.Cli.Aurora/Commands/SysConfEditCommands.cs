@@ -23,7 +23,7 @@ namespace Bhbk.Cli.Aurora.Commands
 
         public SysConfEditCommands()
         {
-            IsCommand("sys-conf-edit", "Edit system config key/value pairs");
+            IsCommand("sys-conf-edit", "Edit config key/value pair");
 
             HasRequiredOption("k|key=", "Enter config key", arg =>
             {

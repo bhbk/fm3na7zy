@@ -15,7 +15,6 @@ using Microsoft.Extensions.Hosting;
 using Quartz;
 using Serilog;
 using System;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -56,13 +55,6 @@ namespace Bhbk.Daemon.Aurora.SFTP
                     admin.Grant = new ResourceOwnerGrantV2(_conf);
 
                     return admin;
-                });
-                sc.AddTransient<IMeService, MeService>(_ =>
-                {
-                    var me = new MeService(_conf);
-                    me.Grant = new ResourceOwnerGrantV2(_conf);
-
-                    return me;
                 });
                 sc.AddTransient<IStsService, StsService>(_ =>
                 {
@@ -151,13 +143,6 @@ namespace Bhbk.Daemon.Aurora.SFTP
                     admin.Grant = new ResourceOwnerGrantV2(_conf);
 
                     return admin;
-                });
-                sc.AddTransient<IMeService, MeService>(_ =>
-                {
-                    var me = new MeService(_conf);
-                    me.Grant = new ResourceOwnerGrantV2(_conf);
-
-                    return me;
                 });
                 sc.AddTransient<IStsService, StsService>(_ =>
                 {

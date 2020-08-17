@@ -24,10 +24,10 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
     {
         private readonly IServiceScopeFactory _factory;
         private readonly SafeAccessTokenHandle _userToken;
-        private readonly tbl_Users _user;
+        private readonly tbl_Users _userEntity;
         private readonly string _userMount;
 
-        internal SmbReadOnlyFileSystem(FileSystemProviderSettings settings, IServiceScopeFactory factory, tbl_Users user, 
+        internal SmbReadOnlyFileSystem(FileSystemProviderSettings settings, IServiceScopeFactory factory, tbl_Users userEntity, 
             string identityUser, string identityPass)
             : base(settings)
         {
@@ -39,7 +39,10 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                 throw new NotImplementedException();
 
             _factory = factory;
-            _user = user;
+            _userEntity = userEntity;
+
+            var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
+            Log.Information($"'{callPath}' '{_userEntity.IdentityAlias}' initialize '{typeof(SmbReadOnlyFileSystem).Name}'");
 
             using (var scope = factory.CreateScope())
             {
@@ -47,7 +50,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                 var conf = scope.ServiceProvider.GetRequiredService<IConfiguration>();
 
                 var userMount = uow.UserMounts.Get(QueryExpressionFactory.GetQueryExpression<tbl_UserMounts>()
-                    .Where(x => x.IdentityId == _user.IdentityId).ToLambda())
+                    .Where(x => x.IdentityId == _userEntity.IdentityId).ToLambda())
                     .Single();
 
                 if (userMount.CredentialId.HasValue)
@@ -56,7 +59,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                         .Where(x => x.Id == userMount.CredentialId).ToLambda())
                         .Single();
 
-                    var secret = conf["Databases:AuroraSecretKey"];
+                    var secret = conf["Databases:AuroraSecret"];
 
                     var plainText = AES.DecryptString(userCred.Password, secret);
                     var cipherText = AES.EncryptString(plainText, secret);
@@ -72,6 +75,11 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                 }
 
                 _userMount = userMount.ServerAddress + userMount.ServerShare;
+
+                var pubKeys = uow.PublicKeys.Get(QueryExpressionFactory.GetQueryExpression<tbl_PublicKeys>()
+                    .Where(x => x.IdentityId == _userEntity.IdentityId).ToLambda()).ToList();
+
+                var pubKeysContent = KeyHelper.ExportPubKeyBase64(_userEntity, pubKeys);
             }
         }
 
@@ -316,6 +324,14 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                 Log.Error(ex.ToString());
                 throw;
             }
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
+            Log.Information($"'{callPath}' '{_userEntity.IdentityAlias}' dispose '{typeof(SmbReadOnlyFileSystem).Name}'");
+
+            base.Dispose(disposing);
         }
     }
 }

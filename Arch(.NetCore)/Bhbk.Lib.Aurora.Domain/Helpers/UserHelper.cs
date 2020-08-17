@@ -1,4 +1,6 @@
-﻿using Bhbk.Lib.Aurora.Data.Models_DIRECT;
+﻿using Bhbk.Lib.Aurora.Data.Infrastructure_DIRECT;
+using Bhbk.Lib.Aurora.Data.Models_DIRECT;
+using Bhbk.Lib.Cryptography.Encryption;
 using Microsoft.Win32.SafeHandles;
 using Rebex.Net;
 using Rebex.Security.Cryptography.Pkcs;
@@ -42,25 +44,51 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
             var loginStream = new MemoryStream();
             loginKey.SavePublicKey(loginStream, SshPublicKeyFormat.Pkcs8);
 
-            var login = Encoding.ASCII.GetString(loginStream.ToArray());
+            var loginValue = Encoding.ASCII.GetString(loginStream.ToArray());
 
             foreach (var userKey in userKeys)
             {
-                var pubBytes = Encoding.ASCII.GetBytes(userKey.KeyValue);
+                var pubKeyBytes = Encoding.ASCII.GetBytes(userKey.KeyValue);
                 var pubKeyInfo = new PublicKeyInfo();
-                pubKeyInfo.Load(new MemoryStream(pubBytes));
+                pubKeyInfo.Load(new MemoryStream(pubKeyBytes));
 
                 var pubStream = new MemoryStream();
                 var pubKey = new SshPublicKey(pubKeyInfo);
                 pubKey.SavePublicKey(pubStream, SshPublicKeyFormat.Pkcs8);
 
-                var pubResult = Encoding.ASCII.GetString(pubStream.ToArray());
+                var pubKeyValue = Encoding.ASCII.GetString(pubStream.ToArray());
 
-                if (login == pubResult)
+                if (loginValue == pubKeyValue)
                     return true;
             }
 
             return false;
+        }
+
+        public static ICollection<tbl_Credentials> EditCredentialSecrets(IUnitOfWork uow,
+            ICollection<tbl_Credentials> creds, string secretCurrent, string secretNew)
+        {
+            var userCreds = new List<tbl_Credentials>();
+
+            foreach (var cred in creds)
+            {
+                var plainText = AES.DecryptString(cred.Password, secretCurrent);
+                var cipherText = AES.EncryptString(plainText, secretCurrent);
+
+                if (cred.Password != cipherText)
+                    throw new UnauthorizedAccessException();
+
+                cred.Password = AES.EncryptString(plainText, secretNew);
+                cred.LastUpdated = DateTime.Now;
+
+                uow.Credentials.Update(cred);
+
+                userCreds.Add(cred);
+            }
+
+            uow.Commit();
+
+            return userCreds;
         }
 
         [DllImport("advapi32.dll", SetLastError = true, CharSet = CharSet.Unicode)]

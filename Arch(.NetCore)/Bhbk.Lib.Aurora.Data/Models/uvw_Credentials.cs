@@ -11,6 +11,7 @@ namespace Bhbk.Lib.Aurora.Data.Models
         public string Password { get; set; }
         public bool Enabled { get; set; }
         public DateTime Created { get; set; }
+        public DateTime? LastUpdated { get; set; }
         public bool Immutable { get; set; }
     }
 }

@@ -1,19 +1,24 @@
 ﻿using Bhbk.Daemon.Aurora.SFTP.Helpers;
 using Bhbk.Lib.Aurora.Data.Infrastructure_DIRECT;
 using Bhbk.Lib.Aurora.Data.Models_DIRECT;
-using Bhbk.Lib.Identity.Services;
+using Bhbk.Lib.Aurora.Domain.Helpers;
+using Bhbk.Lib.QueryExpression.Extensions;
+using Bhbk.Lib.QueryExpression.Factories;
 using Microsoft.Extensions.DependencyInjection;
 using Rebex.IO.FileSystem;
+using Serilog;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 
 /*
  * https://forum.rebex.net/8453/implement-filesystem-almost-as-memoryfilesystemprovider
  */
 namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
 {
-    internal class MemoryReadOnlyFileSystem : ReadOnlyFileSystemProvider
+    internal class MemoryReadOnlyFileSystem : ReadOnlyFileSystemProvider, IDisposable
     {
         private readonly IServiceScopeFactory _factory;
         private readonly Dictionary<NodePath, NodeBase> _path;
@@ -29,14 +34,20 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
             _path = new Dictionary<NodePath, NodeBase>();
             _store = new Dictionary<NodeBase, MemoryNodeData>();
 
-            MemoryFileSystemHelper.EnsureRootExists(Root, _path, _store);
+            var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
+            Log.Information($"'{callPath}' '{_userEntity.IdentityAlias}' initialize '{typeof(MemoryReadOnlyFileSystem).Name}'");
 
             using (var scope = _factory.CreateScope())
             {
                 var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
-                var me = scope.ServiceProvider.GetRequiredService<IMeService>();
 
-                MemoryFileSystemHelper.GenerateContentForMOTD(Root, _path, _store, me);
+                var pubKeys = uow.PublicKeys.Get(QueryExpressionFactory.GetQueryExpression<tbl_PublicKeys>()
+                    .Where(x => x.IdentityId == _userEntity.IdentityId).ToLambda()).ToList();
+
+                var pubKeysContent = KeyHelper.ExportPubKeyBase64(_userEntity, pubKeys);
+
+                MemoryFileSystemHelper.EnsureRootExists(Root, _path, _store);
+                MemoryFileSystemHelper.CreatePubKeysFile(Root, _path, _store, _userEntity, pubKeysContent);
             }
         }
 
@@ -92,6 +103,14 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
         protected override NodeTimeInfo GetTimeInfo(NodeBase node)
         {
             return _store[node].TimeInfo;
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
+            Log.Information($"'{callPath}' '{_userEntity.IdentityAlias}' dispose '{typeof(MemoryReadOnlyFileSystem).Name}'");
+
+            base.Dispose(disposing);
         }
     }
 }

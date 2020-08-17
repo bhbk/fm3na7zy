@@ -54,9 +54,14 @@ namespace Bhbk.Cli.Aurora.Commands
                     _user.FileSystemType = _fileSystem.ToString();
             });
 
+            HasOption("k|public-key=", "Require public key for user", arg =>
+            {
+                _user.RequirePublicKey = bool.Parse(arg);
+            });
+
             HasOption("p|pass=", "Require password for user", arg =>
             {
-                _user.AllowPassword = bool.Parse(arg);
+                _user.RequirePassword = bool.Parse(arg);
             });
         }
 

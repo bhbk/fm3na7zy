@@ -4,6 +4,8 @@ using Bhbk.Lib.Aurora.Data.Models_DIRECT;
 using Bhbk.Lib.Aurora.Domain.Helpers;
 using Bhbk.Lib.Aurora.Domain.Primitives;
 using Bhbk.Lib.Aurora.Domain.Primitives.Enums;
+using Bhbk.Lib.Aurora.Primitives.Enums;
+using Bhbk.Lib.Cryptography.Encryption;
 using Bhbk.Lib.Cryptography.Entropy;
 using Bhbk.Lib.Identity.Models.Alert;
 using Bhbk.Lib.Identity.Models.Sts;
@@ -74,10 +76,14 @@ namespace Bhbk.Daemon.Aurora.SFTP
 
                         Rebex.Licensing.Key = license.ConfigValue;
 
-                        KeyHelper.CheckDaemonSshPrivKey(uow, SshHostKeyAlgorithm.DSS, 1024, AlphaNumeric.CreateString(32), SignatureHashAlgorithm.SHA256);
-                        KeyHelper.CheckDaemonSshPrivKey(uow, SshHostKeyAlgorithm.RSA, 2048, AlphaNumeric.CreateString(32), SignatureHashAlgorithm.SHA256);
-                        KeyHelper.CheckDaemonSshPrivKey(uow, SshHostKeyAlgorithm.ECDsaNistP521, 521, AlphaNumeric.CreateString(32), SignatureHashAlgorithm.SHA256);
-                        KeyHelper.CheckDaemonSshPrivKey(uow, SshHostKeyAlgorithm.ED25519, 256, AlphaNumeric.CreateString(32), SignatureHashAlgorithm.SHA256);
+                        KeyHelper.CheckPrivKey(conf, uow, SshHostKeyAlgorithm.DSS, 1024, AlphaNumeric.CreateString(32), SignatureHashAlgorithm.SHA256);
+                        KeyHelper.CheckPrivKey(conf, uow, SshHostKeyAlgorithm.RSA, 4096, AlphaNumeric.CreateString(32), SignatureHashAlgorithm.SHA256);
+                        KeyHelper.CheckPrivKey(conf, uow, SshHostKeyAlgorithm.ECDsaNistP256, 256, AlphaNumeric.CreateString(32), SignatureHashAlgorithm.SHA256);
+                        KeyHelper.CheckPrivKey(conf, uow, SshHostKeyAlgorithm.ECDsaNistP384, 384, AlphaNumeric.CreateString(32), SignatureHashAlgorithm.SHA256);
+                        KeyHelper.CheckPrivKey(conf, uow, SshHostKeyAlgorithm.ECDsaNistP521, 521, AlphaNumeric.CreateString(32), SignatureHashAlgorithm.SHA256);
+                        KeyHelper.CheckPrivKey(conf, uow, SshHostKeyAlgorithm.ED25519, 256, AlphaNumeric.CreateString(32), SignatureHashAlgorithm.SHA256);
+
+                        var secret = conf["Databases:AuroraSecret"];
 
                         var dsaStr = SshHostKeyAlgorithm.DSS.ToString();
                         var dsaPrivKey = uow.PrivateKeys.Get(QueryExpressionFactory.GetQueryExpression<tbl_PrivateKeys>()
@@ -85,7 +91,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                             .Single();
 
                         var dsaBytes = Encoding.ASCII.GetBytes(dsaPrivKey.KeyValue);
-                        _server.Keys.Add(new SshPrivateKey(dsaBytes, dsaPrivKey.KeyPass));
+                        _server.Keys.Add(new SshPrivateKey(dsaBytes, AES.DecryptString(dsaPrivKey.KeyPass,secret)));
 
                         var rsaStr = SshHostKeyAlgorithm.RSA.ToString();
                         var rsaPrivKey = uow.PrivateKeys.Get(QueryExpressionFactory.GetQueryExpression<tbl_PrivateKeys>()
@@ -93,15 +99,31 @@ namespace Bhbk.Daemon.Aurora.SFTP
                             .Single();
 
                         var rsaBytes = Encoding.ASCII.GetBytes(rsaPrivKey.KeyValue);
-                        _server.Keys.Add(new SshPrivateKey(rsaBytes, rsaPrivKey.KeyPass));
+                        _server.Keys.Add(new SshPrivateKey(rsaBytes, AES.DecryptString(rsaPrivKey.KeyPass, secret)));
 
-                        var ecdsaStr = SshHostKeyAlgorithm.ECDsaNistP521.ToString();
-                        var ecdsaPrivKey = uow.PrivateKeys.Get(QueryExpressionFactory.GetQueryExpression<tbl_PrivateKeys>()
-                            .Where(x => x.KeyAlgo == ecdsaStr && x.IdentityId == null).ToLambda()).OrderBy(x => x.Created)
+                        var ecdsa256Str = SshHostKeyAlgorithm.ECDsaNistP256.ToString();
+                        var ecdsa256PrivKey = uow.PrivateKeys.Get(QueryExpressionFactory.GetQueryExpression<tbl_PrivateKeys>()
+                            .Where(x => x.KeyAlgo == ecdsa256Str && x.IdentityId == null).ToLambda()).OrderBy(x => x.Created)
                             .Single();
 
-                        var ecdsaBytes = Encoding.ASCII.GetBytes(ecdsaPrivKey.KeyValue);
-                        _server.Keys.Add(new SshPrivateKey(ecdsaBytes, ecdsaPrivKey.KeyPass));
+                        var ecdsa256Bytes = Encoding.ASCII.GetBytes(ecdsa256PrivKey.KeyValue);
+                        _server.Keys.Add(new SshPrivateKey(ecdsa256Bytes, AES.DecryptString(ecdsa256PrivKey.KeyPass, secret)));
+
+                        var ecdsa384Str = SshHostKeyAlgorithm.ECDsaNistP384.ToString();
+                        var ecdsa384PrivKey = uow.PrivateKeys.Get(QueryExpressionFactory.GetQueryExpression<tbl_PrivateKeys>()
+                            .Where(x => x.KeyAlgo == ecdsa384Str && x.IdentityId == null).ToLambda()).OrderBy(x => x.Created)
+                            .Single();
+
+                        var ecdsa384Bytes = Encoding.ASCII.GetBytes(ecdsa384PrivKey.KeyValue);
+                        _server.Keys.Add(new SshPrivateKey(ecdsa384Bytes, AES.DecryptString(ecdsa384PrivKey.KeyPass, secret)));
+
+                        var ecdsa521Str = SshHostKeyAlgorithm.ECDsaNistP521.ToString();
+                        var ecdsa521PrivKey = uow.PrivateKeys.Get(QueryExpressionFactory.GetQueryExpression<tbl_PrivateKeys>()
+                            .Where(x => x.KeyAlgo == ecdsa521Str && x.IdentityId == null).ToLambda()).OrderBy(x => x.Created)
+                            .Single();
+
+                        var ecdsa521Bytes = Encoding.ASCII.GetBytes(ecdsa521PrivKey.KeyValue);
+                        _server.Keys.Add(new SshPrivateKey(ecdsa521Bytes, AES.DecryptString(ecdsa521PrivKey.KeyPass, secret)));
 
                         var ed25519Str = SshHostKeyAlgorithm.ED25519.ToString();
                         var ed25519PrivKey = uow.PrivateKeys.Get(QueryExpressionFactory.GetQueryExpression<tbl_PrivateKeys>()
@@ -109,7 +131,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                             .Single();
 
                         var ed25519Bytes = Encoding.ASCII.GetBytes(ed25519PrivKey.KeyValue);
-                        _server.Keys.Add(new SshPrivateKey(ed25519Bytes, ed25519PrivKey.KeyPass));
+                        _server.Keys.Add(new SshPrivateKey(ed25519Bytes, AES.DecryptString(ed25519PrivKey.KeyPass, secret)));
 
                         _binding = conf.GetSection("Daemons:SftpService:Bindings").GetChildren().Select(x => x.Value);
                     }
@@ -325,35 +347,31 @@ namespace Bhbk.Daemon.Aurora.SFTP
 
                     Log.Information($"'{callPath}' '{e.UserName}' allowed from '{e.ClientEndPoint}' running '{e.ClientSoftwareIdentifier}'");
 
-                    var keys = user.tbl_PublicKeys.Where(x => x.Enabled);
-
-                    if (!user.AllowPassword)
+                    if (user.RequirePublicKey
+                        && user.RequirePassword)
                     {
-                        if (keys.Count() > 0)
-                        {
-                            Log.Information($"'{callPath}' '{e.UserName}' allowed with public key");
+                        Log.Information($"'{callPath}' '{e.UserName}' allowed with public key and password");
 
-                            e.Accept(AuthenticationMethods.PublicKey);
-                            return;
-                        }
+                        e.Accept(AuthenticationMethods.PublicKey | AuthenticationMethods.Password);
+                        return;
                     }
-
-                    if (user.AllowPassword)
+                    
+                    if (user.RequirePublicKey
+                        && !user.RequirePassword)
                     {
-                        if (keys.Count() > 0)
-                        {
-                            Log.Information($"'{callPath}' '{e.UserName}' allowed with public key or password");
+                        Log.Information($"'{callPath}' '{e.UserName}' allowed with public key");
 
-                            e.Accept(AuthenticationMethods.PublicKey | AuthenticationMethods.Password);
-                            return;
-                        }
-                        else
-                        {
-                            Log.Information($"'{callPath}' '{e.UserName}' allowed with password");
+                        e.Accept(AuthenticationMethods.PublicKey);
+                        return;
+                    }
+                    
+                    if (!user.RequirePublicKey
+                        && user.RequirePassword)
+                    {
+                        Log.Information($"'{callPath}' '{e.UserName}' allowed with password");
 
-                            e.Accept(AuthenticationMethods.Password);
-                            return;
-                        }
+                        e.Accept(AuthenticationMethods.Password);
+                        return;
                     }
 
                     Log.Warning($"'{callPath}' '{e.UserName}' denied");
@@ -386,7 +404,8 @@ namespace Bhbk.Daemon.Aurora.SFTP
                         .Where(x => x.IdentityAlias == e.UserName).ToLambda(),
                             new List<Expression<Func<tbl_Users, object>>>()
                             {
-                                    x => x.tbl_PublicKeys,
+                                x => x.tbl_PublicKeys,
+                                x => x.tbl_UserMounts,
                             }).SingleOrDefault();
 
                     var admin = scope.ServiceProvider.GetRequiredService<IAdminService>();
@@ -396,50 +415,64 @@ namespace Bhbk.Daemon.Aurora.SFTP
                     {
                         Log.Information($"'{callPath}' '{e.UserName}' in-progress with public key");
 
-                        if (UserHelper.ValidatePubKey(user.tbl_PublicKeys.Where(x => x.Enabled).ToList(), e.Key))
+                        if (UserHelper.ValidatePubKey(user.tbl_PublicKeys.Where(x => x.Enabled).ToList(), e.Key)
+                            && admin.User_VerifyV1(user.IdentityId).Result)
                         {
-                            if (!admin.User_VerifyV1(user.IdentityId).Result)
-                            {
-                                Log.Warning($"'{callPath}' '{e.UserName}' failure with public key");
-
-                                e.Reject();
-                                return;
-                            }
-
                             Log.Information($"'{callPath}' '{e.UserName}' success with public key");
 
-                            var fs = FileSystemFactory.CreateFileSystem(_factory, log, user, e.UserName, e.Password);
-                            var fsUser = new FileServerUser(e.UserName, e.Password);
-                            fsUser.SetFileSystem(fs);
+                            if (e.PartiallyAccepted
+                                || !user.RequirePassword)
+                            {
+                                /*
+                                 * an smb mount will not succeed without a user password or ambassador credential.
+                                 */
+                                if (user.FileSystemType == FileSystemTypes.SMB.ToString()
+                                    && !user.tbl_UserMounts.CredentialId.HasValue)
+                                {
+                                    Log.Warning($"'{callPath}' '{e.UserName}' failure no credential to create {FileSystemTypes.SMB} filesystem");
 
-                            var fsNotify = fs.GetFileSystemNotifier();
-                            fsNotify.CreatePreview += FsNotify_CreatePreview;
-                            fsNotify.CreateCompleted += FsNotify_CreateCompleted;
-                            fsNotify.DeletePreview += FsNotify_DeletePreview;
-                            fsNotify.DeleteCompleted += FsNotify_DeleteCompleted;
+                                    e.Reject();
+                                    return;
+                                }
 
-                            e.Accept(fsUser);
+                                var fs = FileSystemFactory.CreateFileSystem(_factory, log, user, e.UserName, e.Password);
+                                var fsUser = new FileServerUser(e.UserName, e.Password);
+                                fsUser.SetFileSystem(fs);
+
+                                var fsNotify = fs.GetFileSystemNotifier();
+                                fsNotify.CreatePreview += FsNotify_CreatePreview;
+                                fsNotify.CreateCompleted += FsNotify_CreateCompleted;
+                                fsNotify.DeletePreview += FsNotify_DeletePreview;
+                                fsNotify.DeleteCompleted += FsNotify_DeleteCompleted;
+
+                                e.Accept(fsUser);
+                                return;
+                            }
+                            else
+                            {
+                                /*
+                                 * authenticate partially if another kind of credential has not been provided yet.
+                                 */
+                                e.AcceptPartially();
+                                return;
+                            }
+                        }
+                        else
+                        {
+                            Log.Warning($"'{callPath}' '{e.UserName}' failure with public key");
+
+                            e.Reject();
                             return;
                         }
-
-                        Log.Warning($"'{callPath}' '{e.UserName}' failure with public key");
-
-                        e.Reject();
-                        return;
                     }
-
+                    
                     if (e.Password != null)
                     {
                         Log.Information($"'{callPath}' '{e.UserName}' in-progress with password");
 
-                        string identityUser = string.Empty, identityPass = string.Empty;
-
                         try
                         {
                             var identity = admin.User_GetV1(user.IdentityId.ToString()).Result;
-
-                            identityUser = identity.UserName;
-                            identityPass = e.Password;
 
                             var auth = sts.ResourceOwner_GrantV2(
                                 new ResourceOwnerV2()
@@ -447,9 +480,36 @@ namespace Bhbk.Daemon.Aurora.SFTP
                                     issuer = conf["IdentityCredentials:IssuerName"],
                                     client = conf["IdentityCredentials:AudienceName"],
                                     grant_type = "password",
-                                    user = identityUser,
-                                    password = identityPass,
+                                    user = identity.UserName,
+                                    password = e.Password,
                                 }).Result;
+
+                            Log.Information($"'{callPath}' '{e.UserName}' success with password");
+
+                            if (e.PartiallyAccepted
+                                || !user.RequirePublicKey)
+                            {
+                                var fs = FileSystemFactory.CreateFileSystem(_factory, log, user, e.UserName, e.Password);
+                                var fsUser = new FileServerUser(e.UserName, e.Password);
+                                fsUser.SetFileSystem(fs);
+
+                                var fsNotify = fs.GetFileSystemNotifier();
+                                fsNotify.CreatePreview += FsNotify_CreatePreview;
+                                fsNotify.CreateCompleted += FsNotify_CreateCompleted;
+                                fsNotify.DeletePreview += FsNotify_DeletePreview;
+                                fsNotify.DeleteCompleted += FsNotify_DeleteCompleted;
+
+                                e.Accept(fsUser);
+                                return;
+                            }
+                            else
+                            {
+                                /*
+                                 * authenticate partially if another kind of credential has not been provided yet.
+                                 */
+                                e.AcceptPartially();
+                                return;
+                            }
                         }
                         catch (HttpRequestException)
                         {
@@ -458,28 +518,13 @@ namespace Bhbk.Daemon.Aurora.SFTP
                             e.Reject();
                             return;
                         }
-
-                        Log.Information($"'{callPath}' '{e.UserName}' success with password");
-
-                        var fs = FileSystemFactory.CreateFileSystem(_factory, log, user, identityUser, identityPass);
-                        var fsUser = new FileServerUser(e.UserName, e.Password);
-                        fsUser.SetFileSystem(fs);
-
-                        var fsNotify = fs.GetFileSystemNotifier();
-                        fsNotify.CreatePreview += FsNotify_CreatePreview;
-                        fsNotify.CreateCompleted += FsNotify_CreateCompleted;
-                        fsNotify.DeletePreview += FsNotify_DeletePreview;
-                        fsNotify.DeleteCompleted += FsNotify_DeleteCompleted;
-
-                        e.Accept(fsUser);
-                        return;
                     }
+
+                    Log.Warning($"'{callPath}' '{e.UserName}' denied");
+
+                    e.Reject();
+                    return;
                 }
-
-                Log.Warning($"'{callPath}' '{e.UserName}' denied");
-
-                e.Reject();
-                return;
             }
             catch (Exception ex)
             {
