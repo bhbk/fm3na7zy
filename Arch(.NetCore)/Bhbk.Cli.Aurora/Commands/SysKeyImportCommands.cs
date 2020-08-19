@@ -47,7 +47,7 @@ namespace Bhbk.Cli.Aurora.Commands
 
         public override int Run(string[] remainingArguments)
         {
-            var license = _uow.Settings.Get(QueryExpressionFactory.GetQueryExpression<tbl_Settings>()
+            var license = _uow.Settings.Get(QueryExpressionFactory.GetQueryExpression<tbl_Setting>()
                 .Where(x => x.ConfigKey == "RebexLicense").ToLambda()).OrderBy(x => x.Created)
                 .Last();
 

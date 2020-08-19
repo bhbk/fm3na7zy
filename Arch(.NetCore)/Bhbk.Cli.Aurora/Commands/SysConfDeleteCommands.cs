@@ -40,8 +40,8 @@ namespace Bhbk.Cli.Aurora.Commands
         {
             try
             {
-                var configs = _uow.Settings.Get(QueryExpressionFactory.GetQueryExpression<tbl_Settings>()
-                    .Where(x => x.Immutable == false).ToLambda());
+                var configs = _uow.Settings.Get(QueryExpressionFactory.GetQueryExpression<tbl_Setting>()
+                    .Where(x => x.Deletable == true).ToLambda());
 
                 ConsoleHelper.StdOutSettings(configs);
 
@@ -51,8 +51,8 @@ namespace Bhbk.Cli.Aurora.Commands
                     _configID = Guid.Parse(StandardInput.GetInput());
                 }
 
-                _uow.Settings.Delete(QueryExpressionFactory.GetQueryExpression<tbl_Settings>()
-                    .Where(x => x.Id == _configID && x.Immutable == false).ToLambda());
+                _uow.Settings.Delete(QueryExpressionFactory.GetQueryExpression<tbl_Setting>()
+                    .Where(x => x.Id == _configID && x.Deletable == true).ToLambda());
 
                 _uow.Commit();
 

@@ -19,7 +19,7 @@ namespace Bhbk.Cli.Aurora.Commands
     {
         private static IConfiguration _conf;
         private static IUnitOfWork _uow;
-        private static tbl_Users _user;
+        private static tbl_User _user;
 
         public UserMntDeleteCommands()
         {
@@ -37,11 +37,11 @@ namespace Bhbk.Cli.Aurora.Commands
                 var instance = new ContextService(InstanceContext.DeployedOrLocal);
                 _uow = new UnitOfWork(_conf["Databases:AuroraEntities"], instance);
 
-                _user = _uow.Users.Get(QueryExpressionFactory.GetQueryExpression<tbl_Users>()
+                _user = _uow.Users.Get(QueryExpressionFactory.GetQueryExpression<tbl_User>()
                     .Where(x => x.IdentityAlias == arg).ToLambda(),
-                        new List<Expression<Func<tbl_Users, object>>>()
+                        new List<Expression<Func<tbl_User, object>>>()
                         {
-                            x => x.tbl_UserMounts
+                            x => x.tbl_UserMount,
                         }).SingleOrDefault();
 
                 if (_user == null)
@@ -53,7 +53,11 @@ namespace Bhbk.Cli.Aurora.Commands
         {
             try
             {
-                _uow.UserMounts.Delete(_user.tbl_UserMounts);
+                var mount = _user.tbl_UserMount;
+
+                ConsoleHelper.StdOutUserMounts(new List<tbl_UserMount> { mount });
+
+                _uow.UserMounts.Delete(mount);
                 _uow.Commit();
 
                 return StandardOutput.FondFarewell();

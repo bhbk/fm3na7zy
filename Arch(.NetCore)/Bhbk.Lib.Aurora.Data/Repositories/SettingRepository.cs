@@ -10,22 +10,22 @@ using System.Linq.Expressions;
 
 namespace Bhbk.Lib.Aurora.Data.Repositories
 {
-    public class SettingRepository : GenericRepository<uvw_Settings>
+    public class SettingRepository : GenericRepository<uvw_Setting>
     {
         public SettingRepository(AuroraEntities context)
             : base(context) { }
 
-        public override uvw_Settings Create(uvw_Settings entity)
+        public override uvw_Setting Create(uvw_Setting entity)
         {
             var pvalues = new List<SqlParameter>
             {
                 new SqlParameter("@ConfigKey", SqlDbType.NVarChar) { Value = entity.ConfigKey },
                 new SqlParameter("@ConfigValue", SqlDbType.NVarChar) { Value = entity.ConfigValue },
-                new SqlParameter("@Immutable", SqlDbType.Bit) { Value = entity.Immutable }
+                new SqlParameter("@Deletable", SqlDbType.Bit) { Value = entity.Deletable },
             };
 
-            return _context.Set<uvw_Settings>().FromSqlRaw("[svc].[usp_Setting_Insert]"
-                + "@ConfigKey, @ConfigValue, @Immutable", pvalues.ToArray())
+            return _context.Set<uvw_Setting>().FromSqlRaw("[svc].[usp_Setting_Insert]"
+                + "@ConfigKey, @ConfigValue, @Deletable", pvalues.ToArray())
                     .AsEnumerable().Single();
 
             /*
@@ -45,9 +45,9 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
             */
         }
 
-        public override IEnumerable<uvw_Settings> Create(IEnumerable<uvw_Settings> entities)
+        public override IEnumerable<uvw_Setting> Create(IEnumerable<uvw_Setting> entities)
         {
-            var results = new List<uvw_Settings>();
+            var results = new List<uvw_Setting>();
 
             foreach (var entity in entities)
             {
@@ -59,20 +59,20 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
             return results;
         }
 
-        public override uvw_Settings Delete(uvw_Settings entity)
+        public override uvw_Setting Delete(uvw_Setting entity)
         {
             var pvalues = new List<SqlParameter>
             {
                 new SqlParameter("@Id", SqlDbType.UniqueIdentifier) { Value = entity.Id }
             };
 
-            return _context.Set<uvw_Settings>().FromSqlRaw("[svc].[usp_Setting_Delete] @Id", pvalues.ToArray())
+            return _context.Set<uvw_Setting>().FromSqlRaw("[svc].[usp_Setting_Delete] @Id", pvalues.ToArray())
                 .AsEnumerable().Single();
         }
 
-        public override IEnumerable<uvw_Settings> Delete(IEnumerable<uvw_Settings> entities)
+        public override IEnumerable<uvw_Setting> Delete(IEnumerable<uvw_Setting> entities)
         {
-            var results = new List<uvw_Settings>();
+            var results = new List<uvw_Setting>();
 
             foreach (var entity in entities)
             {
@@ -84,29 +84,29 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
             return results;
         }
 
-        public override IEnumerable<uvw_Settings> Delete(LambdaExpression lambda)
+        public override IEnumerable<uvw_Setting> Delete(LambdaExpression lambda)
         {
             throw new NotImplementedException();
         }
 
-        public override uvw_Settings Update(uvw_Settings entity)
+        public override uvw_Setting Update(uvw_Setting entity)
         {
             var pvalues = new List<SqlParameter>
             {
                 new SqlParameter("@Id", SqlDbType.UniqueIdentifier) { Value = entity.Id },
                 new SqlParameter("@ConfigKey", SqlDbType.NVarChar) { Value = entity.ConfigKey },
                 new SqlParameter("@ConfigValue", SqlDbType.NVarChar) { Value = entity.ConfigValue },
-                new SqlParameter("@Immutable", SqlDbType.Bit) { Value = entity.Immutable }
+                new SqlParameter("@Deletable", SqlDbType.Bit) { Value = entity.Deletable }
             };
 
-            return _context.Set<uvw_Settings>().FromSqlRaw("[svc].[usp_Setting_Update]"
-                + "@Id, @ConfigKey, @ConfigValue, @Immutable", pvalues.ToArray())
+            return _context.Set<uvw_Setting>().FromSqlRaw("[svc].[usp_Setting_Update]"
+                + "@Id, @ConfigKey, @ConfigValue, @Deletable", pvalues.ToArray())
                     .AsEnumerable().Single();
         }
 
-        public override IEnumerable<uvw_Settings> Update(IEnumerable<uvw_Settings> entities)
+        public override IEnumerable<uvw_Setting> Update(IEnumerable<uvw_Setting> entities)
         {
-            var results = new List<uvw_Settings>();
+            var results = new List<uvw_Setting>();
 
             foreach (var entity in entities)
             {

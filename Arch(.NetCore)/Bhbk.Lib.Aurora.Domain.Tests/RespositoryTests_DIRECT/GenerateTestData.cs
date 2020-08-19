@@ -48,23 +48,23 @@ namespace Bhbk.Lib.Aurora.Domain.Tests.RespositoryTests_DIRECT
             /*
              * create composite test users
              */
-            var foundCompositeUser = _uow.Users.Get(QueryExpressionFactory.GetQueryExpression<tbl_Users>()
+            var foundCompositeUser = _uow.Users.Get(QueryExpressionFactory.GetQueryExpression<tbl_User>()
                 .Where(x => x.IdentityAlias == Constants.TestCompositeUser).ToLambda())
                 .SingleOrDefault();
 
             if (foundCompositeUser == null)
             {
                 foundCompositeUser = _uow.Users.Create(
-                    new tbl_Users()
+                    new tbl_User()
                     {
                         IdentityId = Guid.NewGuid(),
                         IdentityAlias = Constants.TestCompositeUser,
                         RequirePassword = true,
                         RequirePublicKey = false,
                         FileSystemType = FileSystemTypes.Composite.ToString(),
-                        Enabled = true,
                         Created = DateTime.Now,
-                        Immutable = false,
+                        Enabled = true,
+                        Deletable = true,
                     });
 
                 _uow.Commit();
@@ -76,23 +76,23 @@ namespace Bhbk.Lib.Aurora.Domain.Tests.RespositoryTests_DIRECT
             /*
              * create memory test users
              */
-            var foundMemoryUser = _uow.Users.Get(QueryExpressionFactory.GetQueryExpression<tbl_Users>()
+            var foundMemoryUser = _uow.Users.Get(QueryExpressionFactory.GetQueryExpression<tbl_User>()
                 .Where(x => x.IdentityAlias == Constants.TestMemoryUser).ToLambda())
                 .SingleOrDefault();
 
             if (foundMemoryUser == null)
             {
                 foundMemoryUser = _uow.Users.Create(
-                    new tbl_Users()
+                    new tbl_User()
                     {
                         IdentityId = Guid.NewGuid(),
                         IdentityAlias = Constants.TestMemoryUser,
                         RequirePassword = true,
                         RequirePublicKey = false,
                         FileSystemType = FileSystemTypes.Memory.ToString(),
-                        Enabled = true,
                         Created = DateTime.Now,
-                        Immutable = false,
+                        Enabled = true,
+                        Deletable = true,
                     });
 
                 _uow.Commit();
@@ -104,23 +104,23 @@ namespace Bhbk.Lib.Aurora.Domain.Tests.RespositoryTests_DIRECT
             /*
              * create smb test users
              */
-            var foundSmbUser = _uow.Users.Get(QueryExpressionFactory.GetQueryExpression<tbl_Users>()
+            var foundSmbUser = _uow.Users.Get(QueryExpressionFactory.GetQueryExpression<tbl_User>()
                 .Where(x => x.IdentityAlias == Constants.TestSmbUser).ToLambda())
                 .SingleOrDefault();
 
             if (foundSmbUser == null)
             {
                 foundSmbUser = _uow.Users.Create(
-                    new tbl_Users()
+                    new tbl_User()
                     {
                         IdentityId = Guid.NewGuid(),
                         IdentityAlias = Constants.TestSmbUser,
                         RequirePassword = true,
                         RequirePublicKey = false,
                         FileSystemType = FileSystemTypes.SMB.ToString(),
-                        Enabled = true,
                         Created = DateTime.Now,
-                        Immutable = false,
+                        Enabled = true,
+                        Deletable = true,
                     });
 
                 _uow.Commit();
@@ -138,7 +138,7 @@ namespace Bhbk.Lib.Aurora.Domain.Tests.RespositoryTests_DIRECT
             /*
              * delete test users
              */
-            _uow.Users.Delete(QueryExpressionFactory.GetQueryExpression<tbl_Users>()
+            _uow.Users.Delete(QueryExpressionFactory.GetQueryExpression<tbl_User>()
                 .Where(x => x.IdentityAlias == Constants.TestCompositeUser 
                     || x.IdentityAlias == Constants.TestMemoryUser
                     || x.IdentityAlias == Constants.TestSmbUser).ToLambda());
@@ -148,7 +148,7 @@ namespace Bhbk.Lib.Aurora.Domain.Tests.RespositoryTests_DIRECT
             /*
              * delete key pairs for daemons
              */
-            _uow.PrivateKeys.Delete(QueryExpressionFactory.GetQueryExpression<tbl_PrivateKeys>()
+            _uow.PrivateKeys.Delete(QueryExpressionFactory.GetQueryExpression<tbl_PrivateKey>()
                 .Where(x => (x.KeyAlgo == SshHostKeyAlgorithm.DSS.ToString()
                     || x.KeyAlgo == SshHostKeyAlgorithm.RSA.ToString()
                     || x.KeyAlgo == SshHostKeyAlgorithm.ECDsaNistP521.ToString()

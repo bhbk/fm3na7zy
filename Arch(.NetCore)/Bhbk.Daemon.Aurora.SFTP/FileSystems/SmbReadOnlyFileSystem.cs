@@ -24,11 +24,11 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
     {
         private readonly IServiceScopeFactory _factory;
         private readonly SafeAccessTokenHandle _userToken;
-        private readonly tbl_Users _userEntity;
+        private readonly tbl_User _userEntity;
         private readonly string _userMount;
         private bool _disposed = false;
 
-        internal SmbReadOnlyFileSystem(FileSystemProviderSettings settings, IServiceScopeFactory factory, tbl_Users userEntity, 
+        internal SmbReadOnlyFileSystem(FileSystemProviderSettings settings, IServiceScopeFactory factory, tbl_User userEntity, 
             string identityUser, string identityPass)
             : base(settings)
         {
@@ -47,13 +47,13 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                 var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
                 var conf = scope.ServiceProvider.GetRequiredService<IConfiguration>();
 
-                var userMount = uow.UserMounts.Get(QueryExpressionFactory.GetQueryExpression<tbl_UserMounts>()
+                var userMount = uow.UserMounts.Get(QueryExpressionFactory.GetQueryExpression<tbl_UserMount>()
                     .Where(x => x.IdentityId == _userEntity.IdentityId).ToLambda())
                     .Single();
 
                 if (userMount.CredentialId.HasValue)
                 {
-                    var userCred = uow.Credentials.Get(QueryExpressionFactory.GetQueryExpression<tbl_Credentials>()
+                    var userCred = uow.Credentials.Get(QueryExpressionFactory.GetQueryExpression<tbl_Credential>()
                         .Where(x => x.Id == userMount.CredentialId).ToLambda())
                         .Single();
 
@@ -74,7 +74,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
 
                 _userMount = userMount.ServerAddress + userMount.ServerShare;
 
-                var pubKeys = uow.PublicKeys.Get(QueryExpressionFactory.GetQueryExpression<tbl_PublicKeys>()
+                var pubKeys = uow.PublicKeys.Get(QueryExpressionFactory.GetQueryExpression<tbl_PublicKey>()
                     .Where(x => x.IdentityId == _userEntity.IdentityId).ToLambda()).ToList();
 
                 var pubKeysContent = KeyHelper.ExportPubKeyBase64(_userEntity, pubKeys);

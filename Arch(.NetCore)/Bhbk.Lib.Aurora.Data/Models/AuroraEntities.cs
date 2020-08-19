@@ -15,15 +15,15 @@ namespace Bhbk.Lib.Aurora.Data.Models
         {
         }
 
-        public virtual DbSet<uvw_Credentials> uvw_Credentials { get; set; }
-        public virtual DbSet<uvw_Networks> uvw_Networks { get; set; }
-        public virtual DbSet<uvw_PrivateKeys> uvw_PrivateKeys { get; set; }
-        public virtual DbSet<uvw_PublicKeys> uvw_PublicKeys { get; set; }
-        public virtual DbSet<uvw_Settings> uvw_Settings { get; set; }
-        public virtual DbSet<uvw_UserFiles> uvw_UserFiles { get; set; }
-        public virtual DbSet<uvw_UserFolders> uvw_UserFolders { get; set; }
-        public virtual DbSet<uvw_UserMounts> uvw_UserMounts { get; set; }
-        public virtual DbSet<uvw_Users> uvw_Users { get; set; }
+        public virtual DbSet<uvw_Credential> uvw_Credential { get; set; }
+        public virtual DbSet<uvw_Network> uvw_Network { get; set; }
+        public virtual DbSet<uvw_PrivateKey> uvw_PrivateKey { get; set; }
+        public virtual DbSet<uvw_PublicKey> uvw_PublicKey { get; set; }
+        public virtual DbSet<uvw_Setting> uvw_Setting { get; set; }
+        public virtual DbSet<uvw_User> uvw_User { get; set; }
+        public virtual DbSet<uvw_UserFile> uvw_UserFile { get; set; }
+        public virtual DbSet<uvw_UserFolder> uvw_UserFolder { get; set; }
+        public virtual DbSet<uvw_UserMount> uvw_UserMount { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -36,11 +36,11 @@ namespace Bhbk.Lib.Aurora.Data.Models
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<uvw_Credentials>(entity =>
+            modelBuilder.Entity<uvw_Credential>(entity =>
             {
                 entity.HasNoKey();
 
-                entity.ToView("uvw_Credentials", "svc");
+                entity.ToView("uvw_Credential", "svc");
 
                 entity.Property(e => e.Domain)
                     .HasMaxLength(128)
@@ -57,11 +57,11 @@ namespace Bhbk.Lib.Aurora.Data.Models
                     .IsUnicode(false);
             });
 
-            modelBuilder.Entity<uvw_Networks>(entity =>
+            modelBuilder.Entity<uvw_Network>(entity =>
             {
                 entity.HasNoKey();
 
-                entity.ToView("uvw_Networks", "svc");
+                entity.ToView("uvw_Network", "svc");
 
                 entity.Property(e => e.Action)
                     .IsRequired()
@@ -72,11 +72,11 @@ namespace Bhbk.Lib.Aurora.Data.Models
                     .HasMaxLength(128);
             });
 
-            modelBuilder.Entity<uvw_PrivateKeys>(entity =>
+            modelBuilder.Entity<uvw_PrivateKey>(entity =>
             {
                 entity.HasNoKey();
 
-                entity.ToView("uvw_PrivateKeys", "svc");
+                entity.ToView("uvw_PrivateKey", "svc");
 
                 entity.Property(e => e.KeyAlgo)
                     .IsRequired()
@@ -93,11 +93,11 @@ namespace Bhbk.Lib.Aurora.Data.Models
                 entity.Property(e => e.KeyValue).IsRequired();
             });
 
-            modelBuilder.Entity<uvw_PublicKeys>(entity =>
+            modelBuilder.Entity<uvw_PublicKey>(entity =>
             {
                 entity.HasNoKey();
 
-                entity.ToView("uvw_PublicKeys", "svc");
+                entity.ToView("uvw_PublicKey", "svc");
 
                 entity.Property(e => e.Comment).HasMaxLength(1024);
 
@@ -120,11 +120,11 @@ namespace Bhbk.Lib.Aurora.Data.Models
                     .HasMaxLength(512);
             });
 
-            modelBuilder.Entity<uvw_Settings>(entity =>
+            modelBuilder.Entity<uvw_Setting>(entity =>
             {
                 entity.HasNoKey();
 
-                entity.ToView("uvw_Settings", "svc");
+                entity.ToView("uvw_Setting", "svc");
 
                 entity.Property(e => e.ConfigKey)
                     .IsRequired()
@@ -137,11 +137,32 @@ namespace Bhbk.Lib.Aurora.Data.Models
                     .IsUnicode(false);
             });
 
-            modelBuilder.Entity<uvw_UserFiles>(entity =>
+            modelBuilder.Entity<uvw_User>(entity =>
             {
                 entity.HasNoKey();
 
-                entity.ToView("uvw_UserFiles", "svc");
+                entity.ToView("uvw_User", "svc");
+
+                entity.Property(e => e.DebugLevel)
+                    .HasMaxLength(16)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.FileSystemType)
+                    .IsRequired()
+                    .HasMaxLength(16)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.IdentityAlias)
+                    .IsRequired()
+                    .HasMaxLength(128)
+                    .IsUnicode(false);
+            });
+
+            modelBuilder.Entity<uvw_UserFile>(entity =>
+            {
+                entity.HasNoKey();
+
+                entity.ToView("uvw_UserFile", "svc");
 
                 entity.Property(e => e.HashSHA256).HasMaxLength(64);
 
@@ -152,22 +173,22 @@ namespace Bhbk.Lib.Aurora.Data.Models
                 entity.Property(e => e.VirtualName).IsRequired();
             });
 
-            modelBuilder.Entity<uvw_UserFolders>(entity =>
+            modelBuilder.Entity<uvw_UserFolder>(entity =>
             {
                 entity.HasNoKey();
 
-                entity.ToView("uvw_UserFolders", "svc");
+                entity.ToView("uvw_UserFolder", "svc");
 
                 entity.Property(e => e.VirtualName)
                     .IsRequired()
                     .IsUnicode(false);
             });
 
-            modelBuilder.Entity<uvw_UserMounts>(entity =>
+            modelBuilder.Entity<uvw_UserMount>(entity =>
             {
                 entity.HasNoKey();
 
-                entity.ToView("uvw_UserMounts", "svc");
+                entity.ToView("uvw_UserMount", "svc");
 
                 entity.Property(e => e.AuthType)
                     .IsRequired()
@@ -182,27 +203,6 @@ namespace Bhbk.Lib.Aurora.Data.Models
                 entity.Property(e => e.ServerShare)
                     .IsRequired()
                     .HasMaxLength(256)
-                    .IsUnicode(false);
-            });
-
-            modelBuilder.Entity<uvw_Users>(entity =>
-            {
-                entity.HasNoKey();
-
-                entity.ToView("uvw_Users", "svc");
-
-                entity.Property(e => e.DebugLevel)
-                    .HasMaxLength(16)
-                    .IsUnicode(false);
-
-                entity.Property(e => e.FileSystemType)
-                    .IsRequired()
-                    .HasMaxLength(16)
-                    .IsUnicode(false);
-
-                entity.Property(e => e.IdentityAlias)
-                    .IsRequired()
-                    .HasMaxLength(128)
                     .IsUnicode(false);
             });
 

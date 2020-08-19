@@ -10,12 +10,12 @@ using System.Linq.Expressions;
 
 namespace Bhbk.Lib.Aurora.Data.Repositories
 {
-    public class NetworkRepository : GenericRepository<uvw_Networks>
+    public class NetworkRepository : GenericRepository<uvw_Network>
     {
         public NetworkRepository(AuroraEntities context)
             : base(context) { }
 
-        public override uvw_Networks Create(uvw_Networks entity)
+        public override uvw_Network Create(uvw_Network entity)
         {
             var pvalues = new List<SqlParameter>
             {
@@ -25,7 +25,7 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
                 new SqlParameter("@Enabled", SqlDbType.Bit) { Value = entity.Enabled },
             };
 
-            return _context.Set<uvw_Networks>().FromSqlRaw("[svc].[usp_Network_Insert]"
+            return _context.Set<uvw_Network>().FromSqlRaw("[svc].[usp_Network_Insert]"
                 + "@IdentityId, @Address, @Action, @Enabled", pvalues.ToArray())
                     .AsEnumerable().Single();
 
@@ -46,9 +46,9 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
             */
         }
 
-        public override IEnumerable<uvw_Networks> Create(IEnumerable<uvw_Networks> entities)
+        public override IEnumerable<uvw_Network> Create(IEnumerable<uvw_Network> entities)
         {
-            var results = new List<uvw_Networks>();
+            var results = new List<uvw_Network>();
 
             foreach (var entity in entities)
             {
@@ -60,20 +60,20 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
             return results;
         }
 
-        public override uvw_Networks Delete(uvw_Networks entity)
+        public override uvw_Network Delete(uvw_Network entity)
         {
             var pvalues = new List<SqlParameter>
             {
                 new SqlParameter("@Id", SqlDbType.UniqueIdentifier) { Value = entity.Id }
             };
 
-            return _context.Set<uvw_Networks>().FromSqlRaw("[svc].[usp_Network_Delete] @Id", pvalues.ToArray())
+            return _context.Set<uvw_Network>().FromSqlRaw("[svc].[usp_Network_Delete] @Id", pvalues.ToArray())
                 .AsEnumerable().Single();
         }
 
-        public override IEnumerable<uvw_Networks> Delete(IEnumerable<uvw_Networks> entities)
+        public override IEnumerable<uvw_Network> Delete(IEnumerable<uvw_Network> entities)
         {
-            var results = new List<uvw_Networks>();
+            var results = new List<uvw_Network>();
 
             foreach (var entity in entities)
             {
@@ -85,12 +85,12 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
             return results;
         }
 
-        public override IEnumerable<uvw_Networks> Delete(LambdaExpression lambda)
+        public override IEnumerable<uvw_Network> Delete(LambdaExpression lambda)
         {
             throw new NotImplementedException();
         }
 
-        public override uvw_Networks Update(uvw_Networks entity)
+        public override uvw_Network Update(uvw_Network entity)
         {
             var pvalues = new List<SqlParameter>
             {
@@ -101,14 +101,14 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
                 new SqlParameter("@Enabled", SqlDbType.Bit) { Value = entity.Enabled },
             };
 
-            return _context.Set<uvw_Networks>().FromSqlRaw("[svc].[usp_Network_Update]"
+            return _context.Set<uvw_Network>().FromSqlRaw("[svc].[usp_Network_Update]"
                 + "@Id, @IdentityId, @Address, @Action, @Enabled", pvalues.ToArray())
                     .AsEnumerable().Single();
         }
 
-        public override IEnumerable<uvw_Networks> Update(IEnumerable<uvw_Networks> entities)
+        public override IEnumerable<uvw_Network> Update(IEnumerable<uvw_Network> entities)
         {
-            var results = new List<uvw_Networks>();
+            var results = new List<uvw_Network>();
 
             foreach (var entity in entities)
             {

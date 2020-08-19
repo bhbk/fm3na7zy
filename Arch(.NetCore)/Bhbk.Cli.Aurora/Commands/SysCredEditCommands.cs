@@ -52,7 +52,7 @@ namespace Bhbk.Cli.Aurora.Commands
         {
             try
             {
-                var credential = _uow.Credentials.Get(QueryExpressionFactory.GetQueryExpression<tbl_Credentials>()
+                var credential = _uow.Credentials.Get(QueryExpressionFactory.GetQueryExpression<tbl_Credential>()
                     .Where(x => x.Domain == _credDomain && x.UserName == _credLogin).ToLambda())
                     .SingleOrDefault();
 

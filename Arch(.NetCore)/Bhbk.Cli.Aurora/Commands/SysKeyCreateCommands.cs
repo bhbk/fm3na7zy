@@ -71,7 +71,7 @@ namespace Bhbk.Cli.Aurora.Commands
 
                 var privKey = KeyHelper.CreatePrivKey(_conf, _uow, _keyAlgo, _privKeySize, _privKeyPass, SignatureHashAlgorithm.SHA256);
 
-                var pubKey = _uow.PublicKeys.Get(QueryExpressionFactory.GetQueryExpression<tbl_PublicKeys>()
+                var pubKey = _uow.PublicKeys.Get(QueryExpressionFactory.GetQueryExpression<tbl_PublicKey>()
                     .Where(x => x.PrivateKeyId == privKey.Id).ToLambda())
                     .Single();
 

@@ -119,24 +119,24 @@
     <None Include="Maintenance\DbCompare-Test.scmp" />
   </ItemGroup>
   <ItemGroup>
-    <Build Include="dbo\Tables\tbl_Users.sql" />
-    <Build Include="dbo\Tables\tbl_UserFolders.sql" />
-    <Build Include="dbo\Tables\tbl_UserFiles.sql" />
-    <Build Include="dbo\Tables\tbl_UserMounts.sql" />
-    <Build Include="svc\Views\uvw_UserMounts.sql" />
-    <Build Include="svc\Views\uvw_UserFolders.sql" />
-    <Build Include="svc\Views\uvw_UserFiles.sql" />
-    <Build Include="svc\Views\uvw_Users.sql" />
-    <Build Include="svc\Views\uvw_PublicKeys.sql" />
-    <Build Include="svc\Views\uvw_PrivateKeys.sql" />
+    <Build Include="svc\Views\uvw_UserMount.sql" />
+    <Build Include="svc\Views\uvw_UserFolder.sql" />
+    <Build Include="svc\Views\uvw_UserFile.sql" />
+    <Build Include="svc\Views\uvw_User.sql" />
+    <Build Include="svc\Views\uvw_PublicKey.sql" />
+    <Build Include="svc\Views\uvw_PrivateKey.sql" />
     <Build Include="Security\svc.sql" />
-    <Build Include="dbo\Tables\tbl_Settings.sql" />
-    <Build Include="dbo\Tables\tbl_PublicKeys.sql" />
-    <Build Include="dbo\Tables\tbl_PrivateKeys.sql" />
-    <Build Include="svc\Views\uvw_Settings.sql" />
-    <Build Include="dbo\Tables\tbl_Credentials.sql" />
-    <Build Include="svc\Views\uvw_Credentials.sql" />
-    <Build Include="svc\Views\uvw_Networks.sql" />
-    <Build Include="dbo\Tables\tbl_Networks.sql" />
+    <Build Include="svc\Views\uvw_Setting.sql" />
+    <Build Include="svc\Views\uvw_Credential.sql" />
+    <Build Include="svc\Views\uvw_Network.sql" />
+    <Build Include="dbo\Tables\tbl_UserMount.sql" />
+    <Build Include="dbo\Tables\tbl_UserFolder.sql" />
+    <Build Include="dbo\Tables\tbl_UserFile.sql" />
+    <Build Include="dbo\Tables\tbl_User.sql" />
+    <Build Include="dbo\Tables\tbl_Setting.sql" />
+    <Build Include="dbo\Tables\tbl_PublicKey.sql" />
+    <Build Include="dbo\Tables\tbl_PrivateKey.sql" />
+    <Build Include="dbo\Tables\tbl_Network.sql" />
+    <Build Include="dbo\Tables\tbl_Credential.sql" />
   </ItemGroup>
 </Project>

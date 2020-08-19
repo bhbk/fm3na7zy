@@ -10,12 +10,12 @@ using System.Linq.Expressions;
 
 namespace Bhbk.Lib.Aurora.Data.Repositories
 {
-    public class CredentialRepository : GenericRepository<uvw_Credentials>
+    public class CredentialRepository : GenericRepository<uvw_Credential>
     {
         public CredentialRepository(AuroraEntities context)
             : base(context) { }
 
-        public override uvw_Credentials Create(uvw_Credentials entity)
+        public override uvw_Credential Create(uvw_Credential entity)
         {
             var pvalues = new List<SqlParameter>
             {
@@ -23,11 +23,11 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
                 new SqlParameter("@UserName", SqlDbType.NVarChar) { Value = entity.UserName },
                 new SqlParameter("@Password", SqlDbType.NVarChar) { Value = entity.Password },
                 new SqlParameter("@Enabled", SqlDbType.Bit) { Value = entity.Enabled },
-                new SqlParameter("@Immutable", SqlDbType.Bit) { Value = entity.Immutable }
+                new SqlParameter("@Deletable", SqlDbType.Bit) { Value = entity.Deletable },
             };
 
-            return _context.Set<uvw_Credentials>().FromSqlRaw("[svc].[usp_Credential_Insert]"
-                + "@Domain, @UserName, @Password, @Enabled, @Immutable", pvalues.ToArray())
+            return _context.Set<uvw_Credential>().FromSqlRaw("[svc].[usp_Credential_Insert]"
+                + "@Domain, @UserName, @Password, @Enabled, @Deletable", pvalues.ToArray())
                     .AsEnumerable().Single();
 
             /*
@@ -47,9 +47,9 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
             */
         }
 
-        public override IEnumerable<uvw_Credentials> Create(IEnumerable<uvw_Credentials> entities)
+        public override IEnumerable<uvw_Credential> Create(IEnumerable<uvw_Credential> entities)
         {
-            var results = new List<uvw_Credentials>();
+            var results = new List<uvw_Credential>();
 
             foreach (var entity in entities)
             {
@@ -61,20 +61,20 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
             return results;
         }
 
-        public override uvw_Credentials Delete(uvw_Credentials entity)
+        public override uvw_Credential Delete(uvw_Credential entity)
         {
             var pvalues = new List<SqlParameter>
             {
                 new SqlParameter("@Id", SqlDbType.UniqueIdentifier) { Value = entity.Id }
             };
 
-            return _context.Set<uvw_Credentials>().FromSqlRaw("[svc].[usp_Credential_Delete] @Id", pvalues.ToArray())
+            return _context.Set<uvw_Credential>().FromSqlRaw("[svc].[usp_Credential_Delete] @Id", pvalues.ToArray())
                 .AsEnumerable().Single();
         }
 
-        public override IEnumerable<uvw_Credentials> Delete(IEnumerable<uvw_Credentials> entities)
+        public override IEnumerable<uvw_Credential> Delete(IEnumerable<uvw_Credential> entities)
         {
-            var results = new List<uvw_Credentials>();
+            var results = new List<uvw_Credential>();
 
             foreach (var entity in entities)
             {
@@ -86,12 +86,12 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
             return results;
         }
 
-        public override IEnumerable<uvw_Credentials> Delete(LambdaExpression lambda)
+        public override IEnumerable<uvw_Credential> Delete(LambdaExpression lambda)
         {
             throw new NotImplementedException();
         }
 
-        public override uvw_Credentials Update(uvw_Credentials entity)
+        public override uvw_Credential Update(uvw_Credential entity)
         {
             var pvalues = new List<SqlParameter>
             {
@@ -100,17 +100,17 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
                 new SqlParameter("@UserName", SqlDbType.NVarChar) { Value = entity.UserName },
                 new SqlParameter("@Password", SqlDbType.NVarChar) { Value = entity.Password },
                 new SqlParameter("@Enabled", SqlDbType.Bit) { Value = entity.Enabled },
-                new SqlParameter("@Immutable", SqlDbType.Bit) { Value = entity.Immutable }
+                new SqlParameter("@Deletable", SqlDbType.Bit) { Value = entity.Deletable }
             };
 
-            return _context.Set<uvw_Credentials>().FromSqlRaw("[svc].[usp_Credential_Update]"
-                + "@Id, @Domain, @UserName, @Password, @Enabled, @Immutable", pvalues.ToArray())
+            return _context.Set<uvw_Credential>().FromSqlRaw("[svc].[usp_Credential_Update]"
+                + "@Id, @Domain, @UserName, @Password, @Enabled, @Deletable", pvalues.ToArray())
                     .AsEnumerable().Single();
         }
 
-        public override IEnumerable<uvw_Credentials> Update(IEnumerable<uvw_Credentials> entities)
+        public override IEnumerable<uvw_Credential> Update(IEnumerable<uvw_Credential> entities)
         {
-            var results = new List<uvw_Credentials>();
+            var results = new List<uvw_Credential>();
 
             foreach (var entity in entities)
             {

@@ -3,7 +3,7 @@ using Bhbk.Lib.DataAccess.EFCore.Repositories;
 
 namespace Bhbk.Lib.Aurora.Data.Repositories_DIRECT
 {
-    public class PrivateKeyRepository : GenericRepository<tbl_PrivateKeys>
+    public class PrivateKeyRepository : GenericRepository<tbl_PrivateKey>
     {
         public PrivateKeyRepository(AuroraEntities context)
             : base(context) { }

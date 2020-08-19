@@ -70,7 +70,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                         if (!Enum.TryParse<LogLevel>(conf["Rebex:LogLevel"], true, out _level))
                             throw new InvalidCastException();
 
-                        var license = uow.Settings.Get(QueryExpressionFactory.GetQueryExpression<tbl_Settings>()
+                        var license = uow.Settings.Get(QueryExpressionFactory.GetQueryExpression<tbl_Setting>()
                             .Where(x => x.ConfigKey == "RebexLicense").ToLambda()).OrderBy(x => x.Created)
                             .Last();
 
@@ -86,7 +86,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                         var secret = conf["Databases:AuroraSecret"];
 
                         var dsaStr = SshHostKeyAlgorithm.DSS.ToString();
-                        var dsaPrivKey = uow.PrivateKeys.Get(QueryExpressionFactory.GetQueryExpression<tbl_PrivateKeys>()
+                        var dsaPrivKey = uow.PrivateKeys.Get(QueryExpressionFactory.GetQueryExpression<tbl_PrivateKey>()
                             .Where(x => x.KeyAlgo == dsaStr && x.IdentityId == null).ToLambda()).OrderBy(x => x.Created)
                             .Single();
 
@@ -94,7 +94,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                         _server.Keys.Add(new SshPrivateKey(dsaBytes, AES.DecryptString(dsaPrivKey.KeyPass,secret)));
 
                         var rsaStr = SshHostKeyAlgorithm.RSA.ToString();
-                        var rsaPrivKey = uow.PrivateKeys.Get(QueryExpressionFactory.GetQueryExpression<tbl_PrivateKeys>()
+                        var rsaPrivKey = uow.PrivateKeys.Get(QueryExpressionFactory.GetQueryExpression<tbl_PrivateKey>()
                             .Where(x => x.KeyAlgo == rsaStr && x.IdentityId == null).ToLambda()).OrderBy(x => x.Created)
                             .Single();
 
@@ -102,7 +102,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                         _server.Keys.Add(new SshPrivateKey(rsaBytes, AES.DecryptString(rsaPrivKey.KeyPass, secret)));
 
                         var ecdsa256Str = SshHostKeyAlgorithm.ECDsaNistP256.ToString();
-                        var ecdsa256PrivKey = uow.PrivateKeys.Get(QueryExpressionFactory.GetQueryExpression<tbl_PrivateKeys>()
+                        var ecdsa256PrivKey = uow.PrivateKeys.Get(QueryExpressionFactory.GetQueryExpression<tbl_PrivateKey>()
                             .Where(x => x.KeyAlgo == ecdsa256Str && x.IdentityId == null).ToLambda()).OrderBy(x => x.Created)
                             .Single();
 
@@ -110,7 +110,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                         _server.Keys.Add(new SshPrivateKey(ecdsa256Bytes, AES.DecryptString(ecdsa256PrivKey.KeyPass, secret)));
 
                         var ecdsa384Str = SshHostKeyAlgorithm.ECDsaNistP384.ToString();
-                        var ecdsa384PrivKey = uow.PrivateKeys.Get(QueryExpressionFactory.GetQueryExpression<tbl_PrivateKeys>()
+                        var ecdsa384PrivKey = uow.PrivateKeys.Get(QueryExpressionFactory.GetQueryExpression<tbl_PrivateKey>()
                             .Where(x => x.KeyAlgo == ecdsa384Str && x.IdentityId == null).ToLambda()).OrderBy(x => x.Created)
                             .Single();
 
@@ -118,7 +118,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                         _server.Keys.Add(new SshPrivateKey(ecdsa384Bytes, AES.DecryptString(ecdsa384PrivKey.KeyPass, secret)));
 
                         var ecdsa521Str = SshHostKeyAlgorithm.ECDsaNistP521.ToString();
-                        var ecdsa521PrivKey = uow.PrivateKeys.Get(QueryExpressionFactory.GetQueryExpression<tbl_PrivateKeys>()
+                        var ecdsa521PrivKey = uow.PrivateKeys.Get(QueryExpressionFactory.GetQueryExpression<tbl_PrivateKey>()
                             .Where(x => x.KeyAlgo == ecdsa521Str && x.IdentityId == null).ToLambda()).OrderBy(x => x.Created)
                             .Single();
 
@@ -126,7 +126,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                         _server.Keys.Add(new SshPrivateKey(ecdsa521Bytes, AES.DecryptString(ecdsa521PrivKey.KeyPass, secret)));
 
                         var ed25519Str = SshHostKeyAlgorithm.ED25519.ToString();
-                        var ed25519PrivKey = uow.PrivateKeys.Get(QueryExpressionFactory.GetQueryExpression<tbl_PrivateKeys>()
+                        var ed25519PrivKey = uow.PrivateKeys.Get(QueryExpressionFactory.GetQueryExpression<tbl_PrivateKey>()
                             .Where(x => x.KeyAlgo == ed25519Str && x.IdentityId == null).ToLambda()).OrderBy(x => x.Created)
                             .Single();
 
@@ -225,7 +225,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                         var conf = scope.ServiceProvider.GetRequiredService<IConfiguration>();
                         var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
 
-                        var user = uow.Users.Get(QueryExpressionFactory.GetQueryExpression<tbl_Users>()
+                        var user = uow.Users.Get(QueryExpressionFactory.GetQueryExpression<tbl_User>()
                             .Where(x => x.IdentityAlias == ServerSession.Current.UserName).ToLambda())
                             .Single();
 
@@ -310,12 +310,12 @@ namespace Bhbk.Daemon.Aurora.SFTP
                 using (var scope = _factory.CreateScope())
                 {
                     var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
-                    var user = uow.Users.Get(QueryExpressionFactory.GetQueryExpression<tbl_Users>()
+                    var user = uow.Users.Get(QueryExpressionFactory.GetQueryExpression<tbl_User>()
                         .Where(x => x.IdentityAlias == e.UserName && x.Enabled).ToLambda(),
-                            new List<Expression<Func<tbl_Users, object>>>()
+                            new List<Expression<Func<tbl_User, object>>>()
                             {
-                                x => x.tbl_Networks,
-                                x => x.tbl_PublicKeys,
+                                x => x.tbl_Network,
+                                x => x.tbl_PublicKey,
                             }).SingleOrDefault();
 
                     if (user == null
@@ -328,7 +328,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                     }
 
                     var action = NetworkAction.Deny.ToString();
-                    if (NetworkHelper.ValidateAddress(user.tbl_Networks.Where(x => x.Action == action && x.Enabled), e.ClientAddress))
+                    if (NetworkHelper.ValidateAddress(user.tbl_Network.Where(x => x.Action == action && x.Enabled), e.ClientAddress))
                     {
                         Log.Warning($"'{callPath}' '{e.UserName}' is denied from '{e.ClientEndPoint}' running '{e.ClientSoftwareIdentifier}'");
 
@@ -337,7 +337,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                     }
 
                     action = NetworkAction.Allow.ToString();
-                    if (!NetworkHelper.ValidateAddress(user.tbl_Networks.Where(x => x.Action == action && x.Enabled), e.ClientAddress))
+                    if (!NetworkHelper.ValidateAddress(user.tbl_Network.Where(x => x.Action == action && x.Enabled), e.ClientAddress))
                     {
                         Log.Warning($"'{callPath}' '{e.UserName}' is not allowed from '{e.ClientEndPoint}' running '{e.ClientSoftwareIdentifier}'");
 
@@ -400,12 +400,12 @@ namespace Bhbk.Daemon.Aurora.SFTP
                     var conf = scope.ServiceProvider.GetRequiredService<IConfiguration>();
                     var log = scope.ServiceProvider.GetRequiredService<ILogger>();
                     var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
-                    var user = uow.Users.Get(QueryExpressionFactory.GetQueryExpression<tbl_Users>()
+                    var user = uow.Users.Get(QueryExpressionFactory.GetQueryExpression<tbl_User>()
                         .Where(x => x.IdentityAlias == e.UserName).ToLambda(),
-                            new List<Expression<Func<tbl_Users, object>>>()
+                            new List<Expression<Func<tbl_User, object>>>()
                             {
-                                x => x.tbl_PublicKeys,
-                                x => x.tbl_UserMounts,
+                                x => x.tbl_PublicKey,
+                                x => x.tbl_UserMount,
                             }).SingleOrDefault();
 
                     var admin = scope.ServiceProvider.GetRequiredService<IAdminService>();
@@ -415,7 +415,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                     {
                         Log.Information($"'{callPath}' '{e.UserName}' in-progress with public key");
 
-                        if (UserHelper.ValidatePubKey(user.tbl_PublicKeys.Where(x => x.Enabled).ToList(), e.Key)
+                        if (UserHelper.ValidatePubKey(user.tbl_PublicKey.Where(x => x.Enabled).ToList(), e.Key)
                             && admin.User_VerifyV1(user.IdentityId).Result)
                         {
                             Log.Information($"'{callPath}' '{e.UserName}' success with public key");
@@ -427,7 +427,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                                  * an smb mount will not succeed without a user password or ambassador credential.
                                  */
                                 if (user.FileSystemType == FileSystemTypes.SMB.ToString()
-                                    && !user.tbl_UserMounts.CredentialId.HasValue)
+                                    && !user.tbl_UserMount.CredentialId.HasValue)
                                 {
                                     Log.Warning($"'{callPath}' '{e.UserName}' failure no credential to create {FileSystemTypes.SMB} filesystem");
 

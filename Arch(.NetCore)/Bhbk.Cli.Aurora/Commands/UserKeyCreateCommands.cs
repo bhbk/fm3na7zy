@@ -23,7 +23,7 @@ namespace Bhbk.Cli.Aurora.Commands
     {
         private static IConfiguration _conf;
         private static IUnitOfWork _uow;
-        private static tbl_Users _user;
+        private static tbl_User _user;
         private static int _privKeySize;
         private static SshHostKeyAlgorithm _keyAlgo;
         private static string _keyAlgoList = string.Join(", ", Enum.GetNames(typeof(SshHostKeyAlgorithm)));
@@ -46,12 +46,12 @@ namespace Bhbk.Cli.Aurora.Commands
                 var instance = new ContextService(InstanceContext.DeployedOrLocal);
                 _uow = new UnitOfWork(_conf["Databases:AuroraEntities"], instance);
 
-                _user = _uow.Users.Get(QueryExpressionFactory.GetQueryExpression<tbl_Users>()
+                _user = _uow.Users.Get(QueryExpressionFactory.GetQueryExpression<tbl_User>()
                     .Where(x => x.IdentityAlias == arg).ToLambda(),
-                        new List<Expression<Func<tbl_Users, object>>>()
+                        new List<Expression<Func<tbl_User, object>>>()
                         {
-                            x => x.tbl_PrivateKeys,
-                            x => x.tbl_PublicKeys,
+                            x => x.tbl_PrivateKey,
+                            x => x.tbl_PublicKey,
                         }).SingleOrDefault();
 
                 if (_user == null)
@@ -101,7 +101,7 @@ namespace Bhbk.Cli.Aurora.Commands
 
                 var privKey = KeyHelper.CreatePrivKey(_conf, _uow, _user, _keyAlgo, _privKeySize, _privKeyPass, SignatureHashAlgorithm.SHA256, _pubKeyComment);
 
-                var pubKey = _uow.PublicKeys.Get(QueryExpressionFactory.GetQueryExpression<tbl_PublicKeys>()
+                var pubKey = _uow.PublicKeys.Get(QueryExpressionFactory.GetQueryExpression<tbl_PublicKey>()
                     .Where(x => x.PrivateKeyId == privKey.Id).ToLambda())
                     .Single();
 

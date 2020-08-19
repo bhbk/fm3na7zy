@@ -30,7 +30,7 @@ namespace Bhbk.Lib.Aurora.Domain.Infrastructure
             /*
              * delete default users
              */
-            _uow.Users.Delete(QueryExpressionFactory.GetQueryExpression<tbl_Users>()
+            _uow.Users.Delete(QueryExpressionFactory.GetQueryExpression<tbl_User>()
                 .Where(x => x.IdentityAlias == Constants.DefaultUser).ToLambda());
 
             _uow.Commit();

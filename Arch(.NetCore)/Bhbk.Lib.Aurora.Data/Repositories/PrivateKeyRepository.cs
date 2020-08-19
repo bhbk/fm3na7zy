@@ -10,12 +10,12 @@ using System.Linq.Expressions;
 
 namespace Bhbk.Lib.Aurora.Data.Repositories
 {
-    public class PrivateKeyRepository : GenericRepository<uvw_PrivateKeys>
+    public class PrivateKeyRepository : GenericRepository<uvw_PrivateKey>
     {
         public PrivateKeyRepository(AuroraEntities context)
             : base(context) { }
 
-        public override uvw_PrivateKeys Create(uvw_PrivateKeys entity)
+        public override uvw_PrivateKey Create(uvw_PrivateKey entity)
         {
             var pvalues = new List<SqlParameter>
             {
@@ -25,11 +25,11 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
                 new SqlParameter("@KeyValueAlgo", SqlDbType.NVarChar) { Value = entity.KeyAlgo },
                 new SqlParameter("@KeyValuePass", SqlDbType.NVarChar) { Value = entity.KeyPass },
                 new SqlParameter("@Enabled", SqlDbType.Bit) { Value = entity.Enabled },
-                new SqlParameter("@Immutable", SqlDbType.Bit) { Value = entity.Immutable }
+                new SqlParameter("@Deletable", SqlDbType.Bit) { Value = entity.Deletable }
             };
 
-            return _context.Set<uvw_PrivateKeys>().FromSqlRaw("[svc].[usp_PrivateKey_Insert]"
-                + "@IdentityId, @PublicKeyId, @KeyValueBase64, @KeyValueAlgo, @KeyValuePass, @Enabled, @Immutable", pvalues.ToArray())
+            return _context.Set<uvw_PrivateKey>().FromSqlRaw("[svc].[usp_PrivateKey_Insert]"
+                + "@IdentityId, @PublicKeyId, @KeyValueBase64, @KeyValueAlgo, @KeyValuePass, @Enabled, @Deletable", pvalues.ToArray())
                     .AsEnumerable().Single();
 
             /*
@@ -49,9 +49,9 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
             */
         }
 
-        public override IEnumerable<uvw_PrivateKeys> Create(IEnumerable<uvw_PrivateKeys> entities)
+        public override IEnumerable<uvw_PrivateKey> Create(IEnumerable<uvw_PrivateKey> entities)
         {
-            var results = new List<uvw_PrivateKeys>();
+            var results = new List<uvw_PrivateKey>();
 
             foreach (var entity in entities)
             {
@@ -63,20 +63,20 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
             return results;
         }
 
-        public override uvw_PrivateKeys Delete(uvw_PrivateKeys entity)
+        public override uvw_PrivateKey Delete(uvw_PrivateKey entity)
         {
             var pvalues = new List<SqlParameter>
             {
                 new SqlParameter("@Id", SqlDbType.UniqueIdentifier) { Value = entity.Id }
             };
 
-            return _context.Set<uvw_PrivateKeys>().FromSqlRaw("[svc].[usp_PrivateKey_Delete] @Id", pvalues.ToArray())
+            return _context.Set<uvw_PrivateKey>().FromSqlRaw("[svc].[usp_PrivateKey_Delete] @Id", pvalues.ToArray())
                 .AsEnumerable().Single();
         }
 
-        public override IEnumerable<uvw_PrivateKeys> Delete(IEnumerable<uvw_PrivateKeys> entities)
+        public override IEnumerable<uvw_PrivateKey> Delete(IEnumerable<uvw_PrivateKey> entities)
         {
-            var results = new List<uvw_PrivateKeys>();
+            var results = new List<uvw_PrivateKey>();
 
             foreach (var entity in entities)
             {
@@ -88,12 +88,12 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
             return results;
         }
 
-        public override IEnumerable<uvw_PrivateKeys> Delete(LambdaExpression lambda)
+        public override IEnumerable<uvw_PrivateKey> Delete(LambdaExpression lambda)
         {
             throw new NotImplementedException();
         }
 
-        public override uvw_PrivateKeys Update(uvw_PrivateKeys entity)
+        public override uvw_PrivateKey Update(uvw_PrivateKey entity)
         {
             var pvalues = new List<SqlParameter>
             {
@@ -104,17 +104,17 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
                 new SqlParameter("@KeyValueAlgo", SqlDbType.NVarChar) { Value = entity.KeyAlgo },
                 new SqlParameter("@KeyValuePass", SqlDbType.NVarChar) { Value = entity.KeyPass },
                 new SqlParameter("@Enabled", SqlDbType.Bit) { Value = entity.Enabled },
-                new SqlParameter("@Immutable", SqlDbType.Bit) { Value = entity.Immutable }
+                new SqlParameter("@Deletable", SqlDbType.Bit) { Value = entity.Deletable }
             };
 
-            return _context.Set<uvw_PrivateKeys>().FromSqlRaw("[svc].[usp_PrivateKey_Insert]"
-                + "@Id, @IdentityId, @PublicKeyId, @KeyValueBase64, @KeyValueAlgo, @KeyValuePass, @Enabled, @Immutable", pvalues.ToArray())
+            return _context.Set<uvw_PrivateKey>().FromSqlRaw("[svc].[usp_PrivateKey_Insert]"
+                + "@Id, @IdentityId, @PublicKeyId, @KeyValueBase64, @KeyValueAlgo, @KeyValuePass, @Enabled, @Deletable", pvalues.ToArray())
                     .AsEnumerable().Single();
         }
 
-        public override IEnumerable<uvw_PrivateKeys> Update(IEnumerable<uvw_PrivateKeys> entities)
+        public override IEnumerable<uvw_PrivateKey> Update(IEnumerable<uvw_PrivateKey> entities)
         {
-            var results = new List<uvw_PrivateKeys>();
+            var results = new List<uvw_PrivateKey>();
 
             foreach (var entity in entities)
             {

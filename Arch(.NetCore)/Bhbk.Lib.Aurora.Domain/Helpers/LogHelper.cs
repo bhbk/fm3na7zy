@@ -11,18 +11,18 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
     public class LogHelper : LogWriterBase
     {
         private readonly ILogger _logger;
-        private readonly tbl_Users _user;
+        private readonly tbl_User _user;
         private const string MessageTemplate = "{type} {user} {id} {area} {message}";
         private const string MessageTemplateWithData = "{type} {user} {id} {area} {message} {data}";
 
-        public LogHelper(ILogger logger, tbl_Users user, LogLevel level)
+        public LogHelper(ILogger logger, tbl_User user, LogLevel level)
         {
             Level = level;
             _user = user;
             _logger = logger;
         }
 
-        private void Write(LogLevel level, Type objectType, tbl_Users user, int objectId, string area, string message, ArraySegment<byte>? data)
+        private void Write(LogLevel level, Type objectType, tbl_User user, int objectId, string area, string message, ArraySegment<byte>? data)
         {
             string template = (data == null) ? MessageTemplate : MessageTemplateWithData;
 

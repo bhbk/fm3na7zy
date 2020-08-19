@@ -10,12 +10,12 @@ using System.Linq.Expressions;
 
 namespace Bhbk.Lib.Aurora.Data.Repositories
 {
-    public class UserRepository : GenericRepository<uvw_Users>
+    public class UserRepository : GenericRepository<uvw_User>
     {
         public UserRepository(AuroraEntities context)
             : base(context) { }
 
-        public override uvw_Users Create(uvw_Users entity)
+        public override uvw_User Create(uvw_User entity)
         {
             var pvalues = new List<SqlParameter>
             {
@@ -26,11 +26,11 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
                 new SqlParameter("@FileSystemReadOnly", SqlDbType.Bit) { Value = entity.FileSystemReadOnly },
                 new SqlParameter("@DebugLevel", SqlDbType.NVarChar) { Value = (object)entity.DebugLevel ?? DBNull.Value },
                 new SqlParameter("@Enabled", SqlDbType.Bit) { Value = entity.Enabled },
-                new SqlParameter("@Immutable", SqlDbType.Bit) { Value = entity.Immutable }
+                new SqlParameter("@Deletable", SqlDbType.Bit) { Value = entity.Deletable },
             };
 
-            return _context.Set<uvw_Users>().FromSqlRaw("[svc].[usp_User_Insert]"
-                + "@IdentityAlias, @RequirePublicKey, @RequirePassword, @FileSystemType, @FileSystemReadOnly, @DebugLevel, @Enabled, @Immutable", pvalues.ToArray())
+            return _context.Set<uvw_User>().FromSqlRaw("[svc].[usp_User_Insert]"
+                + "@IdentityAlias, @RequirePublicKey, @RequirePassword, @FileSystemType, @FileSystemReadOnly, @DebugLevel, @Enabled, @Deletable", pvalues.ToArray())
                     .AsEnumerable().Single();
 
             /*
@@ -50,9 +50,9 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
             */
         }
 
-        public override IEnumerable<uvw_Users> Create(IEnumerable<uvw_Users> entities)
+        public override IEnumerable<uvw_User> Create(IEnumerable<uvw_User> entities)
         {
-            var results = new List<uvw_Users>();
+            var results = new List<uvw_User>();
 
             foreach (var entity in entities)
             {
@@ -64,20 +64,20 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
             return results;
         }
 
-        public override uvw_Users Delete(uvw_Users entity)
+        public override uvw_User Delete(uvw_User entity)
         {
             var pvalues = new List<SqlParameter>
             {
                 new SqlParameter("@IdentityId", SqlDbType.UniqueIdentifier) { Value = entity.IdentityId }
             };
 
-            return _context.Set<uvw_Users>().FromSqlRaw("[svc].[usp_UserFolder_Delete] @IdentityId", pvalues.ToArray())
+            return _context.Set<uvw_User>().FromSqlRaw("[svc].[usp_UserFolder_Delete] @IdentityId", pvalues.ToArray())
                 .AsEnumerable().Single();
         }
 
-        public override IEnumerable<uvw_Users> Delete(IEnumerable<uvw_Users> entities)
+        public override IEnumerable<uvw_User> Delete(IEnumerable<uvw_User> entities)
         {
-            var results = new List<uvw_Users>();
+            var results = new List<uvw_User>();
 
             foreach (var entity in entities)
             {
@@ -89,12 +89,12 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
             return results;
         }
 
-        public override IEnumerable<uvw_Users> Delete(LambdaExpression lambda)
+        public override IEnumerable<uvw_User> Delete(LambdaExpression lambda)
         {
             throw new NotImplementedException();
         }
 
-        public override uvw_Users Update(uvw_Users entity)
+        public override uvw_User Update(uvw_User entity)
         {
             var pvalues = new List<SqlParameter>
             {
@@ -106,17 +106,17 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
                 new SqlParameter("@FileSystemReadOnly", SqlDbType.Bit) { Value = entity.FileSystemReadOnly },
                 new SqlParameter("@DebugLevel", SqlDbType.NVarChar) { Value = (object)entity.DebugLevel ?? DBNull.Value },
                 new SqlParameter("@Enabled", SqlDbType.Bit) { Value = entity.Enabled },
-                new SqlParameter("@Immutable", SqlDbType.Bit) { Value = entity.Immutable }
+                new SqlParameter("@Deletable", SqlDbType.Bit) { Value = entity.Deletable }
             };
 
-            return _context.Set<uvw_Users>().FromSqlRaw("[svc].[usp_User_Update]"
-                + "@IdentityId, @IdentityId, @IdentityAlias, @RequirePublicKey, @RequirePassword, @FileSystemType, @FileSystemReadOnly, @DebugLevel, @Enabled, @Immutable", pvalues.ToArray())
+            return _context.Set<uvw_User>().FromSqlRaw("[svc].[usp_User_Update]"
+                + "@IdentityId, @IdentityId, @IdentityAlias, @RequirePublicKey, @RequirePassword, @FileSystemType, @FileSystemReadOnly, @DebugLevel, @Enabled, @Deletable", pvalues.ToArray())
                     .AsEnumerable().Single();
         }
 
-        public override IEnumerable<uvw_Users> Update(IEnumerable<uvw_Users> entities)
+        public override IEnumerable<uvw_User> Update(IEnumerable<uvw_User> entities)
         {
-            var results = new List<uvw_Users>();
+            var results = new List<uvw_User>();
 
             foreach (var entity in entities)
             {

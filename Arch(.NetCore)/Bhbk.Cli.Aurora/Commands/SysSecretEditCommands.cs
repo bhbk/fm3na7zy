@@ -24,7 +24,7 @@ namespace Bhbk.Cli.Aurora.Commands
 
         public SysSecretEditCommands()
         {
-            IsCommand("sys-secret-edit", "Edit secret used system");
+            IsCommand("sys-secret-edit", "Edit secret used by system");
 
             HasOption("c|current=", "Enter current secret to encrypt passwords", arg =>
             {
@@ -46,18 +46,18 @@ namespace Bhbk.Cli.Aurora.Commands
 
         public override int Run(string[] remainingArguments)
         {
-            var license = _uow.Settings.Get(QueryExpressionFactory.GetQueryExpression<tbl_Settings>()
-                .Where(x => x.ConfigKey == "RebexLicense").ToLambda()).OrderBy(x => x.Created)
-                .Last();
-
-            Rebex.Licensing.Key = license.ConfigValue;
-
-            AsymmetricKeyAlgorithm.Register(Curve25519.Create);
-            AsymmetricKeyAlgorithm.Register(Ed25519.Create);
-            AsymmetricKeyAlgorithm.Register(EllipticCurveAlgorithm.Create);
-
             try
             {
+                var license = _uow.Settings.Get(QueryExpressionFactory.GetQueryExpression<tbl_Setting>()
+                    .Where(x => x.ConfigKey == "RebexLicense").ToLambda()).OrderBy(x => x.Created)
+                    .Last();
+
+                Rebex.Licensing.Key = license.ConfigValue;
+
+                AsymmetricKeyAlgorithm.Register(Curve25519.Create);
+                AsymmetricKeyAlgorithm.Register(Ed25519.Create);
+                AsymmetricKeyAlgorithm.Register(EllipticCurveAlgorithm.Create);
+
                 if (string.IsNullOrEmpty(_secretCurrent))
                 {
                     Console.Out.Write("  *** Enter current secret to encrypt passwords *** : ");

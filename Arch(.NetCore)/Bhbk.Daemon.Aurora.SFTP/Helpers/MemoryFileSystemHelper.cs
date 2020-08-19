@@ -24,7 +24,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Helpers
         internal static void CreatePubKeysFile(DirectoryNode root,
             Dictionary<NodePath, NodeBase> path,
             Dictionary<NodeBase, MemoryNodeData> store,
-            tbl_Users user,
+            tbl_User user,
             StringBuilder content)
         {
             var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";

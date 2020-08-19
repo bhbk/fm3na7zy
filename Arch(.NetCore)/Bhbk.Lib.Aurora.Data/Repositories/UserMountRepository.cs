@@ -10,12 +10,12 @@ using System.Linq.Expressions;
 
 namespace Bhbk.Lib.Aurora.Data.Repositories
 {
-    public class UserMountRepository : GenericRepository<uvw_UserMounts>
+    public class UserMountRepository : GenericRepository<uvw_UserMount>
     {
         public UserMountRepository(AuroraEntities context)
             : base(context) { }
 
-        public override uvw_UserMounts Create(uvw_UserMounts entity)
+        public override uvw_UserMount Create(uvw_UserMount entity)
         {
             var pvalues = new List<SqlParameter>
             {
@@ -25,11 +25,11 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
                 new SqlParameter("@ServerName", SqlDbType.NVarChar) { Value = entity.ServerAddress },
                 new SqlParameter("@ServerPath", SqlDbType.NVarChar) { Value = entity.ServerShare },
                 new SqlParameter("@Enabled", SqlDbType.Bit) { Value = entity.Enabled },
-                new SqlParameter("@Immutable", SqlDbType.Bit) { Value = entity.Immutable }
+                new SqlParameter("@Deletable", SqlDbType.Bit) { Value = entity.Deletable }
             };
 
-            return _context.Set<uvw_UserMounts>().FromSqlRaw("[svc].[usp_UserMount_Insert]"
-                + "@IdentityId, @CredentialId, @AuthType, @ServerName, @ServerPath, @Enabled, @Immutable", pvalues.ToArray())
+            return _context.Set<uvw_UserMount>().FromSqlRaw("[svc].[usp_UserMount_Insert]"
+                + "@IdentityId, @CredentialId, @AuthType, @ServerName, @ServerPath, @Enabled, @Deletable", pvalues.ToArray())
                     .AsEnumerable().Single();
 
             /*
@@ -49,9 +49,9 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
             */
         }
 
-        public override IEnumerable<uvw_UserMounts> Create(IEnumerable<uvw_UserMounts> entities)
+        public override IEnumerable<uvw_UserMount> Create(IEnumerable<uvw_UserMount> entities)
         {
-            var results = new List<uvw_UserMounts>();
+            var results = new List<uvw_UserMount>();
 
             foreach (var entity in entities)
             {
@@ -63,20 +63,20 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
             return results;
         }
 
-        public override uvw_UserMounts Delete(uvw_UserMounts entity)
+        public override uvw_UserMount Delete(uvw_UserMount entity)
         {
             var pvalues = new List<SqlParameter>
             {
                 new SqlParameter("@IdentityId", SqlDbType.UniqueIdentifier) { Value = entity.IdentityId }
             };
 
-            return _context.Set<uvw_UserMounts>().FromSqlRaw("[svc].[usp_UserMount_Delete] @IdentityId", pvalues.ToArray())
+            return _context.Set<uvw_UserMount>().FromSqlRaw("[svc].[usp_UserMount_Delete] @IdentityId", pvalues.ToArray())
                 .AsEnumerable().Single();
         }
 
-        public override IEnumerable<uvw_UserMounts> Delete(IEnumerable<uvw_UserMounts> entities)
+        public override IEnumerable<uvw_UserMount> Delete(IEnumerable<uvw_UserMount> entities)
         {
-            var results = new List<uvw_UserMounts>();
+            var results = new List<uvw_UserMount>();
 
             foreach (var entity in entities)
             {
@@ -88,12 +88,12 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
             return results;
         }
 
-        public override IEnumerable<uvw_UserMounts> Delete(LambdaExpression lambda)
+        public override IEnumerable<uvw_UserMount> Delete(LambdaExpression lambda)
         {
             throw new NotImplementedException();
         }
 
-        public override uvw_UserMounts Update(uvw_UserMounts entity)
+        public override uvw_UserMount Update(uvw_UserMount entity)
         {
             var pvalues = new List<SqlParameter>
             {
@@ -103,17 +103,17 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
                 new SqlParameter("@ServerName", SqlDbType.NVarChar) { Value = entity.ServerAddress },
                 new SqlParameter("@ServerPath", SqlDbType.NVarChar) { Value = entity.ServerShare },
                 new SqlParameter("@Enabled", SqlDbType.Bit) { Value = entity.Enabled },
-                new SqlParameter("@Immutable", SqlDbType.Bit) { Value = entity.Immutable }
+                new SqlParameter("@Deletable", SqlDbType.Bit) { Value = entity.Deletable }
             };
 
-            return _context.Set<uvw_UserMounts>().FromSqlRaw("[svc].[usp_UserMount_Update]"
-                + "@IdentityId, @CredentialId, @AuthType, @ServerName, @ServerPath, @Enabled, @Immutable", pvalues.ToArray())
+            return _context.Set<uvw_UserMount>().FromSqlRaw("[svc].[usp_UserMount_Update]"
+                + "@IdentityId, @CredentialId, @AuthType, @ServerName, @ServerPath, @Enabled, @Deletable", pvalues.ToArray())
                     .AsEnumerable().Single();
         }
 
-        public override IEnumerable<uvw_UserMounts> Update(IEnumerable<uvw_UserMounts> entities)
+        public override IEnumerable<uvw_UserMount> Update(IEnumerable<uvw_UserMount> entities)
         {
-            var results = new List<uvw_UserMounts>();
+            var results = new List<uvw_UserMount>();
 
             foreach (var entity in entities)
             {

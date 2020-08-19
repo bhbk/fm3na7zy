@@ -45,9 +45,9 @@ namespace Bhbk.Cli.Aurora.Commands
                 if (!Directory.Exists(dir))
                     Directory.CreateDirectory(dir);
 
-                var keys = _uow.PublicKeys.Get(QueryExpressionFactory.GetQueryExpression<tbl_PublicKeys>()
-                    .Where(x => x.IdentityId == null && x.Immutable == true).ToLambda(),
-                        new List<Expression<Func<tbl_PublicKeys, object>>>()
+                var keys = _uow.PublicKeys.Get(QueryExpressionFactory.GetQueryExpression<tbl_PublicKey>()
+                    .Where(x => x.IdentityId == null && x.Deletable == false).ToLambda(),
+                        new List<Expression<Func<tbl_PublicKey, object>>>()
                         {
                             x => x.PrivateKey,
                         });

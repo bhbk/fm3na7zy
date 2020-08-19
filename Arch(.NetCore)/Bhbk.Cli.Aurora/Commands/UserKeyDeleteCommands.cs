@@ -19,7 +19,7 @@ namespace Bhbk.Cli.Aurora.Commands
     {
         private static IConfiguration _conf;
         private static IUnitOfWork _uow;
-        private static tbl_Users _user;
+        private static tbl_User _user;
         private static bool _delete = false, _deleteAll = false;
 
         public UserKeyDeleteCommands()
@@ -38,12 +38,12 @@ namespace Bhbk.Cli.Aurora.Commands
                 var instance = new ContextService(InstanceContext.DeployedOrLocal);
                 _uow = new UnitOfWork(_conf["Databases:AuroraEntities"], instance);
 
-                _user = _uow.Users.Get(QueryExpressionFactory.GetQueryExpression<tbl_Users>()
+                _user = _uow.Users.Get(QueryExpressionFactory.GetQueryExpression<tbl_User>()
                     .Where(x => x.IdentityAlias == arg).ToLambda(),
-                        new List<Expression<Func<tbl_Users, object>>>()
+                        new List<Expression<Func<tbl_User, object>>>()
                         {
-                            x => x.tbl_PrivateKeys,
-                            x => x.tbl_PublicKeys
+                            x => x.tbl_PrivateKey,
+                            x => x.tbl_PublicKey,
                         }).SingleOrDefault();
 
                 if (_user == null)
@@ -65,8 +65,8 @@ namespace Bhbk.Cli.Aurora.Commands
         {
             try
             {
-                var keys = _uow.PublicKeys.Delete(QueryExpressionFactory.GetQueryExpression<tbl_PublicKeys>()
-                    .Where(x => x.IdentityId == _user.IdentityId && x.Immutable == false).ToLambda());
+                var keys = _uow.PublicKeys.Get(QueryExpressionFactory.GetQueryExpression<tbl_PublicKey>()
+                    .Where(x => x.IdentityId == _user.IdentityId && x.Deletable == false).ToLambda());
 
                 ConsoleHelper.StdOutKeyPairs(keys.OrderBy(x => x.Created));
 
@@ -75,28 +75,28 @@ namespace Bhbk.Cli.Aurora.Commands
                     Console.Out.Write("  *** Enter GUID of public key to delete *** : ");
                     var input = Guid.Parse(StandardInput.GetInput());
 
-                    var key = _uow.PublicKeys.Get(QueryExpressionFactory.GetQueryExpression<tbl_PublicKeys>()
+                    var key = _uow.PublicKeys.Get(QueryExpressionFactory.GetQueryExpression<tbl_PublicKey>()
                         .Where(x => x.IdentityId == _user.IdentityId && x.Id == input).ToLambda())
                         .SingleOrDefault();
 
                     if(key != null)
                     {
-                        _uow.PublicKeys.Delete(QueryExpressionFactory.GetQueryExpression<tbl_PublicKeys>()
-                            .Where(x => x.IdentityId == _user.IdentityId && !x.Immutable && x.Id == key.Id).ToLambda());
+                        _uow.PublicKeys.Delete(QueryExpressionFactory.GetQueryExpression<tbl_PublicKey>()
+                            .Where(x => x.IdentityId == _user.IdentityId && x.Deletable == false && x.Id == key.Id).ToLambda());
 
-                        _uow.PrivateKeys.Delete(QueryExpressionFactory.GetQueryExpression<tbl_PrivateKeys>()
-                            .Where(x => x.IdentityId == _user.IdentityId && !x.Immutable && x.Id == key.PrivateKeyId).ToLambda());
+                        _uow.PrivateKeys.Delete(QueryExpressionFactory.GetQueryExpression<tbl_PrivateKey>()
+                            .Where(x => x.IdentityId == _user.IdentityId && x.Deletable == false && x.Id == key.PrivateKeyId).ToLambda());
 
                         _uow.Commit();
                     }
                 }
                 else if (_deleteAll)
                 {
-                    _uow.PublicKeys.Delete(QueryExpressionFactory.GetQueryExpression<tbl_PublicKeys>()
-                        .Where(x => x.IdentityId == _user.IdentityId && !x.Immutable).ToLambda());
+                    _uow.PublicKeys.Delete(QueryExpressionFactory.GetQueryExpression<tbl_PublicKey>()
+                        .Where(x => x.IdentityId == _user.IdentityId && x.Deletable == false).ToLambda());
 
-                    _uow.PrivateKeys.Delete(QueryExpressionFactory.GetQueryExpression<tbl_PrivateKeys>()
-                        .Where(x => x.IdentityId == _user.IdentityId && !x.Immutable).ToLambda());
+                    _uow.PrivateKeys.Delete(QueryExpressionFactory.GetQueryExpression<tbl_PrivateKey>()
+                        .Where(x => x.IdentityId == _user.IdentityId && x.Deletable == false).ToLambda());
 
                     _uow.Commit();
                 }

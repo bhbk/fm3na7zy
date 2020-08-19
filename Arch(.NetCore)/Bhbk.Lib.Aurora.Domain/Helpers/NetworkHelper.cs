@@ -6,7 +6,7 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 {
     public static class NetworkHelper
     {
-        public static bool ValidateAddress(IEnumerable<tbl_Networks> networks, IPAddress client)
+        public static bool ValidateAddress(IEnumerable<tbl_Network> networks, IPAddress client)
         {
             var found = false;
 

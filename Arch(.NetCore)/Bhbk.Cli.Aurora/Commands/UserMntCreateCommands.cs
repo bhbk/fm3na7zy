@@ -20,7 +20,7 @@ namespace Bhbk.Cli.Aurora.Commands
     {
         private static IConfiguration _conf;
         private static IUnitOfWork _uow;
-        private static tbl_Users _user;
+        private static tbl_User _user;
         private static AuthType _authType;
         private static bool _alternateCredential;
         private static string _serverAddress, _serverShare;
@@ -42,11 +42,11 @@ namespace Bhbk.Cli.Aurora.Commands
                 var instance = new ContextService(InstanceContext.DeployedOrLocal);
                 _uow = new UnitOfWork(_conf["Databases:AuroraEntities"], instance);
 
-                _user = _uow.Users.Get(QueryExpressionFactory.GetQueryExpression<tbl_Users>()
+                _user = _uow.Users.Get(QueryExpressionFactory.GetQueryExpression<tbl_User>()
                     .Where(x => x.IdentityAlias == arg).ToLambda(),
-                        new List<Expression<Func<tbl_Users, object>>>()
+                        new List<Expression<Func<tbl_User, object>>>()
                         {
-                            x => x.tbl_UserMounts
+                            x => x.tbl_UserMount
                         }).SingleOrDefault();
 
                 if (_user == null)
@@ -79,10 +79,10 @@ namespace Bhbk.Cli.Aurora.Commands
         {
             try
             {
-                if (_user.tbl_UserMounts != null)
+                if (_user.tbl_UserMount != null)
                 {
                     Console.Out.WriteLine("  *** The user already has a mount ***");
-                    ConsoleHelper.StdOutUserMounts(new List<tbl_UserMounts> { _user.tbl_UserMounts });
+                    ConsoleHelper.StdOutUserMounts(new List<tbl_UserMount> { _user.tbl_UserMount });
 
                     return StandardOutput.FondFarewell();
                 }
@@ -98,7 +98,7 @@ namespace Bhbk.Cli.Aurora.Commands
                     var input = StandardInput.GetInput();
 
                     _uow.UserMounts.Create(
-                        new tbl_UserMounts
+                        new tbl_UserMount
                         {
                             IdentityId = _user.IdentityId,
                             CredentialId = Guid.Parse(input),
@@ -106,14 +106,14 @@ namespace Bhbk.Cli.Aurora.Commands
                             ServerAddress = _serverAddress,
                             ServerShare = _serverShare,
                             Enabled = true,
+                            Deletable = false,
                             Created = DateTime.Now,
-                            Immutable = false,
                         });
                 }
                 else
                 {
                     _uow.UserMounts.Create(
-                        new tbl_UserMounts
+                        new tbl_UserMount
                         {
                             IdentityId = _user.IdentityId,
                             CredentialId = null,
@@ -121,8 +121,8 @@ namespace Bhbk.Cli.Aurora.Commands
                             ServerAddress = _serverAddress,
                             ServerShare = _serverShare,
                             Enabled = true,
+                            Deletable = false,
                             Created = DateTime.Now,
-                            Immutable = false,
                         });
                 }
 

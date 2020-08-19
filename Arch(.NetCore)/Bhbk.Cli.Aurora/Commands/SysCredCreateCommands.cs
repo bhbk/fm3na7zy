@@ -79,15 +79,15 @@ namespace Bhbk.Cli.Aurora.Commands
                     throw new ArithmeticException();
 
                 var credential = _uow.Credentials.Create(
-                    new tbl_Credentials
+                    new tbl_Credential
                     {
                         Id = Guid.NewGuid(),
                         Domain = _credDomain,
                         UserName = _credLogin,
                         Password = cipherText,
-                        Enabled = true,
                         Created = DateTime.Now,
-                        Immutable = false,
+                        Enabled = true,
+                        Deletable = true,
                     });
 
                 _uow.Commit();

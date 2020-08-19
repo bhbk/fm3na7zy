@@ -46,13 +46,13 @@ namespace Bhbk.Cli.Aurora.Commands
             try
             {
                 _uow.Settings.Create(
-                    new tbl_Settings
+                    new tbl_Setting
                     {
                         Id = Guid.NewGuid(),
                         ConfigKey = _configType.ToString(),
                         ConfigValue = _configValue,
+                        Deletable = true,
                         Created = DateTime.UtcNow,
-                        Immutable = false,
                     });
                 _uow.Commit();
 

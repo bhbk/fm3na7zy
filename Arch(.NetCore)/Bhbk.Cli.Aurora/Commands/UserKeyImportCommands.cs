@@ -23,7 +23,7 @@ namespace Bhbk.Cli.Aurora.Commands
         private static IConfiguration _conf;
         private static IUnitOfWork _uow;
         private static FileInfo _path;
-        private static tbl_Users _user;
+        private static tbl_User _user;
         private static string _privKeyPass, _pubKeyComment;
 
         public UserKeyImportCommands()
@@ -42,12 +42,12 @@ namespace Bhbk.Cli.Aurora.Commands
                 var instance = new ContextService(InstanceContext.DeployedOrLocal);
                 _uow = new UnitOfWork(_conf["Databases:AuroraEntities"], instance);
 
-                _user = _uow.Users.Get(QueryExpressionFactory.GetQueryExpression<tbl_Users>()
+                _user = _uow.Users.Get(QueryExpressionFactory.GetQueryExpression<tbl_User>()
                     .Where(x => x.IdentityAlias == arg).ToLambda(),
-                        new List<Expression<Func<tbl_Users, object>>>()
+                        new List<Expression<Func<tbl_User, object>>>()
                         {
-                            x => x.tbl_PrivateKeys,
-                            x => x.tbl_PublicKeys
+                            x => x.tbl_PrivateKey,
+                            x => x.tbl_PublicKey,
                         }).SingleOrDefault();
 
                 if (_user == null)
@@ -72,18 +72,18 @@ namespace Bhbk.Cli.Aurora.Commands
 
         public override int Run(string[] remainingArguments)
         {
-            var license = _uow.Settings.Get(QueryExpressionFactory.GetQueryExpression<tbl_Settings>()
-                .Where(x => x.ConfigKey == "RebexLicense").ToLambda()).OrderBy(x => x.Created)
-                .Last();
-
-            Rebex.Licensing.Key = license.ConfigValue;
-
-            AsymmetricKeyAlgorithm.Register(Curve25519.Create);
-            AsymmetricKeyAlgorithm.Register(Ed25519.Create);
-            AsymmetricKeyAlgorithm.Register(EllipticCurveAlgorithm.Create);
-
             try
             {
+                var license = _uow.Settings.Get(QueryExpressionFactory.GetQueryExpression<tbl_Setting>()
+                    .Where(x => x.ConfigKey == "RebexLicense").ToLambda()).OrderBy(x => x.Created)
+                    .Last();
+
+                Rebex.Licensing.Key = license.ConfigValue;
+
+                AsymmetricKeyAlgorithm.Register(Curve25519.Create);
+                AsymmetricKeyAlgorithm.Register(Ed25519.Create);
+                AsymmetricKeyAlgorithm.Register(EllipticCurveAlgorithm.Create);
+
                 if (string.IsNullOrEmpty(_privKeyPass))
                 {
                     Console.Out.Write("  *** Enter password for the private key *** : ");

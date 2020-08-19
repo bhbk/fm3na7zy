@@ -40,8 +40,8 @@ namespace Bhbk.Cli.Aurora.Commands
         {
             try
             {
-                var credentials = _uow.Credentials.Get(QueryExpressionFactory.GetQueryExpression<tbl_Credentials>()
-                    .Where(x => x.Immutable == false).ToLambda());
+                var credentials = _uow.Credentials.Get(QueryExpressionFactory.GetQueryExpression<tbl_Credential>()
+                    .Where(x => x.Deletable == true).ToLambda());
 
                 ConsoleHelper.StdOutCredentials(credentials);
 
@@ -52,7 +52,7 @@ namespace Bhbk.Cli.Aurora.Commands
                     _credID = Guid.Parse(StandardInput.GetInput());
                 }
 
-                var mounts = _uow.UserMounts.Get(QueryExpressionFactory.GetQueryExpression<tbl_UserMounts>()
+                var mounts = _uow.UserMounts.Get(QueryExpressionFactory.GetQueryExpression<tbl_UserMount>()
                     .Where(x => x.CredentialId == _credID).ToLambda());
 
                 if (mounts.Any())
@@ -65,8 +65,8 @@ namespace Bhbk.Cli.Aurora.Commands
                     return StandardOutput.FondFarewell();
                 }
 
-                _uow.Credentials.Delete(QueryExpressionFactory.GetQueryExpression<tbl_Credentials>()
-                    .Where(x => x.Id == _credID && x.Immutable == false).ToLambda());
+                _uow.Credentials.Delete(QueryExpressionFactory.GetQueryExpression<tbl_Credential>()
+                    .Where(x => x.Id == _credID && x.Deletable == true).ToLambda());
 
                 _uow.Commit();
 

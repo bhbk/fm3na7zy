@@ -10,12 +10,12 @@ using System.Linq.Expressions;
 
 namespace Bhbk.Lib.Aurora.Data.Repositories
 {
-    public class UserFileRepository : GenericRepository<uvw_UserFiles>
+    public class UserFileRepository : GenericRepository<uvw_UserFile>
     {
         public UserFileRepository(AuroraEntities context)
             : base(context) { }
 
-        public override uvw_UserFiles Create(uvw_UserFiles entity)
+        public override uvw_UserFile Create(uvw_UserFile entity)
         {
             var pvalues = new List<SqlParameter>
             {
@@ -29,7 +29,7 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
                 new SqlParameter("@HashSHA256", SqlDbType.NVarChar) { Value = (object)entity.HashSHA256 ?? DBNull.Value }
             };
 
-            return _context.Set<uvw_UserFiles>().FromSqlRaw("[svc].[usp_UserFile_Insert]"
+            return _context.Set<uvw_UserFile>().FromSqlRaw("[svc].[usp_UserFile_Insert]"
                 + "@IdentityId, @FolderId, @VirtualName, @ReadOnly, @RealPath, @RealFileName, @RealFileSize, @HashSHA256", pvalues.ToArray())
                     .AsEnumerable().Single();
 
@@ -50,9 +50,9 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
             */
         }
 
-        public override IEnumerable<uvw_UserFiles> Create(IEnumerable<uvw_UserFiles> entities)
+        public override IEnumerable<uvw_UserFile> Create(IEnumerable<uvw_UserFile> entities)
         {
-            var results = new List<uvw_UserFiles>();
+            var results = new List<uvw_UserFile>();
 
             foreach (var entity in entities)
             {
@@ -64,20 +64,20 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
             return results;
         }
 
-        public override uvw_UserFiles Delete(uvw_UserFiles entity)
+        public override uvw_UserFile Delete(uvw_UserFile entity)
         {
             var pvalues = new List<SqlParameter>
             {
                 new SqlParameter("@Id", SqlDbType.UniqueIdentifier) { Value = entity.Id }
             };
 
-            return _context.Set<uvw_UserFiles>().FromSqlRaw("[svc].[usp_SysSetting_Delete] @Id", pvalues.ToArray())
+            return _context.Set<uvw_UserFile>().FromSqlRaw("[svc].[usp_SysSetting_Delete] @Id", pvalues.ToArray())
                 .AsEnumerable().Single();
         }
 
-        public override IEnumerable<uvw_UserFiles> Delete(IEnumerable<uvw_UserFiles> entities)
+        public override IEnumerable<uvw_UserFile> Delete(IEnumerable<uvw_UserFile> entities)
         {
-            var results = new List<uvw_UserFiles>();
+            var results = new List<uvw_UserFile>();
 
             foreach (var entity in entities)
             {
@@ -89,12 +89,12 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
             return results;
         }
 
-        public override IEnumerable<uvw_UserFiles> Delete(LambdaExpression lambda)
+        public override IEnumerable<uvw_UserFile> Delete(LambdaExpression lambda)
         {
             throw new NotImplementedException();
         }
 
-        public override uvw_UserFiles Update(uvw_UserFiles entity)
+        public override uvw_UserFile Update(uvw_UserFile entity)
         {
             var pvalues = new List<SqlParameter>
             {
@@ -112,15 +112,15 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
                 new SqlParameter("@LastVerified", SqlDbType.DateTime2) { Value = entity.LastVerified }
             };
 
-            return _context.Set<uvw_UserFiles>().FromSqlRaw("[svc].[usp_UserFile_Update]"
+            return _context.Set<uvw_UserFile>().FromSqlRaw("[svc].[usp_UserFile_Update]"
                 + "@Id, @IdentityId, @FolderId, @VirtualName, @ReadOnly, @RealPath, @RealFileName, @RealFileSize, @FileHashSHA256, "
                 + "@LastAccessed, @LastUpdated, @LastVerified", pvalues.ToArray())
                     .AsEnumerable().Single();
         }
 
-        public override IEnumerable<uvw_UserFiles> Update(IEnumerable<uvw_UserFiles> entities)
+        public override IEnumerable<uvw_UserFile> Update(IEnumerable<uvw_UserFile> entities)
         {
-            var results = new List<uvw_UserFiles>();
+            var results = new List<uvw_UserFile>();
 
             foreach (var entity in entities)
             {

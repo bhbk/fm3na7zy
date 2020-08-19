@@ -10,12 +10,12 @@ using System.Linq.Expressions;
 
 namespace Bhbk.Lib.Aurora.Data.Repositories
 {
-    public class UserFolderRepository : GenericRepository<uvw_UserFolders>
+    public class UserFolderRepository : GenericRepository<uvw_UserFolder>
     {
         public UserFolderRepository(AuroraEntities context)
             : base(context) { }
 
-        public override uvw_UserFolders Create(uvw_UserFolders entity)
+        public override uvw_UserFolder Create(uvw_UserFolder entity)
         {
             var pvalues = new List<SqlParameter>
             {
@@ -25,7 +25,7 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
                 new SqlParameter("@ReadOnly", SqlDbType.Bit) { Value = entity.ReadOnly }
             };
 
-            return _context.Set<uvw_UserFolders>().FromSqlRaw("[svc].[usp_UserFolder_Insert]"
+            return _context.Set<uvw_UserFolder>().FromSqlRaw("[svc].[usp_UserFolder_Insert]"
                 + "@IdentityId, @ParentId, @VirtualName, @ReadOnly", pvalues.ToArray())
                     .AsEnumerable().Single();
 
@@ -46,9 +46,9 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
             */
         }
 
-        public override IEnumerable<uvw_UserFolders> Create(IEnumerable<uvw_UserFolders> entities)
+        public override IEnumerable<uvw_UserFolder> Create(IEnumerable<uvw_UserFolder> entities)
         {
-            var results = new List<uvw_UserFolders>();
+            var results = new List<uvw_UserFolder>();
 
             foreach (var entity in entities)
             {
@@ -60,20 +60,20 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
             return results;
         }
 
-        public override uvw_UserFolders Delete(uvw_UserFolders entity)
+        public override uvw_UserFolder Delete(uvw_UserFolder entity)
         {
             var pvalues = new List<SqlParameter>
             {
                 new SqlParameter("@Id", SqlDbType.UniqueIdentifier) { Value = entity.Id }
             };
 
-            return _context.Set<uvw_UserFolders>().FromSqlRaw("[svc].[usp_UserFolder_Delete] @IdentityId", pvalues.ToArray())
+            return _context.Set<uvw_UserFolder>().FromSqlRaw("[svc].[usp_UserFolder_Delete] @IdentityId", pvalues.ToArray())
                 .AsEnumerable().Single();
         }
 
-        public override IEnumerable<uvw_UserFolders> Delete(IEnumerable<uvw_UserFolders> entities)
+        public override IEnumerable<uvw_UserFolder> Delete(IEnumerable<uvw_UserFolder> entities)
         {
-            var results = new List<uvw_UserFolders>();
+            var results = new List<uvw_UserFolder>();
 
             foreach (var entity in entities)
             {
@@ -85,12 +85,12 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
             return results;
         }
 
-        public override IEnumerable<uvw_UserFolders> Delete(LambdaExpression lambda)
+        public override IEnumerable<uvw_UserFolder> Delete(LambdaExpression lambda)
         {
             throw new NotImplementedException();
         }
 
-        public override uvw_UserFolders Update(uvw_UserFolders entity)
+        public override uvw_UserFolder Update(uvw_UserFolder entity)
         {
             var pvalues = new List<SqlParameter>
             {
@@ -103,14 +103,14 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
                 new SqlParameter("@LastUpdated", SqlDbType.DateTime2) { Value = entity.LastUpdated }
             };
 
-            return _context.Set<uvw_UserFolders>().FromSqlRaw("[svc].[usp_UserFolder_Update]"
+            return _context.Set<uvw_UserFolder>().FromSqlRaw("[svc].[usp_UserFolder_Update]"
                 + "@Id, @IdentityId, @ParentId, @VirtualName, @ReadOnly, @LastAccessed, @LastUpdated", pvalues.ToArray())
                     .AsEnumerable().Single();
         }
 
-        public override IEnumerable<uvw_UserFolders> Update(IEnumerable<uvw_UserFolders> entities)
+        public override IEnumerable<uvw_UserFolder> Update(IEnumerable<uvw_UserFolder> entities)
         {
-            var results = new List<uvw_UserFolders>();
+            var results = new List<uvw_UserFolder>();
 
             foreach (var entity in entities)
             {

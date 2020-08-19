@@ -19,7 +19,7 @@ namespace Bhbk.Cli.Aurora.Commands
     {
         private static IConfiguration _conf;
         private static IUnitOfWork _uow;
-        private static tbl_Users _user;
+        private static tbl_User _user;
 
         public UserDeleteCommands()
         {
@@ -37,12 +37,12 @@ namespace Bhbk.Cli.Aurora.Commands
                 var instance = new ContextService(InstanceContext.DeployedOrLocal);
                 _uow = new UnitOfWork(_conf["Databases:AuroraEntities"], instance);
 
-                _user = _uow.Users.Get(QueryExpressionFactory.GetQueryExpression<tbl_Users>()
-                    .Where(x => x.IdentityAlias == arg && x.Immutable == false).ToLambda(),
-                        new List<Expression<Func<tbl_Users, object>>>()
+                _user = _uow.Users.Get(QueryExpressionFactory.GetQueryExpression<tbl_User>()
+                    .Where(x => x.IdentityAlias == arg && x.Deletable == true).ToLambda(),
+                        new List<Expression<Func<tbl_User, object>>>()
                         {
-                            x => x.tbl_UserFiles,
-                            x => x.tbl_UserFolders,
+                            x => x.tbl_UserFile,
+                            x => x.tbl_UserFolder,
                         }).SingleOrDefault();
 
                 if (_user == null)
@@ -54,8 +54,8 @@ namespace Bhbk.Cli.Aurora.Commands
         {
             try
             {
-                var files = _user.tbl_UserFiles.Count();
-                var folders = _user.tbl_UserFolders.Count();
+                var files = _user.tbl_UserFile.Count();
+                var folders = _user.tbl_UserFolder.Count();
 
                 if (files > 0)
                     throw new ConsoleHelpAsException($"  *** The user can not be deleted. There are {files} files owned ***");

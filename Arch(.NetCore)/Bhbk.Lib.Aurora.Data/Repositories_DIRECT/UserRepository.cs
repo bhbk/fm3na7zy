@@ -3,7 +3,7 @@ using Bhbk.Lib.DataAccess.EFCore.Repositories;
 
 namespace Bhbk.Lib.Aurora.Data.Repositories_DIRECT
 {
-    public class UserRepository : GenericRepository<tbl_Users>
+    public class UserRepository : GenericRepository<tbl_User>
     {
         public UserRepository(AuroraEntities context)
             : base(context) { }

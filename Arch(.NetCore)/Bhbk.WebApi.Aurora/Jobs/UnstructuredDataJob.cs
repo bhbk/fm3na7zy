@@ -38,10 +38,10 @@ namespace Bhbk.WebApi.Aurora.Tasks
 
                     var staggerVerify = int.Parse(conf["Jobs:UnstructuredData:StaggerVerify"]);
 
-                    var files = uow.UserFiles.Get(QueryExpressionFactory.GetQueryExpression<tbl_UserFiles>()
+                    var files = uow.UserFiles.Get(QueryExpressionFactory.GetQueryExpression<tbl_UserFile>()
                         .Where(x => x.LastVerified < DateTime.UtcNow.AddSeconds(-staggerVerify)).ToLambda());
 
-                    var problems = new List<tbl_UserFiles>();
+                    var problems = new List<tbl_UserFile>();
 
                     foreach (var file in files)
                     {

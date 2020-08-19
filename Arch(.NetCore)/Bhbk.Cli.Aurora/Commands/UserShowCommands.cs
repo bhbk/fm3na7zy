@@ -19,7 +19,7 @@ namespace Bhbk.Cli.Aurora.Commands
     {
         private static IConfiguration _conf;
         private static IUnitOfWork _uow;
-        private static tbl_Users _user;
+        private static tbl_User _user;
 
         public UserShowCommands()
         {
@@ -37,13 +37,13 @@ namespace Bhbk.Cli.Aurora.Commands
                 var instance = new ContextService(InstanceContext.DeployedOrLocal);
                 _uow = new UnitOfWork(_conf["Databases:AuroraEntities"], instance);
 
-                _user = _uow.Users.Get(QueryExpressionFactory.GetQueryExpression<tbl_Users>()
+                _user = _uow.Users.Get(QueryExpressionFactory.GetQueryExpression<tbl_User>()
                     .Where(x => x.IdentityAlias == arg).ToLambda(),
-                        new List<Expression<Func<tbl_Users, object>>>()
+                        new List<Expression<Func<tbl_User, object>>>()
                         {
-                            x => x.tbl_UserMounts,
-                            x => x.tbl_PrivateKeys,
-                            x => x.tbl_PublicKeys,
+                            x => x.tbl_UserMount,
+                            x => x.tbl_PrivateKey,
+                            x => x.tbl_PublicKey,
                         }).SingleOrDefault();
 
                 if (_user == null)
@@ -55,9 +55,9 @@ namespace Bhbk.Cli.Aurora.Commands
         {
             try
             {
-                ConsoleHelper.StdOutKeyPairs(_user.tbl_PublicKeys.OrderBy(x => x.Created));
+                ConsoleHelper.StdOutKeyPairs(_user.tbl_PublicKey.OrderBy(x => x.Created));
                 Console.Out.WriteLine();
-                ConsoleHelper.StdOutUserMounts(new List<tbl_UserMounts> { _user.tbl_UserMounts });
+                ConsoleHelper.StdOutUserMounts(new List<tbl_UserMount> { _user.tbl_UserMount });
 
                 return StandardOutput.FondFarewell();
             }

@@ -42,7 +42,7 @@ namespace Bhbk.Cli.Aurora.Commands
                 var instance = new ContextService(InstanceContext.DeployedOrLocal);
                 _uow = new UnitOfWork(_conf["Databases:AuroraEntities"], instance);
 
-                var user = _uow.Users.Get(QueryExpressionFactory.GetQueryExpression<tbl_Users>()
+                var user = _uow.Users.Get(QueryExpressionFactory.GetQueryExpression<tbl_User>()
                     .Where(x => x.IdentityAlias == arg).ToLambda()).SingleOrDefault();
 
                 if (user != null)
@@ -83,7 +83,7 @@ namespace Bhbk.Cli.Aurora.Commands
                 var input = StandardInput.GetInput();
 
                 var user = _uow.Users.Create(
-                    new tbl_Users
+                    new tbl_User
                     {
                         IdentityId = Guid.Parse(input),
                         IdentityAlias = _userName,
@@ -91,8 +91,8 @@ namespace Bhbk.Cli.Aurora.Commands
                         RequirePublicKey = false,
                         FileSystemType = _fileSystem.ToString(),
                         Enabled = true,
+                        Deletable = false,
                         Created = DateTime.Now,
-                        Immutable = false,
                     });
 
                 _uow.Commit();

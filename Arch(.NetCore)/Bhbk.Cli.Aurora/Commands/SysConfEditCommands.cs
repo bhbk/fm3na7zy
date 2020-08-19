@@ -48,7 +48,7 @@ namespace Bhbk.Cli.Aurora.Commands
         {
             try
             {
-                var config = _uow.Settings.Get(QueryExpressionFactory.GetQueryExpression<tbl_Settings>()
+                var config = _uow.Settings.Get(QueryExpressionFactory.GetQueryExpression<tbl_Setting>()
                     .Where(x => x.ConfigKey == _configType.ToString()).ToLambda())
                     .SingleOrDefault();
 
