@@ -46,8 +46,8 @@ namespace Bhbk.Cli.Aurora.Commands
                     .Where(x => x.IdentityAlias == arg).ToLambda(),
                         new List<Expression<Func<tbl_User, object>>>()
                         {
-                            x => x.tbl_PrivateKey,
-                            x => x.tbl_PublicKey,
+                            x => x.tbl_PrivateKeys,
+                            x => x.tbl_PublicKeys,
                         }).SingleOrDefault();
 
                 if (_user == null)
@@ -75,7 +75,7 @@ namespace Bhbk.Cli.Aurora.Commands
             try
             {
                 var license = _uow.Settings.Get(QueryExpressionFactory.GetQueryExpression<tbl_Setting>()
-                    .Where(x => x.ConfigKey == "RebexLicense").ToLambda()).OrderBy(x => x.Created)
+                    .Where(x => x.ConfigKey == "RebexLicense").ToLambda()).OrderBy(x => x.CreatedUtc)
                     .Last();
 
                 Rebex.Licensing.Key = license.ConfigValue;

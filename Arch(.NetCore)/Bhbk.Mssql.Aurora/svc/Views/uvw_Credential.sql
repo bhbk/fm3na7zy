@@ -1,5 +1,5 @@
 ﻿
-CREATE VIEW svc.uvw_Credential
+CREATE VIEW [svc].[uvw_Credential]
 AS
-SELECT        Id, Domain, UserName, Password, Enabled, Deletable, Created, LastUpdated
-FROM            dbo.tbl_Credential
+SELECT        Id, Domain, UserName, Password, IsEnabled, IsDeletable, CreatedUtc, LastUpdatedUtc
+FROM            [dbo].[tbl_Credential]

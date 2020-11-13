@@ -75,7 +75,7 @@ namespace Bhbk.Cli.Aurora.Commands
                     throw new ArithmeticException();
 
                 credential.Password = cipherText;
-                credential.LastUpdated = DateTime.Now;
+                credential.LastUpdatedUtc = DateTime.UtcNow;
 
                 _uow.Credentials.Update(credential);
                 _uow.Commit();

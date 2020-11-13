@@ -24,7 +24,7 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 		{
 			var keyAlgoStr = keyAlgo.ToString();
 			var privKey = uow.PrivateKeys.Get(QueryExpressionFactory.GetQueryExpression<tbl_PrivateKey>()
-				.Where(x => x.KeyAlgo == keyAlgoStr && x.IdentityId == null && x.Deletable == false).ToLambda())
+				.Where(x => x.KeyAlgo == keyAlgoStr && x.IdentityId == null && x.IsDeletable == false).ToLambda())
 				.SingleOrDefault();
 
 			if (privKey == null)
@@ -54,10 +54,10 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 					KeyAlgo = keyPair.KeyAlgorithm.ToString(),
 					KeyPass = AES.EncryptString(privKeyPass, conf["Databases:AuroraSecret"]),
 					KeyFormat = SshPrivateKeyFormat.Pkcs8.ToString(),
-					Enabled = true,
-					Deletable = false,
-					Created = DateTime.Now,
-					LastUpdated = null,
+					IsEnabled = true,
+					IsDeletable = false,
+					CreatedUtc = DateTime.UtcNow,
+					LastUpdatedUtc = null,
 				});
 
 			Log.Information($"'{callPath}' 'system' private key algo {keyPair.KeyAlgorithm} sig {keyPair.Fingerprint.ToString(sigAlgo, false)}" +
@@ -74,10 +74,9 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 					KeyFormat = SshPublicKeyFormat.Pkcs8.ToString(),
 					SigValue = keyPair.Fingerprint.ToString(sigAlgo, false),
 					SigAlgo = sigAlgo.ToString(),
-					Enabled = true,
-					Deletable = false,
-					Created = DateTime.Now,
-					LastUpdated = null,
+					IsEnabled = true,
+					IsDeletable = false,
+					CreatedUtc = DateTime.UtcNow,
 				});
 
 			Log.Information($"'{callPath}' 'system' public key algo {keyPair.KeyAlgorithm} sig {keyPair.Fingerprint.ToString(sigAlgo, false)}" +
@@ -111,10 +110,9 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 					KeyAlgo = keyPair.KeyAlgorithm.ToString(),
 					KeyPass = AES.EncryptString(privKeyPass, conf["Databases:AuroraSecret"]),
 					KeyFormat = SshPrivateKeyFormat.Pkcs8.ToString(),
-					Enabled = true,
-					Deletable = true,
-					Created = DateTime.Now,
-					LastUpdated = null,
+					IsEnabled = true,
+					IsDeletable = true,
+					CreatedUtc = DateTime.UtcNow,
 				});
 
 			Log.Information($"'{callPath}' '{user.IdentityAlias}' private key algo {keyPair.KeyAlgorithm} sig {keyPair.Fingerprint.ToString(sigAlgo, false)}" +
@@ -132,10 +130,10 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 					SigValue = keyPair.Fingerprint.ToString(sigAlgo, false),
 					SigAlgo = sigAlgo.ToString(),
 					Comment = comment,
-					Enabled = true,
-					Deletable = true,
-					Created = DateTime.Now,
-					LastUpdated = null,
+					IsEnabled = true,
+					IsDeletable = true,
+					CreatedUtc = DateTime.UtcNow,
+					LastUpdatedUtc = null,
 				});
 
 			Log.Information($"'{callPath}' '{user.IdentityAlias}' public key algo {keyPair.KeyAlgorithm} sig {keyPair.Fingerprint.ToString(sigAlgo, false)}" +
@@ -171,7 +169,7 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 				privKey.Save(privStream, plainText, keyFormat);
 
 				key.KeyPass = AES.EncryptString(plainText, secretNew);
-				key.LastUpdated = DateTime.Now;
+				key.LastUpdatedUtc = DateTime.UtcNow;
 
 				uow.PrivateKeys.Update(key);
 
@@ -305,10 +303,9 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 						KeyAlgo = keyPair.KeyAlgorithm.ToString(),
 						KeyPass = AES.EncryptString(privKeyPass, conf["Databases:AuroraSecret"]),
 						KeyFormat = SshPrivateKeyFormat.Pkcs8.ToString(),
-						Enabled = true,
-						Deletable = false,
-						Created = DateTime.Now,
-						LastUpdated = null,
+						IsEnabled = true,
+						IsDeletable = false,
+						CreatedUtc = DateTime.UtcNow,
 					});
 
 				Log.Information($"'{callPath}' 'system' private key algo {keyPair.KeyAlgorithm} sig {keyPair.Fingerprint.ToString(sigAlgo, false)}" +
@@ -326,10 +323,9 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 						SigValue = keyPair.Fingerprint.ToString(sigAlgo, false),
 						SigAlgo = sigAlgo.ToString(),
 						Comment = null,
-						Enabled = true,
-						Deletable = false,
-						Created = DateTime.Now,
-						LastUpdated = null,
+						IsEnabled = true,
+						IsDeletable = false,
+						CreatedUtc = DateTime.UtcNow,
 					});
 
 				Log.Information($"'{callPath}' 'system' public key algo {keyPair.KeyAlgorithm} sig {keyPair.Fingerprint.ToString(sigAlgo, false)}" +
@@ -350,10 +346,9 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 						SigValue = keyPair.Fingerprint.ToString(sigAlgo, false),
 						SigAlgo = sigAlgo.ToString(),
 						Comment = null,
-						Enabled = true,
-						Deletable = false,
-						Created = DateTime.Now,
-						LastUpdated = null,
+						IsEnabled = true,
+						IsDeletable = false,
+						CreatedUtc = DateTime.UtcNow,
 					});
 
 				Log.Information($"'{callPath}' 'system' public key algo {keyPair.KeyAlgorithm} sig {keyPair.Fingerprint.ToString(sigAlgo, false)}" +
@@ -372,10 +367,9 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 						KeyAlgo = keyPair.KeyAlgorithm.ToString(),
 						KeyPass = AES.EncryptString(privKeyPass, conf["Databases:AuroraSecret"]),
 						KeyFormat = SshPrivateKeyFormat.Pkcs8.ToString(),
-						Enabled = true,
-						Deletable = false,
-						Created = DateTime.Now,
-						LastUpdated = null,
+						IsEnabled = true,
+						IsDeletable = false,
+						CreatedUtc = DateTime.UtcNow,
 					});
 
 				Log.Information($"'{callPath}' 'system' private key algo {keyPair.KeyAlgorithm} sig {keyPair.Fingerprint.ToString(sigAlgo, false)}" +
@@ -426,10 +420,9 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 						KeyAlgo = keyPair.KeyAlgorithm.ToString(),
 						KeyPass = AES.EncryptString(privKeyPass, conf["Databases:AuroraSecret"]),
 						KeyFormat = SshPrivateKeyFormat.Pkcs8.ToString(),
-						Enabled = true,
-						Deletable = true,
-						Created = DateTime.Now,
-						LastUpdated = null,
+						IsEnabled = true,
+						IsDeletable = true,
+						CreatedUtc = DateTime.UtcNow,
 					});
 
 				Log.Information($"'{callPath}' '{user.IdentityAlias}' private key algo {keyPair.KeyAlgorithm} sig {keyPair.Fingerprint.ToString(sigAlgo, false)}" +
@@ -447,10 +440,9 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 						SigValue = keyPair.Fingerprint.ToString(sigAlgo, false),
 						SigAlgo = sigAlgo.ToString(),
 						Comment = comment,
-						Enabled = true,
-						Deletable = true,
-						Created = DateTime.Now,
-						LastUpdated = null,
+						IsEnabled = true,
+						IsDeletable = true,
+						CreatedUtc = DateTime.UtcNow,
 					});
 
 				Log.Information($"'{callPath}' '{user.IdentityAlias}' public key algo {keyPair.KeyAlgorithm} sig {keyPair.Fingerprint.ToString(sigAlgo, false)}" +
@@ -471,10 +463,9 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 						SigValue = keyPair.Fingerprint.ToString(sigAlgo, false),
 						SigAlgo = sigAlgo.ToString(),
 						Comment = comment,
-						Enabled = true,
-						Deletable = true,
-						Created = DateTime.Now,
-						LastUpdated = null,
+						IsEnabled = true,
+						IsDeletable = true,
+						CreatedUtc = DateTime.UtcNow,
 					});
 
 				Log.Information($"'{callPath}' '{user.IdentityAlias}' public key algo {keyPair.KeyAlgorithm} sig {keyPair.Fingerprint.ToString(sigAlgo, false)}" +
@@ -492,10 +483,9 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 						KeyValue = privKeyValue,
 						KeyAlgo = keyPair.Fingerprint.ToString(sigAlgo, false).ToString(),
 						KeyPass = AES.EncryptString(privKeyPass, conf["Databases:AuroraSecret"]),
-						Enabled = true,
-						Deletable = true,
-						Created = DateTime.Now,
-						LastUpdated = null,
+						IsEnabled = true,
+						IsDeletable = true,
+						CreatedUtc = DateTime.UtcNow,
 					});
 
 				Log.Information($"'{callPath}' '{user.IdentityAlias}' private key algo {keyPair.KeyAlgorithm} sig {keyPair.Fingerprint.ToString(sigAlgo, false)}" +
@@ -534,10 +524,9 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 						SigValue = pubKey.Fingerprint.ToString(sigAlgo, false),
 						SigAlgo = sigAlgo.ToString(),
 						Comment = hostname,
-						Enabled = true,
-						Deletable = true,
-						Created = DateTime.Now,
-						LastUpdated = null,
+						IsEnabled = true,
+						IsDeletable = true,
+						CreatedUtc = DateTime.UtcNow,
 					});
 
 				Log.Information($"'{callPath}' '{user.IdentityAlias}' public key algo {pubKey.KeyAlgorithm} sig {pubKey.Fingerprint.ToString(sigAlgo, false)}" +
@@ -616,10 +605,9 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 							SigValue = pubKey.Fingerprint.ToString(sigAlgo, false),
 							SigAlgo = sigAlgo.ToString(),
 							Comment = base64[2],
-							Enabled = true,
-							Deletable = true,
-							Created = DateTime.Now,
-							LastUpdated = null,
+							IsEnabled = true,
+							IsDeletable = true,
+							CreatedUtc = DateTime.UtcNow,
 						});
 
 					pubKeys.Add(newPubKey);

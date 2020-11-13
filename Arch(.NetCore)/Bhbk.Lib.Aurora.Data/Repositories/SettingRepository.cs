@@ -19,13 +19,14 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
         {
             var pvalues = new List<SqlParameter>
             {
+                new SqlParameter("@IdentityId", SqlDbType.UniqueIdentifier) { Value = entity.IdentityId },
                 new SqlParameter("@ConfigKey", SqlDbType.NVarChar) { Value = entity.ConfigKey },
                 new SqlParameter("@ConfigValue", SqlDbType.NVarChar) { Value = entity.ConfigValue },
-                new SqlParameter("@Deletable", SqlDbType.Bit) { Value = entity.Deletable },
+                new SqlParameter("@IdDeletable", SqlDbType.Bit) { Value = entity.IsDeletable },
             };
 
             return _context.Set<uvw_Setting>().FromSqlRaw("[svc].[usp_Setting_Insert]"
-                + "@ConfigKey, @ConfigValue, @Deletable", pvalues.ToArray())
+                + "@IdentityId, @ConfigKey, @ConfigValue, @IdDeletable", pvalues.ToArray())
                     .AsEnumerable().Single();
 
             /*
@@ -94,13 +95,14 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
             var pvalues = new List<SqlParameter>
             {
                 new SqlParameter("@Id", SqlDbType.UniqueIdentifier) { Value = entity.Id },
+                new SqlParameter("@IdentityId", SqlDbType.UniqueIdentifier) { Value = entity.IdentityId },
                 new SqlParameter("@ConfigKey", SqlDbType.NVarChar) { Value = entity.ConfigKey },
                 new SqlParameter("@ConfigValue", SqlDbType.NVarChar) { Value = entity.ConfigValue },
-                new SqlParameter("@Deletable", SqlDbType.Bit) { Value = entity.Deletable }
+                new SqlParameter("@IsDeletable", SqlDbType.Bit) { Value = entity.IsDeletable }
             };
 
             return _context.Set<uvw_Setting>().FromSqlRaw("[svc].[usp_Setting_Update]"
-                + "@Id, @ConfigKey, @ConfigValue, @Deletable", pvalues.ToArray())
+                + "@Id, @IdentityId, @ConfigKey, @ConfigValue, @IsDeletable", pvalues.ToArray())
                     .AsEnumerable().Single();
         }
 

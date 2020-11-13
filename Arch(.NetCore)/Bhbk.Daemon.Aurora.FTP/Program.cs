@@ -15,13 +15,26 @@ namespace Bhbk.Daemon.Aurora.FTP
 {
     public class Program
     {
-        private static IMapper _mapper;
         private static IConfiguration _conf;
         private static IContextService _instance;
+        private static IMapper _mapper;
 
         public static IHostBuilder CreateLinuxHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
             .UseSystemd()
+            .ConfigureLogging((hostContext, builder) =>
+            {
+                Log.Logger = new LoggerConfiguration()
+                    .ReadFrom.Configuration(_conf)
+                    .Enrich.FromLogContext()
+                    .WriteTo.Console()
+                    .WriteTo.File($"{hostContext.HostingEnvironment.ContentRootPath}{Path.DirectorySeparatorChar}appdebug-.log",
+                        retainedFileCountLimit: int.Parse(_conf["Serilog:RollingFile:RetainedFileCountLimit"]),
+                        fileSizeLimitBytes: int.Parse(_conf["Serilog:RollingFile:FileSizeLimitBytes"]),
+                        rollingInterval: RollingInterval.Day)
+                    .CreateLogger();
+            })
+            .UseSerilog()
             .ConfigureServices((hostContext, options) =>
             {
                 options.AddSingleton<IMapper>(_mapper);
@@ -37,6 +50,19 @@ namespace Bhbk.Daemon.Aurora.FTP
         public static IHostBuilder CreateWindowsHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
             .UseWindowsService()
+            .ConfigureLogging((hostContext, builder) =>
+            {
+                Log.Logger = new LoggerConfiguration()
+                    .ReadFrom.Configuration(_conf)
+                    .Enrich.FromLogContext()
+                    .WriteTo.Console()
+                    .WriteTo.File($"{hostContext.HostingEnvironment.ContentRootPath}{Path.DirectorySeparatorChar}appdebug-.log",
+                        retainedFileCountLimit: int.Parse(_conf["Serilog:RollingFile:RetainedFileCountLimit"]),
+                        fileSizeLimitBytes: int.Parse(_conf["Serilog:RollingFile:FileSizeLimitBytes"]),
+                        rollingInterval: RollingInterval.Day)
+                    .CreateLogger();
+            })
+            .UseSerilog()
             .ConfigureServices((hostContext, options) =>
             {
                 options.AddSingleton<IMapper>(_mapper);
@@ -54,20 +80,11 @@ namespace Bhbk.Daemon.Aurora.FTP
             _mapper = new MapperConfiguration(x => x.AddProfile<AutoMapperProfile_DIRECT>())
                 .CreateMapper();
 
-            _conf = (IConfiguration)new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
+            _conf = new ConfigurationBuilder()
                 .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
                 .Build();
 
             _instance = new ContextService(InstanceContext.DeployedOrLocal);
-
-            Log.Logger = new LoggerConfiguration()
-                .ReadFrom.Configuration(_conf)
-                .WriteTo.Console()
-                .WriteTo.RollingFile(Directory.GetCurrentDirectory() 
-                    + Path.DirectorySeparatorChar + "appdebug.log", retainedFileCountLimit: 7, fileSizeLimitBytes: 10485760)
-                .Enrich.FromLogContext()
-                .CreateLogger();
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
                 CreateLinuxHostBuilder(args).Build().Run();

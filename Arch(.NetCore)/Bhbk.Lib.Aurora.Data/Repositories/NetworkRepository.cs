@@ -22,7 +22,7 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
                 new SqlParameter("@IdentityId", SqlDbType.UniqueIdentifier) { Value = entity.IdentityId },
                 new SqlParameter("@Address", SqlDbType.NVarChar) { Value = entity.Address },
                 new SqlParameter("@Action", SqlDbType.NVarChar) { Value = entity.Action },
-                new SqlParameter("@Enabled", SqlDbType.Bit) { Value = entity.Enabled },
+                new SqlParameter("@Enabled", SqlDbType.Bit) { Value = entity.IsEnabled },
             };
 
             return _context.Set<uvw_Network>().FromSqlRaw("[svc].[usp_Network_Insert]"
@@ -98,7 +98,7 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
                 new SqlParameter("@IdentityId", SqlDbType.UniqueIdentifier) { Value = entity.IdentityId },
                 new SqlParameter("@Address", SqlDbType.NVarChar) { Value = entity.Address },
                 new SqlParameter("@Action", SqlDbType.NVarChar) { Value = entity.Action },
-                new SqlParameter("@Enabled", SqlDbType.Bit) { Value = entity.Enabled },
+                new SqlParameter("@Enabled", SqlDbType.Bit) { Value = entity.IsEnabled },
             };
 
             return _context.Set<uvw_Network>().FromSqlRaw("[svc].[usp_Network_Update]"

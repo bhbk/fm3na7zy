@@ -51,8 +51,8 @@ namespace Bhbk.Cli.Aurora.Commands
                         Id = Guid.NewGuid(),
                         ConfigKey = _configType.ToString(),
                         ConfigValue = _configValue,
-                        Deletable = true,
-                        Created = DateTime.UtcNow,
+                        IsDeletable = true,
+                        CreatedUtc = DateTime.UtcNow,
                     });
                 _uow.Commit();
 

@@ -38,11 +38,11 @@ namespace Bhbk.Cli.Aurora.Commands
                 _uow = new UnitOfWork(_conf["Databases:AuroraEntities"], instance);
 
                 _user = _uow.Users.Get(QueryExpressionFactory.GetQueryExpression<tbl_User>()
-                    .Where(x => x.IdentityAlias == arg && x.Deletable == true).ToLambda(),
+                    .Where(x => x.IdentityAlias == arg && x.IsDeletable == true).ToLambda(),
                         new List<Expression<Func<tbl_User, object>>>()
                         {
-                            x => x.tbl_UserFile,
-                            x => x.tbl_UserFolder,
+                            x => x.tbl_UserFiles,
+                            x => x.tbl_UserFolders,
                         }).SingleOrDefault();
 
                 if (_user == null)
@@ -54,8 +54,8 @@ namespace Bhbk.Cli.Aurora.Commands
         {
             try
             {
-                var files = _user.tbl_UserFile.Count();
-                var folders = _user.tbl_UserFolder.Count();
+                var files = _user.tbl_UserFiles.Count();
+                var folders = _user.tbl_UserFolders.Count();
 
                 if (files > 0)
                     throw new ConsoleHelpAsException($"  *** The user can not be deleted. There are {files} files owned ***");

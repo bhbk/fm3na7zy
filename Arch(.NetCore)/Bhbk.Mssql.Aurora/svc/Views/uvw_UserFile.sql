@@ -1,5 +1,5 @@
 ﻿
 CREATE VIEW [svc].[uvw_UserFile]
 AS
-SELECT        Id, IdentityId, FolderId, VirtualName, ReadOnly, RealPath, RealFileName, RealFileSize, HashSHA256, Created, LastAccessed, LastUpdated, LastVerified
-FROM            dbo.tbl_UserFile
+SELECT        Id, IdentityId, FolderId, VirtualName, RealPath, RealFileName, RealFileSize, HashSHA256, IsReadOnly, CreatedUtc, LastAccessedUtc, LastUpdatedUtc, LastVerifiedUtc
+FROM            [dbo].[tbl_UserFile]

@@ -85,9 +85,9 @@ namespace Bhbk.Cli.Aurora.Commands
                         Domain = _credDomain,
                         UserName = _credLogin,
                         Password = cipherText,
-                        Created = DateTime.Now,
-                        Enabled = true,
-                        Deletable = true,
+                        CreatedUtc = DateTime.UtcNow,
+                        IsEnabled = true,
+                        IsDeletable = true,
                     });
 
                 _uow.Commit();

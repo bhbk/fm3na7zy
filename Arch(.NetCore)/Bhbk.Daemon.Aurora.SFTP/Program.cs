@@ -3,11 +3,11 @@ using Bhbk.Daemon.Aurora.SFTP.Jobs;
 using Bhbk.Lib.Aurora.Data.Infrastructure_DIRECT;
 using Bhbk.Lib.Aurora.Domain.Infrastructure;
 using Bhbk.Lib.Aurora.Domain.Primitives.Enums;
-using Bhbk.Lib.Common.FileSystem;
 using Bhbk.Lib.Common.Primitives.Enums;
 using Bhbk.Lib.Common.Services;
 using Bhbk.Lib.Identity.Grants;
 using Bhbk.Lib.Identity.Services;
+using CronExpressionDescriptor;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -27,11 +27,26 @@ namespace Bhbk.Daemon.Aurora.SFTP
         private static IContextService _instance;
         private static ILogger _logger;
         private static IMapper _mapper;
+        private static string callPath = "Program.Main";
 
         public static IHostBuilder CreateLinuxHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
-            .UseSerilog()
             .UseSystemd()
+            .ConfigureLogging((hostContext, builder) =>
+            {
+                Log.Logger = new LoggerConfiguration()
+                    .ReadFrom.Configuration(_conf)
+                    .Enrich.FromLogContext()
+                    .WriteTo.Console()
+                    .WriteTo.File($"{hostContext.HostingEnvironment.ContentRootPath}{Path.DirectorySeparatorChar}appdebug-.log",
+                        retainedFileCountLimit: int.Parse(_conf["Serilog:RollingFile:RetainedFileCountLimit"]),
+                        fileSizeLimitBytes: int.Parse(_conf["Serilog:RollingFile:FileSizeLimitBytes"]),
+                        rollingInterval: RollingInterval.Day)
+                    .CreateLogger();
+
+                _logger = Log.Logger;
+            })
+            .UseSerilog()
             .ConfigureServices((hostContext, sc) =>
             {
                 sc.AddSingleton<IConfiguration>(_conf);
@@ -79,38 +94,42 @@ namespace Bhbk.Daemon.Aurora.SFTP
 
                     if (bool.Parse(_conf["Jobs:MOTDDownloadJob:Enable"]))
                     {
-                        var motdPullJobKey = new JobKey(JobType.MOTDDownloadJob.ToString(), GroupType.Daemons.ToString());
+                        var jobKey = new JobKey(JobType.MOTDDownloadJob.ToString(), GroupType.Daemons.ToString());
                         jobs.AddJob<MOTDDownloadJob>(opt => opt
                             .StoreDurably()
-                            .WithIdentity(motdPullJobKey)
+                            .WithIdentity(jobKey)
                         );
 
                         foreach (var cron in _conf.GetSection("Jobs:MOTDDownloadJob:Schedules").GetChildren()
                             .Select(x => x.Value).ToList())
                         {
                             jobs.AddTrigger(opt => opt
-                                .ForJob(motdPullJobKey)
+                                .ForJob(jobKey)
                                 .StartNow()
                                 .WithCronSchedule(cron)
                             );
+
+                            Log.Information($"'{callPath}' {jobKey.Name} job has schedule '{ExpressionDescriptor.GetDescription(cron)}'");
                         }
                     }
                     if (bool.Parse(_conf["Jobs:MOTDUploadJob:Enable"]))
                     {
-                        var motdPushJobKey = new JobKey(JobType.MOTDUploadJob.ToString(), GroupType.Daemons.ToString());
+                        var jobKey = new JobKey(JobType.MOTDUploadJob.ToString(), GroupType.Daemons.ToString());
                         jobs.AddJob<MOTDUploadJob>(opt => opt
                             .StoreDurably()
-                            .WithIdentity(motdPushJobKey)
+                            .WithIdentity(jobKey)
                         );
 
                         foreach (var cron in _conf.GetSection("Jobs:MOTDUploadJob:Schedules").GetChildren()
                             .Select(x => x.Value).ToList())
                         {
                             jobs.AddTrigger(opt => opt
-                                .ForJob(motdPushJobKey)
+                                .ForJob(jobKey)
                                 .StartNow()
                                 .WithCronSchedule(cron)
                             );
+
+                            Log.Information($"'{callPath}' {jobKey.Name} job has schedule '{ExpressionDescriptor.GetDescription(cron)}'");
                         }
                     }
                 });
@@ -122,8 +141,22 @@ namespace Bhbk.Daemon.Aurora.SFTP
 
         public static IHostBuilder CreateWindowsHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
-            .UseSerilog()
             .UseWindowsService()
+            .UseSerilog()
+            .ConfigureLogging((hostContext, builder) =>
+            {
+                Log.Logger = new LoggerConfiguration()
+                    .ReadFrom.Configuration(_conf)
+                    .Enrich.FromLogContext()
+                    .WriteTo.Console()
+                    .WriteTo.File($"{hostContext.HostingEnvironment.ContentRootPath}{Path.DirectorySeparatorChar}appdebug-.log",
+                        retainedFileCountLimit: int.Parse(_conf["Serilog:RollingFile:RetainedFileCountLimit"]),
+                        fileSizeLimitBytes: int.Parse(_conf["Serilog:RollingFile:FileSizeLimitBytes"]),
+                        rollingInterval: RollingInterval.Day)
+                    .CreateLogger();
+
+                _logger = Log.Logger;
+            })
             .ConfigureServices((hostContext, sc) =>
             {
                 sc.AddSingleton<IConfiguration>(_conf);
@@ -171,38 +204,42 @@ namespace Bhbk.Daemon.Aurora.SFTP
 
                     if (bool.Parse(_conf["Jobs:MOTDDownloadJob:Enable"]))
                     {
-                        var motdPullJobKey = new JobKey(JobType.MOTDDownloadJob.ToString(), GroupType.Daemons.ToString());
+                        var jobKey = new JobKey(JobType.MOTDDownloadJob.ToString(), GroupType.Daemons.ToString());
                         jobs.AddJob<MOTDDownloadJob>(opt => opt
                             .StoreDurably()
-                            .WithIdentity(motdPullJobKey)
+                            .WithIdentity(jobKey)
                         );
 
                         foreach (var cron in _conf.GetSection("Jobs:MOTDDownloadJob:Schedules").GetChildren()
                             .Select(x => x.Value).ToList())
                         {
                             jobs.AddTrigger(opt => opt
-                                .ForJob(motdPullJobKey)
+                                .ForJob(jobKey)
                                 .StartNow()
                                 .WithCronSchedule(cron)
                             );
+
+                            Log.Information($"'{callPath}' {jobKey.Name} job has schedule '{ExpressionDescriptor.GetDescription(cron)}'");
                         }
                     }
                     if (bool.Parse(_conf["Jobs:MOTDUploadJob:Enable"]))
                     {
-                        var motdPushJobKey = new JobKey(JobType.MOTDUploadJob.ToString(), GroupType.Daemons.ToString());
+                        var jobKey = new JobKey(JobType.MOTDUploadJob.ToString(), GroupType.Daemons.ToString());
                         jobs.AddJob<MOTDUploadJob>(opt => opt
                             .StoreDurably()
-                            .WithIdentity(motdPushJobKey)
+                            .WithIdentity(jobKey)
                         );
 
                         foreach (var cron in _conf.GetSection("Jobs:MOTDUploadJob:Schedules").GetChildren()
                             .Select(x => x.Value).ToList())
                         {
                             jobs.AddTrigger(opt => opt
-                                .ForJob(motdPushJobKey)
+                                .ForJob(jobKey)
                                 .StartNow()
                                 .WithCronSchedule(cron)
                             );
+
+                            Log.Information($"'{callPath}' {jobKey.Name} job has schedule '{ExpressionDescriptor.GetDescription(cron)}'");
                         }
                     }
                 });
@@ -214,25 +251,12 @@ namespace Bhbk.Daemon.Aurora.SFTP
 
         public static void Main(string[] args = null)
         {
-            var where = Search.ByAssemblyInvocation("appsettings.json");
-
-            _conf = new ConfigurationBuilder()
-                .AddJsonFile(where.Name, optional: false, reloadOnChange: true)
-                .Build();
-
-            Log.Logger = new LoggerConfiguration()
-                .ReadFrom.Configuration(_conf)
-                .Enrich.FromLogContext()
-                .WriteTo.Console()
-                .WriteTo.RollingFile(where.DirectoryName + Path.DirectorySeparatorChar + "appdebug.log",
-                    retainedFileCountLimit: int.Parse(_conf["Serilog:RollingFile:RetainedFileCountLimit"]),
-                    fileSizeLimitBytes: int.Parse(_conf["Serilog:RollingFile:FileSizeLimitBytes"]))
-                .CreateLogger();
-
-            _logger = Log.Logger;
-
             _mapper = new MapperConfiguration(x => x.AddProfile<AutoMapperProfile_DIRECT>())
                 .CreateMapper();
+
+            _conf = new ConfigurationBuilder()
+                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                .Build();
 
             _instance = new ContextService(InstanceContext.DeployedOrLocal);
 

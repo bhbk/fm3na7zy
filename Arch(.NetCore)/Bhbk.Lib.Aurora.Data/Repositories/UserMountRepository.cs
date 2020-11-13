@@ -24,8 +24,8 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
                 new SqlParameter("@AuthType", SqlDbType.NVarChar) { Value = entity.AuthType },
                 new SqlParameter("@ServerName", SqlDbType.NVarChar) { Value = entity.ServerAddress },
                 new SqlParameter("@ServerPath", SqlDbType.NVarChar) { Value = entity.ServerShare },
-                new SqlParameter("@Enabled", SqlDbType.Bit) { Value = entity.Enabled },
-                new SqlParameter("@Deletable", SqlDbType.Bit) { Value = entity.Deletable }
+                new SqlParameter("@Enabled", SqlDbType.Bit) { Value = entity.IsEnabled },
+                new SqlParameter("@Deletable", SqlDbType.Bit) { Value = entity.IsDeletable }
             };
 
             return _context.Set<uvw_UserMount>().FromSqlRaw("[svc].[usp_UserMount_Insert]"
@@ -102,8 +102,8 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
                 new SqlParameter("@AuthType", SqlDbType.NVarChar) { Value = entity.AuthType },
                 new SqlParameter("@ServerName", SqlDbType.NVarChar) { Value = entity.ServerAddress },
                 new SqlParameter("@ServerPath", SqlDbType.NVarChar) { Value = entity.ServerShare },
-                new SqlParameter("@Enabled", SqlDbType.Bit) { Value = entity.Enabled },
-                new SqlParameter("@Deletable", SqlDbType.Bit) { Value = entity.Deletable }
+                new SqlParameter("@Enabled", SqlDbType.Bit) { Value = entity.IsEnabled },
+                new SqlParameter("@Deletable", SqlDbType.Bit) { Value = entity.IsDeletable }
             };
 
             return _context.Set<uvw_UserMount>().FromSqlRaw("[svc].[usp_UserMount_Update]"

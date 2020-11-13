@@ -12,7 +12,7 @@ namespace Bhbk.Cli.Aurora.Helpers
         {
             foreach (var cred in creds)
             {
-                Console.Out.WriteLine($"  Credential GUID '{cred.Id}'{(!cred.Deletable ? " is immutable" : null)}");
+                Console.Out.WriteLine($"  Credential GUID '{cred.Id}'{(!cred.IsDeletable ? " is immutable" : null)}");
                 Console.Out.WriteLine($"    Login domain '{cred.Domain}' Login user '{cred.UserName}'");
             }
         }
@@ -21,7 +21,7 @@ namespace Bhbk.Cli.Aurora.Helpers
         {
             foreach (var cred in creds)
             {
-                Console.Out.WriteLine($"  Credential GUID '{cred.Id}'{(!cred.Deletable ? " is immutable" : null)}");
+                Console.Out.WriteLine($"  Credential GUID '{cred.Id}'{(!cred.IsDeletable ? " is immutable" : null)}");
                 Console.Out.WriteLine($"    Pass ciphertext '{cred.Password}'");
             }
         }
@@ -30,13 +30,13 @@ namespace Bhbk.Cli.Aurora.Helpers
         {
             foreach (var key in keys)
             {
-                Console.Out.WriteLine($"  Public '{key.KeyAlgo}' key with GUID '{key.Id}'{(!key.Deletable ? " is immutable" : null)}. " +
-                    $"Created {key.Created}.");
+                Console.Out.WriteLine($"  Public '{key.KeyAlgo}' key with GUID '{key.Id}'{(!key.IsDeletable ? " is immutable" : null)}. " +
+                    $"Created {key.CreatedUtc}.");
                 Console.Out.WriteLine($"    Sig '{key.SigValue}'");
 
                 if (key.PrivateKeyId != null)
-                    Console.Out.WriteLine($"    Private '{key.KeyAlgo}' key GUID '{key.PrivateKeyId}'{(!key.PrivateKey.Deletable ? " is immutable" : null)}. " +
-                        $"Created {key.Created}.");
+                    Console.Out.WriteLine($"    Private '{key.KeyAlgo}' key GUID '{key.PrivateKeyId}'{(!key.PrivateKey.IsDeletable ? " is immutable" : null)}. " +
+                        $"Created {key.CreatedUtc}.");
                 else
                     Console.Out.WriteLine($"    Private key not available");
             };
@@ -46,8 +46,8 @@ namespace Bhbk.Cli.Aurora.Helpers
         {
             foreach (var key in keys)
             {
-                Console.Out.WriteLine($"  Private '{key.KeyAlgo}' key with GUID '{key.Id}'{(!key.Deletable ? " is immutable" : null)}. " +
-                    $"Created {key.Created}.");
+                Console.Out.WriteLine($"  Private '{key.KeyAlgo}' key with GUID '{key.Id}'{(!key.IsDeletable ? " is immutable" : null)}. " +
+                    $"Created {key.CreatedUtc}.");
                 Console.Out.WriteLine($"    Key pass ciphertext '{key.KeyPass}'");
             };
         }
@@ -65,7 +65,7 @@ namespace Bhbk.Cli.Aurora.Helpers
         {
             foreach (var config in configs)
             {
-                Console.Out.WriteLine($"  Config GUID '{config.Id}'{(!config.Deletable ? " is immutable" : null)}");
+                Console.Out.WriteLine($"  Config GUID '{config.Id}'{(!config.IsDeletable ? " is immutable" : null)}");
                 Console.Out.WriteLine($"    Config key '{config.ConfigKey}' Config value '{config.ConfigValue}'");
             }
         }
@@ -74,7 +74,7 @@ namespace Bhbk.Cli.Aurora.Helpers
         {
             foreach (var mount in mounts)
             {
-                Console.Out.WriteLine($"  Mount for user GUID '{mount.IdentityId}'{(!mount.Deletable ? " is immutable" : null)}");
+                Console.Out.WriteLine($"  Mount for user GUID '{mount.IdentityId}'{(!mount.IsDeletable ? " is immutable" : null)}");
                 Console.Out.WriteLine($"    Mount '{mount.ServerAddress}{mount.ServerShare}' using '{mount.AuthType}' protocol");
             }
         }

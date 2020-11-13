@@ -22,8 +22,8 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
                 new SqlParameter("@Domain", SqlDbType.NVarChar) { Value = (object)entity.Domain ?? DBNull.Value },
                 new SqlParameter("@UserName", SqlDbType.NVarChar) { Value = entity.UserName },
                 new SqlParameter("@Password", SqlDbType.NVarChar) { Value = entity.Password },
-                new SqlParameter("@Enabled", SqlDbType.Bit) { Value = entity.Enabled },
-                new SqlParameter("@Deletable", SqlDbType.Bit) { Value = entity.Deletable },
+                new SqlParameter("@Enabled", SqlDbType.Bit) { Value = entity.IsEnabled },
+                new SqlParameter("@Deletable", SqlDbType.Bit) { Value = entity.IsDeletable },
             };
 
             return _context.Set<uvw_Credential>().FromSqlRaw("[svc].[usp_Credential_Insert]"
@@ -99,8 +99,8 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
                 new SqlParameter("@Domain", SqlDbType.NVarChar) { Value = (object)entity.Domain ?? DBNull.Value },
                 new SqlParameter("@UserName", SqlDbType.NVarChar) { Value = entity.UserName },
                 new SqlParameter("@Password", SqlDbType.NVarChar) { Value = entity.Password },
-                new SqlParameter("@Enabled", SqlDbType.Bit) { Value = entity.Enabled },
-                new SqlParameter("@Deletable", SqlDbType.Bit) { Value = entity.Deletable }
+                new SqlParameter("@Enabled", SqlDbType.Bit) { Value = entity.IsEnabled },
+                new SqlParameter("@Deletable", SqlDbType.Bit) { Value = entity.IsDeletable }
             };
 
             return _context.Set<uvw_Credential>().FromSqlRaw("[svc].[usp_Credential_Update]"

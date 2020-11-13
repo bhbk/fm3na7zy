@@ -105,9 +105,9 @@ namespace Bhbk.Cli.Aurora.Commands
                             AuthType = _authType.ToString(),
                             ServerAddress = _serverAddress,
                             ServerShare = _serverShare,
-                            Enabled = true,
-                            Deletable = false,
-                            Created = DateTime.Now,
+                            IsEnabled = true,
+                            IsDeletable = false,
+                            CreatedUtc = DateTime.UtcNow,
                         });
                 }
                 else
@@ -120,9 +120,9 @@ namespace Bhbk.Cli.Aurora.Commands
                             AuthType = _authType.ToString(),
                             ServerAddress = _serverAddress,
                             ServerShare = _serverShare,
-                            Enabled = true,
-                            Deletable = false,
-                            Created = DateTime.Now,
+                            IsEnabled = true,
+                            IsDeletable = false,
+                            CreatedUtc = DateTime.UtcNow,
                         });
                 }
 

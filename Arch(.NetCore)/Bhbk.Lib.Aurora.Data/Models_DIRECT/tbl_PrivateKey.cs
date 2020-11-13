@@ -1,13 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 
+#nullable disable
+
 namespace Bhbk.Lib.Aurora.Data.Models_DIRECT
 {
     public partial class tbl_PrivateKey
     {
         public tbl_PrivateKey()
         {
-            tbl_PublicKey = new HashSet<tbl_PublicKey>();
+            tbl_PublicKeys = new HashSet<tbl_PublicKey>();
         }
 
         public Guid Id { get; set; }
@@ -17,12 +19,12 @@ namespace Bhbk.Lib.Aurora.Data.Models_DIRECT
         public string KeyAlgo { get; set; }
         public string KeyPass { get; set; }
         public string KeyFormat { get; set; }
-        public bool Enabled { get; set; }
-        public bool Deletable { get; set; }
-        public DateTime Created { get; set; }
-        public DateTime? LastUpdated { get; set; }
+        public bool IsEnabled { get; set; }
+        public bool IsDeletable { get; set; }
+        public DateTimeOffset CreatedUtc { get; set; }
+        public DateTimeOffset? LastUpdatedUtc { get; set; }
 
         public virtual tbl_User Identity { get; set; }
-        public virtual ICollection<tbl_PublicKey> tbl_PublicKey { get; set; }
+        public virtual ICollection<tbl_PublicKey> tbl_PublicKeys { get; set; }
     }
 }

@@ -62,9 +62,9 @@ namespace Bhbk.Lib.Aurora.Domain.Tests.RespositoryTests_DIRECT
                         RequirePassword = true,
                         RequirePublicKey = false,
                         FileSystemType = FileSystemTypes.Composite.ToString(),
-                        Created = DateTime.Now,
-                        Enabled = true,
-                        Deletable = true,
+                        CreatedUtc = DateTime.UtcNow,
+                        IsEnabled = true,
+                        IsDeletable = true,
                     });
 
                 _uow.Commit();
@@ -90,9 +90,9 @@ namespace Bhbk.Lib.Aurora.Domain.Tests.RespositoryTests_DIRECT
                         RequirePassword = true,
                         RequirePublicKey = false,
                         FileSystemType = FileSystemTypes.Memory.ToString(),
-                        Created = DateTime.Now,
-                        Enabled = true,
-                        Deletable = true,
+                        CreatedUtc = DateTime.UtcNow,
+                        IsEnabled = true,
+                        IsDeletable = true,
                     });
 
                 _uow.Commit();
@@ -118,9 +118,9 @@ namespace Bhbk.Lib.Aurora.Domain.Tests.RespositoryTests_DIRECT
                         RequirePassword = true,
                         RequirePublicKey = false,
                         FileSystemType = FileSystemTypes.SMB.ToString(),
-                        Created = DateTime.Now,
-                        Enabled = true,
-                        Deletable = true,
+                        CreatedUtc = DateTime.UtcNow,
+                        IsEnabled = true,
+                        IsDeletable = true,
                     });
 
                 _uow.Commit();

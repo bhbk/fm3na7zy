@@ -66,7 +66,7 @@ namespace Bhbk.Cli.Aurora.Commands
                             x => x.PrivateKey,
                         });
 
-                ConsoleHelper.StdOutKeyPairs(keys.OrderBy(x => x.Created));
+                ConsoleHelper.StdOutKeyPairs(keys.OrderBy(x => x.CreatedUtc));
 
                 Console.Out.Write("  *** Enter GUID of public key to export *** : ");
                 var input = Guid.Parse(StandardInput.GetInput());

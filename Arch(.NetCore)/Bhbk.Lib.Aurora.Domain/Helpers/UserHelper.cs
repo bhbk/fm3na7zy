@@ -79,7 +79,7 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
                     throw new UnauthorizedAccessException();
 
                 cred.Password = AES.EncryptString(plainText, secretNew);
-                cred.LastUpdated = DateTime.Now;
+                cred.LastUpdatedUtc = DateTime.UtcNow;
 
                 uow.Credentials.Update(cred);
 

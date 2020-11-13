@@ -2,6 +2,8 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 
+#nullable disable
+
 namespace Bhbk.Lib.Aurora.Data.Models
 {
     public partial class AuroraEntities : DbContext
@@ -15,27 +17,34 @@ namespace Bhbk.Lib.Aurora.Data.Models
         {
         }
 
-        public virtual DbSet<uvw_Credential> uvw_Credential { get; set; }
-        public virtual DbSet<uvw_Network> uvw_Network { get; set; }
-        public virtual DbSet<uvw_PrivateKey> uvw_PrivateKey { get; set; }
-        public virtual DbSet<uvw_PublicKey> uvw_PublicKey { get; set; }
-        public virtual DbSet<uvw_Setting> uvw_Setting { get; set; }
-        public virtual DbSet<uvw_User> uvw_User { get; set; }
-        public virtual DbSet<uvw_UserFile> uvw_UserFile { get; set; }
-        public virtual DbSet<uvw_UserFolder> uvw_UserFolder { get; set; }
-        public virtual DbSet<uvw_UserMount> uvw_UserMount { get; set; }
-
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            if (!optionsBuilder.IsConfigured)
-            {
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. See http://go.microsoft.com/fwlink/?LinkId=723263 for guidance on storing connection strings.
-                optionsBuilder.UseSqlServer("Data Source=bits.test.ochap.local; Initial Catalog=BhbkAurora; User ID=Sql.BhbkAurora; Password=Pa$$word01!");
-            }
-        }
+        public virtual DbSet<uvw_Activity> uvw_Activities { get; set; }
+        public virtual DbSet<uvw_Credential> uvw_Credentials { get; set; }
+        public virtual DbSet<uvw_Network> uvw_Networks { get; set; }
+        public virtual DbSet<uvw_PrivateKey> uvw_PrivateKeys { get; set; }
+        public virtual DbSet<uvw_PublicKey> uvw_PublicKeys { get; set; }
+        public virtual DbSet<uvw_Setting> uvw_Settings { get; set; }
+        public virtual DbSet<uvw_User> uvw_Users { get; set; }
+        public virtual DbSet<uvw_UserFile> uvw_UserFiles { get; set; }
+        public virtual DbSet<uvw_UserFolder> uvw_UserFolders { get; set; }
+        public virtual DbSet<uvw_UserMount> uvw_UserMounts { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.HasAnnotation("Relational:Collation", "SQL_Latin1_General_CP1_CI_AS");
+
+            modelBuilder.Entity<uvw_Activity>(entity =>
+            {
+                entity.HasNoKey();
+
+                entity.ToView("uvw_Activity", "svc");
+
+                entity.Property(e => e.ActivityType)
+                    .IsRequired()
+                    .HasMaxLength(64);
+
+                entity.Property(e => e.TableName).HasMaxLength(256);
+            });
+
             modelBuilder.Entity<uvw_Credential>(entity =>
             {
                 entity.HasNoKey();

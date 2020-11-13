@@ -37,10 +37,8 @@ namespace Bhbk.Daemon.Aurora.SFTP.Helpers
                         IdentityId = user.IdentityId,
                         ParentId = null,
                         VirtualName = string.Empty,
-                        Created = now,
-                        LastAccessed = null,
-                        LastUpdated = null,
-                        ReadOnly = true,
+                        CreatedUtc = now,
+                        IsReadOnly = true,
                     });
                 uow.Commit();
 
@@ -155,10 +153,8 @@ namespace Bhbk.Daemon.Aurora.SFTP.Helpers
 
                 fileEntity.RealFileSize = fs.Length;
                 fileEntity.HashSHA256 = Strings.GetHexString(hash);
-                fileEntity.ReadOnly = false;
-                fileEntity.Created = DateTime.UtcNow;
-                fileEntity.LastAccessed = null;
-                fileEntity.LastUpdated = null;
+                fileEntity.IsReadOnly = false;
+                fileEntity.CreatedUtc = DateTime.UtcNow;
             }
 
             return fileEntity;

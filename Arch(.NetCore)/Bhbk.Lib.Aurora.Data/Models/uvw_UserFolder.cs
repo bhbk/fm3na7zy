@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 
+#nullable disable
+
 namespace Bhbk.Lib.Aurora.Data.Models
 {
     public partial class uvw_UserFolder
@@ -9,9 +11,9 @@ namespace Bhbk.Lib.Aurora.Data.Models
         public Guid IdentityId { get; set; }
         public Guid? ParentId { get; set; }
         public string VirtualName { get; set; }
-        public bool ReadOnly { get; set; }
-        public DateTime Created { get; set; }
-        public DateTime? LastAccessed { get; set; }
-        public DateTime? LastUpdated { get; set; }
+        public bool IsReadOnly { get; set; }
+        public DateTimeOffset CreatedUtc { get; set; }
+        public DateTimeOffset? LastAccessedUtc { get; set; }
+        public DateTimeOffset? LastUpdatedUtc { get; set; }
     }
 }

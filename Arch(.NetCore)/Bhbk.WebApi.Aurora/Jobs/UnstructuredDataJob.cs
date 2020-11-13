@@ -39,7 +39,7 @@ namespace Bhbk.WebApi.Aurora.Tasks
                     var staggerVerify = int.Parse(conf["Jobs:UnstructuredData:StaggerVerify"]);
 
                     var files = uow.UserFiles.Get(QueryExpressionFactory.GetQueryExpression<tbl_UserFile>()
-                        .Where(x => x.LastVerified < DateTime.UtcNow.AddSeconds(-staggerVerify)).ToLambda());
+                        .Where(x => x.LastVerifiedUtc < DateTime.UtcNow.AddSeconds(-staggerVerify)).ToLambda());
 
                     var problems = new List<tbl_UserFile>();
 
@@ -67,7 +67,7 @@ namespace Bhbk.WebApi.Aurora.Tasks
                                     continue;
                                 }
                                 else
-                                    file.LastVerified = DateTime.UtcNow;
+                                    file.LastVerifiedUtc = DateTime.UtcNow;
                             }
                         }
                         catch (CryptographicException ex)

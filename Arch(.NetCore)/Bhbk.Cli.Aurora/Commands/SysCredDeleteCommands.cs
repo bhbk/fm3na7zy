@@ -41,7 +41,7 @@ namespace Bhbk.Cli.Aurora.Commands
             try
             {
                 var credentials = _uow.Credentials.Get(QueryExpressionFactory.GetQueryExpression<tbl_Credential>()
-                    .Where(x => x.Deletable == true).ToLambda());
+                    .Where(x => x.IsDeletable == true).ToLambda());
 
                 ConsoleHelper.StdOutCredentials(credentials);
 
@@ -66,7 +66,7 @@ namespace Bhbk.Cli.Aurora.Commands
                 }
 
                 _uow.Credentials.Delete(QueryExpressionFactory.GetQueryExpression<tbl_Credential>()
-                    .Where(x => x.Id == _credID && x.Deletable == true).ToLambda());
+                    .Where(x => x.Id == _credID && x.IsDeletable == true).ToLambda());
 
                 _uow.Commit();
 

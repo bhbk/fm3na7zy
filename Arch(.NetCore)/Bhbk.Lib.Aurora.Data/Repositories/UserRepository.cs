@@ -25,8 +25,8 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
                 new SqlParameter("@FileSystemType", SqlDbType.NVarChar) { Value = entity.FileSystemType },
                 new SqlParameter("@FileSystemReadOnly", SqlDbType.Bit) { Value = entity.FileSystemReadOnly },
                 new SqlParameter("@DebugLevel", SqlDbType.NVarChar) { Value = (object)entity.DebugLevel ?? DBNull.Value },
-                new SqlParameter("@Enabled", SqlDbType.Bit) { Value = entity.Enabled },
-                new SqlParameter("@Deletable", SqlDbType.Bit) { Value = entity.Deletable },
+                new SqlParameter("@Enabled", SqlDbType.Bit) { Value = entity.IsEnabled },
+                new SqlParameter("@Deletable", SqlDbType.Bit) { Value = entity.IsDeletable },
             };
 
             return _context.Set<uvw_User>().FromSqlRaw("[svc].[usp_User_Insert]"
@@ -105,8 +105,8 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
                 new SqlParameter("@FileSystemType", SqlDbType.NVarChar) { Value = entity.FileSystemType },
                 new SqlParameter("@FileSystemReadOnly", SqlDbType.Bit) { Value = entity.FileSystemReadOnly },
                 new SqlParameter("@DebugLevel", SqlDbType.NVarChar) { Value = (object)entity.DebugLevel ?? DBNull.Value },
-                new SqlParameter("@Enabled", SqlDbType.Bit) { Value = entity.Enabled },
-                new SqlParameter("@Deletable", SqlDbType.Bit) { Value = entity.Deletable }
+                new SqlParameter("@Enabled", SqlDbType.Bit) { Value = entity.IsEnabled },
+                new SqlParameter("@Deletable", SqlDbType.Bit) { Value = entity.IsDeletable }
             };
 
             return _context.Set<uvw_User>().FromSqlRaw("[svc].[usp_User_Update]"

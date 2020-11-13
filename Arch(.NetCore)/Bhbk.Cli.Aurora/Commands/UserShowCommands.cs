@@ -42,8 +42,8 @@ namespace Bhbk.Cli.Aurora.Commands
                         new List<Expression<Func<tbl_User, object>>>()
                         {
                             x => x.tbl_UserMount,
-                            x => x.tbl_PrivateKey,
-                            x => x.tbl_PublicKey,
+                            x => x.tbl_PrivateKeys,
+                            x => x.tbl_PublicKeys,
                         }).SingleOrDefault();
 
                 if (_user == null)
@@ -55,7 +55,7 @@ namespace Bhbk.Cli.Aurora.Commands
         {
             try
             {
-                ConsoleHelper.StdOutKeyPairs(_user.tbl_PublicKey.OrderBy(x => x.Created));
+                ConsoleHelper.StdOutKeyPairs(_user.tbl_PublicKeys.OrderBy(x => x.CreatedUtc));
                 Console.Out.WriteLine();
                 ConsoleHelper.StdOutUserMounts(new List<tbl_UserMount> { _user.tbl_UserMount });
 

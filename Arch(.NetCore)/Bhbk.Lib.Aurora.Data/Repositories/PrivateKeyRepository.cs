@@ -24,8 +24,8 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
                 new SqlParameter("@KeyValueBase64", SqlDbType.NVarChar) { Value = entity.KeyValue },
                 new SqlParameter("@KeyValueAlgo", SqlDbType.NVarChar) { Value = entity.KeyAlgo },
                 new SqlParameter("@KeyValuePass", SqlDbType.NVarChar) { Value = entity.KeyPass },
-                new SqlParameter("@Enabled", SqlDbType.Bit) { Value = entity.Enabled },
-                new SqlParameter("@Deletable", SqlDbType.Bit) { Value = entity.Deletable }
+                new SqlParameter("@Enabled", SqlDbType.Bit) { Value = entity.IsEnabled },
+                new SqlParameter("@Deletable", SqlDbType.Bit) { Value = entity.IsDeletable }
             };
 
             return _context.Set<uvw_PrivateKey>().FromSqlRaw("[svc].[usp_PrivateKey_Insert]"
@@ -103,8 +103,8 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
                 new SqlParameter("@KeyValueBase64", SqlDbType.NVarChar) { Value = entity.KeyValue },
                 new SqlParameter("@KeyValueAlgo", SqlDbType.NVarChar) { Value = entity.KeyAlgo },
                 new SqlParameter("@KeyValuePass", SqlDbType.NVarChar) { Value = entity.KeyPass },
-                new SqlParameter("@Enabled", SqlDbType.Bit) { Value = entity.Enabled },
-                new SqlParameter("@Deletable", SqlDbType.Bit) { Value = entity.Deletable }
+                new SqlParameter("@Enabled", SqlDbType.Bit) { Value = entity.IsEnabled },
+                new SqlParameter("@Deletable", SqlDbType.Bit) { Value = entity.IsDeletable }
             };
 
             return _context.Set<uvw_PrivateKey>().FromSqlRaw("[svc].[usp_PrivateKey_Insert]"

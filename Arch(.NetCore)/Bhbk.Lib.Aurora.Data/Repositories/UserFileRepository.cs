@@ -22,15 +22,15 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
                 new SqlParameter("@IdentityId", SqlDbType.UniqueIdentifier) { Value = entity.IdentityId },
                 new SqlParameter("@FolderId", SqlDbType.UniqueIdentifier) { Value = entity.FolderId.HasValue ? (object)entity.FolderId.Value : DBNull.Value },
                 new SqlParameter("@VirtualName", SqlDbType.NVarChar) { Value = entity.VirtualName },
-                new SqlParameter("@ReadOnly", SqlDbType.Bit) { Value = entity.ReadOnly },
                 new SqlParameter("@RealPath", SqlDbType.NVarChar) { Value = entity.RealPath },
                 new SqlParameter("@RealFileName", SqlDbType.NVarChar) { Value = entity.RealFileName },
                 new SqlParameter("@RealFileSize", SqlDbType.BigInt) { Value = entity.RealFileSize },
-                new SqlParameter("@HashSHA256", SqlDbType.NVarChar) { Value = (object)entity.HashSHA256 ?? DBNull.Value }
+                new SqlParameter("@HashSHA256", SqlDbType.NVarChar) { Value = (object)entity.HashSHA256 ?? DBNull.Value },
+                new SqlParameter("@IsReadOnly", SqlDbType.Bit) { Value = entity.IsReadOnly },
             };
 
             return _context.Set<uvw_UserFile>().FromSqlRaw("[svc].[usp_UserFile_Insert]"
-                + "@IdentityId, @FolderId, @VirtualName, @ReadOnly, @RealPath, @RealFileName, @RealFileSize, @HashSHA256", pvalues.ToArray())
+                + "@IdentityId, @FolderId, @VirtualName, @RealPath, @RealFileName, @RealFileSize, @HashSHA256, @IsReadOnly", pvalues.ToArray())
                     .AsEnumerable().Single();
 
             /*
@@ -102,19 +102,19 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
                 new SqlParameter("@IdentityId", SqlDbType.UniqueIdentifier) { Value = entity.IdentityId },
                 new SqlParameter("@FolderId", SqlDbType.UniqueIdentifier) { Value = entity.FolderId.HasValue ? (object)entity.FolderId.Value : DBNull.Value },
                 new SqlParameter("@VirtualName", SqlDbType.NVarChar) { Value = entity.VirtualName },
-                new SqlParameter("@ReadOnly", SqlDbType.Bit) { Value = entity.ReadOnly },
                 new SqlParameter("@RealPath", SqlDbType.NVarChar) { Value = entity.RealPath },
                 new SqlParameter("@RealFileName", SqlDbType.NVarChar) { Value = entity.RealFileName },
                 new SqlParameter("@RealFileSize", SqlDbType.BigInt) { Value = entity.RealFileSize },
                 new SqlParameter("@HashSHA256", SqlDbType.NVarChar) { Value = (object)entity.HashSHA256 ?? DBNull.Value },
-                new SqlParameter("@LastAccessed", SqlDbType.DateTime2) { Value = entity.LastAccessed },
-                new SqlParameter("@LastUpdated", SqlDbType.DateTime2) { Value = entity.LastUpdated },
-                new SqlParameter("@LastVerified", SqlDbType.DateTime2) { Value = entity.LastVerified }
+                new SqlParameter("@IsReadOnly", SqlDbType.Bit) { Value = entity.IsReadOnly },
+                new SqlParameter("@LastAccessedUtc", SqlDbType.DateTimeOffset) { Value = entity.LastAccessedUtc },
+                new SqlParameter("@LastUpdatedUtc", SqlDbType.DateTimeOffset) { Value = entity.LastUpdatedUtc },
+                new SqlParameter("@LastVerifiedUtc", SqlDbType.DateTimeOffset) { Value = entity.LastVerifiedUtc },
             };
 
             return _context.Set<uvw_UserFile>().FromSqlRaw("[svc].[usp_UserFile_Update]"
-                + "@Id, @IdentityId, @FolderId, @VirtualName, @ReadOnly, @RealPath, @RealFileName, @RealFileSize, @FileHashSHA256, "
-                + "@LastAccessed, @LastUpdated, @LastVerified", pvalues.ToArray())
+                + "@Id, @IdentityId, @FolderId, @VirtualName, @RealPath, @RealFileName, @RealFileSize, @FileHashSHA256, @IsReadOnly, "
+                + "@LastAccessedUtc, @LastUpdatedUtc, @LastVerifiedUtc", pvalues.ToArray())
                     .AsEnumerable().Single();
         }
 

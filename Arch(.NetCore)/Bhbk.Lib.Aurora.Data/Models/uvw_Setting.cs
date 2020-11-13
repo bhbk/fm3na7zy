@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 
+#nullable disable
+
 namespace Bhbk.Lib.Aurora.Data.Models
 {
     public partial class uvw_Setting
@@ -9,8 +11,8 @@ namespace Bhbk.Lib.Aurora.Data.Models
         public Guid? IdentityId { get; set; }
         public string ConfigKey { get; set; }
         public string ConfigValue { get; set; }
-        public bool Deletable { get; set; }
-        public DateTime Created { get; set; }
-        public DateTime? LastUpdated { get; set; }
+        public bool IsDeletable { get; set; }
+        public DateTimeOffset CreatedUtc { get; set; }
+        public DateTimeOffset? LastUpdatedUtc { get; set; }
     }
 }

@@ -71,7 +71,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                             throw new InvalidCastException();
 
                         var license = uow.Settings.Get(QueryExpressionFactory.GetQueryExpression<tbl_Setting>()
-                            .Where(x => x.ConfigKey == "RebexLicense").ToLambda()).OrderBy(x => x.Created)
+                            .Where(x => x.ConfigKey == "RebexLicense").ToLambda()).OrderBy(x => x.CreatedUtc)
                             .Last();
 
                         Rebex.Licensing.Key = license.ConfigValue;
@@ -87,7 +87,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
 
                         var dsaStr = SshHostKeyAlgorithm.DSS.ToString();
                         var dsaPrivKey = uow.PrivateKeys.Get(QueryExpressionFactory.GetQueryExpression<tbl_PrivateKey>()
-                            .Where(x => x.KeyAlgo == dsaStr && x.IdentityId == null).ToLambda()).OrderBy(x => x.Created)
+                            .Where(x => x.KeyAlgo == dsaStr && x.IdentityId == null).ToLambda()).OrderBy(x => x.CreatedUtc)
                             .Single();
 
                         var dsaBytes = Encoding.ASCII.GetBytes(dsaPrivKey.KeyValue);
@@ -95,7 +95,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
 
                         var rsaStr = SshHostKeyAlgorithm.RSA.ToString();
                         var rsaPrivKey = uow.PrivateKeys.Get(QueryExpressionFactory.GetQueryExpression<tbl_PrivateKey>()
-                            .Where(x => x.KeyAlgo == rsaStr && x.IdentityId == null).ToLambda()).OrderBy(x => x.Created)
+                            .Where(x => x.KeyAlgo == rsaStr && x.IdentityId == null).ToLambda()).OrderBy(x => x.CreatedUtc)
                             .Single();
 
                         var rsaBytes = Encoding.ASCII.GetBytes(rsaPrivKey.KeyValue);
@@ -103,7 +103,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
 
                         var ecdsa256Str = SshHostKeyAlgorithm.ECDsaNistP256.ToString();
                         var ecdsa256PrivKey = uow.PrivateKeys.Get(QueryExpressionFactory.GetQueryExpression<tbl_PrivateKey>()
-                            .Where(x => x.KeyAlgo == ecdsa256Str && x.IdentityId == null).ToLambda()).OrderBy(x => x.Created)
+                            .Where(x => x.KeyAlgo == ecdsa256Str && x.IdentityId == null).ToLambda()).OrderBy(x => x.CreatedUtc)
                             .Single();
 
                         var ecdsa256Bytes = Encoding.ASCII.GetBytes(ecdsa256PrivKey.KeyValue);
@@ -111,7 +111,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
 
                         var ecdsa384Str = SshHostKeyAlgorithm.ECDsaNistP384.ToString();
                         var ecdsa384PrivKey = uow.PrivateKeys.Get(QueryExpressionFactory.GetQueryExpression<tbl_PrivateKey>()
-                            .Where(x => x.KeyAlgo == ecdsa384Str && x.IdentityId == null).ToLambda()).OrderBy(x => x.Created)
+                            .Where(x => x.KeyAlgo == ecdsa384Str && x.IdentityId == null).ToLambda()).OrderBy(x => x.CreatedUtc)
                             .Single();
 
                         var ecdsa384Bytes = Encoding.ASCII.GetBytes(ecdsa384PrivKey.KeyValue);
@@ -119,7 +119,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
 
                         var ecdsa521Str = SshHostKeyAlgorithm.ECDsaNistP521.ToString();
                         var ecdsa521PrivKey = uow.PrivateKeys.Get(QueryExpressionFactory.GetQueryExpression<tbl_PrivateKey>()
-                            .Where(x => x.KeyAlgo == ecdsa521Str && x.IdentityId == null).ToLambda()).OrderBy(x => x.Created)
+                            .Where(x => x.KeyAlgo == ecdsa521Str && x.IdentityId == null).ToLambda()).OrderBy(x => x.CreatedUtc)
                             .Single();
 
                         var ecdsa521Bytes = Encoding.ASCII.GetBytes(ecdsa521PrivKey.KeyValue);
@@ -127,7 +127,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
 
                         var ed25519Str = SshHostKeyAlgorithm.ED25519.ToString();
                         var ed25519PrivKey = uow.PrivateKeys.Get(QueryExpressionFactory.GetQueryExpression<tbl_PrivateKey>()
-                            .Where(x => x.KeyAlgo == ed25519Str && x.IdentityId == null).ToLambda()).OrderBy(x => x.Created)
+                            .Where(x => x.KeyAlgo == ed25519Str && x.IdentityId == null).ToLambda()).OrderBy(x => x.CreatedUtc)
                             .Single();
 
                         var ed25519Bytes = Encoding.ASCII.GetBytes(ed25519PrivKey.KeyValue);
@@ -311,15 +311,15 @@ namespace Bhbk.Daemon.Aurora.SFTP
                 {
                     var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
                     var user = uow.Users.Get(QueryExpressionFactory.GetQueryExpression<tbl_User>()
-                        .Where(x => x.IdentityAlias == e.UserName && x.Enabled).ToLambda(),
+                        .Where(x => x.IdentityAlias == e.UserName && x.IsEnabled).ToLambda(),
                             new List<Expression<Func<tbl_User, object>>>()
                             {
-                                x => x.tbl_Network,
-                                x => x.tbl_PublicKey,
+                                x => x.tbl_Networks,
+                                x => x.tbl_PublicKeys,
                             }).SingleOrDefault();
 
                     if (user == null
-                        || user.Enabled == false)
+                        || user.IsEnabled == false)
                     {
                         Log.Warning($"'{callPath}' '{e.UserName}' not found or not enabled");
 
@@ -328,7 +328,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                     }
 
                     var action = NetworkAction.Deny.ToString();
-                    if (NetworkHelper.ValidateAddress(user.tbl_Network.Where(x => x.Action == action && x.Enabled), e.ClientAddress))
+                    if (NetworkHelper.ValidateAddress(user.tbl_Networks.Where(x => x.Action == action && x.IsEnabled), e.ClientAddress))
                     {
                         Log.Warning($"'{callPath}' '{e.UserName}' is denied from '{e.ClientEndPoint}' running '{e.ClientSoftwareIdentifier}'");
 
@@ -337,7 +337,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                     }
 
                     action = NetworkAction.Allow.ToString();
-                    if (!NetworkHelper.ValidateAddress(user.tbl_Network.Where(x => x.Action == action && x.Enabled), e.ClientAddress))
+                    if (!NetworkHelper.ValidateAddress(user.tbl_Networks.Where(x => x.Action == action && x.IsEnabled), e.ClientAddress))
                     {
                         Log.Warning($"'{callPath}' '{e.UserName}' is not allowed from '{e.ClientEndPoint}' running '{e.ClientSoftwareIdentifier}'");
 
@@ -404,7 +404,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                         .Where(x => x.IdentityAlias == e.UserName).ToLambda(),
                             new List<Expression<Func<tbl_User, object>>>()
                             {
-                                x => x.tbl_PublicKey,
+                                x => x.tbl_PublicKeys,
                                 x => x.tbl_UserMount,
                             }).SingleOrDefault();
 
@@ -415,7 +415,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                     {
                         Log.Information($"'{callPath}' '{e.UserName}' in-progress with public key");
 
-                        if (UserHelper.ValidatePubKey(user.tbl_PublicKey.Where(x => x.Enabled).ToList(), e.Key)
+                        if (UserHelper.ValidatePubKey(user.tbl_PublicKeys.Where(x => x.IsEnabled).ToList(), e.Key)
                             && admin.User_VerifyV1(user.IdentityId).Result)
                         {
                             Log.Information($"'{callPath}' '{e.UserName}' success with public key");

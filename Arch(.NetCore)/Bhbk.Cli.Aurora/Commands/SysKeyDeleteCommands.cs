@@ -48,7 +48,7 @@ namespace Bhbk.Cli.Aurora.Commands
             try
             {
                 var keys = _uow.PublicKeys.Get(QueryExpressionFactory.GetQueryExpression<tbl_PublicKey>()
-                    .Where(x => x.IdentityId == null && x.Deletable == false).ToLambda(),
+                    .Where(x => x.IdentityId == null && x.IsDeletable == false).ToLambda(),
                         new List<Expression<Func<tbl_PublicKey, object>>>()
                         {
                             x => x.PrivateKey,
@@ -56,7 +56,7 @@ namespace Bhbk.Cli.Aurora.Commands
 
                 if (_delete)
                 {
-                    ConsoleHelper.StdOutKeyPairs(keys.OrderBy(x => x.Created));
+                    ConsoleHelper.StdOutKeyPairs(keys.OrderBy(x => x.CreatedUtc));
 
                     Console.Out.Write("  *** Enter GUID of public key to delete *** : ");
                     var input = Guid.Parse(StandardInput.GetInput());
@@ -81,18 +81,18 @@ namespace Bhbk.Cli.Aurora.Commands
                 }
                 else if (_deleteAll)
                 {
-                    ConsoleHelper.StdOutKeyPairs(keys.OrderBy(x => x.Created));
+                    ConsoleHelper.StdOutKeyPairs(keys.OrderBy(x => x.CreatedUtc));
 
                     _uow.PublicKeys.Delete(QueryExpressionFactory.GetQueryExpression<tbl_PublicKey>()
-                        .Where(x => x.IdentityId == null && x.Deletable == false).ToLambda());
+                        .Where(x => x.IdentityId == null && x.IsDeletable == false).ToLambda());
 
                     _uow.PrivateKeys.Delete(QueryExpressionFactory.GetQueryExpression<tbl_PrivateKey>()
-                        .Where(x => x.IdentityId == null && x.Deletable == false).ToLambda());
+                        .Where(x => x.IdentityId == null && x.IsDeletable == false).ToLambda());
 
                     _uow.Commit();
                 }
                 else
-                    ConsoleHelper.StdOutKeyPairs(keys.OrderBy(x => x.Created));
+                    ConsoleHelper.StdOutKeyPairs(keys.OrderBy(x => x.CreatedUtc));
 
                 return StandardOutput.FondFarewell();
             }

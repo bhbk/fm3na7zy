@@ -90,9 +90,9 @@ namespace Bhbk.Cli.Aurora.Commands
                         RequirePassword = true,
                         RequirePublicKey = false,
                         FileSystemType = _fileSystem.ToString(),
-                        Enabled = true,
-                        Deletable = false,
-                        Created = DateTime.Now,
+                        IsEnabled = true,
+                        IsDeletable = false,
+                        CreatedUtc = DateTime.UtcNow,
                     });
 
                 _uow.Commit();

@@ -76,8 +76,8 @@ namespace Bhbk.Cli.Aurora.Commands
                         IdentityId = _user.IdentityId,
                         Address = _cidr.ToString(),
                         Action = _actionType.ToString(),
-                        Enabled = true,
-                        Created = DateTime.UtcNow,
+                        IsEnabled = true,
+                        CreatedUtc = DateTime.UtcNow,
                     });
 
                 _uow.Commit();

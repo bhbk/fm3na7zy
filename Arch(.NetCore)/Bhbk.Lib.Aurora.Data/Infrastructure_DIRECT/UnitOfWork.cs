@@ -2,6 +2,7 @@
 using Bhbk.Lib.Aurora.Data.Repositories_DIRECT;
 using Bhbk.Lib.Common.Primitives.Enums;
 using Bhbk.Lib.Common.Services;
+using Bhbk.Lib.DataAccess.EFCore.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.Extensions.Logging;
@@ -14,15 +15,16 @@ namespace Bhbk.Lib.Aurora.Data.Infrastructure_DIRECT
         private readonly AuroraEntities _context;
         private readonly ILoggerFactory _logger;
         public InstanceContext InstanceType { get; private set; }
-        public CredentialRepository Credentials { get; private set; }
-        public NetworkRepository Networks { get; private set; }
-        public PrivateKeyRepository PrivateKeys { get; private set; }
-        public PublicKeyRepository PublicKeys { get; private set; }
-        public SettingRepository Settings { get; private set; }
-        public UserFileRepository UserFiles { get; private set; }
-        public UserFolderRepository UserFolders { get; private set; }
-        public UserMountRepository UserMounts { get; private set; }
-        public UserRepository Users { get; private set; }
+        public ActivityRepository Activities { get; private set; }
+        public IGenericRepository<tbl_Credential> Credentials { get; private set; }
+        public IGenericRepository<tbl_Network> Networks { get; private set; }
+        public IGenericRepository<tbl_PrivateKey> PrivateKeys { get; private set; }
+        public IGenericRepository<tbl_PublicKey> PublicKeys { get; private set; }
+        public IGenericRepository<tbl_Setting> Settings { get; private set; }
+        public IGenericRepository<tbl_UserFile> UserFiles { get; private set; }
+        public IGenericRepository<tbl_UserFolder> UserFolders { get; private set; }
+        public IGenericRepository<tbl_UserMount> UserMounts { get; private set; }
+        public IGenericRepository<tbl_User> Users { get; private set; }
 
         public UnitOfWork(string connection)
             : this(connection, new ContextService(InstanceContext.DeployedOrLocal)) { }
@@ -32,7 +34,7 @@ namespace Bhbk.Lib.Aurora.Data.Infrastructure_DIRECT
             _logger = LoggerFactory.Create(opt =>
             {
                 opt.AddFilter("Microsoft", LogLevel.Warning)
-                    .AddFilter("Microsoft.EntityFrameworkCore", LogLevel.Information)
+                    .AddFilter("Microsoft.EntityFrameworkCore", LogLevel.Warning)
                     .AddFilter("System", LogLevel.Warning)
                     .AddConsole();
             });
@@ -43,9 +45,9 @@ namespace Bhbk.Lib.Aurora.Data.Infrastructure_DIRECT
                     {
 #if !RELEASE
                         var builder = new DbContextOptionsBuilder<AuroraEntities>()
-                            .UseSqlServer(connection);
-                            //.UseLoggerFactory(_logger)
-                            //.EnableSensitiveDataLogging();
+                            .UseSqlServer(connection)
+                            .UseLoggerFactory(_logger)
+                            .EnableSensitiveDataLogging();
 #elif RELEASE
                         var builder = new DbContextOptionsBuilder<AuroraEntities>()
                             .UseSqlServer(connection);
@@ -80,15 +82,16 @@ namespace Bhbk.Lib.Aurora.Data.Infrastructure_DIRECT
 
             InstanceType = instance.InstanceType;
 
-            Credentials = new CredentialRepository(_context);
-            Networks = new NetworkRepository(_context);
-            PrivateKeys = new PrivateKeyRepository(_context);
-            PublicKeys = new PublicKeyRepository(_context);
-            Settings = new SettingRepository(_context);
-            UserFiles = new UserFileRepository(_context);
-            UserFolders = new UserFolderRepository(_context);
-            UserMounts = new UserMountRepository(_context);
-            Users = new UserRepository(_context);
+            Activities = new ActivityRepository(_context);
+            Credentials = new GenericRepository<tbl_Credential>(_context);
+            Networks = new GenericRepository<tbl_Network>(_context);
+            PrivateKeys = new GenericRepository<tbl_PrivateKey>(_context);
+            PublicKeys = new GenericRepository<tbl_PublicKey>(_context);
+            Settings = new GenericRepository<tbl_Setting>(_context);
+            UserFiles = new GenericRepository<tbl_UserFile>(_context);
+            UserFolders = new GenericRepository<tbl_UserFolder>(_context);
+            UserMounts = new GenericRepository<tbl_UserMount>(_context);
+            Users = new GenericRepository<tbl_User>(_context);
         }
 
         public void Commit()

@@ -1,23 +1,25 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net5.0</TargetFramework>
     <Platforms>AnyCPU;x64;x86</Platforms>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AutoMapper" Version="10.0.0" />
-    <PackageReference Include="Bhbk.Lib.Common" Version="2020.8.11.1945" />
-    <PackageReference Include="Bhbk.Lib.Cryptography" Version="2020.8.11.1945" />
-    <PackageReference Include="Bhbk.Lib.Hosting" Version="2020.8.11.1945" />
+    <PackageReference Include="AutoMapper" Version="10.1.1" />
+    <PackageReference Include="Bhbk.Lib.Common" Version="2020.11.11.1800" />
+    <PackageReference Include="Bhbk.Lib.Cryptography" Version="2020.11.11.1800" />
+    <PackageReference Include="Bhbk.Lib.Hosting" Version="2020.11.11.1800" />
+    <PackageReference Include="CronExpressionDescriptor" Version="2.16.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication" Version="2.2.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="3.1.7" />
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.1.7" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="3.1.7" />
-    <PackageReference Include="Quartz" Version="3.1.0" />
-    <PackageReference Include="Quartz.AspNetCore" Version="3.1.0" />
-    <PackageReference Include="Quartz.Extensions.DependencyInjection" Version="3.1.0" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="5.5.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="5.0.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="5.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="5.0.0" />
+    <PackageReference Include="Quartz" Version="3.2.3" />
+    <PackageReference Include="Quartz.AspNetCore" Version="3.2.3" />
+    <PackageReference Include="Quartz.Extensions.DependencyInjection" Version="3.2.3" />
+    <PackageReference Include="Serilog.Sinks.File" Version="4.1.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="5.6.3" />
   </ItemGroup>
 
   <ItemGroup>

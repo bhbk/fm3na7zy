@@ -37,6 +37,10 @@
         <Value>False</Value>
       </PropertyElementName>
       <PropertyElementName>
+        <Name>IgnoreIndexesStatisticsOnEnclaveEnabledColumns</Name>
+        <Value>False</Value>
+      </PropertyElementName>
+      <PropertyElementName>
         <Name>BlockOnPossibleDataLoss</Name>
         <Value>False</Value>
       </PropertyElementName>

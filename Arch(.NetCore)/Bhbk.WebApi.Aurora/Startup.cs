@@ -5,14 +5,17 @@ using Bhbk.Lib.Aurora.Domain.Primitives.Enums;
 using Bhbk.Lib.Common.Primitives.Enums;
 using Bhbk.Lib.Common.Services;
 using Bhbk.WebApi.Aurora.Tasks;
+using CronExpressionDescriptor;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Quartz;
+using Serilog;
 using System;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 
 namespace Bhbk.WebApi.Aurora
 {
@@ -20,6 +23,8 @@ namespace Bhbk.WebApi.Aurora
     {
         public void ConfigureServices(IServiceCollection sc)
         {
+            var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
+
             var conf = (IConfiguration)new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
@@ -50,20 +55,22 @@ namespace Bhbk.WebApi.Aurora
 
                 if (bool.Parse(conf["Jobs:UnstructuredData:Enable"]))
                 {
-                    var dataJobKey = new JobKey(JobType.UnstructuredData.ToString(), GroupType.Daemons.ToString());
+                    var jobKey = new JobKey(JobType.UnstructuredData.ToString(), GroupType.Daemons.ToString());
                     jobs.AddJob<UnstructuredDataJob>(opt => opt
                         .StoreDurably()
-                        .WithIdentity(dataJobKey)
+                        .WithIdentity(jobKey)
                     );
 
                     foreach (var cron in conf.GetSection("Jobs:UnstructuredData:Schedules").GetChildren()
                         .Select(x => x.Value).ToList())
                     {
                         jobs.AddTrigger(opt => opt
-                            .ForJob(dataJobKey)
+                            .ForJob(jobKey)
                             .StartNow()
                             .WithCronSchedule(cron)
                         );
+
+                        Log.Information($"'{callPath}' {jobKey.Name} job has schedule '{ExpressionDescriptor.GetDescription(cron)}'");
                     }
                 }
             });
@@ -83,7 +90,7 @@ namespace Bhbk.WebApi.Aurora
             var seeds = new UnitOfWork(conf["Databases:AuroraEntities"], instance);
 
             var key = seeds.Settings.Get(x => x.ConfigKey == "RebexLicense")
-                .OrderBy(x => x.Created).Last();
+                .OrderBy(x => x.CreatedUtc).Last();
 
             Rebex.Licensing.Key = key.ConfigValue;
         }

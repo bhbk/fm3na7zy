@@ -46,8 +46,8 @@ namespace Bhbk.Cli.Aurora.Commands
                     .Where(x => x.IdentityAlias == arg).ToLambda(),
                         new List<Expression<Func<tbl_User, object>>>()
                         {
-                            x => x.tbl_PrivateKey,
-                            x => x.tbl_PublicKey,
+                            x => x.tbl_PrivateKeys,
+                            x => x.tbl_PublicKeys,
                         }).SingleOrDefault();
 
                 if (_user == null)

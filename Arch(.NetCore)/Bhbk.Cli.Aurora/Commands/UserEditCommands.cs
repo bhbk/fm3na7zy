@@ -38,7 +38,7 @@ namespace Bhbk.Cli.Aurora.Commands
                 _uow = new UnitOfWork(_conf["Databases:AuroraEntities"], instance);
 
                 _user = _uow.Users.Get(QueryExpressionFactory.GetQueryExpression<tbl_User>()
-                    .Where(x => x.IdentityAlias == arg && x.Deletable == true).ToLambda())
+                    .Where(x => x.IdentityAlias == arg && x.IsDeletable == true).ToLambda())
                     .SingleOrDefault();
 
                 if (_user == null)

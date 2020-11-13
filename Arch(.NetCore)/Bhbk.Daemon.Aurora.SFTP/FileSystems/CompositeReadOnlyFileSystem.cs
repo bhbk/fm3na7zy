@@ -93,7 +93,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                     {
                         var folderEntity = CompositeFileSystemHelper.FolderPathToEntity(uow, _userEntity, node.Path.StringPath);
 
-                        if (folderEntity.ReadOnly)
+                        if (folderEntity.IsReadOnly)
                             return new NodeAttributes(FileAttributes.Directory | FileAttributes.ReadOnly);
 
                         else
@@ -103,7 +103,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                     {
                         var fileEntity = CompositeFileSystemHelper.FilePathToEntity(uow, _userEntity, node.Path.StringPath);
 
-                        if (fileEntity.ReadOnly)
+                        if (fileEntity.IsReadOnly)
                             return new NodeAttributes(FileAttributes.ReadOnly);
 
                         else
@@ -136,7 +136,8 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
 
                     if (folderEntities != null)
                         return new DirectoryNode(folderEntities.VirtualName, parent,
-                            new NodeTimeInfo(folderEntities.Created, folderEntities.LastAccessed, folderEntities.LastUpdated));
+                            new NodeTimeInfo(folderEntities.CreatedUtc.UtcDateTime, 
+                                folderEntities.LastAccessedUtc?.UtcDateTime, folderEntities.LastUpdatedUtc?.UtcDateTime));
 
                     var fileEntities = uow.UserFiles.Get(QueryExpressionFactory.GetQueryExpression<tbl_UserFile>()
                         .Where(x => x.IdentityId == _userEntity.IdentityId && x.FolderId == parentFolder.Id && x.VirtualName == name).ToLambda())
@@ -144,7 +145,8 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
 
                     if (fileEntities != null)
                         return new FileNode(fileEntities.VirtualName, parent,
-                            new NodeTimeInfo(fileEntities.Created, fileEntities.LastAccessed, fileEntities.LastUpdated));
+                            new NodeTimeInfo(fileEntities.CreatedUtc.UtcDateTime, 
+                                fileEntities.LastAccessedUtc?.UtcDateTime, fileEntities.LastUpdatedUtc?.UtcDateTime));
 
                     return null;
                 }
@@ -171,21 +173,23 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
 
                     var parentFolder = CompositeFileSystemHelper.FolderPathToEntity(uow, _userEntity, parent.Path.StringPath);
 
-                    _userEntity.tbl_UserFolder = uow.UserFolders.Get(QueryExpressionFactory.GetQueryExpression<tbl_UserFolder>()
+                    _userEntity.tbl_UserFolders = uow.UserFolders.Get(QueryExpressionFactory.GetQueryExpression<tbl_UserFolder>()
                         .Where(x => x.IdentityId == _userEntity.IdentityId).ToLambda())
                         .ToList();
 
-                    _userEntity.tbl_UserFile = uow.UserFiles.Get(QueryExpressionFactory.GetQueryExpression<tbl_UserFile>()
+                    _userEntity.tbl_UserFiles = uow.UserFiles.Get(QueryExpressionFactory.GetQueryExpression<tbl_UserFile>()
                         .Where(x => x.IdentityId == _userEntity.IdentityId).ToLambda())
                         .ToList();
 
-                    foreach (var folder in _userEntity.tbl_UserFolder.Where(x => x.IdentityId == _userEntity.IdentityId && x.ParentId == parentFolder.Id))
+                    foreach (var folder in _userEntity.tbl_UserFolders.Where(x => x.IdentityId == _userEntity.IdentityId && x.ParentId == parentFolder.Id))
                         children.Add(new DirectoryNode(folder.VirtualName, parent,
-                            new NodeTimeInfo(folder.Created, folder.LastAccessed, folder.LastUpdated)));
+                            new NodeTimeInfo(folder.CreatedUtc.UtcDateTime, 
+                                folder.LastAccessedUtc?.UtcDateTime, folder.LastUpdatedUtc?.UtcDateTime)));
 
-                    foreach (var file in _userEntity.tbl_UserFile.Where(x => x.IdentityId == _userEntity.IdentityId && x.FolderId == parentFolder.Id))
+                    foreach (var file in _userEntity.tbl_UserFiles.Where(x => x.IdentityId == _userEntity.IdentityId && x.FolderId == parentFolder.Id))
                         children.Add(new FileNode(file.VirtualName, parent,
-                            new NodeTimeInfo(file.Created, file.LastAccessed, file.LastUpdated)));
+                            new NodeTimeInfo(file.CreatedUtc.UtcDateTime, 
+                                file.LastAccessedUtc?.UtcDateTime, file.LastUpdatedUtc?.UtcDateTime)));
 
                     return children;
                 }
@@ -223,7 +227,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                             + Path.DirectorySeparatorChar + fileEntity.RealPath
                             + Path.DirectorySeparatorChar + fileEntity.RealFileName);
 
-                        fileEntity.LastAccessed = DateTime.UtcNow;
+                        fileEntity.LastAccessedUtc = DateTime.UtcNow;
 
                         uow.UserFiles.Update(fileEntity);
                         uow.Commit();
@@ -282,13 +286,15 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                     {
                         var folderEntity = CompositeFileSystemHelper.FolderPathToEntity(uow, _userEntity, node.Path.StringPath);
 
-                        return new NodeTimeInfo(folderEntity.Created, folderEntity.LastAccessed, folderEntity.LastUpdated);
+                        return new NodeTimeInfo(folderEntity.CreatedUtc.UtcDateTime, 
+                            folderEntity.LastAccessedUtc?.UtcDateTime, folderEntity.LastUpdatedUtc?.UtcDateTime);
                     }
                     else if (node.NodeType == NodeType.File)
                     {
                         var fileEntity = CompositeFileSystemHelper.FilePathToEntity(uow, _userEntity, node.Path.StringPath);
 
-                        return new NodeTimeInfo(fileEntity.Created, fileEntity.LastAccessed, fileEntity.LastUpdated);
+                        return new NodeTimeInfo(fileEntity.CreatedUtc.UtcDateTime, 
+                            fileEntity.LastAccessedUtc?.UtcDateTime, fileEntity.LastUpdatedUtc?.UtcDateTime);
                     }
                     else
                         throw new NotImplementedException();

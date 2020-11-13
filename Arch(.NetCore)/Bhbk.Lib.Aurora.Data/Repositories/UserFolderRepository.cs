@@ -22,11 +22,11 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
                 new SqlParameter("@IdentityId", SqlDbType.UniqueIdentifier) { Value = entity.IdentityId },
                 new SqlParameter("@ParentId", SqlDbType.UniqueIdentifier) { Value = entity.ParentId.HasValue ? (object)entity.ParentId.Value : DBNull.Value },
                 new SqlParameter("@VirtualName", SqlDbType.NVarChar) { Value = entity.VirtualName },
-                new SqlParameter("@ReadOnly", SqlDbType.Bit) { Value = entity.ReadOnly }
+                new SqlParameter("@IsReadOnly", SqlDbType.Bit) { Value = entity.IsReadOnly }
             };
 
             return _context.Set<uvw_UserFolder>().FromSqlRaw("[svc].[usp_UserFolder_Insert]"
-                + "@IdentityId, @ParentId, @VirtualName, @ReadOnly", pvalues.ToArray())
+                + "@IdentityId, @ParentId, @VirtualName, @IsReadOnly", pvalues.ToArray())
                     .AsEnumerable().Single();
 
             /*
@@ -98,13 +98,13 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
                 new SqlParameter("@IdentityId", SqlDbType.UniqueIdentifier) { Value = entity.IdentityId },
                 new SqlParameter("@ParentId", SqlDbType.UniqueIdentifier) { Value = entity.ParentId.HasValue ? (object)entity.ParentId.Value : DBNull.Value },
                 new SqlParameter("@VirtualName", SqlDbType.NVarChar) { Value = entity.VirtualName },
-                new SqlParameter("@ReadOnly", SqlDbType.Bit) { Value = entity.ReadOnly },
-                new SqlParameter("@LastAccessed", SqlDbType.DateTime2) { Value = entity.LastAccessed },
-                new SqlParameter("@LastUpdated", SqlDbType.DateTime2) { Value = entity.LastUpdated }
+                new SqlParameter("@IsReadOnly", SqlDbType.Bit) { Value = entity.IsReadOnly },
+                new SqlParameter("@LastAccessedUtc", SqlDbType.DateTimeOffset) { Value = entity.LastAccessedUtc },
+                new SqlParameter("@LastUpdatedUtc", SqlDbType.DateTimeOffset) { Value = entity.LastUpdatedUtc }
             };
 
             return _context.Set<uvw_UserFolder>().FromSqlRaw("[svc].[usp_UserFolder_Update]"
-                + "@Id, @IdentityId, @ParentId, @VirtualName, @ReadOnly, @LastAccessed, @LastUpdated", pvalues.ToArray())
+                + "@Id, @IdentityId, @ParentId, @VirtualName, @IsReadOnly, @LastAccessedUtc, @LastUpdatedUtc", pvalues.ToArray())
                     .AsEnumerable().Single();
         }
 

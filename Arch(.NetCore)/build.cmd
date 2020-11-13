@@ -1,7 +1,7 @@
 
 rem call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\Tools\VsDevCmd.bat"
 rem dotnet tool install Octopus.DotNet.Cli --global
-powershell -command "& { write-output 2020.08.11.1945 | out-file -filepath .\version.tmp -nonewline -encoding ascii }"
+powershell -command "& { write-output 2020.11.11.1800 | out-file -filepath .\version.tmp -nonewline -encoding ascii }"
 rem powershell -command "& { get-date -format yyyy.M.d.HHmm | out-file -filepath .\version.tmp -nonewline -encoding ascii }"
 set /p VERSION=< .\version.tmp
 
@@ -14,14 +14,14 @@ rem dotnet test Bhbk.WebApi.Aurora.Tests\Bhbk.WebApi.Aurora.Tests.csproj --confi
 
 rem package .net standard/core assemblies...
 dotnet pack Bhbk.Lib.Aurora\Bhbk.Lib.Aurora.csproj -p:PackageVersion=%VERSION% --output . --configuration Release /p:platform=x64
-dotnet publish Bhbk.Cli.Aurora\Bhbk.Cli.Aurora.csproj --output Bhbk.Cli.Aurora\bin\Release\netcoreapp3.1\publish\ --configuration Release /p:platform=x64
-dotnet publish Bhbk.Daemon.Aurora.FTP\Bhbk.Daemon.Aurora.FTP.csproj --output Bhbk.Daemon.Aurora.FTP\bin\Release\netcoreapp3.1\publish --configuration Release /p:platform=x64
-dotnet publish Bhbk.Daemon.Aurora.SFTP\Bhbk.Daemon.Aurora.SFTP.csproj --output Bhbk.Daemon.Aurora.SFTP\bin\Release\netcoreapp3.1\publish --configuration Release /p:platform=x64
-dotnet publish Bhbk.WebApi.Aurora\Bhbk.WebApi.Aurora.csproj --output Bhbk.WebApi.Aurora\bin\Release\netcoreapp3.1\publish\ --configuration Release /p:platform=x64
-dotnet octo pack --id=Bhbk.Cli.Aurora --version=%VERSION% --basePath=Bhbk.Cli.Aurora\bin\Release\netcoreapp3.1\publish\ --outFolder=. --overwrite
-dotnet octo pack --id=Bhbk.Daemon.Aurora.FTP --version=%VERSION% --basePath=Bhbk.Daemon.Aurora.FTP\bin\Release\netcoreapp3.1\publish\ --outFolder=. --overwrite
-dotnet octo pack --id=Bhbk.Daemon.Aurora.SFTP --version=%VERSION% --basePath=Bhbk.Daemon.Aurora.SFTP\bin\Release\netcoreapp3.1\publish\ --outFolder=. --overwrite
-dotnet octo pack --id=Bhbk.WebApi.Aurora --version=%VERSION% --basePath=Bhbk.WebApi.Aurora\bin\Release\netcoreapp3.1\publish\ --outFolder=. --overwrite
+dotnet publish Bhbk.Cli.Aurora\Bhbk.Cli.Aurora.csproj --output Bhbk.Cli.Aurora\bin\Release\net5.0\publish\ --configuration Release /p:platform=x64
+dotnet publish Bhbk.Daemon.Aurora.FTP\Bhbk.Daemon.Aurora.FTP.csproj --output Bhbk.Daemon.Aurora.FTP\bin\Release\net5.0\publish --configuration Release /p:platform=x64
+dotnet publish Bhbk.Daemon.Aurora.SFTP\Bhbk.Daemon.Aurora.SFTP.csproj --output Bhbk.Daemon.Aurora.SFTP\bin\Release\net5.0\publish --configuration Release /p:platform=x64
+dotnet publish Bhbk.WebApi.Aurora\Bhbk.WebApi.Aurora.csproj --output Bhbk.WebApi.Aurora\bin\Release\net5.0\publish\ --configuration Release /p:platform=x64
+dotnet octo pack --id=Bhbk.Cli.Aurora --version=%VERSION% --basePath=Bhbk.Cli.Aurora\bin\Release\net5.0\publish\ --outFolder=. --overwrite
+dotnet octo pack --id=Bhbk.Daemon.Aurora.FTP --version=%VERSION% --basePath=Bhbk.Daemon.Aurora.FTP\bin\Release\net5.0\publish\ --outFolder=. --overwrite
+dotnet octo pack --id=Bhbk.Daemon.Aurora.SFTP --version=%VERSION% --basePath=Bhbk.Daemon.Aurora.SFTP\bin\Release\net5.0\publish\ --outFolder=. --overwrite
+dotnet octo pack --id=Bhbk.WebApi.Aurora --version=%VERSION% --basePath=Bhbk.WebApi.Aurora\bin\Release\net5.0\publish\ --outFolder=. --overwrite
 
 set VERSION=
 rem dotnet tool uninstall Octopus.DotNet.Cli --global
