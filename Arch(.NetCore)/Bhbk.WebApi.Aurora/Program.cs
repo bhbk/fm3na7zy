@@ -6,7 +6,6 @@ using Microsoft.Extensions.Hosting;
 using Serilog;
 using System.Diagnostics;
 using System.IO;
-using System.Net;
 
 namespace Bhbk.WebApi.Aurora
 {
@@ -58,7 +57,7 @@ namespace Bhbk.WebApi.Aurora
 
         public static void Main(string[] args)
         {
-            _conf = new ConfigurationBuilder()
+            _conf = (IConfiguration)new ConfigurationBuilder()
                 .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
                 .Build();
 

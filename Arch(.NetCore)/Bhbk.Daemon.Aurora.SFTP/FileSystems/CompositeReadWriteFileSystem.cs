@@ -47,12 +47,12 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
 
         protected override DirectoryNode CreateDirectory(DirectoryNode parent, DirectoryNode child)
         {
+            var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
+
             try
             {
                 using (var scope = _factory.CreateScope())
                 {
-                    var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
-
                     var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
 
                     var folderEntity = CompositeFileSystemHelper.FolderPathToEntity(uow, _userEntity, parent.Path.StringPath);
@@ -83,6 +83,8 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
 
         protected override FileNode CreateFile(DirectoryNode parent, FileNode child)
         {
+            var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
+
             FileInfo file = null;
 
             try
@@ -131,6 +133,8 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
 
                     uow.UserFiles.Create(fileEntity);
                     uow.Commit();
+
+                    Log.Information($"'{callPath}' '{_userEntity.IdentityAlias}' file '{child.Path}' to '{file.FullName}'");
                 }
 
                 return child;
@@ -155,12 +159,12 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
             if (!node.Exists())
                 return node;
 
+            var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
+
             try
             {
                 using (var scope = _factory.CreateScope())
                 {
-                    var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
-
                     var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
 
                     if (node.NodeType == NodeType.Directory)
@@ -243,11 +247,11 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
 
         protected override NodeAttributes GetAttributes(NodeBase node)
         {
+            if (!node.Exists())
+                return node.Attributes;
+
             try
             {
-                if (!node.Exists())
-                    return node.Attributes;
-
                 using (var scope = _factory.CreateScope())
                 {
                     var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
@@ -299,7 +303,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
 
                     if (folderEntities != null)
                         return new DirectoryNode(folderEntities.VirtualName, parent,
-                            new NodeTimeInfo(folderEntities.CreatedUtc.UtcDateTime, 
+                            new NodeTimeInfo(folderEntities.CreatedUtc.UtcDateTime,
                                 folderEntities.LastAccessedUtc?.UtcDateTime, folderEntities.LastUpdatedUtc?.UtcDateTime));
 
                     var fileEntities = uow.UserFiles.Get(QueryExpressionFactory.GetQueryExpression<tbl_UserFile>()
@@ -308,7 +312,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
 
                     if (fileEntities != null)
                         return new FileNode(fileEntities.VirtualName, parent,
-                            new NodeTimeInfo(fileEntities.CreatedUtc.UtcDateTime, 
+                            new NodeTimeInfo(fileEntities.CreatedUtc.UtcDateTime,
                                 fileEntities.LastAccessedUtc?.UtcDateTime, fileEntities.LastUpdatedUtc?.UtcDateTime));
 
                     return null;
@@ -323,11 +327,11 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
 
         protected override IEnumerable<NodeBase> GetChildren(DirectoryNode parent, NodeType nodeType)
         {
+            if (!parent.Exists())
+                return Enumerable.Empty<NodeBase>();
+
             try
             {
-                if (!parent.Exists())
-                    return Enumerable.Empty<NodeBase>();
-
                 using (var scope = _factory.CreateScope())
                 {
                     var children = new List<NodeBase>();
@@ -346,12 +350,12 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
 
                     foreach (var folder in _userEntity.tbl_UserFolders.Where(x => x.IdentityId == _userEntity.IdentityId && x.ParentId == parentFolder.Id))
                         children.Add(new DirectoryNode(folder.VirtualName, parent,
-                            new NodeTimeInfo(folder.CreatedUtc.UtcDateTime, 
+                            new NodeTimeInfo(folder.CreatedUtc.UtcDateTime,
                                 folder.LastAccessedUtc?.UtcDateTime, folder.LastUpdatedUtc?.UtcDateTime)));
 
                     foreach (var file in _userEntity.tbl_UserFiles.Where(x => x.IdentityId == _userEntity.IdentityId && x.FolderId == parentFolder.Id))
                         children.Add(new FileNode(file.VirtualName, parent,
-                            new NodeTimeInfo(file.CreatedUtc.UtcDateTime, 
+                            new NodeTimeInfo(file.CreatedUtc.UtcDateTime,
                                 file.LastAccessedUtc?.UtcDateTime, file.LastUpdatedUtc?.UtcDateTime)));
 
                     return children;
@@ -368,6 +372,8 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
         {
             if (!node.Exists())
                 return NodeContent.CreateDelayedWriteContent(new MemoryStream());
+
+            var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
 
             try
             {
@@ -392,6 +398,8 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
 
                         uow.UserFiles.Update(fileEntity);
                         uow.Commit();
+
+                        Log.Information($"'{callPath}' '{_userEntity.IdentityAlias}' file '{node.Path}' from '{file.FullName}'");
 
                         return NodeContent.CreateDelayedWriteContent(File.Open(file.FullName, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite));
                     }
@@ -447,14 +455,14 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                     {
                         var folderEntity = CompositeFileSystemHelper.FolderPathToEntity(uow, _userEntity, node.Path.StringPath);
 
-                        return new NodeTimeInfo(folderEntity.CreatedUtc.UtcDateTime, 
+                        return new NodeTimeInfo(folderEntity.CreatedUtc.UtcDateTime,
                             folderEntity.LastAccessedUtc?.UtcDateTime, folderEntity.LastUpdatedUtc?.UtcDateTime);
                     }
                     else if (node.NodeType == NodeType.File)
                     {
                         var fileEntity = CompositeFileSystemHelper.FilePathToEntity(uow, _userEntity, node.Path.StringPath);
 
-                        return new NodeTimeInfo(fileEntity.CreatedUtc.UtcDateTime, 
+                        return new NodeTimeInfo(fileEntity.CreatedUtc.UtcDateTime,
                             fileEntity.LastAccessedUtc?.UtcDateTime, fileEntity.LastUpdatedUtc?.UtcDateTime);
                     }
                     else
@@ -470,12 +478,12 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
 
         protected override NodeBase Move(NodeBase toBeMovedNode, DirectoryNode targetDirectory)
         {
+            var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
+
             try
             {
                 using (var scope = _factory.CreateScope())
                 {
-                    var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
-
                     var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
 
                     if (toBeMovedNode.NodeType == NodeType.Directory)
@@ -525,12 +533,12 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
 
         protected override NodeBase Rename(NodeBase node, string newName)
         {
+            var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
+
             try
             {
                 using (var scope = _factory.CreateScope())
                 {
-                    var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
-
                     var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
 
                     if (node.NodeType == NodeType.Directory)
@@ -579,14 +587,14 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
             if (!node.Exists())
                 return node;
 
+            var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
+
             FileInfo file = null;
 
             try
             {
                 using (var scope = _factory.CreateScope())
                 {
-                    var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
-
                     if (node.NodeType == NodeType.File)
                     {
                         var conf = scope.ServiceProvider.GetRequiredService<IConfiguration>();

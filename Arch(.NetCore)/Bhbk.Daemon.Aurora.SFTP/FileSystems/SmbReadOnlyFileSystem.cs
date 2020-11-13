@@ -121,11 +121,11 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
 
         protected override NodeAttributes GetAttributes(NodeBase node)
         {
+            if (!node.Exists())
+                return node.Attributes;
+
             try
             {
-                if (!node.Exists())
-                    return node.Attributes;
-
                 NodeAttributes attributes = null;
 
                 if (node.NodeType == NodeType.Directory)
@@ -192,11 +192,11 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
 
         protected override IEnumerable<NodeBase> GetChildren(DirectoryNode parent, NodeType nodeType)
         {
+            if (!parent.Exists())
+                return Enumerable.Empty<NodeBase>();
+
             try
             {
-                if (!parent.Exists())
-                    return Enumerable.Empty<NodeBase>();
-
                 var children = new List<NodeBase>();
 
                 WindowsIdentity.RunImpersonated(_userToken, () =>
@@ -231,13 +231,13 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
 
         protected override NodeContent GetContent(NodeBase node, NodeContentParameters contentParameters)
         {
+            if (!node.Exists())
+                return NodeContent.CreateDelayedWriteContent(new MemoryStream());
+
             var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
 
             try
             {
-                if (!node.Exists())
-                    return NodeContent.CreateDelayedWriteContent(new MemoryStream());
-
                 NodeContent content = null;
 
                 if (node.NodeType == NodeType.File)
@@ -247,6 +247,9 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                         var file = SmbFileSystemHelper.FilePathToCIFS(_userMount + node.Path.StringPath);
 
                         content = NodeContent.CreateDelayedWriteContent(File.Open(file.FullName, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite));
+
+                        Log.Information($"'{callPath}' '{_userEntity.IdentityAlias}' file '{node.Path}' from '{file.FullName}'" +
+                            $" run as '{WindowsIdentity.GetCurrent().Name}'");
                     });
                 }
                 else

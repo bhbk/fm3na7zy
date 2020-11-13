@@ -12,7 +12,7 @@ namespace Bhbk.Cli.Aurora
         [STAThread]
         static int Main(string[] args)
         {
-            var conf = new ConfigurationBuilder()
+            var conf = (IConfiguration)new ConfigurationBuilder()
                 .AddJsonFile("clisettings.json", optional: false, reloadOnChange: true)
                 .Build();
 

@@ -254,7 +254,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
             _mapper = new MapperConfiguration(x => x.AddProfile<AutoMapperProfile_DIRECT>())
                 .CreateMapper();
 
-            _conf = new ConfigurationBuilder()
+            _conf = (IConfiguration)new ConfigurationBuilder()
                 .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
                 .Build();
 

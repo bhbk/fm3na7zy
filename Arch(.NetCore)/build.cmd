@@ -1,7 +1,7 @@
 
 rem call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\Tools\VsDevCmd.bat"
 rem dotnet tool install Octopus.DotNet.Cli --global
-powershell -command "& { write-output 2020.11.11.1800 | out-file -filepath .\version.tmp -nonewline -encoding ascii }"
+powershell -command "& { write-output 2020.11.12.1900 | out-file -filepath .\version.tmp -nonewline -encoding ascii }"
 rem powershell -command "& { get-date -format yyyy.M.d.HHmm | out-file -filepath .\version.tmp -nonewline -encoding ascii }"
 set /p VERSION=< .\version.tmp
 
@@ -26,9 +26,3 @@ dotnet octo pack --id=Bhbk.WebApi.Aurora --version=%VERSION% --basePath=Bhbk.Web
 set VERSION=
 rem dotnet tool uninstall Octopus.DotNet.Cli --global
 rem powershell -command "& { update-package -reinstall }"
-
-rem Bhbk.Cli.Aurora.exe create-user --user=tester --pass=password
-rem Bhbk.Cli.Aurora.exe create-key --user=tester --type=RSA --size=4096 --hash=SHA256
-rem Bhbk.Cli.Aurora.exe export-keys --user=tester --directory=.\data\.ssh\
-rem Bhbk.Cli.Aurora.exe import-keys --user=tester --directory=.\data\.ssh\
-rem Bhbk.Cli.Aurora.exe show-keys --user=tester

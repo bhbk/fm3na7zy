@@ -91,7 +91,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                             .Single();
 
                         var dsaBytes = Encoding.ASCII.GetBytes(dsaPrivKey.KeyValue);
-                        _server.Keys.Add(new SshPrivateKey(dsaBytes, AES.DecryptString(dsaPrivKey.KeyPass,secret)));
+                        _server.Keys.Add(new SshPrivateKey(dsaBytes, AES.DecryptString(dsaPrivKey.KeyPass, secret)));
 
                         var rsaStr = SshHostKeyAlgorithm.RSA.ToString();
                         var rsaPrivKey = uow.PrivateKeys.Get(QueryExpressionFactory.GetQueryExpression<tbl_PrivateKey>()
@@ -141,7 +141,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                         var pair = binding.Split("|");
 
                         _server.Bind(new IPEndPoint(IPAddress.Parse(pair[0]), int.Parse(pair[1])), FileServerProtocol.Sftp);
-#if DEBUG
+#if !RELEASE
                         _server.Bind(new IPEndPoint(IPAddress.Parse(pair[0]), int.Parse(pair[1])), FileServerProtocol.Shell);
 #endif
                     }
@@ -219,43 +219,6 @@ namespace Bhbk.Daemon.Aurora.SFTP
                     var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
 
                     Log.Information($"'{callPath}' '{ServerSession.Current.UserName}' file '{e.ResultNode.Path.StringPath}'");
-
-                    using (var scope = _factory.CreateScope())
-                    {
-                        var conf = scope.ServiceProvider.GetRequiredService<IConfiguration>();
-                        var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
-
-                        var user = uow.Users.Get(QueryExpressionFactory.GetQueryExpression<tbl_User>()
-                            .Where(x => x.IdentityAlias == ServerSession.Current.UserName).ToLambda())
-                            .Single();
-
-                        var admin = scope.ServiceProvider.GetRequiredService<IAdminService>();
-                        var alert = scope.ServiceProvider.GetRequiredService<IAlertService>();
-
-                        var identity = admin.User_GetV1(user.IdentityId.ToString()).Result;
-
-                        alert.Email_EnqueueV1(new EmailV1()
-                        {
-                            FromEmail = conf["Notifications:SmtpSenderAddress"],
-                            FromDisplay = conf["Notifications:SmtpSenderDisplayName"],
-                            ToId = identity.Id,
-                            ToEmail = identity.Email,
-                            ToDisplay = $"{identity.FirstName} {identity.LastName}",
-                            Subject = "File Upload Notify",
-                            HtmlContent = Templates.NotifyEmailOnFileUpload(conf["Daemons:SftpService:Dns"],
-                                identity.UserName, identity.FirstName, identity.LastName, e.ResultNode.Path.StringPath, e.ResultNode.Length.ToString())
-                        });
-
-                        alert.Text_EnqueueV1(new TextV1()
-                        {
-                            FromPhoneNumber = conf["Notifications:SmsSenderNumber"],
-                            ToId = identity.Id,
-                            ToPhoneNumber = identity.PhoneNumber,
-                            Body = conf["Notifications:SmsSenderDisplayName"] + Environment.NewLine
-                                + Templates.NotifyTextOnFileUpload(conf["Daemons:SftpService:Dns"], identity.UserName,
-                                e.ResultNode.Path.StringPath, e.ResultNode.Length.ToString())
-                        });
-                    }
                 }
             }
             catch (Exception ex)
@@ -355,7 +318,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                         e.Accept(AuthenticationMethods.PublicKey | AuthenticationMethods.Password);
                         return;
                     }
-                    
+
                     if (user.RequirePublicKey
                         && !user.RequirePassword)
                     {
@@ -364,7 +327,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                         e.Accept(AuthenticationMethods.PublicKey);
                         return;
                     }
-                    
+
                     if (!user.RequirePublicKey
                         && user.RequirePassword)
                     {
@@ -465,7 +428,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                             return;
                         }
                     }
-                    
+
                     if (e.Password != null)
                     {
                         Log.Information($"'{callPath}' '{e.UserName}' in-progress with password");
@@ -570,6 +533,42 @@ namespace Bhbk.Daemon.Aurora.SFTP
             try
             {
                 var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
+
+                using (var scope = _factory.CreateScope())
+                {
+                    var conf = scope.ServiceProvider.GetRequiredService<IConfiguration>();
+                    var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+
+                    var user = uow.Users.Get(QueryExpressionFactory.GetQueryExpression<tbl_User>()
+                        .Where(x => x.IdentityAlias == ServerSession.Current.UserName).ToLambda())
+                        .Single();
+
+                    var admin = scope.ServiceProvider.GetRequiredService<IAdminService>();
+                    var alert = scope.ServiceProvider.GetRequiredService<IAlertService>();
+
+                    var identity = admin.User_GetV1(user.IdentityId.ToString()).Result;
+
+                    alert.Enqueue_EmailV1(new EmailV1()
+                    {
+                        FromEmail = conf["Notifications:EmailFromAddress"],
+                        FromDisplay = conf["Notifications:EmailFromDisplayName"],
+                        ToId = identity.Id,
+                        ToEmail = identity.Email,
+                        ToDisplay = $"{identity.FirstName} {identity.LastName}",
+                        Subject = "File Upload Notify",
+                        Body = Templates.NotifyEmailOnFileUpload(conf["Daemons:SftpService:Dns"],
+                            identity.UserName, identity.FirstName, identity.LastName, e.FullPath, e.BytesTransferred.ToString())
+                    });
+
+                    alert.Enqueue_TextV1(new TextV1()
+                    {
+                        FromPhoneNumber = conf["Notifications:TextFromPhoneNumber"],
+                        ToId = identity.Id,
+                        ToPhoneNumber = identity.PhoneNumber,
+                        Body = Templates.NotifyTextOnFileUpload(conf["Daemons:SftpService:Dns"],
+                            identity.UserName, identity.FirstName, identity.LastName, e.FullPath, e.BytesTransferred.ToString())
+                    });
+                }
 
                 Log.Information($"'{callPath}' '{ServerSession.Current.UserName}' file '/{e.FullPath}' bytes {e.BytesTransferred} from {e.Session.ClientEndPoint}");
             }

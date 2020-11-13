@@ -11,7 +11,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
 
@@ -21,13 +20,13 @@ namespace Bhbk.WebApi.Aurora.Tasks
     public class UnstructuredDataJob : IJob
     {
         private readonly IServiceScopeFactory _factory;
+        private const string _callPath = "UnstructuredDataJob.Execute";
 
         public UnstructuredDataJob(IServiceScopeFactory factory) => _factory = factory;
 
-        public Task Execute(IJobExecutionContext context)
+        public async Task Execute(IJobExecutionContext context)
         {
-            var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
-            Log.Information($"'{callPath}' running");
+            Log.Information($"'{_callPath}' running");
 
             try
             {
@@ -61,7 +60,7 @@ namespace Bhbk.WebApi.Aurora.Tasks
                                 {
                                     problems.Add(file);
 
-                                    Log.Error($"{callPath} validation on {filePath} returned hash of '{hashCheck}' that does not" +
+                                    Log.Error($"'{_callPath}' validation on {filePath} returned hash of '{hashCheck}' that does not" +
                                         $" match recorded hash of '{file.HashSHA256}'");
 
                                     continue;
@@ -72,11 +71,11 @@ namespace Bhbk.WebApi.Aurora.Tasks
                         }
                         catch (CryptographicException ex)
                         {
-                            Log.Error($"{callPath} validation on {filePath} returned error {ex.ToString()}");
+                            Log.Error($"'{_callPath}' validation on {filePath} returned error {ex.ToString()}");
                         }
                         catch (IOException ex)
                         {
-                            Log.Error($"{callPath} validation on {filePath} returned error {ex.ToString()}");
+                            Log.Error($"'{_callPath}' validation on {filePath} returned error {ex.ToString()}");
                         }
                     }
 
@@ -84,7 +83,7 @@ namespace Bhbk.WebApi.Aurora.Tasks
 
                     if (files.Any())
                     {
-                        var msg = $"{callPath} completed. Performed validation on {files.Count().ToString()} files" +
+                        var msg = $"'{_callPath}' completed. Performed validation on {files.Count().ToString()} files" +
                             $" and found {problems.Count()} problems.";
 
                         Log.Information(msg);
@@ -95,12 +94,13 @@ namespace Bhbk.WebApi.Aurora.Tasks
             {
                 Log.Error(ex.ToString());
             }
+            finally
+            {
+                GC.Collect();
+            }
 
-            GC.Collect();
-            Log.Information($"'{callPath}' completed");
-            Log.Information($"'{callPath}' will run again at {context.NextFireTimeUtc.Value.LocalDateTime}");
-
-            return Task.CompletedTask;
+            Log.Information($"'{_callPath}' completed");
+            Log.Information($"'{_callPath}' will run again at {context.NextFireTimeUtc.Value.LocalDateTime}");
         }
     }
 }

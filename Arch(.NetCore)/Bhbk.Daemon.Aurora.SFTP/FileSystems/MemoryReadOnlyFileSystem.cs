@@ -6,10 +6,12 @@ using Bhbk.Lib.QueryExpression.Extensions;
 using Bhbk.Lib.QueryExpression.Factories;
 using Microsoft.Extensions.DependencyInjection;
 using Rebex.IO.FileSystem;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 
 /*
  * https://forum.rebex.net/8453/implement-filesystem-almost-as-memoryfilesystemprovider
@@ -73,15 +75,18 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
 
         protected override NodeContent GetContent(NodeBase node, NodeContentParameters contentParameters)
         {
-            //error
             if (!node.Exists())
                 return NodeContent.CreateDelayedWriteContent(new MemoryStream());
+
+            var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
 
             var resultStream = new MemoryStream();
             _store[node].Content.CopyTo(resultStream);
 
             resultStream.Position = 0;
             _store[node].Content.Position = 0;
+
+            Log.Information($"'{callPath}' '{_userEntity.IdentityAlias}' file '{node.Path}' from memory");
 
             return contentParameters.AccessType == NodeContentAccess.Read
                 ? NodeContent.CreateReadOnlyContent(resultStream)

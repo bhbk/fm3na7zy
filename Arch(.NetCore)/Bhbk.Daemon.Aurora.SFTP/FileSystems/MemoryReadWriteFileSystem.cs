@@ -57,16 +57,20 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
             _store[parent].Children.Add(child);
             _path.Add(child.Path, child);
 
-            Log.Information($"'{callPath}' '{_userEntity.IdentityAlias}' folder '{child.Path}'");
+            Log.Information($"'{callPath}' '{_userEntity.IdentityAlias}' folder '{child.Path}' in memory");
 
             return child;
         }
 
         protected override FileNode CreateFile(DirectoryNode parent, FileNode child)
         {
+            var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
+
             _store.Add(child, new MemoryNodeData());
             _store[parent].Children.Add(child);
             _path.Add(child.Path, child);
+
+            Log.Information($"'{callPath}' '{_userEntity.IdentityAlias}' file '{child.Path}' in memory");
 
             return child;
         }
@@ -83,10 +87,10 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
             _path.Remove(node.Path);
 
             if (node.NodeType == NodeType.Directory)
-                Log.Information($"'{callPath}' '{_userEntity.IdentityAlias}' folder '{node.Path}'");
+                Log.Information($"'{callPath}' '{_userEntity.IdentityAlias}' folder '{node.Path}' from memory");
 
             else if (node.NodeType == NodeType.File)
-                Log.Information($"'{callPath}' '{_userEntity.IdentityAlias}' file '{node.Path}'");
+                Log.Information($"'{callPath}' '{_userEntity.IdentityAlias}' file '{node.Path}' from memory");
 
             else
                 throw new NotImplementedException();
@@ -128,15 +132,18 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
 
         protected override NodeContent GetContent(NodeBase node, NodeContentParameters contentParameters)
         {
-            //error
             if (!node.Exists())
                 return NodeContent.CreateDelayedWriteContent(new MemoryStream());
+
+            var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
 
             var resultStream = new MemoryStream();
             _store[node].Content.CopyTo(resultStream);
 
             resultStream.Position = 0;
             _store[node].Content.Position = 0;
+
+            Log.Information($"'{callPath}' '{_userEntity.IdentityAlias}' file '{node.Path}' from memory");
 
             return contentParameters.AccessType == NodeContentAccess.Read
                 ? NodeContent.CreateReadOnlyContent(resultStream)
@@ -187,7 +194,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
             _store[node.Parent].Children.Remove(node);
             _path.Remove(node.Path);
 
-            Log.Information($"'{callPath}' '{_userEntity.IdentityAlias}' from '{node.Path}' to '{newNode.Path}'");
+            Log.Information($"'{callPath}' '{_userEntity.IdentityAlias}' from '{node.Path}' to '{newNode.Path}' in memory");
 
             return newNode;
         }
@@ -205,7 +212,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
 
             _store[node].Content = newStream;
 
-            Log.Information($"'{callPath}' '{_userEntity.IdentityAlias}' file '{node.Path}'");
+            Log.Information($"'{callPath}' '{_userEntity.IdentityAlias}' file '{node.Path}' to memory");
 
             return node;
         }

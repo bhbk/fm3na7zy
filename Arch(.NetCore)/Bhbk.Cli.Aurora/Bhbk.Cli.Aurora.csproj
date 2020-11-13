@@ -7,9 +7,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Bhbk.Lib.CommandLine" Version="2020.11.11.1800" />
-    <PackageReference Include="Bhbk.Lib.Cryptography" Version="2020.11.11.1800" />
-    <PackageReference Include="Bhbk.Lib.Identity" Version="2020.11.11.1800" />
+    <PackageReference Include="Bhbk.Lib.CommandLine" Version="2020.11.12.1900" />
+    <PackageReference Include="Bhbk.Lib.Cryptography" Version="2020.11.12.1900" />
+    <PackageReference Include="Bhbk.Lib.Identity" Version="2020.11.12.1900" />
     <PackageReference Include="ManyConsole" Version="2.0.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.1">

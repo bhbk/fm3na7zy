@@ -7,9 +7,9 @@
 
   <ItemGroup>
     <PackageReference Include="AutoMapper" Version="10.1.1" />
-    <PackageReference Include="Bhbk.Lib.Common" Version="2020.11.11.1800" />
-    <PackageReference Include="Bhbk.Lib.Cryptography" Version="2020.11.11.1800" />
-    <PackageReference Include="Bhbk.Lib.Hosting" Version="2020.11.11.1800" />
+    <PackageReference Include="Bhbk.Lib.Common" Version="2020.11.12.1900" />
+    <PackageReference Include="Bhbk.Lib.Cryptography" Version="2020.11.12.1900" />
+    <PackageReference Include="Bhbk.Lib.Hosting" Version="2020.11.12.1900" />
     <PackageReference Include="CronExpressionDescriptor" Version="2.16.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication" Version="2.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="5.0.1" />

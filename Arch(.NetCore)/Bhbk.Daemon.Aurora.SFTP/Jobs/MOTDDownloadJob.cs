@@ -30,8 +30,11 @@ namespace Bhbk.Daemon.Aurora.SFTP.Jobs
             {
                 Log.Error(ex.ToString());
             }
+            finally
+            {
+                GC.Collect();
+            }
 
-            GC.Collect();
             Log.Information($"'{callPath}' completed");
             Log.Information($"'{callPath}' will run again at {context.NextFireTimeUtc.Value.LocalDateTime}");
 

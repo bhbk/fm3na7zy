@@ -39,14 +39,11 @@ namespace Bhbk.Lib.Aurora.Domain.Primitives
             "            <table cellpadding=\"0\" cellspacing=\"0\" border=\"0\" width=\"100%\">" +
             "              <tr style=\"font-size: 16px; font-weight: 300; color: #404040; font-family: 'Open Sans', 'HelveticaNeue-Light', 'Helvetica Neue Light', 'Helvetica Neue', Helvetica, Arial, 'Lucida Grande', sans-serif; line-height: 26px; text-align: left;\">" +
             "                <td>" +
+            "                  <br>Hi " + string.Format("{0} {1}", firstName, lastName) + ". The user " + userName + " accessed " + serverName + " via SFTP." +
             "                  <br>" +
-            "                  <br>Hi " + string.Format("{0} {1}", firstName, lastName) + "." +
-            "                  <br>" +
-            "                  <br>The user " + userName + " accessed " + serverName + " via SFTP." +
             "                  <br>The file /" + fullPath + " uploaded is " + bytesTransferred + " bytes." +
             "                  <br>" +
             "                  <br>The data within will be processed without any more humans or files involved now. Thank-you." +
-            "                  <br>" +
             "                </td>" +
             "              </tr>" +
             "              <tr>" +
@@ -61,11 +58,11 @@ namespace Bhbk.Lib.Aurora.Domain.Primitives
             "</html>";
         }
 
-        public static string NotifyTextOnFileUpload(string serverName, string userName, string fullPath, string bytesTransferred)
+        public static string NotifyTextOnFileUpload(string serverName, string userName, string firstName, string lastName, string fullPath, string bytesTransferred)
         {
-            return $"The user {userName} accessed {serverName} via SFTP. " + Environment.NewLine
-                + $"The file /{fullPath} uploaded is {bytesTransferred} bytes. " + Environment.NewLine
-                + $"The data within will be processed without any more humans or files involved now. Thank-you. ";
+            return $"Hi {string.Format("{0} {1}", firstName, lastName)}. The user {userName} accessed {serverName} via SFTP. " + Environment.NewLine
+                + Environment.NewLine + $"The file /{fullPath} uploaded is {bytesTransferred} bytes. " + Environment.NewLine
+                + Environment.NewLine + $"The data within will be processed without any more humans or files involved now. Thank-you. ";
         }
 
         #endregion
