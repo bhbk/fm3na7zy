@@ -16,13 +16,13 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 using System.Security.Principal;
 
 namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
 {
     internal class SmbReadOnlyFileSystem : ReadOnlyFileSystemProvider, IDisposable
     {
-        private readonly IServiceScopeFactory _factory;
         private readonly SafeAccessTokenHandle _userToken;
         private readonly tbl_User _userEntity;
         private readonly string _userMount;
@@ -39,7 +39,6 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 throw new NotImplementedException();
 
-            _factory = factory;
             _userEntity = userEntity;
 
             using (var scope = factory.CreateScope())
@@ -81,6 +80,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
             }
         }
 
+        [SupportedOSPlatform("windows")]
         protected override bool Exists(NodePath path, NodeType nodeType)
         {
             try
@@ -119,6 +119,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
             }
         }
 
+        [SupportedOSPlatform("windows")]
         protected override NodeAttributes GetAttributes(NodeBase node)
         {
             if (!node.Exists())
@@ -158,6 +159,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
             }
         }
 
+        [SupportedOSPlatform("windows")]
         protected override NodeBase GetChild(string name, DirectoryNode parent)
         {
             try
@@ -190,6 +192,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
             }
         }
 
+        [SupportedOSPlatform("windows")]
         protected override IEnumerable<NodeBase> GetChildren(DirectoryNode parent, NodeType nodeType)
         {
             if (!parent.Exists())
@@ -229,6 +232,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
             }
         }
 
+        [SupportedOSPlatform("windows")]
         protected override NodeContent GetContent(NodeBase node, NodeContentParameters contentParameters)
         {
             if (!node.Exists())
@@ -264,6 +268,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
             }
         }
 
+        [SupportedOSPlatform("windows")]
         protected override long GetLength(NodeBase node)
         {
             try
@@ -291,6 +296,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
             }
         }
 
+        [SupportedOSPlatform("windows")]
         protected override NodeTimeInfo GetTimeInfo(NodeBase node)
         {
             try

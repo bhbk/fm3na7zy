@@ -146,8 +146,7 @@
     <Build Include="svc\Stored Procedures\usp_Setting_Delete.sql" />
     <Build Include="svc\Stored Procedures\usp_Setting_Insert.sql" />
     <Build Include="svc\Stored Procedures\usp_Setting_Update.sql" />
-  </ItemGroup>
-  <ItemGroup>
-    <RefactorLog Include="Bhbk.Mssql.Aurora.refactorlog" />
+    <Build Include="dbo\Tables\tbl_UserAlert.sql" />
+    <Build Include="svc\Views\uvw_UserAlert.sql" />
   </ItemGroup>
 </Project>

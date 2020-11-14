@@ -24,6 +24,7 @@ namespace Bhbk.Lib.Aurora.Data.Models_DIRECT
         public virtual DbSet<tbl_PublicKey> tbl_PublicKeys { get; set; }
         public virtual DbSet<tbl_Setting> tbl_Settings { get; set; }
         public virtual DbSet<tbl_User> tbl_Users { get; set; }
+        public virtual DbSet<tbl_UserAlert> tbl_UserAlerts { get; set; }
         public virtual DbSet<tbl_UserFile> tbl_UserFiles { get; set; }
         public virtual DbSet<tbl_UserFolder> tbl_UserFolders { get; set; }
         public virtual DbSet<tbl_UserMount> tbl_UserMounts { get; set; }
@@ -220,6 +221,39 @@ namespace Bhbk.Lib.Aurora.Data.Models_DIRECT
                     .IsRequired()
                     .HasMaxLength(128)
                     .IsUnicode(false);
+            });
+
+            modelBuilder.Entity<tbl_UserAlert>(entity =>
+            {
+                entity.ToTable("tbl_UserAlert");
+
+                entity.HasIndex(e => e.Id, "IX_tbl_UserAlert")
+                    .IsUnique();
+
+                entity.Property(e => e.Id).ValueGeneratedNever();
+
+                entity.Property(e => e.ToEmailAddress)
+                    .HasMaxLength(256)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.ToFirstName)
+                    .IsRequired()
+                    .HasMaxLength(128)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.ToLastName)
+                    .IsRequired()
+                    .HasMaxLength(128)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.ToPhoneNumber)
+                    .HasMaxLength(12)
+                    .IsUnicode(false);
+
+                entity.HasOne(d => d.Identity)
+                    .WithMany(p => p.tbl_UserAlerts)
+                    .HasForeignKey(d => d.IdentityId)
+                    .HasConstraintName("FK_tbl_UserAlert_tbl_User");
             });
 
             modelBuilder.Entity<tbl_UserFile>(entity =>

@@ -17,12 +17,19 @@ namespace Bhbk.Cli.Aurora.Commands
 {
     public class SysKeyDeleteCommands : ConsoleCommand
     {
-        private static IConfiguration _conf;
-        private static IUnitOfWork _uow;
-        private static bool _delete = false, _deleteAll = false;
+        private readonly IConfiguration _conf;
+        private readonly IUnitOfWork _uow;
+        private bool _delete = false, _deleteAll = false;
 
         public SysKeyDeleteCommands()
         {
+            _conf = (IConfiguration)new ConfigurationBuilder()
+                .AddJsonFile("clisettings.json", optional: false, reloadOnChange: true)
+                .Build();
+
+            var instance = new ContextService(InstanceContext.DeployedOrLocal);
+            _uow = new UnitOfWork(_conf["Databases:AuroraEntities"], instance);
+
             IsCommand("sys-key-delete", "Delete private/public key for system");
 
             HasOption("d|delete", "Delete a public/private key pair for system", arg =>
@@ -34,13 +41,6 @@ namespace Bhbk.Cli.Aurora.Commands
             {
                 _deleteAll = true;
             });
-
-            _conf = (IConfiguration)new ConfigurationBuilder()
-                .AddJsonFile("clisettings.json", optional: false, reloadOnChange: true)
-                .Build();
-
-            var instance = new ContextService(InstanceContext.DeployedOrLocal);
-            _uow = new UnitOfWork(_conf["Databases:AuroraEntities"], instance);
         }
 
         public override int Run(string[] remainingArguments)
@@ -54,12 +54,14 @@ namespace Bhbk.Cli.Aurora.Commands
                             x => x.PrivateKey,
                         });
 
+                ConsoleHelper.StdOutKeyPairs(keys.OrderBy(x => x.CreatedUtc));
+
                 if (_delete)
                 {
-                    ConsoleHelper.StdOutKeyPairs(keys.OrderBy(x => x.CreatedUtc));
-
+                    Console.Out.WriteLine();
                     Console.Out.Write("  *** Enter GUID of public key to delete *** : ");
                     var input = Guid.Parse(StandardInput.GetInput());
+                    Console.Out.WriteLine();
 
                     var pubKey = _uow.PublicKeys.Get(QueryExpressionFactory.GetQueryExpression<tbl_PublicKey>()
                         .Where(x => x.Id == input).ToLambda(),
@@ -81,8 +83,6 @@ namespace Bhbk.Cli.Aurora.Commands
                 }
                 else if (_deleteAll)
                 {
-                    ConsoleHelper.StdOutKeyPairs(keys.OrderBy(x => x.CreatedUtc));
-
                     _uow.PublicKeys.Delete(QueryExpressionFactory.GetQueryExpression<tbl_PublicKey>()
                         .Where(x => x.IdentityId == null && x.IsDeletable == false).ToLambda());
 
@@ -91,8 +91,6 @@ namespace Bhbk.Cli.Aurora.Commands
 
                     _uow.Commit();
                 }
-                else
-                    ConsoleHelper.StdOutKeyPairs(keys.OrderBy(x => x.CreatedUtc));
 
                 return StandardOutput.FondFarewell();
             }

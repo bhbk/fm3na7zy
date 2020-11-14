@@ -14,6 +14,7 @@ namespace Bhbk.Lib.Aurora.Data.Models_DIRECT
             tbl_PrivateKeys = new HashSet<tbl_PrivateKey>();
             tbl_PublicKeys = new HashSet<tbl_PublicKey>();
             tbl_Settings = new HashSet<tbl_Setting>();
+            tbl_UserAlerts = new HashSet<tbl_UserAlert>();
             tbl_UserFiles = new HashSet<tbl_UserFile>();
             tbl_UserFolders = new HashSet<tbl_UserFolder>();
         }
@@ -36,6 +37,7 @@ namespace Bhbk.Lib.Aurora.Data.Models_DIRECT
         public virtual ICollection<tbl_PrivateKey> tbl_PrivateKeys { get; set; }
         public virtual ICollection<tbl_PublicKey> tbl_PublicKeys { get; set; }
         public virtual ICollection<tbl_Setting> tbl_Settings { get; set; }
+        public virtual ICollection<tbl_UserAlert> tbl_UserAlerts { get; set; }
         public virtual ICollection<tbl_UserFile> tbl_UserFiles { get; set; }
         public virtual ICollection<tbl_UserFolder> tbl_UserFolders { get; set; }
     }

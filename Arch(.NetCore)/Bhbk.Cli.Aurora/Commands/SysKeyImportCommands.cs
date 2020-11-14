@@ -18,13 +18,20 @@ namespace Bhbk.Cli.Aurora.Commands
 {
     public class SysKeyImportCommands : ConsoleCommand
     {
-        private static IConfiguration _conf;
-        private static IUnitOfWork _uow;
-        private static FileInfo _path;
-        private static string _privKeyPass;
+        private readonly IConfiguration _conf;
+        private readonly IUnitOfWork _uow;
+        private FileInfo _path;
+        private string _privKeyPass;
 
         public SysKeyImportCommands()
         {
+            _conf = (IConfiguration)new ConfigurationBuilder()
+                .AddJsonFile("clisettings.json", optional: false, reloadOnChange: true)
+                .Build();
+
+            var instance = new ContextService(InstanceContext.DeployedOrLocal);
+            _uow = new UnitOfWork(_conf["Databases:AuroraEntities"], instance);
+
             IsCommand("sys-key-import", "Import private/public key for system");
 
             HasRequiredOption("f|file=", "Enter file for import", arg =>
@@ -36,13 +43,6 @@ namespace Bhbk.Cli.Aurora.Commands
             {
                 _privKeyPass = arg;
             });
-
-            _conf = (IConfiguration)new ConfigurationBuilder()
-                .AddJsonFile("clisettings.json", optional: false, reloadOnChange: true)
-                .Build();
-
-            var instance = new ContextService(InstanceContext.DeployedOrLocal);
-            _uow = new UnitOfWork(_conf["Databases:AuroraEntities"], instance);
         }
 
         public override int Run(string[] remainingArguments)

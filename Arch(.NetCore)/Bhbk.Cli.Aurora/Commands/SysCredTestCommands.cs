@@ -2,15 +2,14 @@
 using Bhbk.Lib.CommandLine.IO;
 using ManyConsole;
 using System;
+using System.Runtime.Versioning;
 using System.Security.Principal;
 
 namespace Bhbk.Cli.Aurora.Commands
 {
     public class SysCredTestCommands : ConsoleCommand
     {
-        private static string _credDomain;
-        private static string _credLogin;
-        private static string _credPass;
+        private string _credDomain, _credLogin, _credPass;
 
         public SysCredTestCommands()
         {
@@ -32,6 +31,7 @@ namespace Bhbk.Cli.Aurora.Commands
             });
         }
 
+        [SupportedOSPlatform("windows")]
         public override int Run(string[] remainingArguments)
         {
             try

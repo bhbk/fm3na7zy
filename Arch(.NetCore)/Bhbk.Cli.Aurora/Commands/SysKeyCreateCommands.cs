@@ -1,4 +1,5 @@
-﻿using Bhbk.Lib.Aurora.Data.Infrastructure_DIRECT;
+﻿using Bhbk.Cli.Aurora.Helpers;
+using Bhbk.Lib.Aurora.Data.Infrastructure_DIRECT;
 using Bhbk.Lib.Aurora.Data.Models_DIRECT;
 using Bhbk.Lib.Aurora.Domain.Helpers;
 using Bhbk.Lib.CommandLine.IO;
@@ -12,21 +13,30 @@ using Microsoft.Extensions.Configuration;
 using Rebex.Net;
 using Rebex.Security.Certificates;
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 
 namespace Bhbk.Cli.Aurora.Commands
 {
     public class SysKeyCreateCommands : ConsoleCommand
     {
-        private static IConfiguration _conf;
-        private static IUnitOfWork _uow;
-        private static int _privKeySize;
-        private static string _privKeyPass;
-        private static SshHostKeyAlgorithm _keyAlgo;
-        private static string _keyAlgoList = string.Join(", ", Enum.GetNames(typeof(SshHostKeyAlgorithm)));
+        private readonly IConfiguration _conf;
+        private readonly IUnitOfWork _uow;
+        private SshHostKeyAlgorithm _keyAlgo;
+        private readonly string _keyAlgoList = string.Join(", ", Enum.GetNames(typeof(SshHostKeyAlgorithm)));
+        private string _privKeyPass;
+        private int _privKeySize;
 
         public SysKeyCreateCommands()
         {
+            _conf = (IConfiguration)new ConfigurationBuilder()
+                .AddJsonFile("clisettings.json", optional: false, reloadOnChange: true)
+                .Build();
+
+            var instance = new ContextService(InstanceContext.DeployedOrLocal);
+            _uow = new UnitOfWork(_conf["Databases:AuroraEntities"], instance);
+
             IsCommand("sys-key-create", "Create private/public key for system");
 
             HasRequiredOption("a|alg=", "Enter key algorithm", arg =>
@@ -45,13 +55,6 @@ namespace Bhbk.Cli.Aurora.Commands
             {
                 _privKeyPass = arg;
             });
-
-            _conf = (IConfiguration)new ConfigurationBuilder()
-                .AddJsonFile("clisettings.json", optional: false, reloadOnChange: true)
-                .Build();
-
-            var instance = new ContextService(InstanceContext.DeployedOrLocal);
-            _uow = new UnitOfWork(_conf["Databases:AuroraEntities"], instance);
         }
 
         public override int Run(string[] remainingArguments)
@@ -72,11 +75,14 @@ namespace Bhbk.Cli.Aurora.Commands
                 var privKey = KeyHelper.CreatePrivKey(_conf, _uow, _keyAlgo, _privKeySize, _privKeyPass, SignatureHashAlgorithm.SHA256);
 
                 var pubKey = _uow.PublicKeys.Get(QueryExpressionFactory.GetQueryExpression<tbl_PublicKey>()
-                    .Where(x => x.PrivateKeyId == privKey.Id).ToLambda())
+                    .Where(x => x.PrivateKeyId == privKey.Id).ToLambda(),
+                        new List<Expression<Func<tbl_PublicKey, object>>>()
+                        {
+                            x => x.PrivateKey,
+                        })
                     .Single();
 
-                Console.Out.WriteLine($"{privKey.KeyValue}");
-                Console.Out.WriteLine($"{pubKey.KeyValue}");
+                ConsoleHelper.StdOutKeyPairs(new List<tbl_PublicKey>() { pubKey });
 
                 return StandardOutput.FondFarewell();
             }

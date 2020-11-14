@@ -17,9 +17,6 @@
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="5.0.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting.Systemd" Version="5.0.1" />
     <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="5.0.1" />
-    <PackageReference Include="Quartz" Version="3.2.3" />
-    <PackageReference Include="Quartz.AspNetCore" Version="3.2.3" />
-    <PackageReference Include="Quartz.Extensions.DependencyInjection" Version="3.2.3" />
     <PackageReference Include="Rebex.Elliptic.Castle" Version="1.2.1" />
     <PackageReference Include="Rebex.Elliptic.Curve25519" Version="1.2.1" />
     <PackageReference Include="Rebex.Elliptic.Ed25519" Version="1.2.1" />

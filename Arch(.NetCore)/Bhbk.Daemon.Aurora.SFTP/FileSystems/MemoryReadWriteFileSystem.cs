@@ -172,8 +172,8 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
         {
             var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
 
-            NodeBase newNode = null;
-            MemoryNodeData newNodeData = null;
+            NodeBase newNode;
+            MemoryNodeData newNodeData;
 
             if (node.NodeType == NodeType.Directory)
                 newNode = new DirectoryNode(newName, node.Parent);

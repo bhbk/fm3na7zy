@@ -1,4 +1,5 @@
-﻿using Bhbk.Lib.Aurora.Data.Infrastructure_DIRECT;
+﻿using Bhbk.Cli.Aurora.Helpers;
+using Bhbk.Lib.Aurora.Data.Infrastructure_DIRECT;
 using Bhbk.Lib.Aurora.Data.Models_DIRECT;
 using Bhbk.Lib.Aurora.Primitives.Enums;
 using Bhbk.Lib.CommandLine.IO;
@@ -7,19 +8,27 @@ using Bhbk.Lib.Common.Services;
 using ManyConsole;
 using Microsoft.Extensions.Configuration;
 using System;
+using System.Collections.Generic;
 
 namespace Bhbk.Cli.Aurora.Commands
 {
     public class SysConfCreateCommands : ConsoleCommand
     {
-        private static IConfiguration _conf;
-        private static IUnitOfWork _uow;
-        private static ConfigType _configType;
-        private static string _configValue;
-        private static string _configTypeList = string.Join(", ", Enum.GetNames(typeof(ConfigType)));
+        private readonly IConfiguration _conf;
+        private readonly IUnitOfWork _uow;
+        private ConfigType _configType;
+        private readonly string _configTypeList = string.Join(", ", Enum.GetNames(typeof(ConfigType)));
+        private string _configValue;
 
         public SysConfCreateCommands()
         {
+            _conf = (IConfiguration)new ConfigurationBuilder()
+                .AddJsonFile("clisettings.json", optional: false, reloadOnChange: true)
+                .Build();
+
+            var instance = new ContextService(InstanceContext.DeployedOrLocal);
+            _uow = new UnitOfWork(_conf["Databases:AuroraEntities"], instance);
+
             IsCommand("sys-conf-create", "Create config key/value pair");
 
             HasRequiredOption("k|key=", "Enter config key", arg =>
@@ -32,20 +41,13 @@ namespace Bhbk.Cli.Aurora.Commands
             {
                 _configValue = arg;
             });
-
-            _conf = (IConfiguration)new ConfigurationBuilder()
-                .AddJsonFile("clisettings.json", optional: false, reloadOnChange: true)
-                .Build();
-
-            var instance = new ContextService(InstanceContext.DeployedOrLocal);
-            _uow = new UnitOfWork(_conf["Databases:AuroraEntities"], instance);
         }
 
         public override int Run(string[] remainingArguments)
         {
             try
             {
-                _uow.Settings.Create(
+                var config = _uow.Settings.Create(
                     new tbl_Setting
                     {
                         Id = Guid.NewGuid(),
@@ -55,6 +57,8 @@ namespace Bhbk.Cli.Aurora.Commands
                         CreatedUtc = DateTime.UtcNow,
                     });
                 _uow.Commit();
+
+                ConsoleHelper.StdOutSettings(new List<tbl_Setting>() { config });
 
                 return StandardOutput.FondFarewell();
             }

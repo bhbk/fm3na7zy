@@ -45,6 +45,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
         private readonly FileServer _server;
         private IEnumerable<string> _binding;
         private LogLevel _level;
+        private bool _disposed;
 
         public Daemon(IServiceScopeFactory factory)
         {
@@ -252,6 +253,45 @@ namespace Bhbk.Daemon.Aurora.SFTP
                 {
                     var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
 
+                    using (var scope = _factory.CreateScope())
+                    {
+                        var conf = scope.ServiceProvider.GetRequiredService<IConfiguration>();
+                        var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+                        var admin = scope.ServiceProvider.GetRequiredService<IAdminService>();
+                        var alert = scope.ServiceProvider.GetRequiredService<IAlertService>();
+
+                        var user = uow.Users.Get(QueryExpressionFactory.GetQueryExpression<tbl_User>()
+                            .Where(x => x.IdentityAlias == ServerSession.Current.UserName).ToLambda())
+                            .Single();
+
+                        foreach (var email in uow.UserAlerts.Get(QueryExpressionFactory.GetQueryExpression<tbl_UserAlert>()
+                            .Where(x => x.IdentityId == user.IdentityId && !string.IsNullOrWhiteSpace(x.ToEmailAddress) && x.OnDelete == true).ToLambda()))
+                        {
+                            alert.Enqueue_EmailV1(new EmailV1()
+                            {
+                                FromEmail = conf["Notifications:EmailFromAddress"],
+                                FromDisplay = conf["Notifications:EmailFromDisplayName"],
+                                ToEmail = email.ToEmailAddress,
+                                ToDisplay = $"{email.ToFirstName} {email.ToLastName}",
+                                Subject = "File Delete Alert",
+                                Body = Templates.NotifyEmailOnFileDelete(conf["Daemons:SftpService:Dns"], ServerSession.Current.UserName,
+                                    email.ToFirstName, email.ToLastName, e.ResultNode.Path.StringPath)
+                            });
+                        }
+
+                        foreach (var text in uow.UserAlerts.Get(QueryExpressionFactory.GetQueryExpression<tbl_UserAlert>()
+                            .Where(x => x.IdentityId == user.IdentityId && !string.IsNullOrWhiteSpace(x.ToPhoneNumber) && x.OnDelete == true).ToLambda()))
+                        {
+                            alert.Enqueue_TextV1(new TextV1()
+                            {
+                                FromPhoneNumber = conf["Notifications:TextFromPhoneNumber"],
+                                ToPhoneNumber = text.ToPhoneNumber,
+                                Body = Templates.NotifyTextOnFileDelete(conf["Daemons:SftpService:Dns"], ServerSession.Current.UserName,
+                                    text.ToFirstName, text.ToLastName, e.ResultNode.Path.StringPath)
+                            });
+                        }
+                    }
+
                     Log.Information($"'{callPath}' '{ServerSession.Current.UserName}' file '{e.ResultNode.Path.StringPath}'");
                 }
             }
@@ -360,19 +400,19 @@ namespace Bhbk.Daemon.Aurora.SFTP
 
                 using (var scope = _factory.CreateScope())
                 {
-                    var conf = scope.ServiceProvider.GetRequiredService<IConfiguration>();
                     var log = scope.ServiceProvider.GetRequiredService<ILogger>();
+                    var conf = scope.ServiceProvider.GetRequiredService<IConfiguration>();
                     var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+                    var admin = scope.ServiceProvider.GetRequiredService<IAdminService>();
+                    var sts = scope.ServiceProvider.GetRequiredService<IStsService>();
+
                     var user = uow.Users.Get(QueryExpressionFactory.GetQueryExpression<tbl_User>()
-                        .Where(x => x.IdentityAlias == e.UserName).ToLambda(),
+                        .Where(x => x.IdentityAlias == e.UserName && x.IsEnabled).ToLambda(),
                             new List<Expression<Func<tbl_User, object>>>()
                             {
                                 x => x.tbl_PublicKeys,
                                 x => x.tbl_UserMount,
                             }).SingleOrDefault();
-
-                    var admin = scope.ServiceProvider.GetRequiredService<IAdminService>();
-                    var sts = scope.ServiceProvider.GetRequiredService<IStsService>();
 
                     if (e.Key != null)
                     {
@@ -520,7 +560,46 @@ namespace Bhbk.Daemon.Aurora.SFTP
             {
                 var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
 
-                Log.Information($"'{callPath}' '{ServerSession.Current.UserName}' file '/{e.FullPath}' bytes {e.BytesTransferred} to {e.Session.ClientEndPoint}");
+                using (var scope = _factory.CreateScope())
+                {
+                    var conf = scope.ServiceProvider.GetRequiredService<IConfiguration>();
+                    var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+                    var admin = scope.ServiceProvider.GetRequiredService<IAdminService>();
+                    var alert = scope.ServiceProvider.GetRequiredService<IAlertService>();
+
+                    var user = uow.Users.Get(QueryExpressionFactory.GetQueryExpression<tbl_User>()
+                        .Where(x => x.IdentityAlias == ServerSession.Current.UserName).ToLambda())
+                        .Single();
+
+                    foreach (var email in uow.UserAlerts.Get(QueryExpressionFactory.GetQueryExpression<tbl_UserAlert>()
+                        .Where(x => x.IdentityId == user.IdentityId && !string.IsNullOrWhiteSpace(x.ToEmailAddress) && x.OnDownload == true).ToLambda()))
+                    {
+                        alert.Enqueue_EmailV1(new EmailV1()
+                        {
+                            FromEmail = conf["Notifications:EmailFromAddress"],
+                            FromDisplay = conf["Notifications:EmailFromDisplayName"],
+                            ToEmail = email.ToEmailAddress,
+                            ToDisplay = $"{email.ToFirstName} {email.ToLastName}",
+                            Subject = "File Download Alert",
+                            Body = Templates.NotifyEmailOnFileDownload(conf["Daemons:SftpService:Dns"], ServerSession.Current.UserName,
+                                email.ToFirstName, email.ToLastName, "/" + e.FullPath, e.BytesTransferred.ToString(), e.Session.ClientEndPoint.ToString())
+                        });
+                    }
+
+                    foreach (var text in uow.UserAlerts.Get(QueryExpressionFactory.GetQueryExpression<tbl_UserAlert>()
+                        .Where(x => x.IdentityId == user.IdentityId && !string.IsNullOrWhiteSpace(x.ToPhoneNumber) && x.OnDownload == true).ToLambda()))
+                    {
+                        alert.Enqueue_TextV1(new TextV1()
+                        {
+                            FromPhoneNumber = conf["Notifications:TextFromPhoneNumber"],
+                            ToPhoneNumber = text.ToPhoneNumber,
+                            Body = Templates.NotifyTextOnFileDownload(conf["Daemons:SftpService:Dns"], ServerSession.Current.UserName,
+                                text.ToFirstName, text.ToLastName, "/" + e.FullPath, e.BytesTransferred.ToString(), e.Session.ClientEndPoint.ToString())
+                        });
+                    }
+                }
+
+                Log.Information($"'{callPath}' '{ServerSession.Current.UserName}' file '/{e.FullPath}' bytes {e.BytesTransferred} from {e.Session.ClientEndPoint}");
             }
             catch (Exception ex)
             {
@@ -538,36 +617,39 @@ namespace Bhbk.Daemon.Aurora.SFTP
                 {
                     var conf = scope.ServiceProvider.GetRequiredService<IConfiguration>();
                     var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+                    var admin = scope.ServiceProvider.GetRequiredService<IAdminService>();
+                    var alert = scope.ServiceProvider.GetRequiredService<IAlertService>();
 
                     var user = uow.Users.Get(QueryExpressionFactory.GetQueryExpression<tbl_User>()
                         .Where(x => x.IdentityAlias == ServerSession.Current.UserName).ToLambda())
                         .Single();
 
-                    var admin = scope.ServiceProvider.GetRequiredService<IAdminService>();
-                    var alert = scope.ServiceProvider.GetRequiredService<IAlertService>();
-
-                    var identity = admin.User_GetV1(user.IdentityId.ToString()).Result;
-
-                    alert.Enqueue_EmailV1(new EmailV1()
+                    foreach (var email in uow.UserAlerts.Get(QueryExpressionFactory.GetQueryExpression<tbl_UserAlert>()
+                        .Where(x => x.IdentityId == user.IdentityId && !string.IsNullOrWhiteSpace(x.ToEmailAddress) && x.OnUpload == true).ToLambda()))
                     {
-                        FromEmail = conf["Notifications:EmailFromAddress"],
-                        FromDisplay = conf["Notifications:EmailFromDisplayName"],
-                        ToId = identity.Id,
-                        ToEmail = identity.Email,
-                        ToDisplay = $"{identity.FirstName} {identity.LastName}",
-                        Subject = "File Upload Notify",
-                        Body = Templates.NotifyEmailOnFileUpload(conf["Daemons:SftpService:Dns"],
-                            identity.UserName, identity.FirstName, identity.LastName, e.FullPath, e.BytesTransferred.ToString())
-                    });
+                        alert.Enqueue_EmailV1(new EmailV1()
+                        {
+                            FromEmail = conf["Notifications:EmailFromAddress"],
+                            FromDisplay = conf["Notifications:EmailFromDisplayName"],
+                            ToEmail = email.ToEmailAddress,
+                            ToDisplay = $"{email.ToFirstName} {email.ToLastName}",
+                            Subject = "File Upload Alert",
+                            Body = Templates.NotifyEmailOnFileUpload(conf["Daemons:SftpService:Dns"], ServerSession.Current.UserName,
+                                email.ToFirstName, email.ToLastName, "/" + e.FullPath, e.BytesTransferred.ToString(), e.Session.ClientEndPoint.ToString())
+                        });
+                    }
 
-                    alert.Enqueue_TextV1(new TextV1()
+                    foreach (var text in uow.UserAlerts.Get(QueryExpressionFactory.GetQueryExpression<tbl_UserAlert>()
+                        .Where(x => x.IdentityId == user.IdentityId && !string.IsNullOrWhiteSpace(x.ToPhoneNumber) && x.OnUpload == true).ToLambda()))
                     {
-                        FromPhoneNumber = conf["Notifications:TextFromPhoneNumber"],
-                        ToId = identity.Id,
-                        ToPhoneNumber = identity.PhoneNumber,
-                        Body = Templates.NotifyTextOnFileUpload(conf["Daemons:SftpService:Dns"],
-                            identity.UserName, identity.FirstName, identity.LastName, e.FullPath, e.BytesTransferred.ToString())
-                    });
+                        alert.Enqueue_TextV1(new TextV1()
+                        {
+                            FromPhoneNumber = conf["Notifications:TextFromPhoneNumber"],
+                            ToPhoneNumber = text.ToPhoneNumber,
+                            Body = Templates.NotifyTextOnFileUpload(conf["Daemons:SftpService:Dns"], ServerSession.Current.UserName,
+                                text.ToFirstName, text.ToLastName, "/" + e.FullPath, e.BytesTransferred.ToString(), e.Session.ClientEndPoint.ToString())
+                        });
+                    }
                 }
 
                 Log.Information($"'{callPath}' '{ServerSession.Current.UserName}' file '/{e.FullPath}' bytes {e.BytesTransferred} from {e.Session.ClientEndPoint}");
@@ -595,9 +677,34 @@ namespace Bhbk.Daemon.Aurora.SFTP
             }
         }
 
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_disposed)
+            {
+                if (disposing)
+                {
+                    // TODO: dispose managed state (managed objects)
+                    _server.Dispose();
+                }
+
+                // TODO: free unmanaged resources (unmanaged objects) and override finalizer
+                // TODO: set large fields to null
+                _disposed = true;
+            }
+        }
+
+        // // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
+        // ~Daemon()
+        // {
+        //     // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+        //     Dispose(disposing: false);
+        // }
+
         public void Dispose()
         {
-            _server.Dispose();
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
         }
     }
 }

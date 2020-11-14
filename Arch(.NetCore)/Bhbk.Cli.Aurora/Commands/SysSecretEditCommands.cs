@@ -18,12 +18,19 @@ namespace Bhbk.Cli.Aurora.Commands
 {
     public class SysSecretEditCommands : ConsoleCommand
     {
-        private static IConfiguration _conf;
-        private static IUnitOfWork _uow;
-        private static string _secretCurrent, _secretNew;
+        private readonly IConfiguration _conf;
+        private readonly IUnitOfWork _uow;
+        private string _secretCurrent, _secretNew;
 
         public SysSecretEditCommands()
         {
+            _conf = (IConfiguration)new ConfigurationBuilder()
+                .AddJsonFile("clisettings.json", optional: false, reloadOnChange: true)
+                .Build();
+
+            var instance = new ContextService(InstanceContext.DeployedOrLocal);
+            _uow = new UnitOfWork(_conf["Databases:AuroraEntities"], instance);
+
             IsCommand("sys-secret-edit", "Edit secret used by system");
 
             HasOption("c|current=", "Enter current secret to encrypt passwords", arg =>
@@ -35,13 +42,6 @@ namespace Bhbk.Cli.Aurora.Commands
             {
                 _secretNew = arg;
             });
-
-            _conf = (IConfiguration)new ConfigurationBuilder()
-                .AddJsonFile("clisettings.json", optional: false, reloadOnChange: true)
-                .Build();
-
-            var instance = new ContextService(InstanceContext.DeployedOrLocal);
-            _uow = new UnitOfWork(_conf["Databases:AuroraEntities"], instance);
         }
 
         public override int Run(string[] remainingArguments)

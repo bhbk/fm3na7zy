@@ -20,27 +20,27 @@ namespace Bhbk.Cli.Aurora.Commands
 {
     public class UserKeyImportCommands : ConsoleCommand
     {
-        private static IConfiguration _conf;
-        private static IUnitOfWork _uow;
-        private static FileInfo _path;
-        private static tbl_User _user;
-        private static string _privKeyPass, _pubKeyComment;
+        private readonly IConfiguration _conf;
+        private readonly IUnitOfWork _uow;
+        private FileInfo _path;
+        private tbl_User _user;
+        private string _privKeyPass, _pubKeyComment;
 
         public UserKeyImportCommands()
         {
+            _conf = (IConfiguration)new ConfigurationBuilder()
+                .AddJsonFile("clisettings.json", optional: false, reloadOnChange: true)
+                .Build();
+
+            var instance = new ContextService(InstanceContext.DeployedOrLocal);
+            _uow = new UnitOfWork(_conf["Databases:AuroraEntities"], instance);
+
             IsCommand("user-key-import", "Import private/public key for user");
 
             HasRequiredOption("u|user=", "Enter user that exists already", arg =>
             {
                 if (string.IsNullOrEmpty(arg))
                     throw new ConsoleHelpAsException($"  *** No user name given ***");
-
-                _conf = (IConfiguration)new ConfigurationBuilder()
-                    .AddJsonFile("clisettings.json", optional: false, reloadOnChange: true)
-                    .Build();
-
-                var instance = new ContextService(InstanceContext.DeployedOrLocal);
-                _uow = new UnitOfWork(_conf["Databases:AuroraEntities"], instance);
 
                 _user = _uow.Users.Get(QueryExpressionFactory.GetQueryExpression<tbl_User>()
                     .Where(x => x.IdentityAlias == arg).ToLambda(),

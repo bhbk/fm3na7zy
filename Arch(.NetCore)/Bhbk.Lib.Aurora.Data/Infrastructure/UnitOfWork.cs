@@ -22,10 +22,11 @@ namespace Bhbk.Lib.Aurora.Data.Infrastructure
         public IGenericRepository<uvw_PrivateKey> PrivateKeys { get; private set; }
         public IGenericRepository<uvw_PublicKey> PublicKeys { get; private set; }
         public IGenericRepository<uvw_Setting> Settings { get; private set; }
+        public IGenericRepository<uvw_User> Users { get; private set; }
+        public IGenericRepository<uvw_UserAlert> UserAlerts { get; private set; }
         public IGenericRepository<uvw_UserFile> UserFiles { get; private set; }
         public IGenericRepository<uvw_UserFolder> UserFolders { get; private set; }
         public IGenericRepository<uvw_UserMount> UserMounts { get; private set; }
-        public IGenericRepository<uvw_User> Users { get; private set; }
 
         public UnitOfWork(string connection)
             : this(connection, new ContextService(InstanceContext.DeployedOrLocal)) { }
@@ -90,10 +91,11 @@ namespace Bhbk.Lib.Aurora.Data.Infrastructure
             PrivateKeys = new GenericRepository<uvw_PrivateKey>(_context);
             PublicKeys = new GenericRepository<uvw_PublicKey>(_context);
             Settings = new GenericRepository<uvw_Setting>(_context);
+            Users = new GenericRepository<uvw_User>(_context);
+            UserAlerts = new GenericRepository<uvw_UserAlert>(_context);
             UserFiles = new GenericRepository<uvw_UserFile>(_context);
             UserFolders = new GenericRepository<uvw_UserFolder>(_context);
             UserMounts = new GenericRepository<uvw_UserMount>(_context);
-            Users = new GenericRepository<uvw_User>(_context);
         }
 
         public void Commit()

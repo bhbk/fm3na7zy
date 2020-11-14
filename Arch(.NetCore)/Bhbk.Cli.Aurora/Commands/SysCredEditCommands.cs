@@ -1,4 +1,5 @@
-﻿using Bhbk.Lib.Aurora.Data.Infrastructure_DIRECT;
+﻿using Bhbk.Cli.Aurora.Helpers;
+using Bhbk.Lib.Aurora.Data.Infrastructure_DIRECT;
 using Bhbk.Lib.Aurora.Data.Models_DIRECT;
 using Bhbk.Lib.CommandLine.IO;
 using Bhbk.Lib.Common.Primitives.Enums;
@@ -9,20 +10,26 @@ using Bhbk.Lib.QueryExpression.Factories;
 using ManyConsole;
 using Microsoft.Extensions.Configuration;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Bhbk.Cli.Aurora.Commands
 {
     public class SysCredEditCommands : ConsoleCommand
     {
-        private static IConfiguration _conf;
-        private static IUnitOfWork _uow;
-        private static string _credDomain;
-        private static string _credLogin;
-        private static string _credPass;
+        private readonly IConfiguration _conf;
+        private readonly IUnitOfWork _uow;
+        private string _credDomain, _credLogin, _credPass;
         
         public SysCredEditCommands()
         {
+            _conf = (IConfiguration)new ConfigurationBuilder()
+                .AddJsonFile("clisettings.json", optional: false, reloadOnChange: true)
+                .Build();
+
+            var instance = new ContextService(InstanceContext.DeployedOrLocal);
+            _uow = new UnitOfWork(_conf["Databases:AuroraEntities"], instance);
+
             IsCommand("sys-cred-edit", "Edit system credential");
 
             HasRequiredOption("d|domain=", "Enter credential domain", arg =>
@@ -39,13 +46,6 @@ namespace Bhbk.Cli.Aurora.Commands
             {
                 _credPass = arg;
             });
-
-            _conf = (IConfiguration)new ConfigurationBuilder()
-                .AddJsonFile("clisettings.json", optional: false, reloadOnChange: true)
-                .Build();
-
-            var instance = new ContextService(InstanceContext.DeployedOrLocal);
-            _uow = new UnitOfWork(_conf["Databases:AuroraEntities"], instance);
         }
 
         public override int Run(string[] remainingArguments)
@@ -77,8 +77,10 @@ namespace Bhbk.Cli.Aurora.Commands
                 credential.Password = cipherText;
                 credential.LastUpdatedUtc = DateTime.UtcNow;
 
-                _uow.Credentials.Update(credential);
+                credential = _uow.Credentials.Update(credential);
                 _uow.Commit();
+
+                ConsoleHelper.StdOutCredentials(new List<tbl_Credential>() { credential });
 
                 return StandardOutput.FondFarewell();
             }

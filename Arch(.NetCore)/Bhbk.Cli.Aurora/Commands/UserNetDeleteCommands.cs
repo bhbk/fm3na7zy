@@ -17,26 +17,26 @@ namespace Bhbk.Cli.Aurora.Commands
 {
     public class UserNetDeleteCommands : ConsoleCommand
     {
-        private static IConfiguration _conf;
-        private static IUnitOfWork _uow;
-        private static tbl_User _user;
-        private static bool _delete = false, _deleteAll = false;
+        private readonly IConfiguration _conf;
+        private readonly IUnitOfWork _uow;
+        private tbl_User _user;
+        private bool _delete = false, _deleteAll = false;
 
         public UserNetDeleteCommands()
         {
+            _conf = (IConfiguration)new ConfigurationBuilder()
+                .AddJsonFile("clisettings.json", optional: false, reloadOnChange: true)
+                .Build();
+
+            var instance = new ContextService(InstanceContext.DeployedOrLocal);
+            _uow = new UnitOfWork(_conf["Databases:AuroraEntities"], instance);
+
             IsCommand("user-net-delete", "Delete allow/deny for user network");
 
             HasRequiredOption("u|user=", "Enter existing user", arg =>
             {
                 if (string.IsNullOrEmpty(arg))
                     throw new ConsoleHelpAsException($"  *** No user name given ***");
-
-                _conf = (IConfiguration)new ConfigurationBuilder()
-                    .AddJsonFile("clisettings.json", optional: false, reloadOnChange: true)
-                    .Build();
-
-                var instance = new ContextService(InstanceContext.DeployedOrLocal);
-                _uow = new UnitOfWork(_conf["Databases:AuroraEntities"], instance);
 
                 _user = _uow.Users.Get(QueryExpressionFactory.GetQueryExpression<tbl_User>()
                     .Where(x => x.IdentityAlias == arg).ToLambda(),
@@ -72,6 +72,7 @@ namespace Bhbk.Cli.Aurora.Commands
 
                 if (_delete)
                 {
+                    Console.Out.WriteLine();
                     Console.Out.Write("  *** Enter GUID of network to delete *** : ");
                     var input = Guid.Parse(StandardInput.GetInput());
 

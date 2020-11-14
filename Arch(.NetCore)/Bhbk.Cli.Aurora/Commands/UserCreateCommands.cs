@@ -20,27 +20,27 @@ namespace Bhbk.Cli.Aurora.Commands
 {
     public class UserCreateCommands : ConsoleCommand
     {
-        private static IConfiguration _conf;
-        private static IUnitOfWork _uow;
-        private static FileSystemTypes _fileSystem;
-        private static string _fileSystemList = string.Join(", ", Enum.GetNames(typeof(FileSystemTypes)));
-        private static string _userName;
+        private readonly IConfiguration _conf;
+        private readonly IUnitOfWork _uow;
+        private FileSystemTypes _fileSystem;
+        private readonly string _fileSystemList = string.Join(", ", Enum.GetNames(typeof(FileSystemTypes)));
+        private string _userName;
 
         public UserCreateCommands()
         {
+            _conf = (IConfiguration)new ConfigurationBuilder()
+                .AddJsonFile("clisettings.json", optional: false, reloadOnChange: true)
+                .Build();
+
+            var instance = new ContextService(InstanceContext.DeployedOrLocal);
+            _uow = new UnitOfWork(_conf["Databases:AuroraEntities"], instance);
+
             IsCommand("user-create", "Create user");
 
             HasRequiredOption("u|user=", "Enter user that does not exist already", arg =>
             {
                 if (string.IsNullOrEmpty(arg))
                     throw new ConsoleHelpAsException($"  *** No user given ***");
-
-                _conf = (IConfiguration)new ConfigurationBuilder()
-                    .AddJsonFile("clisettings.json", optional: false, reloadOnChange: true)
-                    .Build();
-
-                var instance = new ContextService(InstanceContext.DeployedOrLocal);
-                _uow = new UnitOfWork(_conf["Databases:AuroraEntities"], instance);
 
                 var user = _uow.Users.Get(QueryExpressionFactory.GetQueryExpression<tbl_User>()
                     .Where(x => x.IdentityAlias == arg).ToLambda()).SingleOrDefault();
@@ -62,8 +62,10 @@ namespace Bhbk.Cli.Aurora.Commands
         {
             try
             {
-                var admin = new AdminService(_conf);
-                admin.Grant = new ResourceOwnerGrantV2(_conf);
+                var admin = new AdminService(_conf)
+                {
+                    Grant = new ResourceOwnerGrantV2(_conf)
+                };
 
                 var users = admin.User_GetV1(new DataStateV1()
                 {
@@ -77,10 +79,11 @@ namespace Bhbk.Cli.Aurora.Commands
 
                 foreach(var entry in users.Data)
                     Console.Out.WriteLine($"  User '{entry.UserName}' with GUID '{entry.Id}'");
-
                 Console.Out.WriteLine();
+
                 Console.Out.Write("  *** Enter GUID of (identity) user to use *** : ");
                 var input = StandardInput.GetInput();
+                Console.Out.WriteLine();
 
                 var user = _uow.Users.Create(
                     new tbl_User
@@ -94,7 +97,6 @@ namespace Bhbk.Cli.Aurora.Commands
                         IsDeletable = false,
                         CreatedUtc = DateTime.UtcNow,
                     });
-
                 _uow.Commit();
 
                 return StandardOutput.FondFarewell();

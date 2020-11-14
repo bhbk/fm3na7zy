@@ -16,13 +16,13 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 using System.Security.Principal;
 
 namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
 {
     internal class SmbReadWriteFileSystem : ReadWriteFileSystemProvider, IDisposable
     {
-        private readonly IServiceScopeFactory _factory;
         private readonly SafeAccessTokenHandle _userToken;
         private readonly tbl_User _userEntity;
         private readonly string _userMount;
@@ -39,7 +39,6 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 throw new NotImplementedException();
 
-            _factory = factory;
             _userEntity = userEntity;
 
             using (var scope = factory.CreateScope())
@@ -81,6 +80,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
             }
         }
 
+        [SupportedOSPlatform("windows")]
         protected override DirectoryNode CreateDirectory(DirectoryNode parent, DirectoryNode child)
         {
             var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
@@ -105,6 +105,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
             }
         }
 
+        [SupportedOSPlatform("windows")]
         protected override FileNode CreateFile(DirectoryNode parent, FileNode child)
         {
             var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
@@ -135,6 +136,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
             }
         }
 
+        [SupportedOSPlatform("windows")]
         protected override NodeBase Delete(NodeBase node)
         {
             if (!node.Exists())
@@ -178,6 +180,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
             }
         }
 
+        [SupportedOSPlatform("windows")]
         protected override bool Exists(NodePath path, NodeType nodeType)
         {
             try
@@ -216,6 +219,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
             }
         }
 
+        [SupportedOSPlatform("windows")]
         protected override NodeAttributes GetAttributes(NodeBase node)
         {
             if (!node.Exists())
@@ -255,6 +259,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
             }
         }
 
+        [SupportedOSPlatform("windows")]
         protected override NodeBase GetChild(string name, DirectoryNode parent)
         {
             try
@@ -287,6 +292,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
             }
         }
 
+        [SupportedOSPlatform("windows")]
         protected override IEnumerable<NodeBase> GetChildren(DirectoryNode parent, NodeType nodeType)
         {
             if (!parent.Exists())
@@ -326,6 +332,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
             }
         }
 
+        [SupportedOSPlatform("windows")]
         protected override NodeContent GetContent(NodeBase node, NodeContentParameters contentParameters)
         {
             if (!node.Exists())
@@ -361,6 +368,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
             }
         }
 
+        [SupportedOSPlatform("windows")]
         protected override long GetLength(NodeBase node)
         {
             try
@@ -388,6 +396,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
             }
         }
 
+        [SupportedOSPlatform("windows")]
         protected override NodeTimeInfo GetTimeInfo(NodeBase node)
         {
             try
@@ -424,6 +433,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
             }
         }
 
+        [SupportedOSPlatform("windows")]
         protected override NodeBase Move(NodeBase toBeMovedNode, DirectoryNode targetDirectory)
         {
             var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
@@ -475,6 +485,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
             }
         }
 
+        [SupportedOSPlatform("windows")]
         protected override NodeBase Rename(NodeBase node, string newName)
         {
             var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
@@ -528,6 +539,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
             }
         }
 
+        [SupportedOSPlatform("windows")]
         protected override NodeBase SaveContent(NodeBase node, NodeContent content)
         {
             if (!node.Exists())
@@ -570,6 +582,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
             }
         }
 
+        [SupportedOSPlatform("windows")]
         protected override NodeBase SetAttributes(NodeBase node, NodeAttributes attributes)
         {
             try
@@ -604,6 +617,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
             }
         }
 
+        [SupportedOSPlatform("windows")]
         protected override NodeBase SetTimeInfo(NodeBase node, NodeTimeInfo newTimeInfo)
         {
             try

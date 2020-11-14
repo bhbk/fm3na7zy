@@ -21,19 +21,19 @@ namespace Bhbk.Cli.Aurora.Commands
 {
     public class SysKeyExportCommands : ConsoleCommand
     {
-        private static IConfiguration _conf;
-        private static IUnitOfWork _uow;
+        private readonly IConfiguration _conf;
+        private readonly IUnitOfWork _uow;
 
         public SysKeyExportCommands()
         {
-            IsCommand("sys-key-export", "Export private/public key for system");
-
             _conf = (IConfiguration)new ConfigurationBuilder()
                 .AddJsonFile("clisettings.json", optional: false, reloadOnChange: true)
                 .Build();
 
             var instance = new ContextService(InstanceContext.DeployedOrLocal);
             _uow = new UnitOfWork(_conf["Databases:AuroraEntities"], instance);
+
+            IsCommand("sys-key-export", "Export private/public key for system");
         }
 
         public override int Run(string[] remainingArguments)

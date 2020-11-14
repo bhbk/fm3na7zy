@@ -9,19 +9,25 @@ using ManyConsole;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Linq;
+using System.Collections.Generic;
 
 namespace Bhbk.Cli.Aurora.Commands
 {
     public class SysCredCreateCommands : ConsoleCommand
     {
-        private static IConfiguration _conf;
-        private static IUnitOfWork _uow;
-        private static string _credDomain;
-        private static string _credLogin;
-        private static string _credPass;
+        private readonly IConfiguration _conf;
+        private readonly IUnitOfWork _uow;
+        private string _credDomain, _credLogin, _credPass;
 
         public SysCredCreateCommands()
         {
+            _conf = (IConfiguration)new ConfigurationBuilder()
+                .AddJsonFile("clisettings.json", optional: false, reloadOnChange: true)
+                .Build();
+
+            var instance = new ContextService(InstanceContext.DeployedOrLocal);
+            _uow = new UnitOfWork(_conf["Databases:AuroraEntities"], instance);
+
             IsCommand("sys-cred-create", "Create system credential");
 
             HasRequiredOption("d|domain=", "Enter credential domain to use", arg =>
@@ -38,13 +44,6 @@ namespace Bhbk.Cli.Aurora.Commands
             {
                 _credPass = arg;
             });
-
-            _conf = (IConfiguration)new ConfigurationBuilder()
-                .AddJsonFile("clisettings.json", optional: false, reloadOnChange: true)
-                .Build();
-
-            var instance = new ContextService(InstanceContext.DeployedOrLocal);
-            _uow = new UnitOfWork(_conf["Databases:AuroraEntities"], instance);
         }
 
         public override int Run(string[] remainingArguments)
@@ -92,8 +91,7 @@ namespace Bhbk.Cli.Aurora.Commands
 
                 _uow.Commit();
 
-                Console.Out.WriteLine();
-                ConsoleHelper.StdOutCredentials(credentials);
+                ConsoleHelper.StdOutCredentials(new List<tbl_Credential>() { credential });
 
                 return StandardOutput.FondFarewell();
             }

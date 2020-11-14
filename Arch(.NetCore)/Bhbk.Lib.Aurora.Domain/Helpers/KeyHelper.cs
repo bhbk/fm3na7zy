@@ -223,9 +223,9 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 				var pubKey = new SshPublicKey(pubKeyInfo);
 				pubKey.SavePublicKey(pubStream, SshPublicKeyFormat.Pkcs8);
 
-				var algo = string.Empty;
+                string algo;
 
-				switch (pubKey.KeyAlgorithm)
+                switch (pubKey.KeyAlgorithm)
 				{
 					case SshHostKeyAlgorithm.DSS:
 						algo = "ssh-dsa";
@@ -283,11 +283,11 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 			var pubKeyValue = Encoding.ASCII.GetString(pubStream.ToArray());
 
 			var privKeyFound = uow.PrivateKeys.Get(QueryExpressionFactory.GetQueryExpression<tbl_PrivateKey>()
-				.Where(x => x.Id == null && x.KeyValue == privKeyValue).ToLambda())
+				.Where(x => x.IdentityId == null && x.KeyValue == privKeyValue).ToLambda())
 				.SingleOrDefault();
 
 			var pubKeyFound = uow.PublicKeys.Get(QueryExpressionFactory.GetQueryExpression<tbl_PublicKey>()
-				.Where(x => x.Id == null && x.KeyValue == pubKeyValue).ToLambda())
+				.Where(x => x.IdentityId == null && x.KeyValue == pubKeyValue).ToLambda())
 				.SingleOrDefault();
 
 			if (privKeyFound == null
@@ -298,7 +298,6 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 					{
 						Id = privId,
 						PublicKeyId = pubId,
-						IdentityId = null,
 						KeyValue = privKeyValue,
 						KeyAlgo = keyPair.KeyAlgorithm.ToString(),
 						KeyPass = AES.EncryptString(privKeyPass, conf["Databases:AuroraSecret"]),
@@ -316,7 +315,6 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 					{
 						Id = pubId,
 						PrivateKeyId = privId,
-						IdentityId = null,
 						KeyValue = pubKeyValue,
 						KeyAlgo = keyPair.KeyAlgorithm.ToString(),
 						KeyFormat = SshPublicKeyFormat.Pkcs8.ToString(),
@@ -339,7 +337,6 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 					{
 						Id = pubId,
 						PrivateKeyId = privKeyFound.Id,
-						IdentityId = null,
 						KeyValue = pubKeyValue,
 						KeyAlgo = keyPair.KeyAlgorithm.ToString(),
 						KeyFormat = SshPublicKeyFormat.Pkcs8.ToString(),
@@ -362,7 +359,6 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 					{
 						Id = privId,
 						PublicKeyId = pubKeyFound.Id,
-						IdentityId = null,
 						KeyValue = privKeyValue,
 						KeyAlgo = keyPair.KeyAlgorithm.ToString(),
 						KeyPass = AES.EncryptString(privKeyPass, conf["Databases:AuroraSecret"]),

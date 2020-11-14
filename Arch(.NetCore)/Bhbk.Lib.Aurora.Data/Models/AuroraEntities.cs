@@ -24,6 +24,7 @@ namespace Bhbk.Lib.Aurora.Data.Models
         public virtual DbSet<uvw_PublicKey> uvw_PublicKeys { get; set; }
         public virtual DbSet<uvw_Setting> uvw_Settings { get; set; }
         public virtual DbSet<uvw_User> uvw_Users { get; set; }
+        public virtual DbSet<uvw_UserAlert> uvw_UserAlerts { get; set; }
         public virtual DbSet<uvw_UserFile> uvw_UserFiles { get; set; }
         public virtual DbSet<uvw_UserFolder> uvw_UserFolders { get; set; }
         public virtual DbSet<uvw_UserMount> uvw_UserMounts { get; set; }
@@ -164,6 +165,31 @@ namespace Bhbk.Lib.Aurora.Data.Models
                 entity.Property(e => e.IdentityAlias)
                     .IsRequired()
                     .HasMaxLength(128)
+                    .IsUnicode(false);
+            });
+
+            modelBuilder.Entity<uvw_UserAlert>(entity =>
+            {
+                entity.HasNoKey();
+
+                entity.ToView("uvw_UserAlert", "svc");
+
+                entity.Property(e => e.ToEmailAddress)
+                    .HasMaxLength(256)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.ToFirstName)
+                    .IsRequired()
+                    .HasMaxLength(128)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.ToLastName)
+                    .IsRequired()
+                    .HasMaxLength(128)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.ToPhoneNumber)
+                    .HasMaxLength(12)
                     .IsUnicode(false);
             });
 

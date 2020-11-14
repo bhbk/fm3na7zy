@@ -24,7 +24,6 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
     {
         private const int LOGON32_PROVIDER_DEFAULT = 0;
         private const int LOGON32_LOGON_INTERACTIVE = 2;
-        private const int LOGON32_LOGON_NETWORK = 3;
 
         public static SafeAccessTokenHandle GetSafeAccessTokenHandle(string domain, string user, string pass)
         {
@@ -92,7 +91,7 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
         }
 
         [DllImport("advapi32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        public static extern bool LogonUser(String lpszUsername, String lpszDomain, String lpszPassword,
+        internal static extern bool LogonUser(String lpszUsername, String lpszDomain, String lpszPassword,
             int dwLogonType, int dwLogonProvider, out SafeAccessTokenHandle phToken);
     }
 }

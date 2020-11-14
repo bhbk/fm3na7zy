@@ -14,8 +14,8 @@ build:
   script:
     - cd ..\Arch(.NetCore)
     - nuget restore Bhbk.Lib.Aurora.Data.EF6\Bhbk.Lib.Aurora.Data.EF6.csproj -SolutionDirectory . -Verbosity quiet
-    - dotnet restore Bhbk.WebApi.Aurora.sln --no-cache --verbosity minimal
-    - dotnet build Bhbk.WebApi.Aurora.sln --configuration Release --verbosity minimal /p:platform=x64
+    - dotnet restore Bhbk.Aurora.sln --no-cache --verbosity quiet
+    - dotnet build Bhbk.Aurora.sln --configuration Release --verbosity quiet /p:platform=x64
 
 test:
   stage: test
@@ -24,8 +24,8 @@ test:
   script:
     - cd ..\Arch(.NetCore)
     - nuget restore Bhbk.Lib.Aurora.Data.EF6\Bhbk.Lib.Aurora.Data.EF6.csproj -SolutionDirectory . -Verbosity quiet
-    - dotnet restore Bhbk.WebApi.Aurora.sln --no-cache --verbosity quiet
-    - dotnet build Bhbk.WebApi.Aurora.sln --configuration Release --verbosity quiet /p:platform=x64
+    - dotnet restore Bhbk.Aurora.sln --no-cache --verbosity quiet
+    - dotnet build Bhbk.Aurora.sln --configuration Release --verbosity quiet /p:platform=x64
     - dotnet test Bhbk.Daemon.Aurora.FTP.Tests\Bhbk.Daemon.Aurora.FTP.Tests.csproj --configuration Release /p:CollectCoverage=true /p:CoverletOutput=bin\Release\
     - dotnet test Bhbk.Daemon.Aurora.SSH.Tests\Bhbk.Daemon.Aurora.SSH.Tests.csproj --configuration Release /p:CollectCoverage=true /p:CoverletOutput=bin\Release\
     - dotnet test Bhbk.WebApi.Aurora.Tests\Bhbk.WebApi.Aurora.Tests.csproj --configuration Release /p:CollectCoverage=true /p:CoverletOutput=bin\Release\
@@ -38,16 +38,16 @@ deploy:
     - set VERSION=2020.11.12.1900
     - cd ..\Arch(.NetCore)
     - nuget restore Bhbk.Lib.Aurora.Data.EF6\Bhbk.Lib.Aurora.Data.EF6.csproj -SolutionDirectory . -Verbosity quiet
-    - dotnet restore Bhbk.WebApi.Aurora.sln --no-cache --verbosity quiet
-    - dotnet build Bhbk.WebApi.Aurora.sln --configuration Release --verbosity quiet /p:platform=x64
+    - dotnet restore Bhbk.Aurora.sln --no-cache --verbosity quiet
+    - dotnet build Bhbk.Aurora.sln --configuration Release --verbosity quiet /p:platform=x64
     - dotnet pack Bhbk.Lib.Aurora\Bhbk.Lib.Aurora.csproj -p:PackageVersion=%VERSION% --output . --configuration Release /p:platform=x64
-    - dotnet publish Bhbk.Daemon.Aurora.FTP\Bhbk.Daemon.Aurora.FTP.csproj --output Bhbk.Daemon.Aurora.FTP\bin\Release\netcoreapp3.1\publish --configuration Release /p:platform=x64
-    - dotnet publish Bhbk.Daemon.Aurora.SSH\Bhbk.Daemon.Aurora.SSH.csproj --output Bhbk.Daemon.Aurora.SSH\bin\Release\netcoreapp3.1\publish --configuration Release /p:platform=x64
-    - dotnet publish Bhbk.WebApi.Aurora\Bhbk.WebApi.Aurora.csproj --output Bhbk.WebApi.Aurora\bin\Release\netcoreapp3.1\publish\ --configuration Release /p:platform=x64
-    - dotnet octo pack --id=Bhbk.Cli.Aurora --version=%VERSION% --basePath=Bhbk.Cli.Aurora\bin\Release\netcoreapp3.1\publish\ --outFolder=. --overwrite
-    - dotnet octo pack --id=Bhbk.Daemon.Aurora.FTP --version=%VERSION% --basePath=Bhbk.Daemon.Aurora.FTP\bin\Release\netcoreapp3.1\publish\ --outFolder=. --overwrite
-    - dotnet octo pack --id=Bhbk.Daemon.Aurora.SSH --version=%VERSION% --basePath=Bhbk.Daemon.Aurora.SSH\bin\Release\netcoreapp3.1\publish\ --outFolder=. --overwrite
-    - dotnet octo pack --id=Bhbk.WebApi.Aurora --version=%VERSION% --basePath=Bhbk.WebApi.Aurora\bin\Release\netcoreapp3.1\publish\ --outFolder=. --overwrite
+    - dotnet publish Bhbk.Daemon.Aurora.FTP\Bhbk.Daemon.Aurora.FTP.csproj --output Bhbk.Daemon.Aurora.FTP\bin\x64\Release\net5.0\publish\ --configuration Release /p:platform=x64
+    - dotnet publish Bhbk.Daemon.Aurora.SSH\Bhbk.Daemon.Aurora.SSH.csproj --output Bhbk.Daemon.Aurora.SSH\bin\x64\Release\net5.0\publish\ --configuration Release /p:platform=x64
+    - dotnet publish Bhbk.WebApi.Aurora\Bhbk.WebApi.Aurora.csproj --output Bhbk.WebApi.Aurora\bin\x64\Release\net5.0\publish\ --configuration Release /p:platform=x64
+    - dotnet octo pack --id=Bhbk.Cli.Aurora --version=%VERSION% --basePath=Bhbk.Cli.Aurora\bin\x64\Release\net5.0\publish\ --outFolder=. --overwrite
+    - dotnet octo pack --id=Bhbk.Daemon.Aurora.FTP --version=%VERSION% --basePath=Bhbk.Daemon.Aurora.FTP\bin\x64\Release\net5.0\publish\ --outFolder=. --overwrite
+    - dotnet octo pack --id=Bhbk.Daemon.Aurora.SSH --version=%VERSION% --basePath=Bhbk.Daemon.Aurora.SSH\bin\x64\Release\net5.0\publish\ --outFolder=. --overwrite
+    - dotnet octo pack --id=Bhbk.WebApi.Aurora --version=%VERSION% --basePath=Bhbk.WebApi.Aurora\bin\x64\Release\net5.0\publish\ --outFolder=. --overwrite
     - cd ..
     - dotnet nuget push Arch(.NetCore)\*.nupkg --api-key %NUGET_FEED_KEY% --source %NUGET_FEED_URL%
     - set VERSION=

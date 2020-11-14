@@ -15,25 +15,25 @@ namespace Bhbk.Cli.Aurora.Commands
 {
     public class SysCredDeleteCommands : ConsoleCommand
     {
-        private static IConfiguration _conf;
-        private static IUnitOfWork _uow;
-        private static Guid _credID;
+        private readonly IConfiguration _conf;
+        private readonly IUnitOfWork _uow;
+        private Guid _credID;
 
         public SysCredDeleteCommands()
         {
-            IsCommand("sys-cred-delete", "Delete system credential");
-
-            HasOption("i|id=", "Enter GUID of credential to delete", arg =>
-            {
-                _credID = Guid.Parse(arg);
-            });
-
             _conf = (IConfiguration)new ConfigurationBuilder()
                 .AddJsonFile("clisettings.json", optional: false, reloadOnChange: true)
                 .Build();
 
             var instance = new ContextService(InstanceContext.DeployedOrLocal);
             _uow = new UnitOfWork(_conf["Databases:AuroraEntities"], instance);
+
+            IsCommand("sys-cred-delete", "Delete system credential");
+
+            HasOption("i|id=", "Enter GUID of credential to delete", arg =>
+            {
+                _credID = Guid.Parse(arg);
+            });
         }
 
         public override int Run(string[] remainingArguments)

@@ -15,25 +15,25 @@ namespace Bhbk.Cli.Aurora.Commands
 {
     public class SysConfDeleteCommands : ConsoleCommand
     {
-        private static IConfiguration _conf;
-        private static IUnitOfWork _uow;
-        private static Guid _configID;
+        private readonly IConfiguration _conf;
+        private readonly IUnitOfWork _uow;
+        private Guid _configID;
 
         public SysConfDeleteCommands()
         {
-            IsCommand("sys-conf-delete", "Delete config key/value pair");
-
-            HasOption("i|id=", "Enter GUID of config to delete", arg =>
-            {
-                _configID = Guid.Parse(arg);
-            });
-
             _conf = (IConfiguration)new ConfigurationBuilder()
                 .AddJsonFile("clisettings.json", optional: false, reloadOnChange: true)
                 .Build();
 
             var instance = new ContextService(InstanceContext.DeployedOrLocal);
             _uow = new UnitOfWork(_conf["Databases:AuroraEntities"], instance);
+
+            IsCommand("sys-conf-delete", "Delete config key/value pair");
+
+            HasOption("i|id=", "Enter GUID of config to delete", arg =>
+            {
+                _configID = Guid.Parse(arg);
+            });
         }
 
         public override int Run(string[] remainingArguments)
@@ -47,6 +47,7 @@ namespace Bhbk.Cli.Aurora.Commands
 
                 if (_configID == Guid.Empty)
                 {
+                    Console.Out.WriteLine();
                     Console.Out.Write("  *** Enter GUID of config to delete *** : ");
                     _configID = Guid.Parse(StandardInput.GetInput());
                 }

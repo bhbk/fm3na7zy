@@ -26,81 +26,84 @@ namespace Bhbk.WebApi.Aurora.Tasks
 
         public async Task Execute(IJobExecutionContext context)
         {
-            Log.Information($"'{_callPath}' running");
-
-            try
+            await Task.Run(() =>
             {
-                using (var scope = _factory.CreateScope())
+                Log.Information($"'{_callPath}' running");
+
+                try
                 {
-                    var conf = scope.ServiceProvider.GetRequiredService<IConfiguration>();
-                    var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
-
-                    var staggerVerify = int.Parse(conf["Jobs:UnstructuredData:StaggerVerify"]);
-
-                    var files = uow.UserFiles.Get(QueryExpressionFactory.GetQueryExpression<tbl_UserFile>()
-                        .Where(x => x.LastVerifiedUtc < DateTime.UtcNow.AddSeconds(-staggerVerify)).ToLambda());
-
-                    var problems = new List<tbl_UserFile>();
-
-                    foreach (var file in files)
+                    using (var scope = _factory.CreateScope())
                     {
-                        var filePath = new FileInfo(conf["Storage:UnstructuredDataPath"]
-                            + Path.DirectorySeparatorChar + file.RealPath
-                            + Path.DirectorySeparatorChar + file.RealFileName);
+                        var conf = scope.ServiceProvider.GetRequiredService<IConfiguration>();
+                        var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
 
-                        try
+                        var staggerVerify = int.Parse(conf["Jobs:UnstructuredData:StaggerVerify"]);
+
+                        var files = uow.UserFiles.Get(QueryExpressionFactory.GetQueryExpression<tbl_UserFile>()
+                            .Where(x => x.LastVerifiedUtc < DateTime.UtcNow.AddSeconds(-staggerVerify)).ToLambda());
+
+                        var problems = new List<tbl_UserFile>();
+
+                        foreach (var file in files)
                         {
-                            using (var sha256 = new SHA256Managed())
-                            using (var fs = new FileStream(filePath.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                            var filePath = new FileInfo(conf["Storage:UnstructuredDataPath"]
+                                + Path.DirectorySeparatorChar + file.RealPath
+                                + Path.DirectorySeparatorChar + file.RealFileName);
+
+                            try
                             {
-                                var hash = sha256.ComputeHash(fs);
-                                var hashCheck = Strings.GetHexString(hash);
-
-                                if (file.HashSHA256 != hashCheck)
+                                using (var sha256 = new SHA256Managed())
+                                using (var fs = new FileStream(filePath.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
                                 {
-                                    problems.Add(file);
+                                    var hash = sha256.ComputeHash(fs);
+                                    var hashCheck = Strings.GetHexString(hash);
 
-                                    Log.Error($"'{_callPath}' validation on {filePath} returned hash of '{hashCheck}' that does not" +
-                                        $" match recorded hash of '{file.HashSHA256}'");
+                                    if (file.HashSHA256 != hashCheck)
+                                    {
+                                        problems.Add(file);
 
-                                    continue;
+                                        Log.Error($"'{_callPath}' validation on {filePath} returned hash of '{hashCheck}' that does not" +
+                                            $" match recorded hash of '{file.HashSHA256}'");
+
+                                        continue;
+                                    }
+                                    else
+                                        file.LastVerifiedUtc = DateTime.UtcNow;
                                 }
-                                else
-                                    file.LastVerifiedUtc = DateTime.UtcNow;
+                            }
+                            catch (CryptographicException ex)
+                            {
+                                Log.Error($"'{_callPath}' validation on {filePath} returned error {ex}");
+                            }
+                            catch (IOException ex)
+                            {
+                                Log.Error($"'{_callPath}' validation on {filePath} returned error {ex}");
                             }
                         }
-                        catch (CryptographicException ex)
+
+                        uow.Commit();
+
+                        if (files.Any())
                         {
-                            Log.Error($"'{_callPath}' validation on {filePath} returned error {ex.ToString()}");
+                            var msg = $"'{_callPath}' completed. Performed validation on {files.Count()} files" +
+                                $" and found {problems.Count} problems.";
+
+                            Log.Information(msg);
                         }
-                        catch (IOException ex)
-                        {
-                            Log.Error($"'{_callPath}' validation on {filePath} returned error {ex.ToString()}");
-                        }
-                    }
-
-                    uow.Commit();
-
-                    if (files.Any())
-                    {
-                        var msg = $"'{_callPath}' completed. Performed validation on {files.Count().ToString()} files" +
-                            $" and found {problems.Count()} problems.";
-
-                        Log.Information(msg);
                     }
                 }
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex.ToString());
-            }
-            finally
-            {
-                GC.Collect();
-            }
+                catch (Exception ex)
+                {
+                    Log.Error(ex.ToString());
+                }
+                finally
+                {
+                    GC.Collect();
+                }
 
-            Log.Information($"'{_callPath}' completed");
-            Log.Information($"'{_callPath}' will run again at {context.NextFireTimeUtc.Value.LocalDateTime}");
+                Log.Information($"'{_callPath}' completed");
+                Log.Information($"'{_callPath}' will run again at {context.NextFireTimeUtc.Value.LocalDateTime}");
+            });
         }
     }
 }

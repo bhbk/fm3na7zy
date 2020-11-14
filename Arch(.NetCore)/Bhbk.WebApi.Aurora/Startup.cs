@@ -44,18 +44,14 @@ namespace Bhbk.WebApi.Aurora
             {
                 jobs.SchedulerId = Guid.NewGuid().ToString();
 
-                jobs.UseMicrosoftDependencyInjectionJobFactory(options =>
-                {
-                    options.AllowDefaultConstructor = false;
-                });
-
+                jobs.UseMicrosoftDependencyInjectionJobFactory();
                 jobs.UseSimpleTypeLoader();
                 jobs.UseInMemoryStore();
                 jobs.UseDefaultThreadPool();
 
                 if (bool.Parse(conf["Jobs:UnstructuredData:Enable"]))
                 {
-                    var jobKey = new JobKey(JobType.UnstructuredData.ToString(), GroupType.Daemons.ToString());
+                    var jobKey = new JobKey(JobType.UnstructuredData.ToString(), WorkerType.AdminWorker.ToString());
                     jobs.AddJob<UnstructuredDataJob>(opt => opt
                         .StoreDurably()
                         .WithIdentity(jobKey)

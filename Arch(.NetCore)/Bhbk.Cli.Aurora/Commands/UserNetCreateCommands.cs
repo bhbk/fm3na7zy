@@ -1,4 +1,5 @@
-﻿using Bhbk.Lib.Aurora.Data.Infrastructure_DIRECT;
+﻿using Bhbk.Cli.Aurora.Helpers;
+using Bhbk.Lib.Aurora.Data.Infrastructure_DIRECT;
 using Bhbk.Lib.Aurora.Data.Models_DIRECT;
 using Bhbk.Lib.Aurora.Domain.Primitives.Enums;
 using Bhbk.Lib.CommandLine.IO;
@@ -18,28 +19,28 @@ namespace Bhbk.Cli.Aurora.Commands
 {
     public class UserNetCreateCommands : ConsoleCommand
     {
-        private static IConfiguration _conf;
-        private static IUnitOfWork _uow;
-        private static tbl_User _user;
-        private static IPNetwork _cidr;
-        private static NetworkAction _actionType;
-        private static string _actionTypeList = string.Join(", ", Enum.GetNames(typeof(NetworkAction)));
+        private readonly IConfiguration _conf;
+        private readonly IUnitOfWork _uow;
+        private tbl_User _user;
+        private IPNetwork _cidr;
+        private NetworkAction _actionType;
+        private readonly string _actionTypeList = string.Join(", ", Enum.GetNames(typeof(NetworkAction)));
 
         public UserNetCreateCommands()
         {
+            _conf = (IConfiguration)new ConfigurationBuilder()
+                .AddJsonFile("clisettings.json", optional: false, reloadOnChange: true)
+                .Build();
+
+            var instance = new ContextService(InstanceContext.DeployedOrLocal);
+            _uow = new UnitOfWork(_conf["Databases:AuroraEntities"], instance);
+
             IsCommand("user-net-create", "Create allow/deny for user network");
 
             HasRequiredOption("u|user=", "Enter user that already exists", arg =>
             {
                 if (string.IsNullOrEmpty(arg))
                     throw new ConsoleHelpAsException($"  *** No user name given ***");
-
-                _conf = (IConfiguration)new ConfigurationBuilder()
-                    .AddJsonFile("clisettings.json", optional: false, reloadOnChange: true)
-                    .Build();
-
-                var instance = new ContextService(InstanceContext.DeployedOrLocal);
-                _uow = new UnitOfWork(_conf["Databases:AuroraEntities"], instance);
 
                 _user = _uow.Users.Get(QueryExpressionFactory.GetQueryExpression<tbl_User>()
                     .Where(x => x.IdentityAlias == arg).ToLambda(),
@@ -69,7 +70,7 @@ namespace Bhbk.Cli.Aurora.Commands
         {
             try
             {
-                _uow.Networks.Create(
+                var network = _uow.Networks.Create(
                     new tbl_Network
                     {
                         Id = Guid.NewGuid(),
@@ -79,8 +80,9 @@ namespace Bhbk.Cli.Aurora.Commands
                         IsEnabled = true,
                         CreatedUtc = DateTime.UtcNow,
                     });
-
                 _uow.Commit();
+
+                ConsoleHelper.StdOutNetworks(new List<tbl_Network>() { network });
 
                 return StandardOutput.FondFarewell();
             }

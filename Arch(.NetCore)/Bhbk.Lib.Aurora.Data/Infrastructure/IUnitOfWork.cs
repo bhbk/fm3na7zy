@@ -13,9 +13,10 @@ namespace Bhbk.Lib.Aurora.Data.Infrastructure
         public IGenericRepository<uvw_PrivateKey> PrivateKeys { get; }
         public IGenericRepository<uvw_PublicKey> PublicKeys { get; }
         public IGenericRepository<uvw_Setting> Settings { get; }
+        public IGenericRepository<uvw_User> Users { get; }
+        public IGenericRepository<uvw_UserAlert> UserAlerts { get; }
         public IGenericRepository<uvw_UserFile> UserFiles { get; }
         public IGenericRepository<uvw_UserFolder> UserFolders { get; }
         public IGenericRepository<uvw_UserMount> UserMounts { get; }
-        public IGenericRepository<uvw_User> Users { get; }
     }
 }
