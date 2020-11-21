@@ -276,7 +276,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                                 Subject = "File Delete Alert",
                                 Body = Templates.NotifyEmailOnFileDelete(conf["Daemons:SftpService:Dns"], ServerSession.Current.UserName,
                                     email.ToFirstName, email.ToLastName, e.ResultNode.Path.StringPath)
-                            });
+                            }).AsTask();
                         }
 
                         foreach (var text in uow.UserAlerts.Get(QueryExpressionFactory.GetQueryExpression<tbl_UserAlert>()
@@ -288,7 +288,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                                 ToPhoneNumber = text.ToPhoneNumber,
                                 Body = Templates.NotifyTextOnFileDelete(conf["Daemons:SftpService:Dns"], ServerSession.Current.UserName,
                                     text.ToFirstName, text.ToLastName, e.ResultNode.Path.StringPath)
-                            });
+                            }).AsTask();
                         }
                     }
 
@@ -419,7 +419,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                         Log.Information($"'{callPath}' '{e.UserName}' in-progress with public key");
 
                         if (UserHelper.ValidatePubKey(user.tbl_PublicKeys.Where(x => x.IsEnabled).ToList(), e.Key)
-                            && admin.User_VerifyV1(user.IdentityId).Result)
+                            && admin.User_VerifyV1(user.IdentityId).AsTask().Result)
                         {
                             Log.Information($"'{callPath}' '{e.UserName}' success with public key");
 
@@ -475,7 +475,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
 
                         try
                         {
-                            var identity = admin.User_GetV1(user.IdentityId.ToString()).Result;
+                            var identity = admin.User_GetV1(user.IdentityId.ToString()).AsTask().Result;
 
                             var auth = sts.ResourceOwner_GrantV2(
                                 new ResourceOwnerV2()
@@ -485,7 +485,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                                     grant_type = "password",
                                     user = identity.UserName,
                                     password = e.Password,
-                                }).Result;
+                                }).AsTask().Result;
 
                             Log.Information($"'{callPath}' '{e.UserName}' success with password");
 
@@ -583,7 +583,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                             Subject = "File Download Alert",
                             Body = Templates.NotifyEmailOnFileDownload(conf["Daemons:SftpService:Dns"], ServerSession.Current.UserName,
                                 email.ToFirstName, email.ToLastName, "/" + e.FullPath, e.BytesTransferred.ToString(), e.Session.ClientEndPoint.ToString())
-                        });
+                        }).AsTask();
                     }
 
                     foreach (var text in uow.UserAlerts.Get(QueryExpressionFactory.GetQueryExpression<tbl_UserAlert>()
@@ -595,7 +595,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                             ToPhoneNumber = text.ToPhoneNumber,
                             Body = Templates.NotifyTextOnFileDownload(conf["Daemons:SftpService:Dns"], ServerSession.Current.UserName,
                                 text.ToFirstName, text.ToLastName, "/" + e.FullPath, e.BytesTransferred.ToString(), e.Session.ClientEndPoint.ToString())
-                        });
+                        }).AsTask();
                     }
                 }
 
@@ -636,7 +636,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                             Subject = "File Upload Alert",
                             Body = Templates.NotifyEmailOnFileUpload(conf["Daemons:SftpService:Dns"], ServerSession.Current.UserName,
                                 email.ToFirstName, email.ToLastName, "/" + e.FullPath, e.BytesTransferred.ToString(), e.Session.ClientEndPoint.ToString())
-                        });
+                        }).AsTask();
                     }
 
                     foreach (var text in uow.UserAlerts.Get(QueryExpressionFactory.GetQueryExpression<tbl_UserAlert>()
@@ -648,7 +648,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                             ToPhoneNumber = text.ToPhoneNumber,
                             Body = Templates.NotifyTextOnFileUpload(conf["Daemons:SftpService:Dns"], ServerSession.Current.UserName,
                                 text.ToFirstName, text.ToLastName, "/" + e.FullPath, e.BytesTransferred.ToString(), e.Session.ClientEndPoint.ToString())
-                        });
+                        }).AsTask();
                     }
                 }
 

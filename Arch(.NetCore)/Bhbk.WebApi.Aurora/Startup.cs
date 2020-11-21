@@ -4,18 +4,27 @@ using Bhbk.Lib.Aurora.Domain.Infrastructure;
 using Bhbk.Lib.Aurora.Domain.Primitives.Enums;
 using Bhbk.Lib.Common.Primitives.Enums;
 using Bhbk.Lib.Common.Services;
+using Bhbk.Lib.Identity.Validators;
 using Bhbk.WebApi.Aurora.Tasks;
 using CronExpressionDescriptor;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
+using Newtonsoft.Json.Serialization;
 using Quartz;
 using Serilog;
 using System;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 
 namespace Bhbk.WebApi.Aurora
 {
@@ -89,11 +98,100 @@ namespace Bhbk.WebApi.Aurora
                 .OrderBy(x => x.CreatedUtc).Last();
 
             Rebex.Licensing.Key = key.ConfigValue;
+
+            var issuers = conf.GetSection("IdentityTenants:AllowedIssuers").GetChildren()
+                .Select(x => x.Value + ":" + conf["IdentityTenants:Salt"]);
+
+            var issuerKeys = conf.GetSection("IdentityTenants:AllowedIssuerKeys").GetChildren()
+                .Select(x => x.Value);
+
+            var audiences = conf.GetSection("IdentityTenants:AllowedAudiences").GetChildren()
+                .Select(x => x.Value);
+
+            sc.AddLogging(opt =>
+            {
+                opt.AddSerilog();
+            });
+            sc.AddControllers()
+                .AddNewtonsoftJson(opt =>
+                {
+                    opt.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+                });
+            sc.AddCors();
+            sc.AddAuthentication(opt =>
+            {
+                opt.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                opt.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                opt.DefaultForbidScheme = JwtBearerDefaults.AuthenticationScheme;
+                opt.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+                opt.DefaultSignOutScheme = JwtBearerDefaults.AuthenticationScheme;
+                opt.DefaultSignInScheme = JwtBearerDefaults.AuthenticationScheme;
+            }).AddJwtBearer(jwt =>
+            {
+#if RELEASE
+                jwt.IncludeErrorDetails = false;
+#elif !RELEASE
+                jwt.IncludeErrorDetails = true;
+#endif
+                jwt.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidIssuers = issuers.ToArray(),
+                    IssuerSigningKeys = issuerKeys.Select(x => new SymmetricSecurityKey(Encoding.Unicode.GetBytes(x))).ToArray(),
+                    ValidAudiences = audiences.ToArray(),
+                    AudienceValidator = AudiencesValidator.Multiple,
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidateLifetime = true,
+                    RequireAudience = true,
+                    RequireExpirationTime = true,
+                    RequireSignedTokens = true,
+                };
+            });
+            sc.AddSwaggerGen(opt =>
+            {
+                opt.SwaggerDoc("v1", new OpenApiInfo { Title = "Reference", Version = "v1" });
+            });
+            sc.Configure<ForwardedHeadersOptions>(opt =>
+            {
+                opt.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+            });
         }
 
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public virtual void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory log)
         {
+            //order below is important...
+            if (env.IsDevelopment())
+            {
+                app.UseDeveloperExceptionPage();
+            }
+            else
+            {
+                app.UseExceptionHandler("/error");
+            }
 
+            app.UseForwardedHeaders();
+            app.UseStaticFiles();
+            app.UseSwagger(opt =>
+            {
+                opt.RouteTemplate = "help/{documentName}/index.json";
+            });
+            app.UseSwaggerUI(opt =>
+            {
+                opt.RoutePrefix = "help";
+                opt.SwaggerEndpoint("v1/index.json", "Reference");
+            });
+            app.UseRouting();
+            app.UseCors(opt => opt
+                .AllowAnyOrigin()
+                .AllowAnyHeader()
+                .AllowAnyMethod());
+            app.UseAuthentication();
+            app.UseAuthorization();
+            app.UseEndpoints(opt =>
+            {
+                opt.MapControllers();
+            });
         }
     }
 }
