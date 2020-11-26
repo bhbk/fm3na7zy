@@ -12,19 +12,19 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 
 /*
  * https://forum.rebex.net/8453/implement-filesystem-almost-as-memoryfilesystemprovider
  */
 namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
 {
-    internal class MemoryReadWriteFileSystem : ReadWriteFileSystemProvider, IDisposable
+    internal class MemoryReadWriteFileSystem : ReadWriteFileSystemProvider
     {
         private readonly IServiceScopeFactory _factory;
         private readonly Dictionary<NodePath, NodeBase> _path;
         private readonly Dictionary<NodeBase, MemoryNodeData> _store;
         private readonly User _userEntity;
-        private bool _disposed = false;
 
         internal MemoryReadWriteFileSystem(FileSystemProviderSettings settings, IServiceScopeFactory factory, User userEntity)
             : base(settings)
@@ -35,18 +35,16 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
             _path = new Dictionary<NodePath, NodeBase>();
             _store = new Dictionary<NodeBase, MemoryNodeData>();
 
-            using (var scope = _factory.CreateScope())
-            {
-                var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+            var folderKeysNode = new DirectoryNode(".ssh", Root);
+            var fileKeysNode = new FileNode("authorized_users", folderKeysNode);
 
-                var pubKeys = uow.PublicKeys.Get(QueryExpressionFactory.GetQueryExpression<PublicKey>()
-                    .Where(x => x.IdentityId == _userEntity.IdentityId).ToLambda()).ToList();
+            MemoryFileSystemHelper.EnsureRootExists(Root, _path, _store, _userEntity);
 
-                var pubKeysContent = KeyHelper.ExportPubKeyBase64(_userEntity, pubKeys);
+            var pubKeysContent = KeyHelper.ExportPubKeyBase64(_userEntity, _userEntity.PublicKeys);
 
-                MemoryFileSystemHelper.EnsureRootExists(Root, _path, _store);
-                MemoryFileSystemHelper.CreatePubKeysFile(Root, _path, _store, _userEntity, pubKeysContent);
-            }
+            CreateFile(folderKeysNode, fileKeysNode);
+            SaveContent(fileKeysNode, NodeContent.CreateDelayedWriteContent(
+                new MemoryStream(Encoding.UTF8.GetBytes(pubKeysContent.ToString()))));
         }
 
         protected override DirectoryNode CreateDirectory(DirectoryNode parent, DirectoryNode child)
@@ -229,28 +227,6 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
             _store[node].TimeInfo = newTimeInfo;
 
             return node;
-        }
-
-        protected override void Dispose(bool disposing)
-        {
-            if (!_disposed)
-            {
-                if (disposing)
-                {
-                    // TODO: dispose managed state (managed objects)
-
-                }
-
-                // TODO: free unmanaged resources (unmanaged objects) and override finalizer
-                _disposed = true;
-            }
-        }
-
-        public new void Dispose()
-        {
-            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-            Dispose(disposing: true);
-            GC.SuppressFinalize(this);
         }
     }
 }

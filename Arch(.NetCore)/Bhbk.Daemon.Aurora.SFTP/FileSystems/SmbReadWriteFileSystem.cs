@@ -18,28 +18,32 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using System.Security.Principal;
+using System.Text;
 
 namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
 {
-    internal class SmbReadWriteFileSystem : ReadWriteFileSystemProvider, IDisposable
+    internal class SmbReadWriteFileSystem : ReadWriteFileSystemProvider
     {
         private readonly SafeAccessTokenHandle _userToken;
         private readonly User _userEntity;
         private readonly string _userMount;
-        private bool _disposed = false;
 
         internal SmbReadWriteFileSystem(FileSystemProviderSettings settings, IServiceScopeFactory factory, User userEntity,
             string identityUser, string identityPass)
             : base(settings)
         {
+            _userEntity = userEntity;
+
             /*
              * this file-system is functional only when the daemon is running a on windows platform. there is 
              * an interop call required to obtain a user credential outside the context of what the daemon runs as.
              */
+
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 throw new NotImplementedException();
 
-            _userEntity = userEntity;
+            var folderKeysNode = new DirectoryNode(".ssh", Root);
+            var fileKeysNode = new FileNode("authorized_users", folderKeysNode);
 
             using (var scope = factory.CreateScope())
             {
@@ -49,6 +53,8 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                 var userMount = uow.UserMounts.Get(QueryExpressionFactory.GetQueryExpression<UserMount>()
                     .Where(x => x.IdentityId == _userEntity.IdentityId).ToLambda())
                     .Single();
+
+                _userMount = userMount.ServerAddress + userMount.ServerShare;
 
                 if (userMount.CredentialId.HasValue)
                 {
@@ -70,14 +76,19 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                 {
                     _userToken = UserHelper.GetSafeAccessTokenHandle(null, identityUser, identityPass);
                 }
-
-                _userMount = userMount.ServerAddress + userMount.ServerShare;
-
-                var pubKeys = uow.PublicKeys.Get(QueryExpressionFactory.GetQueryExpression<PublicKey>()
-                    .Where(x => x.IdentityId == _userEntity.IdentityId).ToLambda()).ToList();
-
-                var pubKeysContent = KeyHelper.ExportPubKeyBase64(_userEntity, pubKeys);
             }
+
+            if (!Exists(folderKeysNode.Path, NodeType.Directory))
+                CreateDirectory(Root, folderKeysNode);
+
+            if (Exists(fileKeysNode.Path, NodeType.File))
+                Delete(fileKeysNode);
+
+            var pubKeysContent = KeyHelper.ExportPubKeyBase64(_userEntity, _userEntity.PublicKeys);
+
+            CreateFile(folderKeysNode, fileKeysNode);
+            SaveContent(fileKeysNode, NodeContent.CreateDelayedWriteContent(
+                new MemoryStream(Encoding.UTF8.GetBytes(pubKeysContent.ToString()))));
         }
 
         [SupportedOSPlatform("windows")]
@@ -654,28 +665,6 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                 Log.Error(ex.ToString());
                 throw;
             }
-        }
-
-        protected override void Dispose(bool disposing)
-        {
-            if (!_disposed)
-            {
-                if (disposing)
-                {
-                    // TODO: dispose managed state (managed objects)
-
-                }
-
-                // TODO: free unmanaged resources (unmanaged objects) and override finalizer
-                _disposed = true;
-            }
-        }
-
-        public new void Dispose()
-        {
-            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-            Dispose(disposing: true);
-            GC.SuppressFinalize(this);
         }
     }
 }

@@ -16,7 +16,7 @@ namespace Bhbk.Lib.Aurora.Data_EF6.Models
     {
         public System.Guid Id { get; set; }
         public System.Guid IdentityId { get; set; }
-        public Nullable<System.Guid> FolderId { get; set; }
+        public System.Guid FolderId { get; set; }
         public string VirtualName { get; set; }
         public bool IsReadOnly { get; set; }
         public string RealPath { get; set; }

@@ -7,7 +7,6 @@ using Bhbk.Lib.QueryExpression.Factories;
 using Microsoft.Extensions.DependencyInjection;
 using Rebex.IO.FileSystem;
 using Serilog;
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -18,13 +17,12 @@ using System.Reflection;
  */
 namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
 {
-    internal class MemoryReadOnlyFileSystem : ReadOnlyFileSystemProvider, IDisposable
+    internal class MemoryReadOnlyFileSystem : ReadOnlyFileSystemProvider
     {
         private readonly IServiceScopeFactory _factory;
         private readonly Dictionary<NodePath, NodeBase> _path;
         private readonly Dictionary<NodeBase, MemoryNodeData> _store;
         private readonly User _userEntity;
-        private bool _disposed = false;
 
         internal MemoryReadOnlyFileSystem(FileSystemProviderSettings settings, IServiceScopeFactory factory, User userEntity)
             : base(settings)
@@ -35,18 +33,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
             _path = new Dictionary<NodePath, NodeBase>();
             _store = new Dictionary<NodeBase, MemoryNodeData>();
 
-            using (var scope = _factory.CreateScope())
-            {
-                var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
-
-                var pubKeys = uow.PublicKeys.Get(QueryExpressionFactory.GetQueryExpression<PublicKey>()
-                    .Where(x => x.IdentityId == _userEntity.IdentityId).ToLambda()).ToList();
-
-                var pubKeysContent = KeyHelper.ExportPubKeyBase64(_userEntity, pubKeys);
-
-                MemoryFileSystemHelper.EnsureRootExists(Root, _path, _store);
-                MemoryFileSystemHelper.CreatePubKeysFile(Root, _path, _store, _userEntity, pubKeysContent);
-            }
+            MemoryFileSystemHelper.EnsureRootExists(Root, _path, _store, _userEntity);
         }
 
         protected override bool Exists(NodePath path, NodeType nodeType)
@@ -104,28 +91,6 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
         protected override NodeTimeInfo GetTimeInfo(NodeBase node)
         {
             return _store[node].TimeInfo;
-        }
-
-        protected override void Dispose(bool disposing)
-        {
-            if (!_disposed)
-            {
-                if (disposing)
-                {
-                    // TODO: dispose managed state (managed objects)
-
-                }
-
-                // TODO: free unmanaged resources (unmanaged objects) and override finalizer
-                _disposed = true;
-            }
-        }
-
-        public new void Dispose()
-        {
-            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-            Dispose(disposing: true);
-            GC.SuppressFinalize(this);
         }
     }
 }

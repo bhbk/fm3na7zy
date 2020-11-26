@@ -21,26 +21,26 @@ using System.Security.Principal;
 
 namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
 {
-    internal class SmbReadOnlyFileSystem : ReadOnlyFileSystemProvider, IDisposable
+    internal class SmbReadOnlyFileSystem : ReadOnlyFileSystemProvider
     {
         private readonly SafeAccessTokenHandle _userToken;
         private readonly User _userEntity;
         private readonly string _userMount;
-        private bool _disposed = false;
 
         internal SmbReadOnlyFileSystem(FileSystemProviderSettings settings, IServiceScopeFactory factory, User userEntity, 
             string identityUser, string identityPass)
             : base(settings)
         {
+            _userEntity = userEntity;
+
             /*
              * this file-system is functional only when the daemon is running a on windows platform. there is 
              * an interop call required to obtain a user credential outside the context of what the daemon runs as.
              */
+
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 throw new NotImplementedException();
-
-            _userEntity = userEntity;
-
+            
             using (var scope = factory.CreateScope())
             {
                 var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
@@ -49,6 +49,8 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                 var userMount = uow.UserMounts.Get(QueryExpressionFactory.GetQueryExpression<UserMount>()
                     .Where(x => x.IdentityId == _userEntity.IdentityId).ToLambda())
                     .Single();
+
+                _userMount = userMount.ServerAddress + userMount.ServerShare;
 
                 if (userMount.CredentialId.HasValue)
                 {
@@ -70,13 +72,6 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                 {
                     _userToken = UserHelper.GetSafeAccessTokenHandle(null, identityUser, identityPass);
                 }
-
-                _userMount = userMount.ServerAddress + userMount.ServerShare;
-
-                var pubKeys = uow.PublicKeys.Get(QueryExpressionFactory.GetQueryExpression<PublicKey>()
-                    .Where(x => x.IdentityId == _userEntity.IdentityId).ToLambda()).ToList();
-
-                var pubKeysContent = KeyHelper.ExportPubKeyBase64(_userEntity, pubKeys);
             }
         }
 
@@ -331,28 +326,6 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                 Log.Error(ex.ToString());
                 throw;
             }
-        }
-
-        protected override void Dispose(bool disposing)
-        {
-            if (!_disposed)
-            {
-                if (disposing)
-                {
-                    // TODO: dispose managed state (managed objects)
-
-                }
-
-                // TODO: free unmanaged resources (unmanaged objects) and override finalizer
-                _disposed = true;
-            }
-        }
-
-        public new void Dispose()
-        {
-            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-            Dispose(disposing: true);
-            GC.SuppressFinalize(this);
         }
     }
 }

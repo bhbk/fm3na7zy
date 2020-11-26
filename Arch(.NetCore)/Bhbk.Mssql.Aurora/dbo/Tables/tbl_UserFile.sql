@@ -2,9 +2,9 @@
     [Id]              UNIQUEIDENTIFIER   NOT NULL,
     [IdentityId]      UNIQUEIDENTIFIER   NOT NULL,
     [FolderId]        UNIQUEIDENTIFIER   NOT NULL,
-    [VirtualName]     NVARCHAR (MAX)     NOT NULL,
+    [VirtualName]     NVARCHAR (260)     NOT NULL,
     [RealPath]        NVARCHAR (MAX)     NOT NULL,
-    [RealFileName]    NVARCHAR (MAX)     NOT NULL,
+    [RealFileName]    NVARCHAR (260)     NOT NULL,
     [RealFileSize]    BIGINT             NOT NULL,
     [HashSHA256]      NVARCHAR (64)      NOT NULL,
     [IsReadOnly]      BIT                CONSTRAINT [DF_tbl_UserFile_IsReadOnly] DEFAULT ((0)) NOT NULL,
@@ -16,6 +16,8 @@
     CONSTRAINT [FK_tbl_UserFile_FolderID] FOREIGN KEY ([FolderId]) REFERENCES [dbo].[tbl_UserFolder] ([Id]),
     CONSTRAINT [FK_tbl_UserFile_IdentityID] FOREIGN KEY ([IdentityId]) REFERENCES [dbo].[tbl_User] ([IdentityId]) ON DELETE CASCADE ON UPDATE CASCADE
 );
+
+
 
 
 

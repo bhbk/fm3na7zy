@@ -4,7 +4,6 @@ using Serilog;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
-using System.Text;
 
 namespace Bhbk.Daemon.Aurora.SFTP.Helpers
 {
@@ -12,41 +11,18 @@ namespace Bhbk.Daemon.Aurora.SFTP.Helpers
     {
         internal static void EnsureRootExists(DirectoryNode root, 
             Dictionary<NodePath, NodeBase> path, 
-            Dictionary<NodeBase, MemoryNodeData> store)
+            Dictionary<NodeBase, MemoryNodeData> store,
+            User user)
         {
             if (store.Count == 0)
             {
+                var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
+
                 store.Add(root, new MemoryNodeData());
                 path.Add(root.Path, root);
+
+                Log.Information($"'{callPath}' '{user.IdentityAlias}' folder '/'");
             }
-        }
-
-        internal static void CreatePubKeysFile(DirectoryNode root,
-            Dictionary<NodePath, NodeBase> path,
-            Dictionary<NodeBase, MemoryNodeData> store,
-            User user,
-            StringBuilder content)
-        {
-            var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
-
-            var folderName = ".ssh";
-            var folderNode = new DirectoryNode(folderName, root);
-            var fileName = "authorized_users";
-            var fileNode = new FileNode(fileName, folderNode);
-
-            store.Add(folderNode, new MemoryNodeData());
-            store[root].Children.Add(folderNode);
-            path.Add(folderNode.Path, folderNode);
-
-            store.Add(fileNode, 
-                new MemoryNodeData()
-                {
-                    Content = new MemoryStream(Encoding.UTF8.GetBytes(content.ToString()))
-                });
-            store[folderNode].Children.Add(fileNode);
-            path.Add(fileNode.Path, fileNode);
-
-            Log.Information($"'{callPath}' '{user.IdentityAlias}' file '{fileNode.Path}'");
         }
     }
 

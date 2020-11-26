@@ -1,11 +1,10 @@
 ﻿using Bhbk.Lib.Aurora.Data_EF6.Infrastructure;
 using Bhbk.Lib.Aurora.Data_EF6.Models;
+using Bhbk.Lib.Aurora.Domain.Helpers;
 using Bhbk.Lib.Common.Primitives;
-using Bhbk.Lib.Identity.Services;
 using Bhbk.Lib.QueryExpression.Extensions;
 using Bhbk.Lib.QueryExpression.Factories;
 using Microsoft.Extensions.Configuration;
-using Newtonsoft.Json;
 using Rebex.IO.FileSystem;
 using Serilog;
 using System;
@@ -14,7 +13,6 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Security.Cryptography;
-using System.Text;
 
 namespace Bhbk.Daemon.Aurora.SFTP.Helpers
 {
@@ -22,29 +20,26 @@ namespace Bhbk.Daemon.Aurora.SFTP.Helpers
     {
         internal static void EnsureRootExists(IUnitOfWork uow, User user)
         {
+            var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
+
             var folder = uow.UserFolders.Get(QueryExpressionFactory.GetQueryExpression<UserFolder>()
                 .Where(x => x.IdentityId == user.IdentityId && x.ParentId == null).ToLambda())
                 .SingleOrDefault();
 
             if (folder == null)
             {
-                var now = DateTime.UtcNow;
-
-                var newFolder = uow.UserFolders.Create(
+                folder = uow.UserFolders.Create(
                     new UserFolder
                     {
-                        Id = Guid.NewGuid(),
                         IdentityId = user.IdentityId,
                         ParentId = null,
                         VirtualName = string.Empty,
-                        CreatedUtc = now,
+                        CreatedUtc = DateTime.UtcNow,
                         IsReadOnly = true,
                     });
                 uow.Commit();
 
-                var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
-
-                Log.Information($"'{callPath}' '{user.IdentityAlias}' initialize '/'");
+                Log.Information($"'{callPath}' '{user.IdentityAlias}' folder '/'");
             }
         }
 

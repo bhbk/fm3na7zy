@@ -15,16 +15,16 @@
         <EntityTypeShape EntityType="AuroraModels.UserFile" Width="1.5" PointX="5.25" PointY="15.75" IsExpanded="true" />
         <EntityTypeShape EntityType="AuroraModels.UserFolder" Width="1.5" PointX="3" PointY="18.5" IsExpanded="true" />
         <EntityTypeShape EntityType="AuroraModels.UserMount" Width="1.5" PointX="3" PointY="14.375" IsExpanded="true" />
-        <AssociationConnector Association="AuroraModels.UserUserFile" />
-        <AssociationConnector Association="AuroraModels.UserUserFolder" />
-        <AssociationConnector Association="AuroraModels.UserUserMount" />
-        <AssociationConnector Association="AuroraModels.UserPrivateKey" />
-        <AssociationConnector Association="AuroraModels.UserPublicKey" />
-        <AssociationConnector Association="AuroraModels.UserNetwork" />
-        <AssociationConnector Association="AuroraModels.UserUserAlert" />
-        <AssociationConnector Association="AuroraModels.UserSetting" />
-        <AssociationConnector Association="AuroraModels.CredentialUserMount" />
-        <AssociationConnector Association="AuroraModels.PrivateKeyPublicKey" />
+        <AssociationConnector Association="AuroraModels.User_UserFile" />
+        <AssociationConnector Association="AuroraModels.User_UserFolder" />
+        <AssociationConnector Association="AuroraModels.User_UserMount" />
+        <AssociationConnector Association="AuroraModels.User_PrivateKey" />
+        <AssociationConnector Association="AuroraModels.User_PublicKey" />
+        <AssociationConnector Association="AuroraModels.User_Network" />
+        <AssociationConnector Association="AuroraModels.User_UserAlert" />
+        <AssociationConnector Association="AuroraModels.User_Setting" />
+        <AssociationConnector Association="AuroraModels.Credential_UserMount" />
+        <AssociationConnector Association="AuroraModels.PrivateKey_PublicKey" />
         <AssociationConnector Association="AuroraModels.UserFolder_UserFile" />
         <AssociationConnector Association="AuroraModels.UserFolder_UserFolder" />
       </Diagram>

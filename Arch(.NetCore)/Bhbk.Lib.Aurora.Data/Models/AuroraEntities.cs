@@ -161,7 +161,7 @@ namespace Bhbk.Lib.Aurora.Data.Models
                 entity.ToView("uvw_UserAlert", "svc");
 
                 entity.Property(e => e.ToEmailAddress)
-                    .HasMaxLength(256)
+                    .HasMaxLength(320)
                     .IsUnicode(false);
 
                 entity.Property(e => e.ToFirstName)
@@ -175,7 +175,7 @@ namespace Bhbk.Lib.Aurora.Data.Models
                     .IsUnicode(false);
 
                 entity.Property(e => e.ToPhoneNumber)
-                    .HasMaxLength(12)
+                    .HasMaxLength(15)
                     .IsUnicode(false);
             });
 
@@ -185,13 +185,19 @@ namespace Bhbk.Lib.Aurora.Data.Models
 
                 entity.ToView("uvw_UserFile", "svc");
 
-                entity.Property(e => e.HashSHA256).HasMaxLength(64);
+                entity.Property(e => e.HashSHA256)
+                    .IsRequired()
+                    .HasMaxLength(64);
 
-                entity.Property(e => e.RealFileName).IsRequired();
+                entity.Property(e => e.RealFileName)
+                    .IsRequired()
+                    .HasMaxLength(260);
 
                 entity.Property(e => e.RealPath).IsRequired();
 
-                entity.Property(e => e.VirtualName).IsRequired();
+                entity.Property(e => e.VirtualName)
+                    .IsRequired()
+                    .HasMaxLength(260);
             });
 
             modelBuilder.Entity<uvw_UserFolder>(entity =>

@@ -11,6 +11,10 @@
     <PackageReference Include="Bhbk.Lib.Cryptography" Version="2020.11.21.2300" />
     <PackageReference Include="Bhbk.Lib.Identity" Version="2020.11.21.2300" />
     <PackageReference Include="ManyConsole" Version="2.0.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.1">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="5.0.0" />
     <PackageReference Include="Rebex.Elliptic.Castle" Version="1.2.1" />
     <PackageReference Include="Rebex.Elliptic.Curve25519" Version="1.2.1" />

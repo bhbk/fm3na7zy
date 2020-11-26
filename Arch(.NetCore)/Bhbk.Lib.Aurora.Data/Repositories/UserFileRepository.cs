@@ -23,7 +23,7 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
             var pvalues = new []
             {
                 new SqlParameter("@IdentityId", SqlDbType.UniqueIdentifier) { Value = entity.IdentityId },
-                new SqlParameter("@FolderId", SqlDbType.UniqueIdentifier) { Value = entity.FolderId.HasValue ? (object)entity.FolderId.Value : DBNull.Value },
+                new SqlParameter("@FolderId", SqlDbType.UniqueIdentifier) { Value = entity.FolderId },
                 new SqlParameter("@VirtualName", SqlDbType.NVarChar) { Value = entity.VirtualName },
                 new SqlParameter("@RealPath", SqlDbType.NVarChar) { Value = entity.RealPath },
                 new SqlParameter("@RealFileName", SqlDbType.NVarChar) { Value = entity.RealFileName },
@@ -97,7 +97,7 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
             {
                 new SqlParameter("@Id", SqlDbType.UniqueIdentifier) { Value = entity.Id },
                 new SqlParameter("@IdentityId", SqlDbType.UniqueIdentifier) { Value = entity.IdentityId },
-                new SqlParameter("@FolderId", SqlDbType.UniqueIdentifier) { Value = entity.FolderId.HasValue ? (object)entity.FolderId.Value : DBNull.Value },
+                new SqlParameter("@FolderId", SqlDbType.UniqueIdentifier) { Value = entity.FolderId },
                 new SqlParameter("@VirtualName", SqlDbType.NVarChar) { Value = entity.VirtualName },
                 new SqlParameter("@RealPath", SqlDbType.NVarChar) { Value = entity.RealPath },
                 new SqlParameter("@RealFileName", SqlDbType.NVarChar) { Value = entity.RealFileName },

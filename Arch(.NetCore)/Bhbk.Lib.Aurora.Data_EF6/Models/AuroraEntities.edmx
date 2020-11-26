@@ -182,16 +182,18 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_UserFile' does not have a prima
             
             
             
+            
+            
           </Key>
           <Property Name="Id" Type="uniqueidentifier" Nullable="false" />
           <Property Name="IdentityId" Type="uniqueidentifier" Nullable="false" />
-          <Property Name="FolderId" Type="uniqueidentifier" />
-          <Property Name="VirtualName" Type="nvarchar(max)" Nullable="false" />
+          <Property Name="FolderId" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="VirtualName" Type="nvarchar" MaxLength="260" Nullable="false" />
           <Property Name="IsReadOnly" Type="bit" Nullable="false" />
           <Property Name="RealPath" Type="nvarchar(max)" Nullable="false" />
-          <Property Name="RealFileName" Type="nvarchar(max)" Nullable="false" />
+          <Property Name="RealFileName" Type="nvarchar" MaxLength="260" Nullable="false" />
           <Property Name="RealFileSize" Type="bigint" Nullable="false" />
-          <Property Name="HashSHA256" Type="nvarchar" MaxLength="64" />
+          <Property Name="HashSHA256" Type="nvarchar" MaxLength="64" Nullable="false" />
           <Property Name="CreatedUtc" Type="datetimeoffset" Precision="7" Nullable="false" />
           <Property Name="LastAccessedUtc" Type="datetimeoffset" Precision="7" />
           <Property Name="LastUpdatedUtc" Type="datetimeoffset" Precision="7" />
@@ -614,7 +616,7 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_UserMount' does not have a prim
           <Property Name="IsDeletable" Type="Boolean" Nullable="false" />
           <Property Name="CreatedUtc" Type="DateTimeOffset" Nullable="false" Precision="7" />
           <Property Name="LastUpdatedUtc" Type="DateTimeOffset" Precision="7" />
-          <NavigationProperty Name="Mounts" Relationship="AuroraModels.CredentialUserMount" FromRole="Credential" ToRole="UserMount" />
+          <NavigationProperty Name="Mounts" Relationship="AuroraModels.Credential_UserMount" FromRole="Credential" ToRole="UserMount" />
         </EntityType>
         <EntityType Name="Network">
           <Key>
@@ -627,7 +629,7 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_UserMount' does not have a prim
           <Property Name="IsEnabled" Type="Boolean" Nullable="false" />
           <Property Name="CreatedUtc" Type="DateTimeOffset" Nullable="false" Precision="7" />
           <Property Name="LastUpdatedUtc" Type="DateTimeOffset" Precision="7" />
-          <NavigationProperty Name="User" Relationship="AuroraModels.UserNetwork" FromRole="Network" ToRole="User" />
+          <NavigationProperty Name="User" Relationship="AuroraModels.User_Network" FromRole="Network" ToRole="User" />
         </EntityType>
         <EntityType Name="PrivateKey">
           <Key>
@@ -644,8 +646,8 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_UserMount' does not have a prim
           <Property Name="IsDeletable" Type="Boolean" Nullable="false" />
           <Property Name="CreatedUtc" Type="DateTimeOffset" Nullable="false" Precision="7" />
           <Property Name="LastUpdatedUtc" Type="DateTimeOffset" Precision="7" />
-          <NavigationProperty Name="User" Relationship="AuroraModels.UserPrivateKey" FromRole="PrivateKey" ToRole="User" />
-          <NavigationProperty Name="PublicKey" Relationship="AuroraModels.PrivateKeyPublicKey" FromRole="PrivateKey" ToRole="PublicKey" />
+          <NavigationProperty Name="User" Relationship="AuroraModels.User_PrivateKey" FromRole="PrivateKey" ToRole="User" />
+          <NavigationProperty Name="PublicKey" Relationship="AuroraModels.PrivateKey_PublicKey" FromRole="PrivateKey" ToRole="PublicKey" />
         </EntityType>
         <EntityType Name="PublicKey">
           <Key>
@@ -664,8 +666,8 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_UserMount' does not have a prim
           <Property Name="IsDeletable" Type="Boolean" Nullable="false" />
           <Property Name="CreatedUtc" Type="DateTimeOffset" Nullable="false" Precision="7" />
           <Property Name="LastUpdatedUtc" Type="DateTimeOffset" Precision="7" />
-          <NavigationProperty Name="User" Relationship="AuroraModels.UserPublicKey" FromRole="PublicKey" ToRole="User" />
-          <NavigationProperty Name="PrivateKey" Relationship="AuroraModels.PrivateKeyPublicKey" FromRole="PublicKey" ToRole="PrivateKey" />
+          <NavigationProperty Name="User" Relationship="AuroraModels.User_PublicKey" FromRole="PublicKey" ToRole="User" />
+          <NavigationProperty Name="PrivateKey" Relationship="AuroraModels.PrivateKey_PublicKey" FromRole="PublicKey" ToRole="PrivateKey" />
         </EntityType>
         <EntityType Name="Setting">
           <Key>
@@ -678,7 +680,7 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_UserMount' does not have a prim
           <Property Name="IsDeletable" Type="Boolean" Nullable="false" />
           <Property Name="CreatedUtc" Type="DateTimeOffset" Nullable="false" Precision="7" />
           <Property Name="LastUpdatedUtc" Type="DateTimeOffset" Precision="7" />
-          <NavigationProperty Name="User" Relationship="AuroraModels.UserSetting" FromRole="Setting" ToRole="User" />
+          <NavigationProperty Name="User" Relationship="AuroraModels.User_Setting" FromRole="Setting" ToRole="User" />
         </EntityType>
         <EntityType Name="User">
           <Key>
@@ -695,14 +697,14 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_UserMount' does not have a prim
           <Property Name="IsDeletable" Type="Boolean" Nullable="false" />
           <Property Name="CreatedUtc" Type="DateTimeOffset" Nullable="false" Precision="7" />
           <Property Name="LastUpdatedUtc" Type="DateTimeOffset" Precision="7" />
-          <NavigationProperty Name="Alerts" Relationship="AuroraModels.UserUserAlert" FromRole="User" ToRole="UserAlert" />
-          <NavigationProperty Name="Files" Relationship="AuroraModels.UserUserFile" FromRole="User" ToRole="UserFile" />
-          <NavigationProperty Name="Folders" Relationship="AuroraModels.UserUserFolder" FromRole="User" ToRole="UserFolder" />
-          <NavigationProperty Name="Mount" Relationship="AuroraModels.UserUserMount" FromRole="User" ToRole="UserMount" />
-          <NavigationProperty Name="Networks" Relationship="AuroraModels.UserNetwork" FromRole="User" ToRole="Network" />
-          <NavigationProperty Name="PrivateKeys" Relationship="AuroraModels.UserPrivateKey" FromRole="User" ToRole="PrivateKey" />
-          <NavigationProperty Name="PublicKeys" Relationship="AuroraModels.UserPublicKey" FromRole="User" ToRole="PublicKey" />
-          <NavigationProperty Name="Settings" Relationship="AuroraModels.UserSetting" FromRole="User" ToRole="Setting" />
+          <NavigationProperty Name="Alerts" Relationship="AuroraModels.User_UserAlert" FromRole="User" ToRole="UserAlert" />
+          <NavigationProperty Name="Files" Relationship="AuroraModels.User_UserFile" FromRole="User" ToRole="UserFile" />
+          <NavigationProperty Name="Folders" Relationship="AuroraModels.User_UserFolder" FromRole="User" ToRole="UserFolder" />
+          <NavigationProperty Name="Mount" Relationship="AuroraModels.User_UserMount" FromRole="User" ToRole="UserMount" />
+          <NavigationProperty Name="Networks" Relationship="AuroraModels.User_Network" FromRole="User" ToRole="Network" />
+          <NavigationProperty Name="PrivateKeys" Relationship="AuroraModels.User_PrivateKey" FromRole="User" ToRole="PrivateKey" />
+          <NavigationProperty Name="PublicKeys" Relationship="AuroraModels.User_PublicKey" FromRole="User" ToRole="PublicKey" />
+          <NavigationProperty Name="Settings" Relationship="AuroraModels.User_Setting" FromRole="User" ToRole="Setting" />
         </EntityType>
         <EntityType Name="UserAlert">
           <Key>
@@ -720,7 +722,7 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_UserMount' does not have a prim
           <Property Name="ToPhoneNumber" Type="String" MaxLength="15" FixedLength="false" Unicode="false" />
           <Property Name="CreatedUtc" Type="DateTimeOffset" Nullable="false" Precision="7" />
           <Property Name="LastUpdatedUtc" Type="DateTimeOffset" Precision="7" />
-          <NavigationProperty Name="User" Relationship="AuroraModels.UserUserAlert" FromRole="UserAlert" ToRole="User" />
+          <NavigationProperty Name="User" Relationship="AuroraModels.User_UserAlert" FromRole="UserAlert" ToRole="User" />
           <Property Name="IsEnabled" Type="Boolean" Nullable="false" />
         </EntityType>
         <EntityType Name="UserFile">
@@ -729,18 +731,18 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_UserMount' does not have a prim
           </Key>
           <Property Name="Id" Type="Guid" Nullable="false" />
           <Property Name="IdentityId" Type="Guid" Nullable="false" />
-          <Property Name="FolderId" Type="Guid" />
-          <Property Name="VirtualName" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="FolderId" Type="Guid" Nullable="false" />
+          <Property Name="VirtualName" Type="String" MaxLength="260" FixedLength="false" Unicode="true" Nullable="false" />
           <Property Name="IsReadOnly" Type="Boolean" Nullable="false" />
           <Property Name="RealPath" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" Nullable="false" />
-          <Property Name="RealFileName" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="RealFileName" Type="String" MaxLength="260" FixedLength="false" Unicode="true" Nullable="false" />
           <Property Name="RealFileSize" Type="Int64" Nullable="false" />
-          <Property Name="HashSHA256" Type="String" MaxLength="64" FixedLength="false" Unicode="true" />
+          <Property Name="HashSHA256" Type="String" MaxLength="64" FixedLength="false" Unicode="true" Nullable="false" />
           <Property Name="CreatedUtc" Type="DateTimeOffset" Nullable="false" Precision="7" />
           <Property Name="LastAccessedUtc" Type="DateTimeOffset" Precision="7" />
           <Property Name="LastUpdatedUtc" Type="DateTimeOffset" Precision="7" />
           <Property Name="LastVerifiedUtc" Type="DateTimeOffset" Nullable="false" Precision="7" />
-          <NavigationProperty Name="User" Relationship="AuroraModels.UserUserFile" FromRole="UserFile" ToRole="User" />
+          <NavigationProperty Name="User" Relationship="AuroraModels.User_UserFile" FromRole="UserFile" ToRole="User" />
           <NavigationProperty Name="Parent" Relationship="AuroraModels.UserFolder_UserFile" FromRole="UserFile" ToRole="UserFolder" />
         </EntityType>
         <EntityType Name="UserFolder">
@@ -755,7 +757,7 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_UserMount' does not have a prim
           <Property Name="CreatedUtc" Type="DateTimeOffset" Nullable="false" Precision="7" />
           <Property Name="LastAccessedUtc" Type="DateTimeOffset" Precision="7" />
           <Property Name="LastUpdatedUtc" Type="DateTimeOffset" Precision="7" />
-          <NavigationProperty Name="User" Relationship="AuroraModels.UserUserFolder" FromRole="UserFolder" ToRole="User" />
+          <NavigationProperty Name="User" Relationship="AuroraModels.User_UserFolder" FromRole="UserFolder" ToRole="User" />
           <NavigationProperty Name="Files" Relationship="AuroraModels.UserFolder_UserFile" FromRole="UserFolder" ToRole="UserFile" />
           <NavigationProperty Name="Folders" Relationship="AuroraModels.UserFolder_UserFolder" FromRole="UserFolder" ToRole="UserFolderParent" />
           <NavigationProperty Name="Parent" Relationship="AuroraModels.UserFolder_UserFolder" FromRole="UserFolderParent" ToRole="UserFolder" />
@@ -773,8 +775,8 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_UserMount' does not have a prim
           <Property Name="IsDeletable" Type="Boolean" Nullable="false" />
           <Property Name="CreatedUtc" Type="DateTimeOffset" Nullable="false" Precision="7" />
           <Property Name="LastUpdatedUtc" Type="DateTimeOffset" Precision="7" />
-          <NavigationProperty Name="User" Relationship="AuroraModels.UserUserMount" FromRole="UserMount" ToRole="User" />
-          <NavigationProperty Name="Credential" Relationship="AuroraModels.CredentialUserMount" FromRole="UserMount" ToRole="Credential" />
+          <NavigationProperty Name="User" Relationship="AuroraModels.User_UserMount" FromRole="UserMount" ToRole="User" />
+          <NavigationProperty Name="Credential" Relationship="AuroraModels.Credential_UserMount" FromRole="UserMount" ToRole="Credential" />
         </EntityType>
         <EntityContainer Name="AuroraEntities" annotation:LazyLoadingEnabled="true">
           <EntitySet Name="Credentials" EntityType="AuroraModels.Credential" />
@@ -1006,43 +1008,43 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_UserMount' does not have a prim
             <Parameter Name="IsEnabled" Mode="In" Type="Boolean" />
             <Parameter Name="IsDeletable" Mode="In" Type="Boolean" />
           </FunctionImport>
-          <AssociationSet Name="UserUserFile" Association="AuroraModels.UserUserFile">
+          <AssociationSet Name="User_UserFile" Association="AuroraModels.User_UserFile">
             <End Role="User" EntitySet="Users" />
             <End Role="UserFile" EntitySet="UserFiles" />
           </AssociationSet>
-          <AssociationSet Name="UserUserFolder" Association="AuroraModels.UserUserFolder">
+          <AssociationSet Name="User_UserFolder" Association="AuroraModels.User_UserFolder">
             <End Role="User" EntitySet="Users" />
             <End Role="UserFolder" EntitySet="UserFolders" />
           </AssociationSet>
-          <AssociationSet Name="UserUserMount" Association="AuroraModels.UserUserMount">
+          <AssociationSet Name="User_UserMount" Association="AuroraModels.User_UserMount">
             <End Role="User" EntitySet="Users" />
             <End Role="UserMount" EntitySet="UserMounts" />
           </AssociationSet>
-          <AssociationSet Name="UserPrivateKey" Association="AuroraModels.UserPrivateKey">
+          <AssociationSet Name="User_PrivateKey" Association="AuroraModels.User_PrivateKey">
             <End Role="User" EntitySet="Users" />
             <End Role="PrivateKey" EntitySet="PrivateKeys" />
           </AssociationSet>
-          <AssociationSet Name="UserPublicKey" Association="AuroraModels.UserPublicKey">
+          <AssociationSet Name="User_PublicKey" Association="AuroraModels.User_PublicKey">
             <End Role="User" EntitySet="Users" />
             <End Role="PublicKey" EntitySet="PublicKeys" />
           </AssociationSet>
-          <AssociationSet Name="UserNetwork" Association="AuroraModels.UserNetwork">
+          <AssociationSet Name="User_Network" Association="AuroraModels.User_Network">
             <End Role="User" EntitySet="Users" />
             <End Role="Network" EntitySet="Networks" />
           </AssociationSet>
-          <AssociationSet Name="UserUserAlert" Association="AuroraModels.UserUserAlert">
+          <AssociationSet Name="User_UserAlert" Association="AuroraModels.User_UserAlert">
             <End Role="User" EntitySet="Users" />
             <End Role="UserAlert" EntitySet="UserAlerts" />
           </AssociationSet>
-          <AssociationSet Name="UserSetting" Association="AuroraModels.UserSetting">
+          <AssociationSet Name="User_Setting" Association="AuroraModels.User_Setting">
             <End Role="User" EntitySet="Users" />
             <End Role="Setting" EntitySet="Settings" />
           </AssociationSet>
-          <AssociationSet Name="CredentialUserMount" Association="AuroraModels.CredentialUserMount">
+          <AssociationSet Name="Credential_UserMount" Association="AuroraModels.Credential_UserMount">
             <End Role="Credential" EntitySet="Credentials" />
             <End Role="UserMount" EntitySet="UserMounts" />
           </AssociationSet>
-          <AssociationSet Name="PrivateKeyPublicKey" Association="AuroraModels.PrivateKeyPublicKey">
+          <AssociationSet Name="PrivateKey_PublicKey" Association="AuroraModels.PrivateKey_PublicKey">
             <End Role="PrivateKey" EntitySet="PrivateKeys" />
             <End Role="PublicKey" EntitySet="PublicKeys" />
           </AssociationSet>
@@ -1412,7 +1414,7 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_UserMount' does not have a prim
           <Property Type="DateTimeOffset" Name="CreatedUtc" Nullable="false" />
           <Property Type="DateTimeOffset" Name="LastUpdatedUtc" Nullable="true" />
         </ComplexType>
-        <Association Name="UserUserFile">
+        <Association Name="User_UserFile">
           <End Type="AuroraModels.User" Role="User" Multiplicity="1" />
           <End Type="AuroraModels.UserFile" Role="UserFile" Multiplicity="*" />
           <ReferentialConstraint>
@@ -1424,7 +1426,7 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_UserMount' does not have a prim
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="UserUserFolder">
+        <Association Name="User_UserFolder">
           <End Type="AuroraModels.User" Role="User" Multiplicity="1" />
           <End Type="AuroraModels.UserFolder" Role="UserFolder" Multiplicity="*" />
           <ReferentialConstraint>
@@ -1436,7 +1438,7 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_UserMount' does not have a prim
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="UserUserMount">
+        <Association Name="User_UserMount">
           <End Type="AuroraModels.User" Role="User" Multiplicity="1" />
           <End Type="AuroraModels.UserMount" Role="UserMount" Multiplicity="0..1" />
           <ReferentialConstraint>
@@ -1448,7 +1450,7 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_UserMount' does not have a prim
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="UserPrivateKey">
+        <Association Name="User_PrivateKey">
           <End Type="AuroraModels.User" Role="User" Multiplicity="0..1" />
           <End Type="AuroraModels.PrivateKey" Role="PrivateKey" Multiplicity="*" />
           <ReferentialConstraint>
@@ -1460,7 +1462,7 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_UserMount' does not have a prim
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="UserPublicKey">
+        <Association Name="User_PublicKey">
           <End Type="AuroraModels.User" Role="User" Multiplicity="0..1" />
           <End Type="AuroraModels.PublicKey" Role="PublicKey" Multiplicity="*" />
           <ReferentialConstraint>
@@ -1472,7 +1474,7 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_UserMount' does not have a prim
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="UserNetwork">
+        <Association Name="User_Network">
           <End Type="AuroraModels.User" Role="User" Multiplicity="1" />
           <End Type="AuroraModels.Network" Role="Network" Multiplicity="*" />
           <ReferentialConstraint>
@@ -1484,7 +1486,7 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_UserMount' does not have a prim
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="UserUserAlert">
+        <Association Name="User_UserAlert">
           <End Type="AuroraModels.User" Role="User" Multiplicity="1" />
           <End Type="AuroraModels.UserAlert" Role="UserAlert" Multiplicity="*" />
           <ReferentialConstraint>
@@ -1496,7 +1498,7 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_UserMount' does not have a prim
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="UserSetting">
+        <Association Name="User_Setting">
           <End Type="AuroraModels.User" Role="User" Multiplicity="0..1" />
           <End Type="AuroraModels.Setting" Role="Setting" Multiplicity="*" />
           <ReferentialConstraint>
@@ -1508,7 +1510,7 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_UserMount' does not have a prim
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="CredentialUserMount">
+        <Association Name="Credential_UserMount">
           <End Type="AuroraModels.Credential" Role="Credential" Multiplicity="0..1" />
           <End Type="AuroraModels.UserMount" Role="UserMount" Multiplicity="*" />
           <ReferentialConstraint>
@@ -1520,7 +1522,7 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_UserMount' does not have a prim
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="PrivateKeyPublicKey">
+        <Association Name="PrivateKey_PublicKey">
           <End Type="AuroraModels.PrivateKey" Role="PrivateKey" Multiplicity="0..1" />
           <End Type="AuroraModels.PublicKey" Role="PublicKey" Multiplicity="*" />
           <ReferentialConstraint>
@@ -1533,7 +1535,7 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_UserMount' does not have a prim
           </ReferentialConstraint>
         </Association>
         <Association Name="UserFolder_UserFile">
-          <End Type="AuroraModels.UserFolder" Role="UserFolder" Multiplicity="0..1" />
+          <End Type="AuroraModels.UserFolder" Role="UserFolder" Multiplicity="1" />
           <End Type="AuroraModels.UserFile" Role="UserFile" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="UserFolder">
