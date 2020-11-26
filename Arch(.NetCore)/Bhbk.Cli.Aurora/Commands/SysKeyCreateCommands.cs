@@ -1,6 +1,6 @@
 ﻿using Bhbk.Cli.Aurora.Helpers;
-using Bhbk.Lib.Aurora.Data.Infrastructure_DIRECT;
-using Bhbk.Lib.Aurora.Data.Models_DIRECT;
+using Bhbk.Lib.Aurora.Data_EF6.Infrastructure;
+using Bhbk.Lib.Aurora.Data_EF6.Models;
 using Bhbk.Lib.Aurora.Domain.Helpers;
 using Bhbk.Lib.CommandLine.IO;
 using Bhbk.Lib.Common.Primitives.Enums;
@@ -74,15 +74,15 @@ namespace Bhbk.Cli.Aurora.Commands
 
                 var privKey = KeyHelper.CreatePrivKey(_conf, _uow, _keyAlgo, _privKeySize, _privKeyPass, SignatureHashAlgorithm.SHA256);
 
-                var pubKey = _uow.PublicKeys.Get(QueryExpressionFactory.GetQueryExpression<tbl_PublicKey>()
+                var pubKey = _uow.PublicKeys.Get(QueryExpressionFactory.GetQueryExpression<PublicKey>()
                     .Where(x => x.PrivateKeyId == privKey.Id).ToLambda(),
-                        new List<Expression<Func<tbl_PublicKey, object>>>()
+                        new List<Expression<Func<PublicKey, object>>>()
                         {
                             x => x.PrivateKey,
                         })
                     .Single();
 
-                ConsoleHelper.StdOutKeyPairs(new List<tbl_PublicKey>() { pubKey });
+                ConsoleHelper.StdOutKeyPairs(new List<PublicKey>() { pubKey });
 
                 return StandardOutput.FondFarewell();
             }

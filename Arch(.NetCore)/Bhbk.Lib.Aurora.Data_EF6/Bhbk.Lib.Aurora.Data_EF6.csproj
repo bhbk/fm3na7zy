@@ -1,0 +1,273 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\packages\EntityFramework.6.4.4\build\EntityFramework.props" Condition="Exists('..\packages\EntityFramework.6.4.4\build\EntityFramework.props')" />
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{19B1612A-A0B9-4E21-B413-A37EBF69BFD9}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Bhbk.Lib.Aurora.Data_EF6</RootNamespace>
+    <AssemblyName>Bhbk.Lib.Aurora.Data_EF6</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x64\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <LangVersion>7.3</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <OutputPath>bin\x64\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <LangVersion>7.3</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x86\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <LangVersion>7.3</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+    <OutputPath>bin\x86\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <LangVersion>7.3</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Bhbk.Lib.Common, Version=2020.11.21.2300, Culture=neutral, processorArchitecture=AMD64">
+      <HintPath>..\packages\Bhbk.Lib.Common.2020.11.21.2300\lib\netstandard2.0\Bhbk.Lib.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="Bhbk.Lib.DataAccess.EF, Version=1.0.0.0, Culture=neutral, processorArchitecture=AMD64">
+      <HintPath>..\packages\Bhbk.Lib.DataAccess.EF.2020.11.21.2300\lib\net48\Bhbk.Lib.DataAccess.EF.dll</HintPath>
+    </Reference>
+    <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <HintPath>..\packages\EntityFramework.6.4.4\lib\net45\EntityFramework.dll</HintPath>
+    </Reference>
+    <Reference Include="EntityFramework.SqlServer, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <HintPath>..\packages\EntityFramework.6.4.4\lib\net45\EntityFramework.SqlServer.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Security" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Infrastructure\IUnitOfWork.cs" />
+    <Compile Include="Infrastructure\UnitOfWork.cs" />
+    <Compile Include="Models\AuroraEntities.Context.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>AuroraEntities.Context.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\AuroraEntities.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>AuroraEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\AuroraEntities.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>AuroraEntities.edmx</DependentUpon>
+    </Compile>
+    <Compile Include="Models\AuroraEntitiesFactory.cs" />
+    <Compile Include="Models\Credential.cs">
+      <DependentUpon>AuroraEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\Network.cs">
+      <DependentUpon>AuroraEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\PrivateKey.cs">
+      <DependentUpon>AuroraEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\PublicKey.cs">
+      <DependentUpon>AuroraEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\Setting.cs">
+      <DependentUpon>AuroraEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\User.cs">
+      <DependentUpon>AuroraEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\UserAlert.cs">
+      <DependentUpon>AuroraEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\UserFile.cs">
+      <DependentUpon>AuroraEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\UserFolder.cs">
+      <DependentUpon>AuroraEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\UserMount.cs">
+      <DependentUpon>AuroraEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\usp_Credential_Delete_Result.cs">
+      <DependentUpon>AuroraEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\usp_Credential_Insert_Result.cs">
+      <DependentUpon>AuroraEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\usp_Credential_Update_Result.cs">
+      <DependentUpon>AuroraEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\usp_Network_Delete_Result.cs">
+      <DependentUpon>AuroraEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\usp_Network_Insert_Result.cs">
+      <DependentUpon>AuroraEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\usp_Network_Update_Result.cs">
+      <DependentUpon>AuroraEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\usp_PrivateKey_Delete_Result.cs">
+      <DependentUpon>AuroraEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\usp_PrivateKey_Insert_Result.cs">
+      <DependentUpon>AuroraEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\usp_PrivateKey_Update_Result.cs">
+      <DependentUpon>AuroraEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\usp_PublicKey_Delete_Result.cs">
+      <DependentUpon>AuroraEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\usp_PublicKey_Insert_Result.cs">
+      <DependentUpon>AuroraEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\usp_PublicKey_Update_Result.cs">
+      <DependentUpon>AuroraEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\usp_Setting_Delete_Result.cs">
+      <DependentUpon>AuroraEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\usp_Setting_Insert_Result.cs">
+      <DependentUpon>AuroraEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\usp_Setting_Update_Result.cs">
+      <DependentUpon>AuroraEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\usp_UserAlert_Delete_Result.cs">
+      <DependentUpon>AuroraEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\usp_UserAlert_Insert_Result.cs">
+      <DependentUpon>AuroraEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\usp_UserAlert_Update_Result.cs">
+      <DependentUpon>AuroraEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\usp_UserFile_Delete_Result.cs">
+      <DependentUpon>AuroraEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\usp_UserFile_Insert_Result.cs">
+      <DependentUpon>AuroraEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\usp_UserFile_Update_Result.cs">
+      <DependentUpon>AuroraEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\usp_UserFolder_Delete_Result.cs">
+      <DependentUpon>AuroraEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\usp_UserFolder_Insert_Result.cs">
+      <DependentUpon>AuroraEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\usp_UserFolder_Update_Result.cs">
+      <DependentUpon>AuroraEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\usp_UserMount_Delete_Result.cs">
+      <DependentUpon>AuroraEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\usp_UserMount_Insert_Result.cs">
+      <DependentUpon>AuroraEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\usp_UserMount_Update_Result.cs">
+      <DependentUpon>AuroraEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\usp_User_Delete_Result.cs">
+      <DependentUpon>AuroraEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\usp_User_Insert_Result.cs">
+      <DependentUpon>AuroraEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\usp_User_Update_Result.cs">
+      <DependentUpon>AuroraEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Models\AuroraEntities.Context.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <DependentUpon>AuroraEntities.edmx</DependentUpon>
+      <LastGenOutput>AuroraEntities.Context.cs</LastGenOutput>
+    </Content>
+    <Content Include="Models\AuroraEntities.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <DependentUpon>AuroraEntities.edmx</DependentUpon>
+      <LastGenOutput>AuroraEntities.cs</LastGenOutput>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+    <EntityDeploy Include="Models\AuroraEntities.edmx">
+      <Generator>EntityModelCodeGenerator</Generator>
+      <LastGenOutput>AuroraEntities.Designer.cs</LastGenOutput>
+    </EntityDeploy>
+    <None Include="Models\AuroraEntities.edmx.diagram">
+      <DependentUpon>AuroraEntities.edmx</DependentUpon>
+    </None>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\EntityFramework.6.4.4\build\EntityFramework.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\EntityFramework.6.4.4\build\EntityFramework.props'))" />
+    <Error Condition="!Exists('..\packages\EntityFramework.6.4.4\build\EntityFramework.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\EntityFramework.6.4.4\build\EntityFramework.targets'))" />
+  </Target>
+  <Import Project="..\packages\EntityFramework.6.4.4\build\EntityFramework.targets" Condition="Exists('..\packages\EntityFramework.6.4.4\build\EntityFramework.targets')" />
+</Project>

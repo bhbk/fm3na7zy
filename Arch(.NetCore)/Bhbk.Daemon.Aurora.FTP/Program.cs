@@ -1,6 +1,6 @@
 using AutoMapper;
-using Bhbk.Lib.Aurora.Data.Infrastructure_DIRECT;
-using Bhbk.Lib.Aurora.Domain.Infrastructure;
+using Bhbk.Lib.Aurora.Data_EF6.Infrastructure;
+using Bhbk.Lib.Aurora.Domain.Profiles;
 using Bhbk.Lib.Common.Primitives.Enums;
 using Bhbk.Lib.Common.Services;
 using FubarDev.FtpServer.AccountManagement;
@@ -93,7 +93,7 @@ namespace Bhbk.Daemon.Aurora.FTP
 
         public static void Main(string[] args = null)
         {
-            _mapper = new MapperConfiguration(x => x.AddProfile<AutoMapperProfile_DIRECT>())
+            _mapper = new MapperConfiguration(x => x.AddProfile<AutoMapperProfile>())
                 .CreateMapper();
 
             _conf = (IConfiguration)new ConfigurationBuilder()

@@ -2,7 +2,6 @@
 using Bhbk.Lib.Aurora.Data.Repositories;
 using Bhbk.Lib.Common.Primitives.Enums;
 using Bhbk.Lib.Common.Services;
-using Bhbk.Lib.DataAccess.EFCore.Repositories;
 //using EntityFrameworkCore.Testing.Moq;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
@@ -16,17 +15,16 @@ namespace Bhbk.Lib.Aurora.Data.Infrastructure
         private readonly AuroraEntities _context;
         private readonly ILoggerFactory _logger;
         public InstanceContext InstanceType { get; private set; }
-        public ActivityRepository Activities { get; private set; }
-        public IGenericRepository<uvw_Credential> Credentials { get; private set; }
-        public IGenericRepository<uvw_Network> Networks { get; private set; }
-        public IGenericRepository<uvw_PrivateKey> PrivateKeys { get; private set; }
-        public IGenericRepository<uvw_PublicKey> PublicKeys { get; private set; }
-        public IGenericRepository<uvw_Setting> Settings { get; private set; }
-        public IGenericRepository<uvw_User> Users { get; private set; }
-        public IGenericRepository<uvw_UserAlert> UserAlerts { get; private set; }
-        public IGenericRepository<uvw_UserFile> UserFiles { get; private set; }
-        public IGenericRepository<uvw_UserFolder> UserFolders { get; private set; }
-        public IGenericRepository<uvw_UserMount> UserMounts { get; private set; }
+        public CredentialRepository Credentials { get; private set; }
+        public NetworkRepository Networks { get; private set; }
+        public PrivateKeyRepository PrivateKeys { get; private set; }
+        public PublicKeyRepository PublicKeys { get; private set; }
+        public SettingRepository Settings { get; private set; }
+        public UserRepository Users { get; private set; }
+        public UserAlertRepository UserAlerts { get; private set; }
+        public UserFileRepository UserFiles { get; private set; }
+        public UserFolderRepository UserFolders { get; private set; }
+        public UserMountRepository UserMounts { get; private set; }
 
         public UnitOfWork(string connection)
             : this(connection, new ContextService(InstanceContext.DeployedOrLocal)) { }
@@ -85,17 +83,16 @@ namespace Bhbk.Lib.Aurora.Data.Infrastructure
 
             InstanceType = instance.InstanceType;
 
-            Activities = new ActivityRepository(_context);
-            Credentials = new GenericRepository<uvw_Credential>(_context);
-            Networks = new GenericRepository<uvw_Network>(_context);
-            PrivateKeys = new GenericRepository<uvw_PrivateKey>(_context);
-            PublicKeys = new GenericRepository<uvw_PublicKey>(_context);
-            Settings = new GenericRepository<uvw_Setting>(_context);
-            Users = new GenericRepository<uvw_User>(_context);
-            UserAlerts = new GenericRepository<uvw_UserAlert>(_context);
-            UserFiles = new GenericRepository<uvw_UserFile>(_context);
-            UserFolders = new GenericRepository<uvw_UserFolder>(_context);
-            UserMounts = new GenericRepository<uvw_UserMount>(_context);
+            Credentials = new CredentialRepository(_context);
+            Networks = new NetworkRepository(_context);
+            PrivateKeys = new PrivateKeyRepository(_context);
+            PublicKeys = new PublicKeyRepository(_context);
+            Settings = new SettingRepository(_context);
+            Users = new UserRepository(_context);
+            UserAlerts = new UserAlertRepository(_context);
+            UserFiles = new UserFileRepository(_context);
+            UserFolders = new UserFolderRepository(_context);
+            UserMounts = new UserMountRepository(_context);
         }
 
         public void Commit()

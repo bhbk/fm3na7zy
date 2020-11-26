@@ -1,5 +1,5 @@
-﻿using Bhbk.Lib.Aurora.Data.Infrastructure_DIRECT;
-using Bhbk.Lib.Aurora.Data.Models_DIRECT;
+﻿using Bhbk.Lib.Aurora.Data_EF6.Infrastructure;
+using Bhbk.Lib.Aurora.Data_EF6.Models;
 using Bhbk.Lib.Cryptography.Encryption;
 using Microsoft.Win32.SafeHandles;
 using Rebex.Net;
@@ -38,7 +38,7 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
             return safeAccessTokenHandle;
         }
 
-        public static bool ValidatePubKey(ICollection<tbl_PublicKey> userKeys, SshPublicKey loginKey)
+        public static bool ValidatePubKey(ICollection<PublicKey> userKeys, SshPublicKey loginKey)
         {
             var loginStream = new MemoryStream();
             loginKey.SavePublicKey(loginStream, SshPublicKeyFormat.Pkcs8);
@@ -64,10 +64,10 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
             return false;
         }
 
-        public static ICollection<tbl_Credential> EditCredentialSecrets(IUnitOfWork uow,
-            ICollection<tbl_Credential> creds, string secretCurrent, string secretNew)
+        public static ICollection<Credential> EditCredentialSecrets(IUnitOfWork uow,
+            ICollection<Credential> creds, string secretCurrent, string secretNew)
         {
-            var userCreds = new List<tbl_Credential>();
+            var userCreds = new List<Credential>();
 
             foreach (var cred in creds)
             {

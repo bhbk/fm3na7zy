@@ -1,6 +1,6 @@
 ﻿using Bhbk.Cli.Aurora.Helpers;
-using Bhbk.Lib.Aurora.Data.Infrastructure_DIRECT;
-using Bhbk.Lib.Aurora.Data.Models_DIRECT;
+using Bhbk.Lib.Aurora.Data_EF6.Infrastructure;
+using Bhbk.Lib.Aurora.Data_EF6.Models;
 using Bhbk.Lib.Aurora.Domain.Helpers;
 using Bhbk.Lib.CommandLine.IO;
 using Bhbk.Lib.Common.Primitives.Enums;
@@ -45,9 +45,9 @@ namespace Bhbk.Cli.Aurora.Commands
                 if (!Directory.Exists(dir))
                     Directory.CreateDirectory(dir);
 
-                var keys = _uow.PublicKeys.Get(QueryExpressionFactory.GetQueryExpression<tbl_PublicKey>()
+                var keys = _uow.PublicKeys.Get(QueryExpressionFactory.GetQueryExpression<PublicKey>()
                     .Where(x => x.IdentityId == null && x.IsDeletable == false).ToLambda(),
-                        new List<Expression<Func<tbl_PublicKey, object>>>()
+                        new List<Expression<Func<PublicKey, object>>>()
                         {
                             x => x.PrivateKey,
                         });

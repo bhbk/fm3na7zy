@@ -1,5 +1,5 @@
 ﻿using Bhbk.Daemon.Aurora.SFTP.FileSystems;
-using Bhbk.Lib.Aurora.Data.Models_DIRECT;
+using Bhbk.Lib.Aurora.Data_EF6.Models;
 using Bhbk.Lib.Aurora.Domain.Helpers;
 using Bhbk.Lib.Aurora.Primitives.Enums;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,7 +13,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Factories
 {
     internal static class FileSystemFactory
     {
-        internal static FileSystemProvider CreateFileSystem(IServiceScopeFactory factory, ILogger logger, tbl_User user,
+        internal static FileSystemProvider CreateFileSystem(IServiceScopeFactory factory, ILogger logger, User user,
             string identityUser, string identityPass)
         {
             LogLevel fsLogLevel;

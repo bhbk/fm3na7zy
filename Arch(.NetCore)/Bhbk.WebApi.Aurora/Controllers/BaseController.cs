@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using Bhbk.Lib.Aurora.Data.Infrastructure_DIRECT;
+using Bhbk.Lib.Aurora.Data_EF6.Infrastructure;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;

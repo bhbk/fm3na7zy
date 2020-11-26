@@ -1,6 +1,6 @@
 ﻿using Bhbk.Cli.Aurora.Helpers;
-using Bhbk.Lib.Aurora.Data.Infrastructure_DIRECT;
-using Bhbk.Lib.Aurora.Data.Models_DIRECT;
+using Bhbk.Lib.Aurora.Data_EF6.Infrastructure;
+using Bhbk.Lib.Aurora.Data_EF6.Models;
 using Bhbk.Lib.CommandLine.IO;
 using Bhbk.Lib.Common.Primitives.Enums;
 using Bhbk.Lib.Common.Services;
@@ -40,7 +40,7 @@ namespace Bhbk.Cli.Aurora.Commands
         {
             try
             {
-                var configs = _uow.Settings.Get(QueryExpressionFactory.GetQueryExpression<tbl_Setting>()
+                var configs = _uow.Settings.Get(QueryExpressionFactory.GetQueryExpression<Setting>()
                     .Where(x => x.IsDeletable == true).ToLambda());
 
                 ConsoleHelper.StdOutSettings(configs);
@@ -52,7 +52,7 @@ namespace Bhbk.Cli.Aurora.Commands
                     _configID = Guid.Parse(StandardInput.GetInput());
                 }
 
-                _uow.Settings.Delete(QueryExpressionFactory.GetQueryExpression<tbl_Setting>()
+                _uow.Settings.Delete(QueryExpressionFactory.GetQueryExpression<Setting>()
                     .Where(x => x.Id == _configID && x.IsDeletable == true).ToLambda());
 
                 _uow.Commit();

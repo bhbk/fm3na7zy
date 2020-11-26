@@ -1,6 +1,6 @@
 ﻿using Bhbk.Cli.Aurora.Helpers;
-using Bhbk.Lib.Aurora.Data.Infrastructure_DIRECT;
-using Bhbk.Lib.Aurora.Data.Models_DIRECT;
+using Bhbk.Lib.Aurora.Data_EF6.Infrastructure;
+using Bhbk.Lib.Aurora.Data_EF6.Models;
 using Bhbk.Lib.CommandLine.IO;
 using Bhbk.Lib.Common.Primitives.Enums;
 using Bhbk.Lib.Common.Services;
@@ -19,7 +19,7 @@ namespace Bhbk.Cli.Aurora.Commands
     {
         private readonly IConfiguration _conf;
         private readonly IUnitOfWork _uow;
-        private tbl_User _user;
+        private User _user;
         private bool _delete = false, _deleteAll = false;
 
         public UserKeyDeleteCommands()
@@ -38,12 +38,12 @@ namespace Bhbk.Cli.Aurora.Commands
                 if (string.IsNullOrEmpty(arg))
                     throw new ConsoleHelpAsException($"  *** No user name given ***");
 
-                _user = _uow.Users.Get(QueryExpressionFactory.GetQueryExpression<tbl_User>()
+                _user = _uow.Users.Get(QueryExpressionFactory.GetQueryExpression<User>()
                     .Where(x => x.IdentityAlias == arg).ToLambda(),
-                        new List<Expression<Func<tbl_User, object>>>()
+                        new List<Expression<Func<User, object>>>()
                         {
-                            x => x.tbl_PrivateKeys,
-                            x => x.tbl_PublicKeys,
+                            x => x.PrivateKeys,
+                            x => x.PublicKeys,
                         }).SingleOrDefault();
 
                 if (_user == null)
@@ -65,7 +65,7 @@ namespace Bhbk.Cli.Aurora.Commands
         {
             try
             {
-                var keys = _uow.PublicKeys.Get(QueryExpressionFactory.GetQueryExpression<tbl_PublicKey>()
+                var keys = _uow.PublicKeys.Get(QueryExpressionFactory.GetQueryExpression<PublicKey>()
                     .Where(x => x.IdentityId == _user.IdentityId && x.IsDeletable == false).ToLambda());
 
                 ConsoleHelper.StdOutKeyPairs(keys.OrderBy(x => x.CreatedUtc));
@@ -77,16 +77,16 @@ namespace Bhbk.Cli.Aurora.Commands
                     var input = Guid.Parse(StandardInput.GetInput());
                     Console.Out.WriteLine();
 
-                    var key = _uow.PublicKeys.Get(QueryExpressionFactory.GetQueryExpression<tbl_PublicKey>()
+                    var key = _uow.PublicKeys.Get(QueryExpressionFactory.GetQueryExpression<PublicKey>()
                         .Where(x => x.IdentityId == _user.IdentityId && x.Id == input).ToLambda())
                         .SingleOrDefault();
 
                     if(key != null)
                     {
-                        _uow.PublicKeys.Delete(QueryExpressionFactory.GetQueryExpression<tbl_PublicKey>()
+                        _uow.PublicKeys.Delete(QueryExpressionFactory.GetQueryExpression<PublicKey>()
                             .Where(x => x.IdentityId == _user.IdentityId && x.IsDeletable == false && x.Id == key.Id).ToLambda());
 
-                        _uow.PrivateKeys.Delete(QueryExpressionFactory.GetQueryExpression<tbl_PrivateKey>()
+                        _uow.PrivateKeys.Delete(QueryExpressionFactory.GetQueryExpression<PrivateKey>()
                             .Where(x => x.IdentityId == _user.IdentityId && x.IsDeletable == false && x.Id == key.PrivateKeyId).ToLambda());
 
                         _uow.Commit();
@@ -94,10 +94,10 @@ namespace Bhbk.Cli.Aurora.Commands
                 }
                 else if (_deleteAll)
                 {
-                    _uow.PublicKeys.Delete(QueryExpressionFactory.GetQueryExpression<tbl_PublicKey>()
+                    _uow.PublicKeys.Delete(QueryExpressionFactory.GetQueryExpression<PublicKey>()
                         .Where(x => x.IdentityId == _user.IdentityId && x.IsDeletable == false).ToLambda());
 
-                    _uow.PrivateKeys.Delete(QueryExpressionFactory.GetQueryExpression<tbl_PrivateKey>()
+                    _uow.PrivateKeys.Delete(QueryExpressionFactory.GetQueryExpression<PrivateKey>()
                         .Where(x => x.IdentityId == _user.IdentityId && x.IsDeletable == false).ToLambda());
 
                     _uow.Commit();

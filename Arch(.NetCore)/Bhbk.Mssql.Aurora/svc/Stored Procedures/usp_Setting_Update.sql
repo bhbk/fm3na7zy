@@ -15,14 +15,13 @@ BEGIN
 
         UPDATE [dbo].[tbl_Setting]
         SET
-             Id						= @Id
-	        ,IdentityId				= @IdentityId
-	        ,ConfigKey				= @ConfigKey
+	         ConfigKey				= @ConfigKey
 	        ,ConfigValue			= @ConfigValue
             ,IsDeletable			= @IsDeletable
-        WHERE Id = @Id
+        WHERE Id = @Id AND IdentityId = @IdentityId
 
-        SELECT * FROM [svc].[uvw_Setting] WHERE [svc].[uvw_Setting].Id = @Id
+        SELECT * FROM [dbo].[tbl_Setting] 
+			WHERE Id = @Id AND IdentityId = @IdentityId
 
     END TRY
 

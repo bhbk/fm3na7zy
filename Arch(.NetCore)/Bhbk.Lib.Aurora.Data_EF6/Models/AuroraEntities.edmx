@@ -1,0 +1,2504 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+  <!-- EF Runtime content -->
+  <edmx:Runtime>
+    <!-- SSDL content -->
+    <edmx:StorageModels>
+    <Schema Namespace="AuroraModels.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+        <!--Errors Found During Generation:
+warning 6002: The table/view 'BhbkAurora.svc.uvw_Credential' does not have a primary key defined. The key has been inferred and the definition was created as a read-only table/view.-->
+        <EntityType Name="uvw_Credential">
+          <Key>
+            <PropertyRef Name="Id" />
+            
+            
+            
+            
+            
+          </Key>
+          <Property Name="Id" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="Domain" Type="varchar" MaxLength="128" />
+          <Property Name="UserName" Type="varchar" MaxLength="128" Nullable="false" />
+          <Property Name="Password" Type="varchar" MaxLength="128" Nullable="false" />
+          <Property Name="IsEnabled" Type="bit" Nullable="false" />
+          <Property Name="IsDeletable" Type="bit" Nullable="false" />
+          <Property Name="CreatedUtc" Type="datetimeoffset" Precision="7" Nullable="false" />
+          <Property Name="LastUpdatedUtc" Type="datetimeoffset" Precision="7" />
+        </EntityType>
+        <!--Errors Found During Generation:
+warning 6002: The table/view 'BhbkAurora.svc.uvw_Network' does not have a primary key defined. The key has been inferred and the definition was created as a read-only table/view.-->
+        <EntityType Name="uvw_Network">
+          <Key>
+            <PropertyRef Name="Id" />
+            
+            
+            
+            
+            
+          </Key>
+          <Property Name="Id" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="IdentityId" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="Address" Type="nvarchar" MaxLength="128" Nullable="false" />
+          <Property Name="Action" Type="nvarchar" MaxLength="8" Nullable="false" />
+          <Property Name="IsEnabled" Type="bit" Nullable="false" />
+          <Property Name="CreatedUtc" Type="datetimeoffset" Precision="7" Nullable="false" />
+          <Property Name="LastUpdatedUtc" Type="datetimeoffset" Precision="7" />
+        </EntityType>
+        <!--Errors Found During Generation:
+warning 6002: The table/view 'BhbkAurora.svc.uvw_PrivateKey' does not have a primary key defined. The key has been inferred and the definition was created as a read-only table/view.-->
+        <EntityType Name="uvw_PrivateKey">
+          <Key>
+            <PropertyRef Name="Id" />
+            
+            
+            
+            
+            
+            
+            
+            
+          </Key>
+          <Property Name="Id" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="IdentityId" Type="uniqueidentifier" />
+          <Property Name="PublicKeyId" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="KeyValue" Type="nvarchar(max)" Nullable="false" />
+          <Property Name="KeyAlgo" Type="nvarchar" MaxLength="16" Nullable="false" />
+          <Property Name="KeyPass" Type="nvarchar" MaxLength="1024" Nullable="false" />
+          <Property Name="KeyFormat" Type="nvarchar" MaxLength="16" Nullable="false" />
+          <Property Name="IsEnabled" Type="bit" Nullable="false" />
+          <Property Name="IsDeletable" Type="bit" Nullable="false" />
+          <Property Name="CreatedUtc" Type="datetimeoffset" Precision="7" Nullable="false" />
+          <Property Name="LastUpdatedUtc" Type="datetimeoffset" Precision="7" />
+        </EntityType>
+        <!--Errors Found During Generation:
+warning 6002: The table/view 'BhbkAurora.svc.uvw_PublicKey' does not have a primary key defined. The key has been inferred and the definition was created as a read-only table/view.-->
+        <EntityType Name="uvw_PublicKey">
+          <Key>
+            <PropertyRef Name="Id" />
+            
+            
+            
+            
+            
+            
+            
+            
+          </Key>
+          <Property Name="Id" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="IdentityId" Type="uniqueidentifier" />
+          <Property Name="PrivateKeyId" Type="uniqueidentifier" />
+          <Property Name="KeyValue" Type="nvarchar(max)" Nullable="false" />
+          <Property Name="KeyAlgo" Type="nvarchar" MaxLength="16" Nullable="false" />
+          <Property Name="KeyFormat" Type="nvarchar" MaxLength="16" Nullable="false" />
+          <Property Name="SigValue" Type="nvarchar" MaxLength="512" Nullable="false" />
+          <Property Name="SigAlgo" Type="nvarchar" MaxLength="16" Nullable="false" />
+          <Property Name="Comment" Type="nvarchar" MaxLength="1024" />
+          <Property Name="IsEnabled" Type="bit" Nullable="false" />
+          <Property Name="IsDeletable" Type="bit" Nullable="false" />
+          <Property Name="CreatedUtc" Type="datetimeoffset" Precision="7" Nullable="false" />
+          <Property Name="LastUpdatedUtc" Type="datetimeoffset" Precision="7" />
+        </EntityType>
+        <!--Errors Found During Generation:
+warning 6002: The table/view 'BhbkAurora.svc.uvw_Setting' does not have a primary key defined. The key has been inferred and the definition was created as a read-only table/view.-->
+        <EntityType Name="uvw_Setting">
+          <Key>
+            <PropertyRef Name="Id" />
+            
+            
+            
+            
+          </Key>
+          <Property Name="Id" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="IdentityId" Type="uniqueidentifier" />
+          <Property Name="ConfigKey" Type="varchar" MaxLength="128" Nullable="false" />
+          <Property Name="ConfigValue" Type="varchar" MaxLength="256" Nullable="false" />
+          <Property Name="IsDeletable" Type="bit" Nullable="false" />
+          <Property Name="CreatedUtc" Type="datetimeoffset" Precision="7" Nullable="false" />
+          <Property Name="LastUpdatedUtc" Type="datetimeoffset" Precision="7" />
+        </EntityType>
+        <!--Errors Found During Generation:
+warning 6002: The table/view 'BhbkAurora.svc.uvw_User' does not have a primary key defined. The key has been inferred and the definition was created as a read-only table/view.-->
+        <EntityType Name="uvw_User">
+          <Key>
+            <PropertyRef Name="IdentityId" />
+            
+            
+            
+            
+            
+            
+            
+            
+          </Key>
+          <Property Name="IdentityId" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="IdentityAlias" Type="varchar" MaxLength="128" Nullable="false" />
+          <Property Name="RequirePassword" Type="bit" Nullable="false" />
+          <Property Name="RequirePublicKey" Type="bit" Nullable="false" />
+          <Property Name="FileSystemType" Type="varchar" MaxLength="16" Nullable="false" />
+          <Property Name="FileSystemReadOnly" Type="bit" Nullable="false" />
+          <Property Name="DebugLevel" Type="varchar" MaxLength="16" />
+          <Property Name="IsEnabled" Type="bit" Nullable="false" />
+          <Property Name="IsDeletable" Type="bit" Nullable="false" />
+          <Property Name="CreatedUtc" Type="datetimeoffset" Precision="7" Nullable="false" />
+          <Property Name="LastUpdatedUtc" Type="datetimeoffset" Precision="7" />
+        </EntityType>
+        <!--Errors Found During Generation:
+warning 6002: The table/view 'BhbkAurora.svc.uvw_UserAlert' does not have a primary key defined. The key has been inferred and the definition was created as a read-only table/view.-->
+        <EntityType Name="uvw_UserAlert">
+          <Key>
+            <PropertyRef Name="Id" />
+            
+            
+            
+            
+            
+            
+            <PropertyRef Name="IsEnabled" />
+            
+          </Key>
+          <Property Name="Id" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="IdentityId" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="OnDelete" Type="bit" Nullable="false" />
+          <Property Name="OnDownload" Type="bit" Nullable="false" />
+          <Property Name="OnUpload" Type="bit" Nullable="false" />
+          <Property Name="ToFirstName" Type="varchar" MaxLength="128" Nullable="false" />
+          <Property Name="ToLastName" Type="varchar" MaxLength="128" Nullable="false" />
+          <Property Name="ToEmailAddress" Type="varchar" MaxLength="320" />
+          <Property Name="ToPhoneNumber" Type="varchar" MaxLength="15" />
+          <Property Name="IsEnabled" Type="bit" Nullable="false" />
+          <Property Name="CreatedUtc" Type="datetimeoffset" Precision="7" Nullable="false" />
+          <Property Name="LastUpdatedUtc" Type="datetimeoffset" Precision="7" />
+        </EntityType>
+        <!--Errors Found During Generation:
+warning 6002: The table/view 'BhbkAurora.svc.uvw_UserFile' does not have a primary key defined. The key has been inferred and the definition was created as a read-only table/view.-->
+        <EntityType Name="uvw_UserFile">
+          <Key>
+            <PropertyRef Name="Id" />
+            
+            
+            
+            
+            
+            
+            
+            
+          </Key>
+          <Property Name="Id" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="IdentityId" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="FolderId" Type="uniqueidentifier" />
+          <Property Name="VirtualName" Type="nvarchar(max)" Nullable="false" />
+          <Property Name="IsReadOnly" Type="bit" Nullable="false" />
+          <Property Name="RealPath" Type="nvarchar(max)" Nullable="false" />
+          <Property Name="RealFileName" Type="nvarchar(max)" Nullable="false" />
+          <Property Name="RealFileSize" Type="bigint" Nullable="false" />
+          <Property Name="HashSHA256" Type="nvarchar" MaxLength="64" />
+          <Property Name="CreatedUtc" Type="datetimeoffset" Precision="7" Nullable="false" />
+          <Property Name="LastAccessedUtc" Type="datetimeoffset" Precision="7" />
+          <Property Name="LastUpdatedUtc" Type="datetimeoffset" Precision="7" />
+          <Property Name="LastVerifiedUtc" Type="datetimeoffset" Precision="7" Nullable="false" />
+        </EntityType>
+        <!--Errors Found During Generation:
+warning 6002: The table/view 'BhbkAurora.svc.uvw_UserFolder' does not have a primary key defined. The key has been inferred and the definition was created as a read-only table/view.-->
+        <EntityType Name="uvw_UserFolder">
+          <Key>
+            <PropertyRef Name="Id" />
+            
+            
+            
+            
+          </Key>
+          <Property Name="Id" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="IdentityId" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="ParentId" Type="uniqueidentifier" />
+          <Property Name="VirtualName" Type="varchar(max)" Nullable="false" />
+          <Property Name="IsReadOnly" Type="bit" Nullable="false" />
+          <Property Name="CreatedUtc" Type="datetimeoffset" Precision="7" Nullable="false" />
+          <Property Name="LastAccessedUtc" Type="datetimeoffset" Precision="7" />
+          <Property Name="LastUpdatedUtc" Type="datetimeoffset" Precision="7" />
+        </EntityType>
+        <!--Errors Found During Generation:
+warning 6002: The table/view 'BhbkAurora.svc.uvw_UserMount' does not have a primary key defined. The key has been inferred and the definition was created as a read-only table/view.-->
+        <EntityType Name="uvw_UserMount">
+          <Key>
+            <PropertyRef Name="IdentityId" />
+            
+            
+            
+            
+            
+            
+          </Key>
+          <Property Name="IdentityId" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="CredentialId" Type="uniqueidentifier" />
+          <Property Name="AuthType" Type="varchar" MaxLength="16" Nullable="false" />
+          <Property Name="ServerAddress" Type="varchar" MaxLength="256" Nullable="false" />
+          <Property Name="ServerShare" Type="varchar" MaxLength="256" Nullable="false" />
+          <Property Name="IsEnabled" Type="bit" Nullable="false" />
+          <Property Name="IsDeletable" Type="bit" Nullable="false" />
+          <Property Name="CreatedUtc" Type="datetimeoffset" Precision="7" Nullable="false" />
+          <Property Name="LastUpdatedUtc" Type="datetimeoffset" Precision="7" />
+        </EntityType>
+        <Function Name="usp_Credential_Delete" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="svc">
+          <Parameter Name="Id" Type="uniqueidentifier" Mode="In" />
+        </Function>
+        <Function Name="usp_Credential_Insert" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="svc">
+          <Parameter Name="Domain" Type="nvarchar" Mode="In" />
+          <Parameter Name="UserName" Type="nvarchar" Mode="In" />
+          <Parameter Name="Password" Type="nvarchar" Mode="In" />
+          <Parameter Name="IsEnabled" Type="bit" Mode="In" />
+          <Parameter Name="IsDeletable" Type="bit" Mode="In" />
+        </Function>
+        <Function Name="usp_Credential_Update" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="svc">
+          <Parameter Name="Id" Type="uniqueidentifier" Mode="In" />
+          <Parameter Name="Domain" Type="nvarchar" Mode="In" />
+          <Parameter Name="UserName" Type="nvarchar" Mode="In" />
+          <Parameter Name="Password" Type="nvarchar" Mode="In" />
+          <Parameter Name="IsEnabled" Type="bit" Mode="In" />
+          <Parameter Name="IsDeletable" Type="bit" Mode="In" />
+        </Function>
+        <Function Name="usp_Network_Delete" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="svc">
+          <Parameter Name="Id" Type="uniqueidentifier" Mode="In" />
+        </Function>
+        <Function Name="usp_Network_Insert" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="svc">
+          <Parameter Name="IdentityId" Type="uniqueidentifier" Mode="In" />
+          <Parameter Name="Address" Type="nvarchar" Mode="In" />
+          <Parameter Name="Action" Type="nvarchar" Mode="In" />
+          <Parameter Name="IsEnabled" Type="bit" Mode="In" />
+        </Function>
+        <Function Name="usp_Network_Update" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="svc">
+          <Parameter Name="Id" Type="uniqueidentifier" Mode="In" />
+          <Parameter Name="IdentityId" Type="uniqueidentifier" Mode="In" />
+          <Parameter Name="Address" Type="nvarchar" Mode="In" />
+          <Parameter Name="Action" Type="nvarchar" Mode="In" />
+          <Parameter Name="IsEnabled" Type="bit" Mode="In" />
+        </Function>
+        <Function Name="usp_PrivateKey_Delete" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="svc">
+          <Parameter Name="Id" Type="uniqueidentifier" Mode="In" />
+        </Function>
+        <Function Name="usp_PrivateKey_Insert" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="svc">
+          <Parameter Name="IdentityId" Type="uniqueidentifier" Mode="In" />
+          <Parameter Name="PublicKeyId" Type="uniqueidentifier" Mode="In" />
+          <Parameter Name="KeyValue" Type="nvarchar(max)" Mode="In" />
+          <Parameter Name="KeyAlgo" Type="nvarchar" Mode="In" />
+          <Parameter Name="KeyPass" Type="nvarchar" Mode="In" />
+          <Parameter Name="KeyFormat" Type="nvarchar" Mode="In" />
+          <Parameter Name="IsEnabled" Type="bit" Mode="In" />
+          <Parameter Name="IsDeletable" Type="bit" Mode="In" />
+        </Function>
+        <Function Name="usp_PrivateKey_Update" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="svc">
+          <Parameter Name="Id" Type="uniqueidentifier" Mode="In" />
+          <Parameter Name="IdentityId" Type="uniqueidentifier" Mode="In" />
+          <Parameter Name="PublicKeyId" Type="uniqueidentifier" Mode="In" />
+          <Parameter Name="KeyValue" Type="nvarchar(max)" Mode="In" />
+          <Parameter Name="KeyAlgo" Type="nvarchar" Mode="In" />
+          <Parameter Name="KeyPass" Type="nvarchar" Mode="In" />
+          <Parameter Name="KeyFormat" Type="nvarchar" Mode="In" />
+          <Parameter Name="IsEnabled" Type="bit" Mode="In" />
+          <Parameter Name="IsDeletable" Type="bit" Mode="In" />
+        </Function>
+        <Function Name="usp_PublicKey_Delete" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="svc">
+          <Parameter Name="Id" Type="uniqueidentifier" Mode="In" />
+        </Function>
+        <Function Name="usp_PublicKey_Insert" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="svc">
+          <Parameter Name="IdentityId" Type="uniqueidentifier" Mode="In" />
+          <Parameter Name="PrivateKeyId" Type="uniqueidentifier" Mode="In" />
+          <Parameter Name="KeyValue" Type="nvarchar(max)" Mode="In" />
+          <Parameter Name="KeyAlgo" Type="nvarchar" Mode="In" />
+          <Parameter Name="KeyFormat" Type="nvarchar" Mode="In" />
+          <Parameter Name="SigValue" Type="nvarchar" Mode="In" />
+          <Parameter Name="SigAlgo" Type="nvarchar" Mode="In" />
+          <Parameter Name="Comment" Type="nvarchar" Mode="In" />
+          <Parameter Name="IsEnabled" Type="bit" Mode="In" />
+          <Parameter Name="IsDeletable" Type="bit" Mode="In" />
+        </Function>
+        <Function Name="usp_PublicKey_Update" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="svc">
+          <Parameter Name="Id" Type="uniqueidentifier" Mode="In" />
+          <Parameter Name="IdentityId" Type="uniqueidentifier" Mode="In" />
+          <Parameter Name="PrivateKeyId" Type="uniqueidentifier" Mode="In" />
+          <Parameter Name="KeyValue" Type="nvarchar(max)" Mode="In" />
+          <Parameter Name="KeyAlgo" Type="nvarchar" Mode="In" />
+          <Parameter Name="KeyFormat" Type="nvarchar" Mode="In" />
+          <Parameter Name="SigValue" Type="nvarchar" Mode="In" />
+          <Parameter Name="SigAlgo" Type="nvarchar" Mode="In" />
+          <Parameter Name="Comment" Type="nvarchar" Mode="In" />
+          <Parameter Name="IsEnabled" Type="bit" Mode="In" />
+          <Parameter Name="IsDeletable" Type="bit" Mode="In" />
+        </Function>
+        <Function Name="usp_Setting_Delete" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="svc">
+          <Parameter Name="Id" Type="uniqueidentifier" Mode="In" />
+        </Function>
+        <Function Name="usp_Setting_Insert" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="svc">
+          <Parameter Name="IdentityId" Type="uniqueidentifier" Mode="In" />
+          <Parameter Name="ConfigKey" Type="nvarchar(max)" Mode="In" />
+          <Parameter Name="ConfigValue" Type="nvarchar(max)" Mode="In" />
+          <Parameter Name="IsDeletable" Type="bit" Mode="In" />
+        </Function>
+        <Function Name="usp_Setting_Update" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="svc">
+          <Parameter Name="Id" Type="uniqueidentifier" Mode="In" />
+          <Parameter Name="IdentityId" Type="uniqueidentifier" Mode="In" />
+          <Parameter Name="ConfigKey" Type="nvarchar(max)" Mode="In" />
+          <Parameter Name="ConfigValue" Type="nvarchar(max)" Mode="In" />
+          <Parameter Name="IsDeletable" Type="bit" Mode="In" />
+        </Function>
+        <Function Name="usp_User_Delete" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="svc">
+          <Parameter Name="IdentityId" Type="uniqueidentifier" Mode="In" />
+        </Function>
+        <Function Name="usp_User_Insert" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="svc">
+          <Parameter Name="IdentityId" Type="uniqueidentifier" Mode="In" />
+          <Parameter Name="IdentityAlias" Type="nvarchar" Mode="In" />
+          <Parameter Name="RequirePassword" Type="bit" Mode="In" />
+          <Parameter Name="RequirePublicKey" Type="bit" Mode="In" />
+          <Parameter Name="FileSystemType" Type="nvarchar" Mode="In" />
+          <Parameter Name="FileSystemReadOnly" Type="bit" Mode="In" />
+          <Parameter Name="DebugLevel" Type="nvarchar" Mode="In" />
+          <Parameter Name="IsEnabled" Type="bit" Mode="In" />
+          <Parameter Name="IsDeletable" Type="bit" Mode="In" />
+        </Function>
+        <Function Name="usp_User_Update" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="svc">
+          <Parameter Name="IdentityId" Type="uniqueidentifier" Mode="In" />
+          <Parameter Name="IdentityAlias" Type="nvarchar" Mode="In" />
+          <Parameter Name="RequirePassword" Type="bit" Mode="In" />
+          <Parameter Name="RequirePublicKey" Type="bit" Mode="In" />
+          <Parameter Name="FileSystemType" Type="nvarchar" Mode="In" />
+          <Parameter Name="FileSystemReadOnly" Type="bit" Mode="In" />
+          <Parameter Name="DebugLevel" Type="nvarchar" Mode="In" />
+          <Parameter Name="IsEnabled" Type="bit" Mode="In" />
+          <Parameter Name="IsDeletable" Type="bit" Mode="In" />
+        </Function>
+        <Function Name="usp_UserAlert_Delete" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="svc">
+          <Parameter Name="Id" Type="uniqueidentifier" Mode="In" />
+        </Function>
+        <Function Name="usp_UserAlert_Insert" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="svc">
+          <Parameter Name="IdentityId" Type="uniqueidentifier" Mode="In" />
+          <Parameter Name="OnDelete" Type="bit" Mode="In" />
+          <Parameter Name="OnDownload" Type="bit" Mode="In" />
+          <Parameter Name="OnUpload" Type="bit" Mode="In" />
+          <Parameter Name="ToFirstName" Type="nvarchar" Mode="In" />
+          <Parameter Name="ToLastName" Type="nvarchar" Mode="In" />
+          <Parameter Name="ToEmailAddress" Type="nvarchar" Mode="In" />
+          <Parameter Name="ToPhoneNumber" Type="nvarchar" Mode="In" />
+          <Parameter Name="IsEnabled" Type="bit" Mode="In" />
+        </Function>
+        <Function Name="usp_UserAlert_Update" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="svc">
+          <Parameter Name="Id" Type="uniqueidentifier" Mode="In" />
+          <Parameter Name="IdentityId" Type="uniqueidentifier" Mode="In" />
+          <Parameter Name="OnDelete" Type="bit" Mode="In" />
+          <Parameter Name="OnDownload" Type="bit" Mode="In" />
+          <Parameter Name="OnUpload" Type="bit" Mode="In" />
+          <Parameter Name="ToFirstName" Type="nvarchar" Mode="In" />
+          <Parameter Name="ToLastName" Type="nvarchar" Mode="In" />
+          <Parameter Name="ToEmailAddress" Type="nvarchar" Mode="In" />
+          <Parameter Name="ToPhoneNumber" Type="nvarchar" Mode="In" />
+          <Parameter Name="IsEnabled" Type="bit" Mode="In" />
+        </Function>
+        <Function Name="usp_UserFile_Delete" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="svc">
+          <Parameter Name="Id" Type="uniqueidentifier" Mode="In" />
+        </Function>
+        <Function Name="usp_UserFile_Insert" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="svc">
+          <Parameter Name="IdentityId" Type="uniqueidentifier" Mode="In" />
+          <Parameter Name="FolderId" Type="uniqueidentifier" Mode="In" />
+          <Parameter Name="VirtualName" Type="nvarchar" Mode="In" />
+          <Parameter Name="IsReadOnly" Type="bit" Mode="In" />
+          <Parameter Name="RealPath" Type="nvarchar(max)" Mode="In" />
+          <Parameter Name="RealFileName" Type="nvarchar" Mode="In" />
+          <Parameter Name="RealFileSize" Type="bigint" Mode="In" />
+          <Parameter Name="HashSHA256" Type="nvarchar" Mode="In" />
+        </Function>
+        <Function Name="usp_UserFile_Update" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="svc">
+          <Parameter Name="Id" Type="uniqueidentifier" Mode="In" />
+          <Parameter Name="FolderId" Type="uniqueidentifier" Mode="In" />
+          <Parameter Name="IdentityId" Type="uniqueidentifier" Mode="In" />
+          <Parameter Name="VirtualName" Type="nvarchar" Mode="In" />
+          <Parameter Name="IsReadOnly" Type="bit" Mode="In" />
+          <Parameter Name="RealPath" Type="nvarchar(max)" Mode="In" />
+          <Parameter Name="RealFileName" Type="nvarchar" Mode="In" />
+          <Parameter Name="RealFileSize" Type="bigint" Mode="In" />
+          <Parameter Name="HashSHA256" Type="nvarchar" Mode="In" />
+          <Parameter Name="LastAccessedUtc" Type="datetimeoffset" Mode="In" />
+          <Parameter Name="LastUpdatedUtc" Type="datetimeoffset" Mode="In" />
+          <Parameter Name="LastVerifiedUtc" Type="datetimeoffset" Mode="In" />
+        </Function>
+        <Function Name="usp_UserFolder_Delete" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="svc">
+          <Parameter Name="Id" Type="uniqueidentifier" Mode="In" />
+        </Function>
+        <Function Name="usp_UserFolder_Insert" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="svc">
+          <Parameter Name="IdentityId" Type="uniqueidentifier" Mode="In" />
+          <Parameter Name="ParentId" Type="uniqueidentifier" Mode="In" />
+          <Parameter Name="VirtualName" Type="nvarchar(max)" Mode="In" />
+          <Parameter Name="IsReadOnly" Type="bit" Mode="In" />
+        </Function>
+        <Function Name="usp_UserFolder_Update" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="svc">
+          <Parameter Name="Id" Type="uniqueidentifier" Mode="In" />
+          <Parameter Name="IdentityId" Type="uniqueidentifier" Mode="In" />
+          <Parameter Name="ParentId" Type="uniqueidentifier" Mode="In" />
+          <Parameter Name="VirtualName" Type="nvarchar(max)" Mode="In" />
+          <Parameter Name="IsReadOnly" Type="bit" Mode="In" />
+          <Parameter Name="LastAccessedUtc" Type="datetimeoffset" Mode="In" />
+          <Parameter Name="LastUpdatedUtc" Type="datetimeoffset" Mode="In" />
+        </Function>
+        <Function Name="usp_UserMount_Delete" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="svc">
+          <Parameter Name="IdentityId" Type="uniqueidentifier" Mode="In" />
+        </Function>
+        <Function Name="usp_UserMount_Insert" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="svc">
+          <Parameter Name="IdentityId" Type="uniqueidentifier" Mode="In" />
+          <Parameter Name="CredentialId" Type="uniqueidentifier" Mode="In" />
+          <Parameter Name="AuthType" Type="nvarchar" Mode="In" />
+          <Parameter Name="ServerAddress" Type="nvarchar" Mode="In" />
+          <Parameter Name="ServerShare" Type="nvarchar" Mode="In" />
+          <Parameter Name="IsEnabled" Type="bit" Mode="In" />
+          <Parameter Name="IsDeletable" Type="bit" Mode="In" />
+        </Function>
+        <Function Name="usp_UserMount_Update" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="svc">
+          <Parameter Name="IdentityId" Type="uniqueidentifier" Mode="In" />
+          <Parameter Name="CredentialId" Type="uniqueidentifier" Mode="In" />
+          <Parameter Name="AuthType" Type="nvarchar" Mode="In" />
+          <Parameter Name="ServerAddress" Type="nvarchar" Mode="In" />
+          <Parameter Name="ServerShare" Type="nvarchar" Mode="In" />
+          <Parameter Name="IsEnabled" Type="bit" Mode="In" />
+          <Parameter Name="IsDeletable" Type="bit" Mode="In" />
+        </Function>
+        <EntityContainer Name="AuroraModelsStoreContainer">
+          <EntitySet Name="uvw_Credential" EntityType="Self.uvw_Credential" store:Type="Views" store:Schema="svc">
+            <DefiningQuery>SELECT 
+    [uvw_Credential].[Id] AS [Id], 
+    [uvw_Credential].[Domain] AS [Domain], 
+    [uvw_Credential].[UserName] AS [UserName], 
+    [uvw_Credential].[Password] AS [Password], 
+    [uvw_Credential].[IsEnabled] AS [IsEnabled], 
+    [uvw_Credential].[IsDeletable] AS [IsDeletable], 
+    [uvw_Credential].[CreatedUtc] AS [CreatedUtc], 
+    [uvw_Credential].[LastUpdatedUtc] AS [LastUpdatedUtc]
+    FROM [svc].[uvw_Credential] AS [uvw_Credential]</DefiningQuery>
+          </EntitySet>
+          <EntitySet Name="uvw_Network" EntityType="Self.uvw_Network" store:Type="Views" store:Schema="svc">
+            <DefiningQuery>SELECT 
+    [uvw_Network].[Id] AS [Id], 
+    [uvw_Network].[IdentityId] AS [IdentityId], 
+    [uvw_Network].[Address] AS [Address], 
+    [uvw_Network].[Action] AS [Action], 
+    [uvw_Network].[IsEnabled] AS [IsEnabled], 
+    [uvw_Network].[CreatedUtc] AS [CreatedUtc], 
+    [uvw_Network].[LastUpdatedUtc] AS [LastUpdatedUtc]
+    FROM [svc].[uvw_Network] AS [uvw_Network]</DefiningQuery>
+          </EntitySet>
+          <EntitySet Name="uvw_PrivateKey" EntityType="Self.uvw_PrivateKey" store:Type="Views" store:Schema="svc">
+            <DefiningQuery>SELECT 
+    [uvw_PrivateKey].[Id] AS [Id], 
+    [uvw_PrivateKey].[IdentityId] AS [IdentityId], 
+    [uvw_PrivateKey].[PublicKeyId] AS [PublicKeyId], 
+    [uvw_PrivateKey].[KeyValue] AS [KeyValue], 
+    [uvw_PrivateKey].[KeyAlgo] AS [KeyAlgo], 
+    [uvw_PrivateKey].[KeyPass] AS [KeyPass], 
+    [uvw_PrivateKey].[KeyFormat] AS [KeyFormat], 
+    [uvw_PrivateKey].[IsEnabled] AS [IsEnabled], 
+    [uvw_PrivateKey].[IsDeletable] AS [IsDeletable], 
+    [uvw_PrivateKey].[CreatedUtc] AS [CreatedUtc], 
+    [uvw_PrivateKey].[LastUpdatedUtc] AS [LastUpdatedUtc]
+    FROM [svc].[uvw_PrivateKey] AS [uvw_PrivateKey]</DefiningQuery>
+          </EntitySet>
+          <EntitySet Name="uvw_PublicKey" EntityType="Self.uvw_PublicKey" store:Type="Views" store:Schema="svc">
+            <DefiningQuery>SELECT 
+    [uvw_PublicKey].[Id] AS [Id], 
+    [uvw_PublicKey].[IdentityId] AS [IdentityId], 
+    [uvw_PublicKey].[PrivateKeyId] AS [PrivateKeyId], 
+    [uvw_PublicKey].[KeyValue] AS [KeyValue], 
+    [uvw_PublicKey].[KeyAlgo] AS [KeyAlgo], 
+    [uvw_PublicKey].[KeyFormat] AS [KeyFormat], 
+    [uvw_PublicKey].[SigValue] AS [SigValue], 
+    [uvw_PublicKey].[SigAlgo] AS [SigAlgo], 
+    [uvw_PublicKey].[Comment] AS [Comment], 
+    [uvw_PublicKey].[IsEnabled] AS [IsEnabled], 
+    [uvw_PublicKey].[IsDeletable] AS [IsDeletable], 
+    [uvw_PublicKey].[CreatedUtc] AS [CreatedUtc], 
+    [uvw_PublicKey].[LastUpdatedUtc] AS [LastUpdatedUtc]
+    FROM [svc].[uvw_PublicKey] AS [uvw_PublicKey]</DefiningQuery>
+          </EntitySet>
+          <EntitySet Name="uvw_Setting" EntityType="Self.uvw_Setting" store:Type="Views" store:Schema="svc">
+            <DefiningQuery>SELECT 
+    [uvw_Setting].[Id] AS [Id], 
+    [uvw_Setting].[IdentityId] AS [IdentityId], 
+    [uvw_Setting].[ConfigKey] AS [ConfigKey], 
+    [uvw_Setting].[ConfigValue] AS [ConfigValue], 
+    [uvw_Setting].[IsDeletable] AS [IsDeletable], 
+    [uvw_Setting].[CreatedUtc] AS [CreatedUtc], 
+    [uvw_Setting].[LastUpdatedUtc] AS [LastUpdatedUtc]
+    FROM [svc].[uvw_Setting] AS [uvw_Setting]</DefiningQuery>
+          </EntitySet>
+          <EntitySet Name="uvw_User" EntityType="Self.uvw_User" store:Type="Views" store:Schema="svc">
+            <DefiningQuery>SELECT 
+    [uvw_User].[IdentityId] AS [IdentityId], 
+    [uvw_User].[IdentityAlias] AS [IdentityAlias], 
+    [uvw_User].[RequirePassword] AS [RequirePassword], 
+    [uvw_User].[RequirePublicKey] AS [RequirePublicKey], 
+    [uvw_User].[FileSystemType] AS [FileSystemType], 
+    [uvw_User].[FileSystemReadOnly] AS [FileSystemReadOnly], 
+    [uvw_User].[DebugLevel] AS [DebugLevel], 
+    [uvw_User].[IsEnabled] AS [IsEnabled], 
+    [uvw_User].[IsDeletable] AS [IsDeletable], 
+    [uvw_User].[CreatedUtc] AS [CreatedUtc], 
+    [uvw_User].[LastUpdatedUtc] AS [LastUpdatedUtc]
+    FROM [svc].[uvw_User] AS [uvw_User]</DefiningQuery>
+          </EntitySet>
+          <EntitySet Name="uvw_UserAlert" EntityType="Self.uvw_UserAlert" store:Type="Views" store:Schema="svc">
+            <DefiningQuery>SELECT 
+    [uvw_UserAlert].[Id] AS [Id], 
+    [uvw_UserAlert].[IdentityId] AS [IdentityId], 
+    [uvw_UserAlert].[OnDelete] AS [OnDelete], 
+    [uvw_UserAlert].[OnDownload] AS [OnDownload], 
+    [uvw_UserAlert].[OnUpload] AS [OnUpload], 
+    [uvw_UserAlert].[ToFirstName] AS [ToFirstName], 
+    [uvw_UserAlert].[ToLastName] AS [ToLastName], 
+    [uvw_UserAlert].[ToEmailAddress] AS [ToEmailAddress], 
+    [uvw_UserAlert].[ToPhoneNumber] AS [ToPhoneNumber], 
+    [uvw_UserAlert].[IsEnabled] AS [IsEnabled], 
+    [uvw_UserAlert].[CreatedUtc] AS [CreatedUtc], 
+    [uvw_UserAlert].[LastUpdatedUtc] AS [LastUpdatedUtc]
+    FROM [svc].[uvw_UserAlert] AS [uvw_UserAlert]</DefiningQuery>
+          </EntitySet>
+          <EntitySet Name="uvw_UserFile" EntityType="Self.uvw_UserFile" store:Type="Views" store:Schema="svc">
+            <DefiningQuery>SELECT 
+    [uvw_UserFile].[Id] AS [Id], 
+    [uvw_UserFile].[IdentityId] AS [IdentityId], 
+    [uvw_UserFile].[FolderId] AS [FolderId], 
+    [uvw_UserFile].[VirtualName] AS [VirtualName], 
+    [uvw_UserFile].[IsReadOnly] AS [IsReadOnly], 
+    [uvw_UserFile].[RealPath] AS [RealPath], 
+    [uvw_UserFile].[RealFileName] AS [RealFileName], 
+    [uvw_UserFile].[RealFileSize] AS [RealFileSize], 
+    [uvw_UserFile].[HashSHA256] AS [HashSHA256], 
+    [uvw_UserFile].[CreatedUtc] AS [CreatedUtc], 
+    [uvw_UserFile].[LastAccessedUtc] AS [LastAccessedUtc], 
+    [uvw_UserFile].[LastUpdatedUtc] AS [LastUpdatedUtc], 
+    [uvw_UserFile].[LastVerifiedUtc] AS [LastVerifiedUtc]
+    FROM [svc].[uvw_UserFile] AS [uvw_UserFile]</DefiningQuery>
+          </EntitySet>
+          <EntitySet Name="uvw_UserFolder" EntityType="Self.uvw_UserFolder" store:Type="Views" store:Schema="svc">
+            <DefiningQuery>SELECT 
+    [uvw_UserFolder].[Id] AS [Id], 
+    [uvw_UserFolder].[IdentityId] AS [IdentityId], 
+    [uvw_UserFolder].[ParentId] AS [ParentId], 
+    [uvw_UserFolder].[VirtualName] AS [VirtualName], 
+    [uvw_UserFolder].[IsReadOnly] AS [IsReadOnly], 
+    [uvw_UserFolder].[CreatedUtc] AS [CreatedUtc], 
+    [uvw_UserFolder].[LastAccessedUtc] AS [LastAccessedUtc], 
+    [uvw_UserFolder].[LastUpdatedUtc] AS [LastUpdatedUtc]
+    FROM [svc].[uvw_UserFolder] AS [uvw_UserFolder]</DefiningQuery>
+          </EntitySet>
+          <EntitySet Name="uvw_UserMount" EntityType="Self.uvw_UserMount" store:Type="Views" store:Schema="svc">
+            <DefiningQuery>SELECT 
+    [uvw_UserMount].[IdentityId] AS [IdentityId], 
+    [uvw_UserMount].[CredentialId] AS [CredentialId], 
+    [uvw_UserMount].[AuthType] AS [AuthType], 
+    [uvw_UserMount].[ServerAddress] AS [ServerAddress], 
+    [uvw_UserMount].[ServerShare] AS [ServerShare], 
+    [uvw_UserMount].[IsEnabled] AS [IsEnabled], 
+    [uvw_UserMount].[IsDeletable] AS [IsDeletable], 
+    [uvw_UserMount].[CreatedUtc] AS [CreatedUtc], 
+    [uvw_UserMount].[LastUpdatedUtc] AS [LastUpdatedUtc]
+    FROM [svc].[uvw_UserMount] AS [uvw_UserMount]</DefiningQuery>
+          </EntitySet>
+        </EntityContainer>
+      </Schema></edmx:StorageModels>
+    <!-- CSDL content -->
+    <edmx:ConceptualModels>
+      <Schema Namespace="AuroraModels" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+        <EntityType Name="Credential">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Guid" Nullable="false" />
+          <Property Name="Domain" Type="String" MaxLength="128" FixedLength="false" Unicode="false" />
+          <Property Name="UserName" Type="String" MaxLength="128" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Password" Type="String" MaxLength="128" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="IsEnabled" Type="Boolean" Nullable="false" />
+          <Property Name="IsDeletable" Type="Boolean" Nullable="false" />
+          <Property Name="CreatedUtc" Type="DateTimeOffset" Nullable="false" Precision="7" />
+          <Property Name="LastUpdatedUtc" Type="DateTimeOffset" Precision="7" />
+          <NavigationProperty Name="Mounts" Relationship="AuroraModels.CredentialUserMount" FromRole="Credential" ToRole="UserMount" />
+        </EntityType>
+        <EntityType Name="Network">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Guid" Nullable="false" />
+          <Property Name="IdentityId" Type="Guid" Nullable="false" />
+          <Property Name="Address" Type="String" MaxLength="128" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Action" Type="String" MaxLength="8" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="IsEnabled" Type="Boolean" Nullable="false" />
+          <Property Name="CreatedUtc" Type="DateTimeOffset" Nullable="false" Precision="7" />
+          <Property Name="LastUpdatedUtc" Type="DateTimeOffset" Precision="7" />
+          <NavigationProperty Name="User" Relationship="AuroraModels.UserNetwork" FromRole="Network" ToRole="User" />
+        </EntityType>
+        <EntityType Name="PrivateKey">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Guid" Nullable="false" />
+          <Property Name="IdentityId" Type="Guid" />
+          <Property Name="PublicKeyId" Type="Guid" Nullable="false" />
+          <Property Name="KeyValue" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="KeyAlgo" Type="String" MaxLength="16" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="KeyPass" Type="String" MaxLength="1024" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="KeyFormat" Type="String" MaxLength="16" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="IsEnabled" Type="Boolean" Nullable="false" />
+          <Property Name="IsDeletable" Type="Boolean" Nullable="false" />
+          <Property Name="CreatedUtc" Type="DateTimeOffset" Nullable="false" Precision="7" />
+          <Property Name="LastUpdatedUtc" Type="DateTimeOffset" Precision="7" />
+          <NavigationProperty Name="User" Relationship="AuroraModels.UserPrivateKey" FromRole="PrivateKey" ToRole="User" />
+          <NavigationProperty Name="PublicKey" Relationship="AuroraModels.PrivateKeyPublicKey" FromRole="PrivateKey" ToRole="PublicKey" />
+        </EntityType>
+        <EntityType Name="PublicKey">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Guid" Nullable="false" />
+          <Property Name="IdentityId" Type="Guid" />
+          <Property Name="PrivateKeyId" Type="Guid" />
+          <Property Name="KeyValue" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="KeyAlgo" Type="String" MaxLength="16" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="KeyFormat" Type="String" MaxLength="16" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="SigValue" Type="String" MaxLength="512" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="SigAlgo" Type="String" MaxLength="16" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Comment" Type="String" MaxLength="1024" FixedLength="false" Unicode="true" />
+          <Property Name="IsEnabled" Type="Boolean" Nullable="false" />
+          <Property Name="IsDeletable" Type="Boolean" Nullable="false" />
+          <Property Name="CreatedUtc" Type="DateTimeOffset" Nullable="false" Precision="7" />
+          <Property Name="LastUpdatedUtc" Type="DateTimeOffset" Precision="7" />
+          <NavigationProperty Name="User" Relationship="AuroraModels.UserPublicKey" FromRole="PublicKey" ToRole="User" />
+          <NavigationProperty Name="PrivateKey" Relationship="AuroraModels.PrivateKeyPublicKey" FromRole="PublicKey" ToRole="PrivateKey" />
+        </EntityType>
+        <EntityType Name="Setting">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Guid" Nullable="false" />
+          <Property Name="IdentityId" Type="Guid" />
+          <Property Name="ConfigKey" Type="String" MaxLength="128" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="ConfigValue" Type="String" MaxLength="256" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="IsDeletable" Type="Boolean" Nullable="false" />
+          <Property Name="CreatedUtc" Type="DateTimeOffset" Nullable="false" Precision="7" />
+          <Property Name="LastUpdatedUtc" Type="DateTimeOffset" Precision="7" />
+          <NavigationProperty Name="User" Relationship="AuroraModels.UserSetting" FromRole="Setting" ToRole="User" />
+        </EntityType>
+        <EntityType Name="User">
+          <Key>
+            <PropertyRef Name="IdentityId" />
+          </Key>
+          <Property Name="IdentityId" Type="Guid" Nullable="false" />
+          <Property Name="IdentityAlias" Type="String" MaxLength="128" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="RequirePassword" Type="Boolean" Nullable="false" />
+          <Property Name="RequirePublicKey" Type="Boolean" Nullable="false" />
+          <Property Name="FileSystemType" Type="String" MaxLength="16" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="FileSystemReadOnly" Type="Boolean" Nullable="false" />
+          <Property Name="DebugLevel" Type="String" MaxLength="16" FixedLength="false" Unicode="false" />
+          <Property Name="IsEnabled" Type="Boolean" Nullable="false" />
+          <Property Name="IsDeletable" Type="Boolean" Nullable="false" />
+          <Property Name="CreatedUtc" Type="DateTimeOffset" Nullable="false" Precision="7" />
+          <Property Name="LastUpdatedUtc" Type="DateTimeOffset" Precision="7" />
+          <NavigationProperty Name="Alerts" Relationship="AuroraModels.UserUserAlert" FromRole="User" ToRole="UserAlert" />
+          <NavigationProperty Name="Files" Relationship="AuroraModels.UserUserFile" FromRole="User" ToRole="UserFile" />
+          <NavigationProperty Name="Folders" Relationship="AuroraModels.UserUserFolder" FromRole="User" ToRole="UserFolder" />
+          <NavigationProperty Name="Mount" Relationship="AuroraModels.UserUserMount" FromRole="User" ToRole="UserMount" />
+          <NavigationProperty Name="Networks" Relationship="AuroraModels.UserNetwork" FromRole="User" ToRole="Network" />
+          <NavigationProperty Name="PrivateKeys" Relationship="AuroraModels.UserPrivateKey" FromRole="User" ToRole="PrivateKey" />
+          <NavigationProperty Name="PublicKeys" Relationship="AuroraModels.UserPublicKey" FromRole="User" ToRole="PublicKey" />
+          <NavigationProperty Name="Settings" Relationship="AuroraModels.UserSetting" FromRole="User" ToRole="Setting" />
+        </EntityType>
+        <EntityType Name="UserAlert">
+          <Key>
+            <PropertyRef Name="Id" />
+            <PropertyRef Name="IsEnabled" />
+          </Key>
+          <Property Name="Id" Type="Guid" Nullable="false" />
+          <Property Name="IdentityId" Type="Guid" Nullable="false" />
+          <Property Name="OnDelete" Type="Boolean" Nullable="false" />
+          <Property Name="OnDownload" Type="Boolean" Nullable="false" />
+          <Property Name="OnUpload" Type="Boolean" Nullable="false" />
+          <Property Name="ToFirstName" Type="String" MaxLength="128" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="ToLastName" Type="String" MaxLength="128" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="ToEmailAddress" Type="String" MaxLength="320" FixedLength="false" Unicode="false" />
+          <Property Name="ToPhoneNumber" Type="String" MaxLength="15" FixedLength="false" Unicode="false" />
+          <Property Name="CreatedUtc" Type="DateTimeOffset" Nullable="false" Precision="7" />
+          <Property Name="LastUpdatedUtc" Type="DateTimeOffset" Precision="7" />
+          <NavigationProperty Name="User" Relationship="AuroraModels.UserUserAlert" FromRole="UserAlert" ToRole="User" />
+          <Property Name="IsEnabled" Type="Boolean" Nullable="false" />
+        </EntityType>
+        <EntityType Name="UserFile">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Guid" Nullable="false" />
+          <Property Name="IdentityId" Type="Guid" Nullable="false" />
+          <Property Name="FolderId" Type="Guid" />
+          <Property Name="VirtualName" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="IsReadOnly" Type="Boolean" Nullable="false" />
+          <Property Name="RealPath" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="RealFileName" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="RealFileSize" Type="Int64" Nullable="false" />
+          <Property Name="HashSHA256" Type="String" MaxLength="64" FixedLength="false" Unicode="true" />
+          <Property Name="CreatedUtc" Type="DateTimeOffset" Nullable="false" Precision="7" />
+          <Property Name="LastAccessedUtc" Type="DateTimeOffset" Precision="7" />
+          <Property Name="LastUpdatedUtc" Type="DateTimeOffset" Precision="7" />
+          <Property Name="LastVerifiedUtc" Type="DateTimeOffset" Nullable="false" Precision="7" />
+          <NavigationProperty Name="User" Relationship="AuroraModels.UserUserFile" FromRole="UserFile" ToRole="User" />
+          <NavigationProperty Name="Parent" Relationship="AuroraModels.UserFolder_UserFile" FromRole="UserFile" ToRole="UserFolder" />
+        </EntityType>
+        <EntityType Name="UserFolder">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Guid" Nullable="false" />
+          <Property Name="IdentityId" Type="Guid" Nullable="false" />
+          <Property Name="ParentId" Type="Guid" />
+          <Property Name="VirtualName" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="IsReadOnly" Type="Boolean" Nullable="false" />
+          <Property Name="CreatedUtc" Type="DateTimeOffset" Nullable="false" Precision="7" />
+          <Property Name="LastAccessedUtc" Type="DateTimeOffset" Precision="7" />
+          <Property Name="LastUpdatedUtc" Type="DateTimeOffset" Precision="7" />
+          <NavigationProperty Name="User" Relationship="AuroraModels.UserUserFolder" FromRole="UserFolder" ToRole="User" />
+          <NavigationProperty Name="Files" Relationship="AuroraModels.UserFolder_UserFile" FromRole="UserFolder" ToRole="UserFile" />
+          <NavigationProperty Name="Folders" Relationship="AuroraModels.UserFolder_UserFolder" FromRole="UserFolder" ToRole="UserFolderParent" />
+          <NavigationProperty Name="Parent" Relationship="AuroraModels.UserFolder_UserFolder" FromRole="UserFolderParent" ToRole="UserFolder" />
+        </EntityType>
+        <EntityType Name="UserMount">
+          <Key>
+            <PropertyRef Name="IdentityId" />
+          </Key>
+          <Property Name="IdentityId" Type="Guid" Nullable="false" />
+          <Property Name="CredentialId" Type="Guid" />
+          <Property Name="AuthType" Type="String" MaxLength="16" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="ServerAddress" Type="String" MaxLength="256" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="ServerShare" Type="String" MaxLength="256" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="IsEnabled" Type="Boolean" Nullable="false" />
+          <Property Name="IsDeletable" Type="Boolean" Nullable="false" />
+          <Property Name="CreatedUtc" Type="DateTimeOffset" Nullable="false" Precision="7" />
+          <Property Name="LastUpdatedUtc" Type="DateTimeOffset" Precision="7" />
+          <NavigationProperty Name="User" Relationship="AuroraModels.UserUserMount" FromRole="UserMount" ToRole="User" />
+          <NavigationProperty Name="Credential" Relationship="AuroraModels.CredentialUserMount" FromRole="UserMount" ToRole="Credential" />
+        </EntityType>
+        <EntityContainer Name="AuroraEntities" annotation:LazyLoadingEnabled="true">
+          <EntitySet Name="Credentials" EntityType="AuroraModels.Credential" />
+          <EntitySet Name="Networks" EntityType="AuroraModels.Network" />
+          <EntitySet Name="PrivateKeys" EntityType="AuroraModels.PrivateKey" />
+          <EntitySet Name="PublicKeys" EntityType="AuroraModels.PublicKey" />
+          <EntitySet Name="Settings" EntityType="AuroraModels.Setting" />
+          <EntitySet Name="Users" EntityType="AuroraModels.User" />
+          <EntitySet Name="UserAlerts" EntityType="AuroraModels.UserAlert" />
+          <EntitySet Name="UserFiles" EntityType="AuroraModels.UserFile" />
+          <EntitySet Name="UserFolders" EntityType="AuroraModels.UserFolder" />
+          <EntitySet Name="UserMounts" EntityType="AuroraModels.UserMount" />
+          <FunctionImport Name="usp_Credential_Delete" ReturnType="Collection(AuroraModels.usp_Credential_Delete_Result)">
+          <Parameter Name="Id" Mode="In" Type="Guid" />
+          </FunctionImport>
+          <FunctionImport Name="usp_Credential_Insert" ReturnType="Collection(AuroraModels.usp_Credential_Insert_Result)">
+            <Parameter Name="Domain" Mode="In" Type="String" />
+            <Parameter Name="UserName" Mode="In" Type="String" />
+            <Parameter Name="Password" Mode="In" Type="String" />
+            <Parameter Name="IsEnabled" Mode="In" Type="Boolean" />
+            <Parameter Name="IsDeletable" Mode="In" Type="Boolean" />
+          </FunctionImport>
+          <FunctionImport Name="usp_Credential_Update" ReturnType="Collection(AuroraModels.usp_Credential_Update_Result)">
+            <Parameter Name="Id" Mode="In" Type="Guid" />
+            <Parameter Name="Domain" Mode="In" Type="String" />
+            <Parameter Name="UserName" Mode="In" Type="String" />
+            <Parameter Name="Password" Mode="In" Type="String" />
+            <Parameter Name="IsEnabled" Mode="In" Type="Boolean" />
+            <Parameter Name="IsDeletable" Mode="In" Type="Boolean" />
+          </FunctionImport>
+          <FunctionImport Name="usp_Network_Delete" ReturnType="Collection(AuroraModels.usp_Network_Delete_Result)">
+          <Parameter Name="Id" Mode="In" Type="Guid" />
+          </FunctionImport>
+          <FunctionImport Name="usp_Network_Insert" ReturnType="Collection(AuroraModels.usp_Network_Insert_Result)">
+            <Parameter Name="IdentityId" Mode="In" Type="Guid" />
+            <Parameter Name="Address" Mode="In" Type="String" />
+            <Parameter Name="Action" Mode="In" Type="String" />
+            <Parameter Name="IsEnabled" Mode="In" Type="Boolean" />
+          </FunctionImport>
+          <FunctionImport Name="usp_Network_Update" ReturnType="Collection(AuroraModels.usp_Network_Update_Result)">
+            <Parameter Name="Id" Mode="In" Type="Guid" />
+            <Parameter Name="IdentityId" Mode="In" Type="Guid" />
+            <Parameter Name="Address" Mode="In" Type="String" />
+            <Parameter Name="Action" Mode="In" Type="String" />
+            <Parameter Name="IsEnabled" Mode="In" Type="Boolean" />
+          </FunctionImport>
+          <FunctionImport Name="usp_PrivateKey_Delete" ReturnType="Collection(AuroraModels.usp_PrivateKey_Delete_Result)">
+          <Parameter Name="Id" Mode="In" Type="Guid" />
+          </FunctionImport>
+          <FunctionImport Name="usp_PrivateKey_Insert" ReturnType="Collection(AuroraModels.usp_PrivateKey_Insert_Result)">
+            <Parameter Name="IdentityId" Mode="In" Type="Guid" />
+            <Parameter Name="PublicKeyId" Mode="In" Type="Guid" />
+            <Parameter Name="KeyValue" Mode="In" Type="String" />
+            <Parameter Name="KeyAlgo" Mode="In" Type="String" />
+            <Parameter Name="KeyPass" Mode="In" Type="String" />
+            <Parameter Name="KeyFormat" Mode="In" Type="String" />
+            <Parameter Name="IsEnabled" Mode="In" Type="Boolean" />
+            <Parameter Name="IsDeletable" Mode="In" Type="Boolean" />
+          </FunctionImport>
+          <FunctionImport Name="usp_PrivateKey_Update" ReturnType="Collection(AuroraModels.usp_PrivateKey_Update_Result)">
+            <Parameter Name="Id" Mode="In" Type="Guid" />
+            <Parameter Name="IdentityId" Mode="In" Type="Guid" />
+            <Parameter Name="PublicKeyId" Mode="In" Type="Guid" />
+            <Parameter Name="KeyValue" Mode="In" Type="String" />
+            <Parameter Name="KeyAlgo" Mode="In" Type="String" />
+            <Parameter Name="KeyPass" Mode="In" Type="String" />
+            <Parameter Name="KeyFormat" Mode="In" Type="String" />
+            <Parameter Name="IsEnabled" Mode="In" Type="Boolean" />
+            <Parameter Name="IsDeletable" Mode="In" Type="Boolean" />
+          </FunctionImport>
+          <FunctionImport Name="usp_PublicKey_Delete" ReturnType="Collection(AuroraModels.usp_PublicKey_Delete_Result)">
+          <Parameter Name="Id" Mode="In" Type="Guid" />
+          </FunctionImport>
+          <FunctionImport Name="usp_PublicKey_Insert" ReturnType="Collection(AuroraModels.usp_PublicKey_Insert_Result)">
+            <Parameter Name="IdentityId" Mode="In" Type="Guid" />
+            <Parameter Name="PrivateKeyId" Mode="In" Type="Guid" />
+            <Parameter Name="KeyValue" Mode="In" Type="String" />
+            <Parameter Name="KeyAlgo" Mode="In" Type="String" />
+            <Parameter Name="KeyFormat" Mode="In" Type="String" />
+            <Parameter Name="SigValue" Mode="In" Type="String" />
+            <Parameter Name="SigAlgo" Mode="In" Type="String" />
+            <Parameter Name="Comment" Mode="In" Type="String" />
+            <Parameter Name="IsEnabled" Mode="In" Type="Boolean" />
+            <Parameter Name="IsDeletable" Mode="In" Type="Boolean" />
+          </FunctionImport>
+          <FunctionImport Name="usp_PublicKey_Update" ReturnType="Collection(AuroraModels.usp_PublicKey_Update_Result)">
+            <Parameter Name="Id" Mode="In" Type="Guid" />
+            <Parameter Name="IdentityId" Mode="In" Type="Guid" />
+            <Parameter Name="PrivateKeyId" Mode="In" Type="Guid" />
+            <Parameter Name="KeyValue" Mode="In" Type="String" />
+            <Parameter Name="KeyAlgo" Mode="In" Type="String" />
+            <Parameter Name="KeyFormat" Mode="In" Type="String" />
+            <Parameter Name="SigValue" Mode="In" Type="String" />
+            <Parameter Name="SigAlgo" Mode="In" Type="String" />
+            <Parameter Name="Comment" Mode="In" Type="String" />
+            <Parameter Name="IsEnabled" Mode="In" Type="Boolean" />
+            <Parameter Name="IsDeletable" Mode="In" Type="Boolean" />
+          </FunctionImport>
+          <FunctionImport Name="usp_Setting_Delete" ReturnType="Collection(AuroraModels.usp_Setting_Delete_Result)">
+          <Parameter Name="Id" Mode="In" Type="Guid" />
+          </FunctionImport>
+          <FunctionImport Name="usp_Setting_Insert" ReturnType="Collection(AuroraModels.usp_Setting_Insert_Result)">
+            <Parameter Name="IdentityId" Mode="In" Type="Guid" />
+            <Parameter Name="ConfigKey" Mode="In" Type="String" />
+            <Parameter Name="ConfigValue" Mode="In" Type="String" />
+            <Parameter Name="IsDeletable" Mode="In" Type="Boolean" />
+          </FunctionImport>
+          <FunctionImport Name="usp_Setting_Update" ReturnType="Collection(AuroraModels.usp_Setting_Update_Result)">
+            <Parameter Name="Id" Mode="In" Type="Guid" />
+            <Parameter Name="IdentityId" Mode="In" Type="Guid" />
+            <Parameter Name="ConfigKey" Mode="In" Type="String" />
+            <Parameter Name="ConfigValue" Mode="In" Type="String" />
+            <Parameter Name="IsDeletable" Mode="In" Type="Boolean" />
+          </FunctionImport>
+          <FunctionImport Name="usp_User_Delete" ReturnType="Collection(AuroraModels.usp_User_Delete_Result)">
+          <Parameter Name="IdentityId" Mode="In" Type="Guid" />
+          </FunctionImport>
+          <FunctionImport Name="usp_User_Insert" ReturnType="Collection(AuroraModels.usp_User_Insert_Result)">
+            <Parameter Name="IdentityId" Mode="In" Type="Guid" />
+            <Parameter Name="IdentityAlias" Mode="In" Type="String" />
+            <Parameter Name="RequirePassword" Mode="In" Type="Boolean" />
+            <Parameter Name="RequirePublicKey" Mode="In" Type="Boolean" />
+            <Parameter Name="FileSystemType" Mode="In" Type="String" />
+            <Parameter Name="FileSystemReadOnly" Mode="In" Type="Boolean" />
+            <Parameter Name="DebugLevel" Mode="In" Type="String" />
+            <Parameter Name="IsEnabled" Mode="In" Type="Boolean" />
+            <Parameter Name="IsDeletable" Mode="In" Type="Boolean" />
+          </FunctionImport>
+          <FunctionImport Name="usp_User_Update" ReturnType="Collection(AuroraModels.usp_User_Update_Result)">
+            <Parameter Name="IdentityId" Mode="In" Type="Guid" />
+            <Parameter Name="IdentityAlias" Mode="In" Type="String" />
+            <Parameter Name="RequirePassword" Mode="In" Type="Boolean" />
+            <Parameter Name="RequirePublicKey" Mode="In" Type="Boolean" />
+            <Parameter Name="FileSystemType" Mode="In" Type="String" />
+            <Parameter Name="FileSystemReadOnly" Mode="In" Type="Boolean" />
+            <Parameter Name="DebugLevel" Mode="In" Type="String" />
+            <Parameter Name="IsEnabled" Mode="In" Type="Boolean" />
+            <Parameter Name="IsDeletable" Mode="In" Type="Boolean" />
+          </FunctionImport>
+          <FunctionImport Name="usp_UserAlert_Delete" ReturnType="Collection(AuroraModels.usp_UserAlert_Delete_Result)">
+          <Parameter Name="Id" Mode="In" Type="Guid" />
+          </FunctionImport>
+          <FunctionImport Name="usp_UserAlert_Insert" ReturnType="Collection(AuroraModels.usp_UserAlert_Insert_Result)">
+            <Parameter Name="IdentityId" Mode="In" Type="Guid" />
+            <Parameter Name="OnDelete" Mode="In" Type="Boolean" />
+            <Parameter Name="OnDownload" Mode="In" Type="Boolean" />
+            <Parameter Name="OnUpload" Mode="In" Type="Boolean" />
+            <Parameter Name="ToFirstName" Mode="In" Type="String" />
+            <Parameter Name="ToLastName" Mode="In" Type="String" />
+            <Parameter Name="ToEmailAddress" Mode="In" Type="String" />
+            <Parameter Name="ToPhoneNumber" Mode="In" Type="String" />
+            <Parameter Name="IsEnabled" Mode="In" Type="Boolean" />
+          </FunctionImport>
+          <FunctionImport Name="usp_UserAlert_Update" ReturnType="Collection(AuroraModels.usp_UserAlert_Update_Result)">
+            <Parameter Name="Id" Mode="In" Type="Guid" />
+            <Parameter Name="IdentityId" Mode="In" Type="Guid" />
+            <Parameter Name="OnDelete" Mode="In" Type="Boolean" />
+            <Parameter Name="OnDownload" Mode="In" Type="Boolean" />
+            <Parameter Name="OnUpload" Mode="In" Type="Boolean" />
+            <Parameter Name="ToFirstName" Mode="In" Type="String" />
+            <Parameter Name="ToLastName" Mode="In" Type="String" />
+            <Parameter Name="ToEmailAddress" Mode="In" Type="String" />
+            <Parameter Name="ToPhoneNumber" Mode="In" Type="String" />
+            <Parameter Name="IsEnabled" Mode="In" Type="Boolean" />
+          </FunctionImport>
+          <FunctionImport Name="usp_UserFile_Delete" ReturnType="Collection(AuroraModels.usp_UserFile_Delete_Result)">
+          <Parameter Name="Id" Mode="In" Type="Guid" />
+          </FunctionImport>
+          <FunctionImport Name="usp_UserFile_Insert" ReturnType="Collection(AuroraModels.usp_UserFile_Insert_Result)">
+            <Parameter Name="IdentityId" Mode="In" Type="Guid" />
+            <Parameter Name="FolderId" Mode="In" Type="Guid" />
+            <Parameter Name="VirtualName" Mode="In" Type="String" />
+            <Parameter Name="IsReadOnly" Mode="In" Type="Boolean" />
+            <Parameter Name="RealPath" Mode="In" Type="String" />
+            <Parameter Name="RealFileName" Mode="In" Type="String" />
+            <Parameter Name="RealFileSize" Mode="In" Type="Int64" />
+            <Parameter Name="HashSHA256" Mode="In" Type="String" />
+          </FunctionImport>
+          <FunctionImport Name="usp_UserFile_Update" ReturnType="Collection(AuroraModels.usp_UserFile_Update_Result)">
+            <Parameter Name="Id" Mode="In" Type="Guid" />
+            <Parameter Name="FolderId" Mode="In" Type="Guid" />
+            <Parameter Name="IdentityId" Mode="In" Type="Guid" />
+            <Parameter Name="VirtualName" Mode="In" Type="String" />
+            <Parameter Name="IsReadOnly" Mode="In" Type="Boolean" />
+            <Parameter Name="RealPath" Mode="In" Type="String" />
+            <Parameter Name="RealFileName" Mode="In" Type="String" />
+            <Parameter Name="RealFileSize" Mode="In" Type="Int64" />
+            <Parameter Name="HashSHA256" Mode="In" Type="String" />
+            <Parameter Name="LastAccessedUtc" Mode="In" Type="DateTimeOffset" />
+            <Parameter Name="LastUpdatedUtc" Mode="In" Type="DateTimeOffset" />
+            <Parameter Name="LastVerifiedUtc" Mode="In" Type="DateTimeOffset" />
+          </FunctionImport>
+          <FunctionImport Name="usp_UserFolder_Delete" ReturnType="Collection(AuroraModels.usp_UserFolder_Delete_Result)">
+          <Parameter Name="Id" Mode="In" Type="Guid" />
+          </FunctionImport>
+          <FunctionImport Name="usp_UserFolder_Insert" ReturnType="Collection(AuroraModels.usp_UserFolder_Insert_Result)">
+            <Parameter Name="IdentityId" Mode="In" Type="Guid" />
+            <Parameter Name="ParentId" Mode="In" Type="Guid" />
+            <Parameter Name="VirtualName" Mode="In" Type="String" />
+            <Parameter Name="IsReadOnly" Mode="In" Type="Boolean" />
+          </FunctionImport>
+          <FunctionImport Name="usp_UserFolder_Update" ReturnType="Collection(AuroraModels.usp_UserFolder_Update_Result)">
+            <Parameter Name="Id" Mode="In" Type="Guid" />
+            <Parameter Name="IdentityId" Mode="In" Type="Guid" />
+            <Parameter Name="ParentId" Mode="In" Type="Guid" />
+            <Parameter Name="VirtualName" Mode="In" Type="String" />
+            <Parameter Name="IsReadOnly" Mode="In" Type="Boolean" />
+            <Parameter Name="LastAccessedUtc" Mode="In" Type="DateTimeOffset" />
+            <Parameter Name="LastUpdatedUtc" Mode="In" Type="DateTimeOffset" />
+          </FunctionImport>
+          <FunctionImport Name="usp_UserMount_Delete" ReturnType="Collection(AuroraModels.usp_UserMount_Delete_Result)">
+          <Parameter Name="IdentityId" Mode="In" Type="Guid" />
+          </FunctionImport>
+          <FunctionImport Name="usp_UserMount_Insert" ReturnType="Collection(AuroraModels.usp_UserMount_Insert_Result)">
+            <Parameter Name="IdentityId" Mode="In" Type="Guid" />
+            <Parameter Name="CredentialId" Mode="In" Type="Guid" />
+            <Parameter Name="AuthType" Mode="In" Type="String" />
+            <Parameter Name="ServerAddress" Mode="In" Type="String" />
+            <Parameter Name="ServerShare" Mode="In" Type="String" />
+            <Parameter Name="IsEnabled" Mode="In" Type="Boolean" />
+            <Parameter Name="IsDeletable" Mode="In" Type="Boolean" />
+          </FunctionImport>
+          <FunctionImport Name="usp_UserMount_Update" ReturnType="Collection(AuroraModels.usp_UserMount_Update_Result)">
+            <Parameter Name="IdentityId" Mode="In" Type="Guid" />
+            <Parameter Name="CredentialId" Mode="In" Type="Guid" />
+            <Parameter Name="AuthType" Mode="In" Type="String" />
+            <Parameter Name="ServerAddress" Mode="In" Type="String" />
+            <Parameter Name="ServerShare" Mode="In" Type="String" />
+            <Parameter Name="IsEnabled" Mode="In" Type="Boolean" />
+            <Parameter Name="IsDeletable" Mode="In" Type="Boolean" />
+          </FunctionImport>
+          <AssociationSet Name="UserUserFile" Association="AuroraModels.UserUserFile">
+            <End Role="User" EntitySet="Users" />
+            <End Role="UserFile" EntitySet="UserFiles" />
+          </AssociationSet>
+          <AssociationSet Name="UserUserFolder" Association="AuroraModels.UserUserFolder">
+            <End Role="User" EntitySet="Users" />
+            <End Role="UserFolder" EntitySet="UserFolders" />
+          </AssociationSet>
+          <AssociationSet Name="UserUserMount" Association="AuroraModels.UserUserMount">
+            <End Role="User" EntitySet="Users" />
+            <End Role="UserMount" EntitySet="UserMounts" />
+          </AssociationSet>
+          <AssociationSet Name="UserPrivateKey" Association="AuroraModels.UserPrivateKey">
+            <End Role="User" EntitySet="Users" />
+            <End Role="PrivateKey" EntitySet="PrivateKeys" />
+          </AssociationSet>
+          <AssociationSet Name="UserPublicKey" Association="AuroraModels.UserPublicKey">
+            <End Role="User" EntitySet="Users" />
+            <End Role="PublicKey" EntitySet="PublicKeys" />
+          </AssociationSet>
+          <AssociationSet Name="UserNetwork" Association="AuroraModels.UserNetwork">
+            <End Role="User" EntitySet="Users" />
+            <End Role="Network" EntitySet="Networks" />
+          </AssociationSet>
+          <AssociationSet Name="UserUserAlert" Association="AuroraModels.UserUserAlert">
+            <End Role="User" EntitySet="Users" />
+            <End Role="UserAlert" EntitySet="UserAlerts" />
+          </AssociationSet>
+          <AssociationSet Name="UserSetting" Association="AuroraModels.UserSetting">
+            <End Role="User" EntitySet="Users" />
+            <End Role="Setting" EntitySet="Settings" />
+          </AssociationSet>
+          <AssociationSet Name="CredentialUserMount" Association="AuroraModels.CredentialUserMount">
+            <End Role="Credential" EntitySet="Credentials" />
+            <End Role="UserMount" EntitySet="UserMounts" />
+          </AssociationSet>
+          <AssociationSet Name="PrivateKeyPublicKey" Association="AuroraModels.PrivateKeyPublicKey">
+            <End Role="PrivateKey" EntitySet="PrivateKeys" />
+            <End Role="PublicKey" EntitySet="PublicKeys" />
+          </AssociationSet>
+          <AssociationSet Name="UserFolder_UserFile" Association="AuroraModels.UserFolder_UserFile">
+            <End Role="UserFolder" EntitySet="UserFolders" />
+            <End Role="UserFile" EntitySet="UserFiles" />
+          </AssociationSet>
+          <AssociationSet Name="UserFolder_UserFolder" Association="AuroraModels.UserFolder_UserFolder">
+            <End Role="UserFolder" EntitySet="UserFolders" />
+            <End Role="UserFolderParent" EntitySet="UserFolders" />
+          </AssociationSet>
+        </EntityContainer>
+        <ComplexType Name="usp_Credential_Delete_Result">
+          <Property Type="Guid" Name="Id" Nullable="false" />
+          <Property Type="String" Name="Domain" Nullable="true" MaxLength="128" />
+          <Property Type="String" Name="UserName" Nullable="false" MaxLength="128" />
+          <Property Type="String" Name="Password" Nullable="false" MaxLength="128" />
+          <Property Type="Boolean" Name="IsEnabled" Nullable="false" />
+          <Property Type="Boolean" Name="IsDeletable" Nullable="false" />
+          <Property Type="DateTimeOffset" Name="CreatedUtc" Nullable="false" />
+          <Property Type="DateTimeOffset" Name="LastUpdatedUtc" Nullable="true" />
+        </ComplexType>
+        <ComplexType Name="usp_Credential_Insert_Result">
+          <Property Type="Guid" Name="Id" Nullable="false" />
+          <Property Type="String" Name="Domain" Nullable="true" MaxLength="128" />
+          <Property Type="String" Name="UserName" Nullable="false" MaxLength="128" />
+          <Property Type="String" Name="Password" Nullable="false" MaxLength="128" />
+          <Property Type="Boolean" Name="IsEnabled" Nullable="false" />
+          <Property Type="Boolean" Name="IsDeletable" Nullable="false" />
+          <Property Type="DateTimeOffset" Name="CreatedUtc" Nullable="false" />
+          <Property Type="DateTimeOffset" Name="LastUpdatedUtc" Nullable="true" />
+        </ComplexType>
+        <ComplexType Name="usp_Credential_Update_Result">
+          <Property Type="Guid" Name="Id" Nullable="false" />
+          <Property Type="String" Name="Domain" Nullable="true" MaxLength="128" />
+          <Property Type="String" Name="UserName" Nullable="false" MaxLength="128" />
+          <Property Type="String" Name="Password" Nullable="false" MaxLength="128" />
+          <Property Type="Boolean" Name="IsEnabled" Nullable="false" />
+          <Property Type="Boolean" Name="IsDeletable" Nullable="false" />
+          <Property Type="DateTimeOffset" Name="CreatedUtc" Nullable="false" />
+          <Property Type="DateTimeOffset" Name="LastUpdatedUtc" Nullable="true" />
+        </ComplexType>
+        <ComplexType Name="usp_Network_Delete_Result">
+          <Property Type="Guid" Name="Id" Nullable="false" />
+          <Property Type="Guid" Name="IdentityId" Nullable="false" />
+          <Property Type="String" Name="Address" Nullable="false" MaxLength="128" />
+          <Property Type="String" Name="Action" Nullable="false" MaxLength="8" />
+          <Property Type="Boolean" Name="IsEnabled" Nullable="false" />
+          <Property Type="DateTimeOffset" Name="CreatedUtc" Nullable="false" />
+          <Property Type="DateTimeOffset" Name="LastUpdatedUtc" Nullable="true" />
+        </ComplexType>
+        <ComplexType Name="usp_Network_Insert_Result">
+          <Property Type="Guid" Name="Id" Nullable="false" />
+          <Property Type="Guid" Name="IdentityId" Nullable="false" />
+          <Property Type="String" Name="Address" Nullable="false" MaxLength="128" />
+          <Property Type="String" Name="Action" Nullable="false" MaxLength="8" />
+          <Property Type="Boolean" Name="IsEnabled" Nullable="false" />
+          <Property Type="DateTimeOffset" Name="CreatedUtc" Nullable="false" />
+          <Property Type="DateTimeOffset" Name="LastUpdatedUtc" Nullable="true" />
+        </ComplexType>
+        <ComplexType Name="usp_Network_Update_Result">
+          <Property Type="Guid" Name="Id" Nullable="false" />
+          <Property Type="Guid" Name="IdentityId" Nullable="false" />
+          <Property Type="String" Name="Address" Nullable="false" MaxLength="128" />
+          <Property Type="String" Name="Action" Nullable="false" MaxLength="8" />
+          <Property Type="Boolean" Name="IsEnabled" Nullable="false" />
+          <Property Type="DateTimeOffset" Name="CreatedUtc" Nullable="false" />
+          <Property Type="DateTimeOffset" Name="LastUpdatedUtc" Nullable="true" />
+        </ComplexType>
+        <ComplexType Name="usp_PrivateKey_Delete_Result">
+          <Property Type="Guid" Name="Id" Nullable="false" />
+          <Property Type="Guid" Name="IdentityId" Nullable="true" />
+          <Property Type="Guid" Name="PublicKeyId" Nullable="false" />
+          <Property Type="String" Name="KeyValue" Nullable="false" />
+          <Property Type="String" Name="KeyAlgo" Nullable="false" MaxLength="16" />
+          <Property Type="String" Name="KeyPass" Nullable="false" MaxLength="1024" />
+          <Property Type="String" Name="KeyFormat" Nullable="false" MaxLength="16" />
+          <Property Type="Boolean" Name="IsEnabled" Nullable="false" />
+          <Property Type="Boolean" Name="IsDeletable" Nullable="false" />
+          <Property Type="DateTimeOffset" Name="CreatedUtc" Nullable="false" />
+          <Property Type="DateTimeOffset" Name="LastUpdatedUtc" Nullable="true" />
+        </ComplexType>
+        <ComplexType Name="usp_PrivateKey_Insert_Result">
+          <Property Type="Guid" Name="Id" Nullable="false" />
+          <Property Type="Guid" Name="IdentityId" Nullable="true" />
+          <Property Type="Guid" Name="PublicKeyId" Nullable="false" />
+          <Property Type="String" Name="KeyValue" Nullable="false" />
+          <Property Type="String" Name="KeyAlgo" Nullable="false" MaxLength="16" />
+          <Property Type="String" Name="KeyPass" Nullable="false" MaxLength="1024" />
+          <Property Type="String" Name="KeyFormat" Nullable="false" MaxLength="16" />
+          <Property Type="Boolean" Name="IsEnabled" Nullable="false" />
+          <Property Type="Boolean" Name="IsDeletable" Nullable="false" />
+          <Property Type="DateTimeOffset" Name="CreatedUtc" Nullable="false" />
+          <Property Type="DateTimeOffset" Name="LastUpdatedUtc" Nullable="true" />
+        </ComplexType>
+        <ComplexType Name="usp_PrivateKey_Update_Result">
+          <Property Type="Guid" Name="Id" Nullable="false" />
+          <Property Type="Guid" Name="IdentityId" Nullable="true" />
+          <Property Type="Guid" Name="PublicKeyId" Nullable="false" />
+          <Property Type="String" Name="KeyValue" Nullable="false" />
+          <Property Type="String" Name="KeyAlgo" Nullable="false" MaxLength="16" />
+          <Property Type="String" Name="KeyPass" Nullable="false" MaxLength="1024" />
+          <Property Type="String" Name="KeyFormat" Nullable="false" MaxLength="16" />
+          <Property Type="Boolean" Name="IsEnabled" Nullable="false" />
+          <Property Type="Boolean" Name="IsDeletable" Nullable="false" />
+          <Property Type="DateTimeOffset" Name="CreatedUtc" Nullable="false" />
+          <Property Type="DateTimeOffset" Name="LastUpdatedUtc" Nullable="true" />
+        </ComplexType>
+        <ComplexType Name="usp_PublicKey_Delete_Result">
+          <Property Type="Guid" Name="Id" Nullable="false" />
+          <Property Type="Guid" Name="IdentityId" Nullable="true" />
+          <Property Type="Guid" Name="PrivateKeyId" Nullable="true" />
+          <Property Type="String" Name="KeyValue" Nullable="false" />
+          <Property Type="String" Name="KeyAlgo" Nullable="false" MaxLength="16" />
+          <Property Type="String" Name="KeyFormat" Nullable="false" MaxLength="16" />
+          <Property Type="String" Name="SigValue" Nullable="false" MaxLength="512" />
+          <Property Type="String" Name="SigAlgo" Nullable="false" MaxLength="16" />
+          <Property Type="String" Name="Comment" Nullable="true" MaxLength="1024" />
+          <Property Type="Boolean" Name="IsEnabled" Nullable="false" />
+          <Property Type="Boolean" Name="IsDeletable" Nullable="false" />
+          <Property Type="DateTimeOffset" Name="CreatedUtc" Nullable="false" />
+          <Property Type="DateTimeOffset" Name="LastUpdatedUtc" Nullable="true" />
+        </ComplexType>
+        <ComplexType Name="usp_PublicKey_Insert_Result">
+          <Property Type="Guid" Name="Id" Nullable="false" />
+          <Property Type="Guid" Name="IdentityId" Nullable="true" />
+          <Property Type="Guid" Name="PrivateKeyId" Nullable="true" />
+          <Property Type="String" Name="KeyValue" Nullable="false" />
+          <Property Type="String" Name="KeyAlgo" Nullable="false" MaxLength="16" />
+          <Property Type="String" Name="KeyFormat" Nullable="false" MaxLength="16" />
+          <Property Type="String" Name="SigValue" Nullable="false" MaxLength="512" />
+          <Property Type="String" Name="SigAlgo" Nullable="false" MaxLength="16" />
+          <Property Type="String" Name="Comment" Nullable="true" MaxLength="1024" />
+          <Property Type="Boolean" Name="IsEnabled" Nullable="false" />
+          <Property Type="Boolean" Name="IsDeletable" Nullable="false" />
+          <Property Type="DateTimeOffset" Name="CreatedUtc" Nullable="false" />
+          <Property Type="DateTimeOffset" Name="LastUpdatedUtc" Nullable="true" />
+        </ComplexType>
+        <ComplexType Name="usp_PublicKey_Update_Result">
+          <Property Type="Guid" Name="Id" Nullable="false" />
+          <Property Type="Guid" Name="IdentityId" Nullable="true" />
+          <Property Type="Guid" Name="PrivateKeyId" Nullable="true" />
+          <Property Type="String" Name="KeyValue" Nullable="false" />
+          <Property Type="String" Name="KeyAlgo" Nullable="false" MaxLength="16" />
+          <Property Type="String" Name="KeyFormat" Nullable="false" MaxLength="16" />
+          <Property Type="String" Name="SigValue" Nullable="false" MaxLength="512" />
+          <Property Type="String" Name="SigAlgo" Nullable="false" MaxLength="16" />
+          <Property Type="String" Name="Comment" Nullable="true" MaxLength="1024" />
+          <Property Type="Boolean" Name="IsEnabled" Nullable="false" />
+          <Property Type="Boolean" Name="IsDeletable" Nullable="false" />
+          <Property Type="DateTimeOffset" Name="CreatedUtc" Nullable="false" />
+          <Property Type="DateTimeOffset" Name="LastUpdatedUtc" Nullable="true" />
+        </ComplexType>
+        <ComplexType Name="usp_Setting_Delete_Result">
+          <Property Type="Guid" Name="Id" Nullable="false" />
+          <Property Type="Guid" Name="IdentityId" Nullable="true" />
+          <Property Type="String" Name="ConfigKey" Nullable="false" MaxLength="128" />
+          <Property Type="String" Name="ConfigValue" Nullable="false" MaxLength="256" />
+          <Property Type="Boolean" Name="IsDeletable" Nullable="false" />
+          <Property Type="DateTimeOffset" Name="CreatedUtc" Nullable="false" />
+          <Property Type="DateTimeOffset" Name="LastUpdatedUtc" Nullable="true" />
+        </ComplexType>
+        <ComplexType Name="usp_Setting_Insert_Result">
+          <Property Type="Guid" Name="Id" Nullable="false" />
+          <Property Type="Guid" Name="IdentityId" Nullable="true" />
+          <Property Type="String" Name="ConfigKey" Nullable="false" MaxLength="128" />
+          <Property Type="String" Name="ConfigValue" Nullable="false" MaxLength="256" />
+          <Property Type="Boolean" Name="IsDeletable" Nullable="false" />
+          <Property Type="DateTimeOffset" Name="CreatedUtc" Nullable="false" />
+          <Property Type="DateTimeOffset" Name="LastUpdatedUtc" Nullable="true" />
+        </ComplexType>
+        <ComplexType Name="usp_Setting_Update_Result">
+          <Property Type="Guid" Name="Id" Nullable="false" />
+          <Property Type="Guid" Name="IdentityId" Nullable="true" />
+          <Property Type="String" Name="ConfigKey" Nullable="false" MaxLength="128" />
+          <Property Type="String" Name="ConfigValue" Nullable="false" MaxLength="256" />
+          <Property Type="Boolean" Name="IsDeletable" Nullable="false" />
+          <Property Type="DateTimeOffset" Name="CreatedUtc" Nullable="false" />
+          <Property Type="DateTimeOffset" Name="LastUpdatedUtc" Nullable="true" />
+        </ComplexType>
+        <ComplexType Name="usp_User_Delete_Result">
+          <Property Type="Guid" Name="IdentityId" Nullable="false" />
+          <Property Type="String" Name="IdentityAlias" Nullable="false" MaxLength="128" />
+          <Property Type="Boolean" Name="RequirePassword" Nullable="false" />
+          <Property Type="Boolean" Name="RequirePublicKey" Nullable="false" />
+          <Property Type="String" Name="FileSystemType" Nullable="false" MaxLength="16" />
+          <Property Type="Boolean" Name="FileSystemReadOnly" Nullable="false" />
+          <Property Type="String" Name="DebugLevel" Nullable="true" MaxLength="16" />
+          <Property Type="Boolean" Name="IsEnabled" Nullable="false" />
+          <Property Type="Boolean" Name="IsDeletable" Nullable="false" />
+          <Property Type="DateTimeOffset" Name="CreatedUtc" Nullable="false" />
+          <Property Type="DateTimeOffset" Name="LastUpdatedUtc" Nullable="true" />
+        </ComplexType>
+        <ComplexType Name="usp_User_Insert_Result">
+          <Property Type="Guid" Name="IdentityId" Nullable="false" />
+          <Property Type="String" Name="IdentityAlias" Nullable="false" MaxLength="128" />
+          <Property Type="Boolean" Name="RequirePassword" Nullable="false" />
+          <Property Type="Boolean" Name="RequirePublicKey" Nullable="false" />
+          <Property Type="String" Name="FileSystemType" Nullable="false" MaxLength="16" />
+          <Property Type="Boolean" Name="FileSystemReadOnly" Nullable="false" />
+          <Property Type="String" Name="DebugLevel" Nullable="true" MaxLength="16" />
+          <Property Type="Boolean" Name="IsEnabled" Nullable="false" />
+          <Property Type="Boolean" Name="IsDeletable" Nullable="false" />
+          <Property Type="DateTimeOffset" Name="CreatedUtc" Nullable="false" />
+          <Property Type="DateTimeOffset" Name="LastUpdatedUtc" Nullable="true" />
+        </ComplexType>
+        <ComplexType Name="usp_User_Update_Result">
+          <Property Type="Guid" Name="IdentityId" Nullable="false" />
+          <Property Type="String" Name="IdentityAlias" Nullable="false" MaxLength="128" />
+          <Property Type="Boolean" Name="RequirePassword" Nullable="false" />
+          <Property Type="Boolean" Name="RequirePublicKey" Nullable="false" />
+          <Property Type="String" Name="FileSystemType" Nullable="false" MaxLength="16" />
+          <Property Type="Boolean" Name="FileSystemReadOnly" Nullable="false" />
+          <Property Type="String" Name="DebugLevel" Nullable="true" MaxLength="16" />
+          <Property Type="Boolean" Name="IsEnabled" Nullable="false" />
+          <Property Type="Boolean" Name="IsDeletable" Nullable="false" />
+          <Property Type="DateTimeOffset" Name="CreatedUtc" Nullable="false" />
+          <Property Type="DateTimeOffset" Name="LastUpdatedUtc" Nullable="true" />
+        </ComplexType>
+        <ComplexType Name="usp_UserAlert_Delete_Result">
+          <Property Type="Guid" Name="Id" Nullable="false" />
+          <Property Type="Guid" Name="IdentityId" Nullable="false" />
+          <Property Type="Boolean" Name="OnDelete" Nullable="false" />
+          <Property Type="Boolean" Name="OnDownload" Nullable="false" />
+          <Property Type="Boolean" Name="OnUpload" Nullable="false" />
+          <Property Type="String" Name="ToFirstName" Nullable="false" MaxLength="128" />
+          <Property Type="String" Name="ToLastName" Nullable="false" MaxLength="128" />
+          <Property Type="String" Name="ToEmailAddress" Nullable="true" MaxLength="320" />
+          <Property Type="String" Name="ToPhoneNumber" Nullable="true" MaxLength="15" />
+          <Property Type="Boolean" Name="IsEnabled" Nullable="false" />
+          <Property Type="DateTimeOffset" Name="CreatedUtc" Nullable="false" />
+          <Property Type="DateTimeOffset" Name="LastUpdatedUtc" Nullable="true" />
+        </ComplexType>
+        <ComplexType Name="usp_UserAlert_Insert_Result">
+          <Property Type="Guid" Name="Id" Nullable="false" />
+          <Property Type="Guid" Name="IdentityId" Nullable="false" />
+          <Property Type="Boolean" Name="OnDelete" Nullable="false" />
+          <Property Type="Boolean" Name="OnDownload" Nullable="false" />
+          <Property Type="Boolean" Name="OnUpload" Nullable="false" />
+          <Property Type="String" Name="ToFirstName" Nullable="false" MaxLength="128" />
+          <Property Type="String" Name="ToLastName" Nullable="false" MaxLength="128" />
+          <Property Type="String" Name="ToEmailAddress" Nullable="true" MaxLength="320" />
+          <Property Type="String" Name="ToPhoneNumber" Nullable="true" MaxLength="15" />
+          <Property Type="Boolean" Name="IsEnabled" Nullable="false" />
+          <Property Type="DateTimeOffset" Name="CreatedUtc" Nullable="false" />
+          <Property Type="DateTimeOffset" Name="LastUpdatedUtc" Nullable="true" />
+        </ComplexType>
+        <ComplexType Name="usp_UserAlert_Update_Result">
+          <Property Type="Guid" Name="Id" Nullable="false" />
+          <Property Type="Guid" Name="IdentityId" Nullable="false" />
+          <Property Type="Boolean" Name="OnDelete" Nullable="false" />
+          <Property Type="Boolean" Name="OnDownload" Nullable="false" />
+          <Property Type="Boolean" Name="OnUpload" Nullable="false" />
+          <Property Type="String" Name="ToFirstName" Nullable="false" MaxLength="128" />
+          <Property Type="String" Name="ToLastName" Nullable="false" MaxLength="128" />
+          <Property Type="String" Name="ToEmailAddress" Nullable="true" MaxLength="320" />
+          <Property Type="String" Name="ToPhoneNumber" Nullable="true" MaxLength="15" />
+          <Property Type="Boolean" Name="IsEnabled" Nullable="false" />
+          <Property Type="DateTimeOffset" Name="CreatedUtc" Nullable="false" />
+          <Property Type="DateTimeOffset" Name="LastUpdatedUtc" Nullable="true" />
+        </ComplexType>
+        <ComplexType Name="usp_UserFile_Delete_Result">
+          <Property Type="Guid" Name="Id" Nullable="false" />
+          <Property Type="Guid" Name="IdentityId" Nullable="false" />
+          <Property Type="Guid" Name="FolderId" Nullable="true" />
+          <Property Type="String" Name="VirtualName" Nullable="false" />
+          <Property Type="String" Name="RealPath" Nullable="false" />
+          <Property Type="String" Name="RealFileName" Nullable="false" />
+          <Property Type="Int64" Name="RealFileSize" Nullable="false" />
+          <Property Type="String" Name="HashSHA256" Nullable="true" MaxLength="64" />
+          <Property Type="Boolean" Name="IsReadOnly" Nullable="false" />
+          <Property Type="DateTimeOffset" Name="CreatedUtc" Nullable="false" />
+          <Property Type="DateTimeOffset" Name="LastAccessedUtc" Nullable="true" />
+          <Property Type="DateTimeOffset" Name="LastUpdatedUtc" Nullable="true" />
+          <Property Type="DateTimeOffset" Name="LastVerifiedUtc" Nullable="false" />
+        </ComplexType>
+        <ComplexType Name="usp_UserFile_Insert_Result">
+          <Property Type="Guid" Name="Id" Nullable="false" />
+          <Property Type="Guid" Name="IdentityId" Nullable="false" />
+          <Property Type="Guid" Name="FolderId" Nullable="true" />
+          <Property Type="String" Name="VirtualName" Nullable="false" />
+          <Property Type="String" Name="RealPath" Nullable="false" />
+          <Property Type="String" Name="RealFileName" Nullable="false" />
+          <Property Type="Int64" Name="RealFileSize" Nullable="false" />
+          <Property Type="String" Name="HashSHA256" Nullable="true" MaxLength="64" />
+          <Property Type="Boolean" Name="IsReadOnly" Nullable="false" />
+          <Property Type="DateTimeOffset" Name="CreatedUtc" Nullable="false" />
+          <Property Type="DateTimeOffset" Name="LastAccessedUtc" Nullable="true" />
+          <Property Type="DateTimeOffset" Name="LastUpdatedUtc" Nullable="true" />
+          <Property Type="DateTimeOffset" Name="LastVerifiedUtc" Nullable="false" />
+        </ComplexType>
+        <ComplexType Name="usp_UserFile_Update_Result">
+          <Property Type="Guid" Name="Id" Nullable="false" />
+          <Property Type="Guid" Name="IdentityId" Nullable="false" />
+          <Property Type="Guid" Name="FolderId" Nullable="true" />
+          <Property Type="String" Name="VirtualName" Nullable="false" />
+          <Property Type="String" Name="RealPath" Nullable="false" />
+          <Property Type="String" Name="RealFileName" Nullable="false" />
+          <Property Type="Int64" Name="RealFileSize" Nullable="false" />
+          <Property Type="String" Name="HashSHA256" Nullable="true" MaxLength="64" />
+          <Property Type="Boolean" Name="IsReadOnly" Nullable="false" />
+          <Property Type="DateTimeOffset" Name="CreatedUtc" Nullable="false" />
+          <Property Type="DateTimeOffset" Name="LastAccessedUtc" Nullable="true" />
+          <Property Type="DateTimeOffset" Name="LastUpdatedUtc" Nullable="true" />
+          <Property Type="DateTimeOffset" Name="LastVerifiedUtc" Nullable="false" />
+        </ComplexType>
+        <ComplexType Name="usp_UserFolder_Delete_Result">
+          <Property Type="Guid" Name="Id" Nullable="false" />
+          <Property Type="Guid" Name="IdentityId" Nullable="false" />
+          <Property Type="Guid" Name="ParentId" Nullable="true" />
+          <Property Type="String" Name="VirtualName" Nullable="false" />
+          <Property Type="Boolean" Name="IsReadOnly" Nullable="false" />
+          <Property Type="DateTimeOffset" Name="CreatedUtc" Nullable="false" />
+          <Property Type="DateTimeOffset" Name="LastAccessedUtc" Nullable="true" />
+          <Property Type="DateTimeOffset" Name="LastUpdatedUtc" Nullable="true" />
+        </ComplexType>
+        <ComplexType Name="usp_UserFolder_Insert_Result">
+          <Property Type="Guid" Name="Id" Nullable="false" />
+          <Property Type="Guid" Name="IdentityId" Nullable="false" />
+          <Property Type="Guid" Name="ParentId" Nullable="true" />
+          <Property Type="String" Name="VirtualName" Nullable="false" />
+          <Property Type="Boolean" Name="IsReadOnly" Nullable="false" />
+          <Property Type="DateTimeOffset" Name="CreatedUtc" Nullable="false" />
+          <Property Type="DateTimeOffset" Name="LastAccessedUtc" Nullable="true" />
+          <Property Type="DateTimeOffset" Name="LastUpdatedUtc" Nullable="true" />
+        </ComplexType>
+        <ComplexType Name="usp_UserFolder_Update_Result">
+          <Property Type="Guid" Name="Id" Nullable="false" />
+          <Property Type="Guid" Name="IdentityId" Nullable="false" />
+          <Property Type="Guid" Name="ParentId" Nullable="true" />
+          <Property Type="String" Name="VirtualName" Nullable="false" />
+          <Property Type="Boolean" Name="IsReadOnly" Nullable="false" />
+          <Property Type="DateTimeOffset" Name="CreatedUtc" Nullable="false" />
+          <Property Type="DateTimeOffset" Name="LastAccessedUtc" Nullable="true" />
+          <Property Type="DateTimeOffset" Name="LastUpdatedUtc" Nullable="true" />
+        </ComplexType>
+        <ComplexType Name="usp_UserMount_Delete_Result">
+          <Property Type="Guid" Name="IdentityId" Nullable="false" />
+          <Property Type="Guid" Name="CredentialId" Nullable="true" />
+          <Property Type="String" Name="AuthType" Nullable="false" MaxLength="16" />
+          <Property Type="String" Name="ServerAddress" Nullable="false" MaxLength="256" />
+          <Property Type="String" Name="ServerShare" Nullable="false" MaxLength="256" />
+          <Property Type="Boolean" Name="IsEnabled" Nullable="false" />
+          <Property Type="Boolean" Name="IsDeletable" Nullable="false" />
+          <Property Type="DateTimeOffset" Name="CreatedUtc" Nullable="false" />
+          <Property Type="DateTimeOffset" Name="LastUpdatedUtc" Nullable="true" />
+        </ComplexType>
+        <ComplexType Name="usp_UserMount_Insert_Result">
+          <Property Type="Guid" Name="IdentityId" Nullable="false" />
+          <Property Type="Guid" Name="CredentialId" Nullable="true" />
+          <Property Type="String" Name="AuthType" Nullable="false" MaxLength="16" />
+          <Property Type="String" Name="ServerAddress" Nullable="false" MaxLength="256" />
+          <Property Type="String" Name="ServerShare" Nullable="false" MaxLength="256" />
+          <Property Type="Boolean" Name="IsEnabled" Nullable="false" />
+          <Property Type="Boolean" Name="IsDeletable" Nullable="false" />
+          <Property Type="DateTimeOffset" Name="CreatedUtc" Nullable="false" />
+          <Property Type="DateTimeOffset" Name="LastUpdatedUtc" Nullable="true" />
+        </ComplexType>
+        <ComplexType Name="usp_UserMount_Update_Result">
+          <Property Type="Guid" Name="IdentityId" Nullable="false" />
+          <Property Type="Guid" Name="CredentialId" Nullable="true" />
+          <Property Type="String" Name="AuthType" Nullable="false" MaxLength="16" />
+          <Property Type="String" Name="ServerAddress" Nullable="false" MaxLength="256" />
+          <Property Type="String" Name="ServerShare" Nullable="false" MaxLength="256" />
+          <Property Type="Boolean" Name="IsEnabled" Nullable="false" />
+          <Property Type="Boolean" Name="IsDeletable" Nullable="false" />
+          <Property Type="DateTimeOffset" Name="CreatedUtc" Nullable="false" />
+          <Property Type="DateTimeOffset" Name="LastUpdatedUtc" Nullable="true" />
+        </ComplexType>
+        <Association Name="UserUserFile">
+          <End Type="AuroraModels.User" Role="User" Multiplicity="1" />
+          <End Type="AuroraModels.UserFile" Role="UserFile" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="User">
+              <PropertyRef Name="IdentityId" />
+            </Principal>
+            <Dependent Role="UserFile">
+              <PropertyRef Name="IdentityId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="UserUserFolder">
+          <End Type="AuroraModels.User" Role="User" Multiplicity="1" />
+          <End Type="AuroraModels.UserFolder" Role="UserFolder" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="User">
+              <PropertyRef Name="IdentityId" />
+            </Principal>
+            <Dependent Role="UserFolder">
+              <PropertyRef Name="IdentityId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="UserUserMount">
+          <End Type="AuroraModels.User" Role="User" Multiplicity="1" />
+          <End Type="AuroraModels.UserMount" Role="UserMount" Multiplicity="0..1" />
+          <ReferentialConstraint>
+            <Principal Role="User">
+              <PropertyRef Name="IdentityId" />
+            </Principal>
+            <Dependent Role="UserMount">
+              <PropertyRef Name="IdentityId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="UserPrivateKey">
+          <End Type="AuroraModels.User" Role="User" Multiplicity="0..1" />
+          <End Type="AuroraModels.PrivateKey" Role="PrivateKey" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="User">
+              <PropertyRef Name="IdentityId" />
+            </Principal>
+            <Dependent Role="PrivateKey">
+              <PropertyRef Name="IdentityId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="UserPublicKey">
+          <End Type="AuroraModels.User" Role="User" Multiplicity="0..1" />
+          <End Type="AuroraModels.PublicKey" Role="PublicKey" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="User">
+              <PropertyRef Name="IdentityId" />
+            </Principal>
+            <Dependent Role="PublicKey">
+              <PropertyRef Name="IdentityId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="UserNetwork">
+          <End Type="AuroraModels.User" Role="User" Multiplicity="1" />
+          <End Type="AuroraModels.Network" Role="Network" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="User">
+              <PropertyRef Name="IdentityId" />
+            </Principal>
+            <Dependent Role="Network">
+              <PropertyRef Name="IdentityId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="UserUserAlert">
+          <End Type="AuroraModels.User" Role="User" Multiplicity="1" />
+          <End Type="AuroraModels.UserAlert" Role="UserAlert" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="User">
+              <PropertyRef Name="IdentityId" />
+            </Principal>
+            <Dependent Role="UserAlert">
+              <PropertyRef Name="IdentityId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="UserSetting">
+          <End Type="AuroraModels.User" Role="User" Multiplicity="0..1" />
+          <End Type="AuroraModels.Setting" Role="Setting" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="User">
+              <PropertyRef Name="IdentityId" />
+            </Principal>
+            <Dependent Role="Setting">
+              <PropertyRef Name="IdentityId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="CredentialUserMount">
+          <End Type="AuroraModels.Credential" Role="Credential" Multiplicity="0..1" />
+          <End Type="AuroraModels.UserMount" Role="UserMount" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Credential">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="UserMount">
+              <PropertyRef Name="CredentialId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="PrivateKeyPublicKey">
+          <End Type="AuroraModels.PrivateKey" Role="PrivateKey" Multiplicity="0..1" />
+          <End Type="AuroraModels.PublicKey" Role="PublicKey" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="PrivateKey">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="PublicKey">
+              <PropertyRef Name="PrivateKeyId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="UserFolder_UserFile">
+          <End Type="AuroraModels.UserFolder" Role="UserFolder" Multiplicity="0..1" />
+          <End Type="AuroraModels.UserFile" Role="UserFile" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="UserFolder">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="UserFile">
+              <PropertyRef Name="FolderId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="UserFolder_UserFolder">
+          <End Type="AuroraModels.UserFolder" Role="UserFolder" Multiplicity="0..1" />
+          <End Type="AuroraModels.UserFolder" Role="UserFolderParent" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="UserFolder">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="UserFolderParent">
+              <PropertyRef Name="ParentId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+      </Schema>
+    </edmx:ConceptualModels>
+    <!-- C-S mapping content -->
+    <edmx:Mappings>
+      <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+        <EntityContainerMapping StorageEntityContainer="AuroraModelsStoreContainer" CdmEntityContainer="AuroraEntities">
+          <EntitySetMapping Name="Credentials">
+            <EntityTypeMapping TypeName="AuroraModels.Credential">
+              <MappingFragment StoreEntitySet="uvw_Credential">
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="Domain" ColumnName="Domain" />
+                <ScalarProperty Name="UserName" ColumnName="UserName" />
+                <ScalarProperty Name="Password" ColumnName="Password" />
+                <ScalarProperty Name="IsEnabled" ColumnName="IsEnabled" />
+                <ScalarProperty Name="IsDeletable" ColumnName="IsDeletable" />
+                <ScalarProperty Name="CreatedUtc" ColumnName="CreatedUtc" />
+                <ScalarProperty Name="LastUpdatedUtc" ColumnName="LastUpdatedUtc" />
+              </MappingFragment>
+            </EntityTypeMapping>
+            <EntityTypeMapping TypeName="AuroraModels.Credential">
+              <ModificationFunctionMapping>
+                <DeleteFunction FunctionName="AuroraModels.Store.usp_Credential_Delete" >
+                  <ScalarProperty Name="Id" ParameterName="Id" />
+                </DeleteFunction>
+                <UpdateFunction FunctionName="AuroraModels.Store.usp_Credential_Update">
+                  <ScalarProperty Name="IsDeletable" ParameterName="IsDeletable" Version="Current" />
+                  <ScalarProperty Name="IsEnabled" ParameterName="IsEnabled" Version="Current" />
+                  <ScalarProperty Name="Password" ParameterName="Password" Version="Current" />
+                  <ScalarProperty Name="UserName" ParameterName="UserName" Version="Current" />
+                  <ScalarProperty Name="Domain" ParameterName="Domain" Version="Current" />
+                  <ScalarProperty Name="Id" ParameterName="Id" Version="Current" />
+                  <ResultBinding Name="LastUpdatedUtc" ColumnName="LastUpdatedUtc" />
+                </UpdateFunction>
+                <InsertFunction FunctionName="AuroraModels.Store.usp_Credential_Insert">
+                  <ScalarProperty Name="IsDeletable" ParameterName="IsDeletable" />
+                  <ScalarProperty Name="IsEnabled" ParameterName="IsEnabled" />
+                  <ScalarProperty Name="Password" ParameterName="Password" />
+                  <ScalarProperty Name="UserName" ParameterName="UserName" />
+                  <ScalarProperty Name="Domain" ParameterName="Domain" />
+                  <ResultBinding Name="Id" ColumnName="Id" />
+                  <ResultBinding Name="CreatedUtc" ColumnName="CreatedUtc" />
+                </InsertFunction>
+              </ModificationFunctionMapping>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Networks">
+            <EntityTypeMapping TypeName="AuroraModels.Network">
+              <MappingFragment StoreEntitySet="uvw_Network">
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="IdentityId" ColumnName="IdentityId" />
+                <ScalarProperty Name="Address" ColumnName="Address" />
+                <ScalarProperty Name="Action" ColumnName="Action" />
+                <ScalarProperty Name="IsEnabled" ColumnName="IsEnabled" />
+                <ScalarProperty Name="CreatedUtc" ColumnName="CreatedUtc" />
+                <ScalarProperty Name="LastUpdatedUtc" ColumnName="LastUpdatedUtc" />
+              </MappingFragment>
+            </EntityTypeMapping>
+            <EntityTypeMapping TypeName="AuroraModels.Network">
+              <ModificationFunctionMapping>
+                <DeleteFunction FunctionName="AuroraModels.Store.usp_Network_Delete" >
+                  <ScalarProperty Name="Id" ParameterName="Id" />
+                </DeleteFunction>
+                <UpdateFunction FunctionName="AuroraModels.Store.usp_Network_Update">
+                  <ScalarProperty Name="IsEnabled" ParameterName="IsEnabled" Version="Current" />
+                  <ScalarProperty Name="Action" ParameterName="Action" Version="Current" />
+                  <ScalarProperty Name="Address" ParameterName="Address" Version="Current" />
+                  <ScalarProperty Name="IdentityId" ParameterName="IdentityId" Version="Current" />
+                  <ScalarProperty Name="Id" ParameterName="Id" Version="Current" />
+                  <ResultBinding Name="LastUpdatedUtc" ColumnName="LastUpdatedUtc" />
+                </UpdateFunction>
+                <InsertFunction FunctionName="AuroraModels.Store.usp_Network_Insert">
+                  <ScalarProperty Name="IsEnabled" ParameterName="IsEnabled" />
+                  <ScalarProperty Name="Action" ParameterName="Action" />
+                  <ScalarProperty Name="Address" ParameterName="Address" />
+                  <ScalarProperty Name="IdentityId" ParameterName="IdentityId" />
+                  <ResultBinding Name="Id" ColumnName="Id" />
+                  <ResultBinding Name="CreatedUtc" ColumnName="CreatedUtc" />
+                </InsertFunction>
+              </ModificationFunctionMapping>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="PrivateKeys">
+            <EntityTypeMapping TypeName="AuroraModels.PrivateKey">
+              <MappingFragment StoreEntitySet="uvw_PrivateKey">
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="IdentityId" ColumnName="IdentityId" />
+                <ScalarProperty Name="PublicKeyId" ColumnName="PublicKeyId" />
+                <ScalarProperty Name="KeyValue" ColumnName="KeyValue" />
+                <ScalarProperty Name="KeyAlgo" ColumnName="KeyAlgo" />
+                <ScalarProperty Name="KeyPass" ColumnName="KeyPass" />
+                <ScalarProperty Name="KeyFormat" ColumnName="KeyFormat" />
+                <ScalarProperty Name="IsEnabled" ColumnName="IsEnabled" />
+                <ScalarProperty Name="IsDeletable" ColumnName="IsDeletable" />
+                <ScalarProperty Name="CreatedUtc" ColumnName="CreatedUtc" />
+                <ScalarProperty Name="LastUpdatedUtc" ColumnName="LastUpdatedUtc" />
+              </MappingFragment>
+            </EntityTypeMapping>
+            <EntityTypeMapping TypeName="AuroraModels.PrivateKey">
+              <ModificationFunctionMapping>
+                <DeleteFunction FunctionName="AuroraModels.Store.usp_PrivateKey_Delete">
+                  <ScalarProperty Name="Id" ParameterName="Id" />
+                </DeleteFunction>
+                <UpdateFunction FunctionName="AuroraModels.Store.usp_PrivateKey_Update">
+                  <ScalarProperty Name="IsDeletable" ParameterName="IsDeletable" Version="Current" />
+                  <ScalarProperty Name="IsEnabled" ParameterName="IsEnabled" Version="Current" />
+                  <ScalarProperty Name="KeyFormat" ParameterName="KeyFormat" Version="Current" />
+                  <ScalarProperty Name="KeyPass" ParameterName="KeyPass" Version="Current" />
+                  <ScalarProperty Name="KeyAlgo" ParameterName="KeyAlgo" Version="Current" />
+                  <ScalarProperty Name="KeyValue" ParameterName="KeyValue" Version="Current" />
+                  <ScalarProperty Name="PublicKeyId" ParameterName="PublicKeyId" Version="Current" />
+                  <ScalarProperty Name="IdentityId" ParameterName="IdentityId" Version="Current" />
+                  <ScalarProperty Name="Id" ParameterName="Id" Version="Current" />
+                  <ResultBinding Name="LastUpdatedUtc" ColumnName="LastUpdatedUtc" />
+                </UpdateFunction>
+                <InsertFunction FunctionName="AuroraModels.Store.usp_PrivateKey_Insert">
+                  <ScalarProperty Name="IsDeletable" ParameterName="IsDeletable" />
+                  <ScalarProperty Name="IsEnabled" ParameterName="IsEnabled" />
+                  <ScalarProperty Name="KeyFormat" ParameterName="KeyFormat" />
+                  <ScalarProperty Name="KeyPass" ParameterName="KeyPass" />
+                  <ScalarProperty Name="KeyAlgo" ParameterName="KeyAlgo" />
+                  <ScalarProperty Name="KeyValue" ParameterName="KeyValue" />
+                  <ScalarProperty Name="PublicKeyId" ParameterName="PublicKeyId" />
+                  <ScalarProperty Name="IdentityId" ParameterName="IdentityId" />
+                  <ResultBinding Name="Id" ColumnName="Id" />
+                  <ResultBinding Name="CreatedUtc" ColumnName="CreatedUtc" />
+                </InsertFunction>
+              </ModificationFunctionMapping>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="PublicKeys">
+            <EntityTypeMapping TypeName="AuroraModels.PublicKey">
+              <MappingFragment StoreEntitySet="uvw_PublicKey">
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="IdentityId" ColumnName="IdentityId" />
+                <ScalarProperty Name="PrivateKeyId" ColumnName="PrivateKeyId" />
+                <ScalarProperty Name="KeyValue" ColumnName="KeyValue" />
+                <ScalarProperty Name="KeyAlgo" ColumnName="KeyAlgo" />
+                <ScalarProperty Name="KeyFormat" ColumnName="KeyFormat" />
+                <ScalarProperty Name="SigValue" ColumnName="SigValue" />
+                <ScalarProperty Name="SigAlgo" ColumnName="SigAlgo" />
+                <ScalarProperty Name="Comment" ColumnName="Comment" />
+                <ScalarProperty Name="IsEnabled" ColumnName="IsEnabled" />
+                <ScalarProperty Name="IsDeletable" ColumnName="IsDeletable" />
+                <ScalarProperty Name="CreatedUtc" ColumnName="CreatedUtc" />
+                <ScalarProperty Name="LastUpdatedUtc" ColumnName="LastUpdatedUtc" />
+              </MappingFragment>
+            </EntityTypeMapping>
+            <EntityTypeMapping TypeName="AuroraModels.PublicKey">
+              <ModificationFunctionMapping>
+                <DeleteFunction FunctionName="AuroraModels.Store.usp_PublicKey_Delete">
+                  <ScalarProperty Name="Id" ParameterName="Id" />
+                </DeleteFunction>
+                <UpdateFunction FunctionName="AuroraModels.Store.usp_PublicKey_Update">
+                  <ScalarProperty Name="IsDeletable" ParameterName="IsDeletable" Version="Current" />
+                  <ScalarProperty Name="IsEnabled" ParameterName="IsEnabled" Version="Current" />
+                  <ScalarProperty Name="Comment" ParameterName="Comment" Version="Current" />
+                  <ScalarProperty Name="SigAlgo" ParameterName="SigAlgo" Version="Current" />
+                  <ScalarProperty Name="SigValue" ParameterName="SigValue" Version="Current" />
+                  <ScalarProperty Name="KeyFormat" ParameterName="KeyFormat" Version="Current" />
+                  <ScalarProperty Name="KeyAlgo" ParameterName="KeyAlgo" Version="Current" />
+                  <ScalarProperty Name="KeyValue" ParameterName="KeyValue" Version="Current" />
+                  <ScalarProperty Name="PrivateKeyId" ParameterName="PrivateKeyId" Version="Current" />
+                  <ScalarProperty Name="IdentityId" ParameterName="IdentityId" Version="Current" />
+                  <ScalarProperty Name="Id" ParameterName="Id" Version="Current" />
+                </UpdateFunction>
+                <InsertFunction FunctionName="AuroraModels.Store.usp_PublicKey_Insert">
+                  <ScalarProperty Name="IsDeletable" ParameterName="IsDeletable" />
+                  <ScalarProperty Name="IsEnabled" ParameterName="IsEnabled" />
+                  <ScalarProperty Name="Comment" ParameterName="Comment" />
+                  <ScalarProperty Name="SigAlgo" ParameterName="SigAlgo" />
+                  <ScalarProperty Name="SigValue" ParameterName="SigValue" />
+                  <ScalarProperty Name="KeyFormat" ParameterName="KeyFormat" />
+                  <ScalarProperty Name="KeyAlgo" ParameterName="KeyAlgo" />
+                  <ScalarProperty Name="KeyValue" ParameterName="KeyValue" />
+                  <ScalarProperty Name="PrivateKeyId" ParameterName="PrivateKeyId" />
+                  <ScalarProperty Name="IdentityId" ParameterName="IdentityId" />
+                </InsertFunction>
+              </ModificationFunctionMapping>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Settings">
+            <EntityTypeMapping TypeName="AuroraModels.Setting">
+              <MappingFragment StoreEntitySet="uvw_Setting">
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="IdentityId" ColumnName="IdentityId" />
+                <ScalarProperty Name="ConfigKey" ColumnName="ConfigKey" />
+                <ScalarProperty Name="ConfigValue" ColumnName="ConfigValue" />
+                <ScalarProperty Name="IsDeletable" ColumnName="IsDeletable" />
+                <ScalarProperty Name="CreatedUtc" ColumnName="CreatedUtc" />
+                <ScalarProperty Name="LastUpdatedUtc" ColumnName="LastUpdatedUtc" />
+              </MappingFragment>
+            </EntityTypeMapping>
+            <EntityTypeMapping TypeName="AuroraModels.Setting">
+              <ModificationFunctionMapping>
+                <DeleteFunction FunctionName="AuroraModels.Store.usp_Setting_Delete">
+                  <ScalarProperty Name="Id" ParameterName="Id" />
+                </DeleteFunction>
+                <UpdateFunction FunctionName="AuroraModels.Store.usp_Setting_Update">
+                  <ScalarProperty Name="IsDeletable" ParameterName="IsDeletable" Version="Current" />
+                  <ScalarProperty Name="ConfigValue" ParameterName="ConfigValue" Version="Current" />
+                  <ScalarProperty Name="ConfigKey" ParameterName="ConfigKey" Version="Current" />
+                  <ScalarProperty Name="IdentityId" ParameterName="IdentityId" Version="Current" />
+                  <ScalarProperty Name="Id" ParameterName="Id" Version="Current" />
+                </UpdateFunction>
+                <InsertFunction FunctionName="AuroraModels.Store.usp_Setting_Insert">
+                  <ScalarProperty Name="IsDeletable" ParameterName="IsDeletable" />
+                  <ScalarProperty Name="ConfigValue" ParameterName="ConfigValue" />
+                  <ScalarProperty Name="ConfigKey" ParameterName="ConfigKey" />
+                  <ScalarProperty Name="IdentityId" ParameterName="IdentityId" />
+                </InsertFunction>
+              </ModificationFunctionMapping>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Users">
+            <EntityTypeMapping TypeName="AuroraModels.User">
+              <MappingFragment StoreEntitySet="uvw_User">
+                <ScalarProperty Name="IdentityId" ColumnName="IdentityId" />
+                <ScalarProperty Name="IdentityAlias" ColumnName="IdentityAlias" />
+                <ScalarProperty Name="RequirePassword" ColumnName="RequirePassword" />
+                <ScalarProperty Name="RequirePublicKey" ColumnName="RequirePublicKey" />
+                <ScalarProperty Name="FileSystemType" ColumnName="FileSystemType" />
+                <ScalarProperty Name="FileSystemReadOnly" ColumnName="FileSystemReadOnly" />
+                <ScalarProperty Name="DebugLevel" ColumnName="DebugLevel" />
+                <ScalarProperty Name="IsEnabled" ColumnName="IsEnabled" />
+                <ScalarProperty Name="IsDeletable" ColumnName="IsDeletable" />
+                <ScalarProperty Name="CreatedUtc" ColumnName="CreatedUtc" />
+                <ScalarProperty Name="LastUpdatedUtc" ColumnName="LastUpdatedUtc" />
+              </MappingFragment>
+            </EntityTypeMapping>
+            <EntityTypeMapping TypeName="AuroraModels.User">
+              <ModificationFunctionMapping>
+                <DeleteFunction FunctionName="AuroraModels.Store.usp_User_Delete">
+                  <ScalarProperty Name="IdentityId" ParameterName="IdentityId" />
+                </DeleteFunction>
+                <UpdateFunction FunctionName="AuroraModels.Store.usp_User_Update">
+                  <ScalarProperty Name="IsDeletable" ParameterName="IsDeletable" Version="Current" />
+                  <ScalarProperty Name="IsEnabled" ParameterName="IsEnabled" Version="Current" />
+                  <ScalarProperty Name="DebugLevel" ParameterName="DebugLevel" Version="Current" />
+                  <ScalarProperty Name="FileSystemReadOnly" ParameterName="FileSystemReadOnly" Version="Current" />
+                  <ScalarProperty Name="FileSystemType" ParameterName="FileSystemType" Version="Current" />
+                  <ScalarProperty Name="RequirePublicKey" ParameterName="RequirePublicKey" Version="Current" />
+                  <ScalarProperty Name="RequirePassword" ParameterName="RequirePassword" Version="Current" />
+                  <ScalarProperty Name="IdentityAlias" ParameterName="IdentityAlias" Version="Current" />
+                  <ScalarProperty Name="IdentityId" ParameterName="IdentityId" Version="Current" />
+                </UpdateFunction>
+                <InsertFunction FunctionName="AuroraModels.Store.usp_User_Insert">
+                  <ScalarProperty Name="IsDeletable" ParameterName="IsDeletable" />
+                  <ScalarProperty Name="IsEnabled" ParameterName="IsEnabled" />
+                  <ScalarProperty Name="DebugLevel" ParameterName="DebugLevel" />
+                  <ScalarProperty Name="FileSystemReadOnly" ParameterName="FileSystemReadOnly" />
+                  <ScalarProperty Name="FileSystemType" ParameterName="FileSystemType" />
+                  <ScalarProperty Name="RequirePublicKey" ParameterName="RequirePublicKey" />
+                  <ScalarProperty Name="RequirePassword" ParameterName="RequirePassword" />
+                  <ScalarProperty Name="IdentityAlias" ParameterName="IdentityAlias" />
+                  <ScalarProperty Name="IdentityId" ParameterName="IdentityId" />
+                  <ResultBinding Name="IdentityId" ColumnName="IdentityId" />
+                  <ResultBinding Name="CreatedUtc" ColumnName="CreatedUtc" />
+                </InsertFunction>
+              </ModificationFunctionMapping>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="UserAlerts">
+            <EntityTypeMapping TypeName="AuroraModels.UserAlert">
+              <MappingFragment StoreEntitySet="uvw_UserAlert">
+                <ScalarProperty Name="IsEnabled" ColumnName="IsEnabled" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="IdentityId" ColumnName="IdentityId" />
+                <ScalarProperty Name="OnDelete" ColumnName="OnDelete" />
+                <ScalarProperty Name="OnDownload" ColumnName="OnDownload" />
+                <ScalarProperty Name="OnUpload" ColumnName="OnUpload" />
+                <ScalarProperty Name="ToFirstName" ColumnName="ToFirstName" />
+                <ScalarProperty Name="ToLastName" ColumnName="ToLastName" />
+                <ScalarProperty Name="ToEmailAddress" ColumnName="ToEmailAddress" />
+                <ScalarProperty Name="ToPhoneNumber" ColumnName="ToPhoneNumber" />
+                <ScalarProperty Name="CreatedUtc" ColumnName="CreatedUtc" />
+                <ScalarProperty Name="LastUpdatedUtc" ColumnName="LastUpdatedUtc" />
+              </MappingFragment>
+            </EntityTypeMapping>
+            <EntityTypeMapping TypeName="AuroraModels.UserAlert">
+              <ModificationFunctionMapping>
+                <DeleteFunction FunctionName="AuroraModels.Store.usp_UserAlert_Delete">
+                  <ScalarProperty Name="Id" ParameterName="Id" />
+                </DeleteFunction>
+                <UpdateFunction FunctionName="AuroraModels.Store.usp_UserAlert_Update">
+                  <ScalarProperty Name="IsEnabled" ParameterName="IsEnabled" Version="Current" />
+                  <ScalarProperty Name="ToPhoneNumber" ParameterName="ToPhoneNumber" Version="Current" />
+                  <ScalarProperty Name="ToEmailAddress" ParameterName="ToEmailAddress" Version="Current" />
+                  <ScalarProperty Name="ToLastName" ParameterName="ToLastName" Version="Current" />
+                  <ScalarProperty Name="ToFirstName" ParameterName="ToFirstName" Version="Current" />
+                  <ScalarProperty Name="OnUpload" ParameterName="OnUpload" Version="Current" />
+                  <ScalarProperty Name="OnDownload" ParameterName="OnDownload" Version="Current" />
+                  <ScalarProperty Name="OnDelete" ParameterName="OnDelete" Version="Current" />
+                  <ScalarProperty Name="IdentityId" ParameterName="IdentityId" Version="Current" />
+                  <ScalarProperty Name="Id" ParameterName="Id" Version="Current" />
+                  <ResultBinding Name="LastUpdatedUtc" ColumnName="LastUpdatedUtc" />
+                </UpdateFunction>
+                <InsertFunction FunctionName="AuroraModels.Store.usp_UserAlert_Insert">
+                  <ScalarProperty Name="IsEnabled" ParameterName="IsEnabled" />
+                  <ScalarProperty Name="ToPhoneNumber" ParameterName="ToPhoneNumber" />
+                  <ScalarProperty Name="ToEmailAddress" ParameterName="ToEmailAddress" />
+                  <ScalarProperty Name="ToLastName" ParameterName="ToLastName" />
+                  <ScalarProperty Name="ToFirstName" ParameterName="ToFirstName" />
+                  <ScalarProperty Name="OnUpload" ParameterName="OnUpload" />
+                  <ScalarProperty Name="OnDownload" ParameterName="OnDownload" />
+                  <ScalarProperty Name="OnDelete" ParameterName="OnDelete" />
+                  <ScalarProperty Name="IdentityId" ParameterName="IdentityId" />
+                  <ResultBinding Name="Id" ColumnName="Id" />
+                  <ResultBinding Name="CreatedUtc" ColumnName="CreatedUtc" />
+                </InsertFunction>
+              </ModificationFunctionMapping>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="UserFiles">
+            <EntityTypeMapping TypeName="AuroraModels.UserFile">
+              <MappingFragment StoreEntitySet="uvw_UserFile">
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="IdentityId" ColumnName="IdentityId" />
+                <ScalarProperty Name="FolderId" ColumnName="FolderId" />
+                <ScalarProperty Name="VirtualName" ColumnName="VirtualName" />
+                <ScalarProperty Name="RealPath" ColumnName="RealPath" />
+                <ScalarProperty Name="RealFileName" ColumnName="RealFileName" />
+                <ScalarProperty Name="RealFileSize" ColumnName="RealFileSize" />
+                <ScalarProperty Name="HashSHA256" ColumnName="HashSHA256" />
+                <ScalarProperty Name="IsReadOnly" ColumnName="IsReadOnly" />
+                <ScalarProperty Name="CreatedUtc" ColumnName="CreatedUtc" />
+                <ScalarProperty Name="LastAccessedUtc" ColumnName="LastAccessedUtc" />
+                <ScalarProperty Name="LastUpdatedUtc" ColumnName="LastUpdatedUtc" />
+                <ScalarProperty Name="LastVerifiedUtc" ColumnName="LastVerifiedUtc" />
+              </MappingFragment>
+            </EntityTypeMapping>
+            <EntityTypeMapping TypeName="AuroraModels.UserFile">
+              <ModificationFunctionMapping>
+                <DeleteFunction FunctionName="AuroraModels.Store.usp_UserFile_Delete">
+                  <ScalarProperty Name="Id" ParameterName="Id" />
+                </DeleteFunction>
+                <UpdateFunction FunctionName="AuroraModels.Store.usp_UserFile_Update">
+                  <ScalarProperty Name="RealFileSize" ParameterName="RealFileSize" Version="Current" />
+                  <ScalarProperty Name="LastVerifiedUtc" ParameterName="LastVerifiedUtc" Version="Current" />
+                  <ScalarProperty Name="LastUpdatedUtc" ParameterName="LastUpdatedUtc" Version="Current" />
+                  <ScalarProperty Name="LastAccessedUtc" ParameterName="LastAccessedUtc" Version="Current" />
+                  <ScalarProperty Name="IsReadOnly" ParameterName="IsReadOnly" Version="Current" />
+                  <ScalarProperty Name="HashSHA256" ParameterName="HashSHA256" Version="Current" />
+                  <ScalarProperty Name="RealFileName" ParameterName="RealFileName" Version="Current" />
+                  <ScalarProperty Name="RealPath" ParameterName="RealPath" Version="Current" />
+                  <ScalarProperty Name="VirtualName" ParameterName="VirtualName" Version="Current" />
+                  <ScalarProperty Name="IdentityId" ParameterName="IdentityId" Version="Current" />
+                  <ScalarProperty Name="FolderId" ParameterName="FolderId" Version="Current" />
+                  <ScalarProperty Name="Id" ParameterName="Id" Version="Current" />
+                </UpdateFunction>
+                <InsertFunction FunctionName="AuroraModels.Store.usp_UserFile_Insert">
+                  <ScalarProperty Name="RealFileSize" ParameterName="RealFileSize" />
+                  <ScalarProperty Name="IsReadOnly" ParameterName="IsReadOnly" />
+                  <ScalarProperty Name="HashSHA256" ParameterName="HashSHA256" />
+                  <ScalarProperty Name="RealFileName" ParameterName="RealFileName" />
+                  <ScalarProperty Name="RealPath" ParameterName="RealPath" />
+                  <ScalarProperty Name="VirtualName" ParameterName="VirtualName" />
+                  <ScalarProperty Name="FolderId" ParameterName="FolderId" />
+                  <ScalarProperty Name="IdentityId" ParameterName="IdentityId" />
+                  <ResultBinding Name="Id" ColumnName="Id" />
+                  <ResultBinding Name="CreatedUtc" ColumnName="CreatedUtc" />
+                </InsertFunction>
+              </ModificationFunctionMapping>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="UserFolders">
+            <EntityTypeMapping TypeName="AuroraModels.UserFolder">
+              <MappingFragment StoreEntitySet="uvw_UserFolder">
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="IdentityId" ColumnName="IdentityId" />
+                <ScalarProperty Name="ParentId" ColumnName="ParentId" />
+                <ScalarProperty Name="VirtualName" ColumnName="VirtualName" />
+                <ScalarProperty Name="IsReadOnly" ColumnName="IsReadOnly" />
+                <ScalarProperty Name="CreatedUtc" ColumnName="CreatedUtc" />
+                <ScalarProperty Name="LastAccessedUtc" ColumnName="LastAccessedUtc" />
+                <ScalarProperty Name="LastUpdatedUtc" ColumnName="LastUpdatedUtc" />
+              </MappingFragment>
+            </EntityTypeMapping>
+            <EntityTypeMapping TypeName="AuroraModels.UserFolder">
+              <ModificationFunctionMapping>
+                <DeleteFunction FunctionName="AuroraModels.Store.usp_UserFolder_Delete">
+                  <ScalarProperty Name="Id" ParameterName="Id" />
+                </DeleteFunction>
+                <UpdateFunction FunctionName="AuroraModels.Store.usp_UserFolder_Update">
+                  <ScalarProperty Name="LastUpdatedUtc" ParameterName="LastUpdatedUtc" Version="Current" />
+                  <ScalarProperty Name="LastAccessedUtc" ParameterName="LastAccessedUtc" Version="Current" />
+                  <ScalarProperty Name="IsReadOnly" ParameterName="IsReadOnly" Version="Current" />
+                  <ScalarProperty Name="VirtualName" ParameterName="VirtualName" Version="Current" />
+                  <ScalarProperty Name="ParentId" ParameterName="ParentId" Version="Current" />
+                  <ScalarProperty Name="IdentityId" ParameterName="IdentityId" Version="Current" />
+                  <ScalarProperty Name="Id" ParameterName="Id" Version="Current" />
+                  <ResultBinding Name="LastUpdatedUtc" ColumnName="LastUpdatedUtc" />
+                </UpdateFunction>
+                <InsertFunction FunctionName="AuroraModels.Store.usp_UserFolder_Insert">
+                  <ScalarProperty Name="IsReadOnly" ParameterName="IsReadOnly" />
+                  <ScalarProperty Name="VirtualName" ParameterName="VirtualName" />
+                  <ScalarProperty Name="ParentId" ParameterName="ParentId" />
+                  <ScalarProperty Name="IdentityId" ParameterName="IdentityId" />
+                  <ResultBinding Name="Id" ColumnName="Id" />
+                  <ResultBinding Name="CreatedUtc" ColumnName="CreatedUtc" />
+                </InsertFunction>
+              </ModificationFunctionMapping>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="UserMounts">
+            <EntityTypeMapping TypeName="AuroraModels.UserMount">
+              <MappingFragment StoreEntitySet="uvw_UserMount">
+                <ScalarProperty Name="IdentityId" ColumnName="IdentityId" />
+                <ScalarProperty Name="CredentialId" ColumnName="CredentialId" />
+                <ScalarProperty Name="AuthType" ColumnName="AuthType" />
+                <ScalarProperty Name="ServerAddress" ColumnName="ServerAddress" />
+                <ScalarProperty Name="ServerShare" ColumnName="ServerShare" />
+                <ScalarProperty Name="IsEnabled" ColumnName="IsEnabled" />
+                <ScalarProperty Name="IsDeletable" ColumnName="IsDeletable" />
+                <ScalarProperty Name="CreatedUtc" ColumnName="CreatedUtc" />
+                <ScalarProperty Name="LastUpdatedUtc" ColumnName="LastUpdatedUtc" />
+              </MappingFragment>
+            </EntityTypeMapping>
+            <EntityTypeMapping TypeName="AuroraModels.UserMount">
+              <ModificationFunctionMapping>
+                <DeleteFunction FunctionName="AuroraModels.Store.usp_UserMount_Delete">
+                  <ScalarProperty Name="IdentityId" ParameterName="IdentityId" />
+                </DeleteFunction>
+                <UpdateFunction FunctionName="AuroraModels.Store.usp_UserMount_Update">
+                  <ScalarProperty Name="IsDeletable" ParameterName="IsDeletable" Version="Current" />
+                  <ScalarProperty Name="IsEnabled" ParameterName="IsEnabled" Version="Current" />
+                  <ScalarProperty Name="ServerShare" ParameterName="ServerShare" Version="Current" />
+                  <ScalarProperty Name="ServerAddress" ParameterName="ServerAddress" Version="Current" />
+                  <ScalarProperty Name="AuthType" ParameterName="AuthType" Version="Current" />
+                  <ScalarProperty Name="CredentialId" ParameterName="CredentialId" Version="Current" />
+                  <ScalarProperty Name="IdentityId" ParameterName="IdentityId" Version="Current" />
+                </UpdateFunction>
+                <InsertFunction FunctionName="AuroraModels.Store.usp_UserMount_Insert">
+                  <ScalarProperty Name="IsDeletable" ParameterName="IsDeletable" />
+                  <ScalarProperty Name="IsEnabled" ParameterName="IsEnabled" />
+                  <ScalarProperty Name="ServerShare" ParameterName="ServerShare" />
+                  <ScalarProperty Name="ServerAddress" ParameterName="ServerAddress" />
+                  <ScalarProperty Name="AuthType" ParameterName="AuthType" />
+                  <ScalarProperty Name="CredentialId" ParameterName="CredentialId" />
+                  <ScalarProperty Name="IdentityId" ParameterName="IdentityId" />
+                  <ResultBinding Name="IdentityId" ColumnName="IdentityId" />
+                  <ResultBinding Name="CreatedUtc" ColumnName="CreatedUtc" />
+                </InsertFunction>
+              </ModificationFunctionMapping>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <FunctionImportMapping FunctionImportName="usp_Credential_Delete" FunctionName="AuroraModels.Store.usp_Credential_Delete">
+            <ResultMapping>
+              <ComplexTypeMapping TypeName="AuroraModels.usp_Credential_Delete_Result">
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="Domain" ColumnName="Domain" />
+                <ScalarProperty Name="UserName" ColumnName="UserName" />
+                <ScalarProperty Name="Password" ColumnName="Password" />
+                <ScalarProperty Name="IsEnabled" ColumnName="IsEnabled" />
+                <ScalarProperty Name="IsDeletable" ColumnName="IsDeletable" />
+                <ScalarProperty Name="CreatedUtc" ColumnName="CreatedUtc" />
+                <ScalarProperty Name="LastUpdatedUtc" ColumnName="LastUpdatedUtc" />
+              </ComplexTypeMapping>
+            </ResultMapping>
+          </FunctionImportMapping>
+          <FunctionImportMapping FunctionImportName="usp_Credential_Insert" FunctionName="AuroraModels.Store.usp_Credential_Insert">
+            <ResultMapping>
+              <ComplexTypeMapping TypeName="AuroraModels.usp_Credential_Insert_Result">
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="Domain" ColumnName="Domain" />
+                <ScalarProperty Name="UserName" ColumnName="UserName" />
+                <ScalarProperty Name="Password" ColumnName="Password" />
+                <ScalarProperty Name="IsEnabled" ColumnName="IsEnabled" />
+                <ScalarProperty Name="IsDeletable" ColumnName="IsDeletable" />
+                <ScalarProperty Name="CreatedUtc" ColumnName="CreatedUtc" />
+                <ScalarProperty Name="LastUpdatedUtc" ColumnName="LastUpdatedUtc" />
+              </ComplexTypeMapping>
+            </ResultMapping>
+          </FunctionImportMapping>
+          <FunctionImportMapping FunctionImportName="usp_Credential_Update" FunctionName="AuroraModels.Store.usp_Credential_Update">
+            <ResultMapping>
+              <ComplexTypeMapping TypeName="AuroraModels.usp_Credential_Update_Result">
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="Domain" ColumnName="Domain" />
+                <ScalarProperty Name="UserName" ColumnName="UserName" />
+                <ScalarProperty Name="Password" ColumnName="Password" />
+                <ScalarProperty Name="IsEnabled" ColumnName="IsEnabled" />
+                <ScalarProperty Name="IsDeletable" ColumnName="IsDeletable" />
+                <ScalarProperty Name="CreatedUtc" ColumnName="CreatedUtc" />
+                <ScalarProperty Name="LastUpdatedUtc" ColumnName="LastUpdatedUtc" />
+              </ComplexTypeMapping>
+            </ResultMapping>
+          </FunctionImportMapping>
+          <FunctionImportMapping FunctionImportName="usp_Network_Delete" FunctionName="AuroraModels.Store.usp_Network_Delete">
+            <ResultMapping>
+              <ComplexTypeMapping TypeName="AuroraModels.usp_Network_Delete_Result">
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="IdentityId" ColumnName="IdentityId" />
+                <ScalarProperty Name="Address" ColumnName="Address" />
+                <ScalarProperty Name="Action" ColumnName="Action" />
+                <ScalarProperty Name="IsEnabled" ColumnName="IsEnabled" />
+                <ScalarProperty Name="CreatedUtc" ColumnName="CreatedUtc" />
+                <ScalarProperty Name="LastUpdatedUtc" ColumnName="LastUpdatedUtc" />
+              </ComplexTypeMapping>
+            </ResultMapping>
+          </FunctionImportMapping>
+          <FunctionImportMapping FunctionImportName="usp_Network_Insert" FunctionName="AuroraModels.Store.usp_Network_Insert">
+            <ResultMapping>
+              <ComplexTypeMapping TypeName="AuroraModels.usp_Network_Insert_Result">
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="IdentityId" ColumnName="IdentityId" />
+                <ScalarProperty Name="Address" ColumnName="Address" />
+                <ScalarProperty Name="Action" ColumnName="Action" />
+                <ScalarProperty Name="IsEnabled" ColumnName="IsEnabled" />
+                <ScalarProperty Name="CreatedUtc" ColumnName="CreatedUtc" />
+                <ScalarProperty Name="LastUpdatedUtc" ColumnName="LastUpdatedUtc" />
+              </ComplexTypeMapping>
+            </ResultMapping>
+          </FunctionImportMapping>
+          <FunctionImportMapping FunctionImportName="usp_Network_Update" FunctionName="AuroraModels.Store.usp_Network_Update">
+            <ResultMapping>
+              <ComplexTypeMapping TypeName="AuroraModels.usp_Network_Update_Result">
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="IdentityId" ColumnName="IdentityId" />
+                <ScalarProperty Name="Address" ColumnName="Address" />
+                <ScalarProperty Name="Action" ColumnName="Action" />
+                <ScalarProperty Name="IsEnabled" ColumnName="IsEnabled" />
+                <ScalarProperty Name="CreatedUtc" ColumnName="CreatedUtc" />
+                <ScalarProperty Name="LastUpdatedUtc" ColumnName="LastUpdatedUtc" />
+              </ComplexTypeMapping>
+            </ResultMapping>
+          </FunctionImportMapping>
+          <FunctionImportMapping FunctionImportName="usp_PrivateKey_Delete" FunctionName="AuroraModels.Store.usp_PrivateKey_Delete">
+            <ResultMapping>
+              <ComplexTypeMapping TypeName="AuroraModels.usp_PrivateKey_Delete_Result">
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="IdentityId" ColumnName="IdentityId" />
+                <ScalarProperty Name="PublicKeyId" ColumnName="PublicKeyId" />
+                <ScalarProperty Name="KeyValue" ColumnName="KeyValue" />
+                <ScalarProperty Name="KeyAlgo" ColumnName="KeyAlgo" />
+                <ScalarProperty Name="KeyPass" ColumnName="KeyPass" />
+                <ScalarProperty Name="KeyFormat" ColumnName="KeyFormat" />
+                <ScalarProperty Name="IsEnabled" ColumnName="IsEnabled" />
+                <ScalarProperty Name="IsDeletable" ColumnName="IsDeletable" />
+                <ScalarProperty Name="CreatedUtc" ColumnName="CreatedUtc" />
+                <ScalarProperty Name="LastUpdatedUtc" ColumnName="LastUpdatedUtc" />
+              </ComplexTypeMapping>
+            </ResultMapping>
+          </FunctionImportMapping>
+          <FunctionImportMapping FunctionImportName="usp_PrivateKey_Insert" FunctionName="AuroraModels.Store.usp_PrivateKey_Insert">
+            <ResultMapping>
+              <ComplexTypeMapping TypeName="AuroraModels.usp_PrivateKey_Insert_Result">
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="IdentityId" ColumnName="IdentityId" />
+                <ScalarProperty Name="PublicKeyId" ColumnName="PublicKeyId" />
+                <ScalarProperty Name="KeyValue" ColumnName="KeyValue" />
+                <ScalarProperty Name="KeyAlgo" ColumnName="KeyAlgo" />
+                <ScalarProperty Name="KeyPass" ColumnName="KeyPass" />
+                <ScalarProperty Name="KeyFormat" ColumnName="KeyFormat" />
+                <ScalarProperty Name="IsEnabled" ColumnName="IsEnabled" />
+                <ScalarProperty Name="IsDeletable" ColumnName="IsDeletable" />
+                <ScalarProperty Name="CreatedUtc" ColumnName="CreatedUtc" />
+                <ScalarProperty Name="LastUpdatedUtc" ColumnName="LastUpdatedUtc" />
+              </ComplexTypeMapping>
+            </ResultMapping>
+          </FunctionImportMapping>
+          <FunctionImportMapping FunctionImportName="usp_PrivateKey_Update" FunctionName="AuroraModels.Store.usp_PrivateKey_Update">
+            <ResultMapping>
+              <ComplexTypeMapping TypeName="AuroraModels.usp_PrivateKey_Update_Result">
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="IdentityId" ColumnName="IdentityId" />
+                <ScalarProperty Name="PublicKeyId" ColumnName="PublicKeyId" />
+                <ScalarProperty Name="KeyValue" ColumnName="KeyValue" />
+                <ScalarProperty Name="KeyAlgo" ColumnName="KeyAlgo" />
+                <ScalarProperty Name="KeyPass" ColumnName="KeyPass" />
+                <ScalarProperty Name="KeyFormat" ColumnName="KeyFormat" />
+                <ScalarProperty Name="IsEnabled" ColumnName="IsEnabled" />
+                <ScalarProperty Name="IsDeletable" ColumnName="IsDeletable" />
+                <ScalarProperty Name="CreatedUtc" ColumnName="CreatedUtc" />
+                <ScalarProperty Name="LastUpdatedUtc" ColumnName="LastUpdatedUtc" />
+              </ComplexTypeMapping>
+            </ResultMapping>
+          </FunctionImportMapping>
+          <FunctionImportMapping FunctionImportName="usp_PublicKey_Delete" FunctionName="AuroraModels.Store.usp_PublicKey_Delete">
+            <ResultMapping>
+              <ComplexTypeMapping TypeName="AuroraModels.usp_PublicKey_Delete_Result">
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="IdentityId" ColumnName="IdentityId" />
+                <ScalarProperty Name="PrivateKeyId" ColumnName="PrivateKeyId" />
+                <ScalarProperty Name="KeyValue" ColumnName="KeyValue" />
+                <ScalarProperty Name="KeyAlgo" ColumnName="KeyAlgo" />
+                <ScalarProperty Name="KeyFormat" ColumnName="KeyFormat" />
+                <ScalarProperty Name="SigValue" ColumnName="SigValue" />
+                <ScalarProperty Name="SigAlgo" ColumnName="SigAlgo" />
+                <ScalarProperty Name="Comment" ColumnName="Comment" />
+                <ScalarProperty Name="IsEnabled" ColumnName="IsEnabled" />
+                <ScalarProperty Name="IsDeletable" ColumnName="IsDeletable" />
+                <ScalarProperty Name="CreatedUtc" ColumnName="CreatedUtc" />
+                <ScalarProperty Name="LastUpdatedUtc" ColumnName="LastUpdatedUtc" />
+              </ComplexTypeMapping>
+            </ResultMapping>
+          </FunctionImportMapping>
+          <FunctionImportMapping FunctionImportName="usp_PublicKey_Insert" FunctionName="AuroraModels.Store.usp_PublicKey_Insert">
+            <ResultMapping>
+              <ComplexTypeMapping TypeName="AuroraModels.usp_PublicKey_Insert_Result">
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="IdentityId" ColumnName="IdentityId" />
+                <ScalarProperty Name="PrivateKeyId" ColumnName="PrivateKeyId" />
+                <ScalarProperty Name="KeyValue" ColumnName="KeyValue" />
+                <ScalarProperty Name="KeyAlgo" ColumnName="KeyAlgo" />
+                <ScalarProperty Name="KeyFormat" ColumnName="KeyFormat" />
+                <ScalarProperty Name="SigValue" ColumnName="SigValue" />
+                <ScalarProperty Name="SigAlgo" ColumnName="SigAlgo" />
+                <ScalarProperty Name="Comment" ColumnName="Comment" />
+                <ScalarProperty Name="IsEnabled" ColumnName="IsEnabled" />
+                <ScalarProperty Name="IsDeletable" ColumnName="IsDeletable" />
+                <ScalarProperty Name="CreatedUtc" ColumnName="CreatedUtc" />
+                <ScalarProperty Name="LastUpdatedUtc" ColumnName="LastUpdatedUtc" />
+              </ComplexTypeMapping>
+            </ResultMapping>
+          </FunctionImportMapping>
+          <FunctionImportMapping FunctionImportName="usp_PublicKey_Update" FunctionName="AuroraModels.Store.usp_PublicKey_Update">
+            <ResultMapping>
+              <ComplexTypeMapping TypeName="AuroraModels.usp_PublicKey_Update_Result">
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="IdentityId" ColumnName="IdentityId" />
+                <ScalarProperty Name="PrivateKeyId" ColumnName="PrivateKeyId" />
+                <ScalarProperty Name="KeyValue" ColumnName="KeyValue" />
+                <ScalarProperty Name="KeyAlgo" ColumnName="KeyAlgo" />
+                <ScalarProperty Name="KeyFormat" ColumnName="KeyFormat" />
+                <ScalarProperty Name="SigValue" ColumnName="SigValue" />
+                <ScalarProperty Name="SigAlgo" ColumnName="SigAlgo" />
+                <ScalarProperty Name="Comment" ColumnName="Comment" />
+                <ScalarProperty Name="IsEnabled" ColumnName="IsEnabled" />
+                <ScalarProperty Name="IsDeletable" ColumnName="IsDeletable" />
+                <ScalarProperty Name="CreatedUtc" ColumnName="CreatedUtc" />
+                <ScalarProperty Name="LastUpdatedUtc" ColumnName="LastUpdatedUtc" />
+              </ComplexTypeMapping>
+            </ResultMapping>
+          </FunctionImportMapping>
+          <FunctionImportMapping FunctionImportName="usp_Setting_Delete" FunctionName="AuroraModels.Store.usp_Setting_Delete">
+            <ResultMapping>
+              <ComplexTypeMapping TypeName="AuroraModels.usp_Setting_Delete_Result">
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="IdentityId" ColumnName="IdentityId" />
+                <ScalarProperty Name="ConfigKey" ColumnName="ConfigKey" />
+                <ScalarProperty Name="ConfigValue" ColumnName="ConfigValue" />
+                <ScalarProperty Name="IsDeletable" ColumnName="IsDeletable" />
+                <ScalarProperty Name="CreatedUtc" ColumnName="CreatedUtc" />
+                <ScalarProperty Name="LastUpdatedUtc" ColumnName="LastUpdatedUtc" />
+              </ComplexTypeMapping>
+            </ResultMapping>
+          </FunctionImportMapping>
+          <FunctionImportMapping FunctionImportName="usp_Setting_Insert" FunctionName="AuroraModels.Store.usp_Setting_Insert">
+            <ResultMapping>
+              <ComplexTypeMapping TypeName="AuroraModels.usp_Setting_Insert_Result">
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="IdentityId" ColumnName="IdentityId" />
+                <ScalarProperty Name="ConfigKey" ColumnName="ConfigKey" />
+                <ScalarProperty Name="ConfigValue" ColumnName="ConfigValue" />
+                <ScalarProperty Name="IsDeletable" ColumnName="IsDeletable" />
+                <ScalarProperty Name="CreatedUtc" ColumnName="CreatedUtc" />
+                <ScalarProperty Name="LastUpdatedUtc" ColumnName="LastUpdatedUtc" />
+              </ComplexTypeMapping>
+            </ResultMapping>
+          </FunctionImportMapping>
+          <FunctionImportMapping FunctionImportName="usp_Setting_Update" FunctionName="AuroraModels.Store.usp_Setting_Update">
+            <ResultMapping>
+              <ComplexTypeMapping TypeName="AuroraModels.usp_Setting_Update_Result">
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="IdentityId" ColumnName="IdentityId" />
+                <ScalarProperty Name="ConfigKey" ColumnName="ConfigKey" />
+                <ScalarProperty Name="ConfigValue" ColumnName="ConfigValue" />
+                <ScalarProperty Name="IsDeletable" ColumnName="IsDeletable" />
+                <ScalarProperty Name="CreatedUtc" ColumnName="CreatedUtc" />
+                <ScalarProperty Name="LastUpdatedUtc" ColumnName="LastUpdatedUtc" />
+              </ComplexTypeMapping>
+            </ResultMapping>
+          </FunctionImportMapping>
+          <FunctionImportMapping FunctionImportName="usp_User_Delete" FunctionName="AuroraModels.Store.usp_User_Delete">
+            <ResultMapping>
+              <ComplexTypeMapping TypeName="AuroraModels.usp_User_Delete_Result">
+                <ScalarProperty Name="IdentityId" ColumnName="IdentityId" />
+                <ScalarProperty Name="IdentityAlias" ColumnName="IdentityAlias" />
+                <ScalarProperty Name="RequirePassword" ColumnName="RequirePassword" />
+                <ScalarProperty Name="RequirePublicKey" ColumnName="RequirePublicKey" />
+                <ScalarProperty Name="FileSystemType" ColumnName="FileSystemType" />
+                <ScalarProperty Name="FileSystemReadOnly" ColumnName="FileSystemReadOnly" />
+                <ScalarProperty Name="DebugLevel" ColumnName="DebugLevel" />
+                <ScalarProperty Name="IsEnabled" ColumnName="IsEnabled" />
+                <ScalarProperty Name="IsDeletable" ColumnName="IsDeletable" />
+                <ScalarProperty Name="CreatedUtc" ColumnName="CreatedUtc" />
+                <ScalarProperty Name="LastUpdatedUtc" ColumnName="LastUpdatedUtc" />
+              </ComplexTypeMapping>
+            </ResultMapping>
+          </FunctionImportMapping>
+          <FunctionImportMapping FunctionImportName="usp_User_Insert" FunctionName="AuroraModels.Store.usp_User_Insert">
+            <ResultMapping>
+              <ComplexTypeMapping TypeName="AuroraModels.usp_User_Insert_Result">
+                <ScalarProperty Name="IdentityId" ColumnName="IdentityId" />
+                <ScalarProperty Name="IdentityAlias" ColumnName="IdentityAlias" />
+                <ScalarProperty Name="RequirePassword" ColumnName="RequirePassword" />
+                <ScalarProperty Name="RequirePublicKey" ColumnName="RequirePublicKey" />
+                <ScalarProperty Name="FileSystemType" ColumnName="FileSystemType" />
+                <ScalarProperty Name="FileSystemReadOnly" ColumnName="FileSystemReadOnly" />
+                <ScalarProperty Name="DebugLevel" ColumnName="DebugLevel" />
+                <ScalarProperty Name="IsEnabled" ColumnName="IsEnabled" />
+                <ScalarProperty Name="IsDeletable" ColumnName="IsDeletable" />
+                <ScalarProperty Name="CreatedUtc" ColumnName="CreatedUtc" />
+                <ScalarProperty Name="LastUpdatedUtc" ColumnName="LastUpdatedUtc" />
+              </ComplexTypeMapping>
+            </ResultMapping>
+          </FunctionImportMapping>
+          <FunctionImportMapping FunctionImportName="usp_User_Update" FunctionName="AuroraModels.Store.usp_User_Update">
+            <ResultMapping>
+              <ComplexTypeMapping TypeName="AuroraModels.usp_User_Update_Result">
+                <ScalarProperty Name="IdentityId" ColumnName="IdentityId" />
+                <ScalarProperty Name="IdentityAlias" ColumnName="IdentityAlias" />
+                <ScalarProperty Name="RequirePassword" ColumnName="RequirePassword" />
+                <ScalarProperty Name="RequirePublicKey" ColumnName="RequirePublicKey" />
+                <ScalarProperty Name="FileSystemType" ColumnName="FileSystemType" />
+                <ScalarProperty Name="FileSystemReadOnly" ColumnName="FileSystemReadOnly" />
+                <ScalarProperty Name="DebugLevel" ColumnName="DebugLevel" />
+                <ScalarProperty Name="IsEnabled" ColumnName="IsEnabled" />
+                <ScalarProperty Name="IsDeletable" ColumnName="IsDeletable" />
+                <ScalarProperty Name="CreatedUtc" ColumnName="CreatedUtc" />
+                <ScalarProperty Name="LastUpdatedUtc" ColumnName="LastUpdatedUtc" />
+              </ComplexTypeMapping>
+            </ResultMapping>
+          </FunctionImportMapping>
+          <FunctionImportMapping FunctionImportName="usp_UserAlert_Delete" FunctionName="AuroraModels.Store.usp_UserAlert_Delete">
+            <ResultMapping>
+              <ComplexTypeMapping TypeName="AuroraModels.usp_UserAlert_Delete_Result">
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="IdentityId" ColumnName="IdentityId" />
+                <ScalarProperty Name="OnDelete" ColumnName="OnDelete" />
+                <ScalarProperty Name="OnDownload" ColumnName="OnDownload" />
+                <ScalarProperty Name="OnUpload" ColumnName="OnUpload" />
+                <ScalarProperty Name="ToFirstName" ColumnName="ToFirstName" />
+                <ScalarProperty Name="ToLastName" ColumnName="ToLastName" />
+                <ScalarProperty Name="ToEmailAddress" ColumnName="ToEmailAddress" />
+                <ScalarProperty Name="ToPhoneNumber" ColumnName="ToPhoneNumber" />
+                <ScalarProperty Name="IsEnabled" ColumnName="IsEnabled" />
+                <ScalarProperty Name="CreatedUtc" ColumnName="CreatedUtc" />
+                <ScalarProperty Name="LastUpdatedUtc" ColumnName="LastUpdatedUtc" />
+              </ComplexTypeMapping>
+            </ResultMapping>
+          </FunctionImportMapping>
+          <FunctionImportMapping FunctionImportName="usp_UserAlert_Insert" FunctionName="AuroraModels.Store.usp_UserAlert_Insert">
+            <ResultMapping>
+              <ComplexTypeMapping TypeName="AuroraModels.usp_UserAlert_Insert_Result">
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="IdentityId" ColumnName="IdentityId" />
+                <ScalarProperty Name="OnDelete" ColumnName="OnDelete" />
+                <ScalarProperty Name="OnDownload" ColumnName="OnDownload" />
+                <ScalarProperty Name="OnUpload" ColumnName="OnUpload" />
+                <ScalarProperty Name="ToFirstName" ColumnName="ToFirstName" />
+                <ScalarProperty Name="ToLastName" ColumnName="ToLastName" />
+                <ScalarProperty Name="ToEmailAddress" ColumnName="ToEmailAddress" />
+                <ScalarProperty Name="ToPhoneNumber" ColumnName="ToPhoneNumber" />
+                <ScalarProperty Name="IsEnabled" ColumnName="IsEnabled" />
+                <ScalarProperty Name="CreatedUtc" ColumnName="CreatedUtc" />
+                <ScalarProperty Name="LastUpdatedUtc" ColumnName="LastUpdatedUtc" />
+              </ComplexTypeMapping>
+            </ResultMapping>
+          </FunctionImportMapping>
+          <FunctionImportMapping FunctionImportName="usp_UserAlert_Update" FunctionName="AuroraModels.Store.usp_UserAlert_Update">
+            <ResultMapping>
+              <ComplexTypeMapping TypeName="AuroraModels.usp_UserAlert_Update_Result">
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="IdentityId" ColumnName="IdentityId" />
+                <ScalarProperty Name="OnDelete" ColumnName="OnDelete" />
+                <ScalarProperty Name="OnDownload" ColumnName="OnDownload" />
+                <ScalarProperty Name="OnUpload" ColumnName="OnUpload" />
+                <ScalarProperty Name="ToFirstName" ColumnName="ToFirstName" />
+                <ScalarProperty Name="ToLastName" ColumnName="ToLastName" />
+                <ScalarProperty Name="ToEmailAddress" ColumnName="ToEmailAddress" />
+                <ScalarProperty Name="ToPhoneNumber" ColumnName="ToPhoneNumber" />
+                <ScalarProperty Name="IsEnabled" ColumnName="IsEnabled" />
+                <ScalarProperty Name="CreatedUtc" ColumnName="CreatedUtc" />
+                <ScalarProperty Name="LastUpdatedUtc" ColumnName="LastUpdatedUtc" />
+              </ComplexTypeMapping>
+            </ResultMapping>
+          </FunctionImportMapping>
+          <FunctionImportMapping FunctionImportName="usp_UserFile_Delete" FunctionName="AuroraModels.Store.usp_UserFile_Delete">
+            <ResultMapping>
+              <ComplexTypeMapping TypeName="AuroraModels.usp_UserFile_Delete_Result">
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="IdentityId" ColumnName="IdentityId" />
+                <ScalarProperty Name="FolderId" ColumnName="FolderId" />
+                <ScalarProperty Name="VirtualName" ColumnName="VirtualName" />
+                <ScalarProperty Name="RealPath" ColumnName="RealPath" />
+                <ScalarProperty Name="RealFileName" ColumnName="RealFileName" />
+                <ScalarProperty Name="RealFileSize" ColumnName="RealFileSize" />
+                <ScalarProperty Name="HashSHA256" ColumnName="HashSHA256" />
+                <ScalarProperty Name="IsReadOnly" ColumnName="IsReadOnly" />
+                <ScalarProperty Name="CreatedUtc" ColumnName="CreatedUtc" />
+                <ScalarProperty Name="LastAccessedUtc" ColumnName="LastAccessedUtc" />
+                <ScalarProperty Name="LastUpdatedUtc" ColumnName="LastUpdatedUtc" />
+                <ScalarProperty Name="LastVerifiedUtc" ColumnName="LastVerifiedUtc" />
+              </ComplexTypeMapping>
+            </ResultMapping>
+          </FunctionImportMapping>
+          <FunctionImportMapping FunctionImportName="usp_UserFile_Insert" FunctionName="AuroraModels.Store.usp_UserFile_Insert">
+            <ResultMapping>
+              <ComplexTypeMapping TypeName="AuroraModels.usp_UserFile_Insert_Result">
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="IdentityId" ColumnName="IdentityId" />
+                <ScalarProperty Name="FolderId" ColumnName="FolderId" />
+                <ScalarProperty Name="VirtualName" ColumnName="VirtualName" />
+                <ScalarProperty Name="RealPath" ColumnName="RealPath" />
+                <ScalarProperty Name="RealFileName" ColumnName="RealFileName" />
+                <ScalarProperty Name="RealFileSize" ColumnName="RealFileSize" />
+                <ScalarProperty Name="HashSHA256" ColumnName="HashSHA256" />
+                <ScalarProperty Name="IsReadOnly" ColumnName="IsReadOnly" />
+                <ScalarProperty Name="CreatedUtc" ColumnName="CreatedUtc" />
+                <ScalarProperty Name="LastAccessedUtc" ColumnName="LastAccessedUtc" />
+                <ScalarProperty Name="LastUpdatedUtc" ColumnName="LastUpdatedUtc" />
+                <ScalarProperty Name="LastVerifiedUtc" ColumnName="LastVerifiedUtc" />
+              </ComplexTypeMapping>
+            </ResultMapping>
+          </FunctionImportMapping>
+          <FunctionImportMapping FunctionImportName="usp_UserFile_Update" FunctionName="AuroraModels.Store.usp_UserFile_Update">
+            <ResultMapping>
+              <ComplexTypeMapping TypeName="AuroraModels.usp_UserFile_Update_Result">
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="IdentityId" ColumnName="IdentityId" />
+                <ScalarProperty Name="FolderId" ColumnName="FolderId" />
+                <ScalarProperty Name="VirtualName" ColumnName="VirtualName" />
+                <ScalarProperty Name="RealPath" ColumnName="RealPath" />
+                <ScalarProperty Name="RealFileName" ColumnName="RealFileName" />
+                <ScalarProperty Name="RealFileSize" ColumnName="RealFileSize" />
+                <ScalarProperty Name="HashSHA256" ColumnName="HashSHA256" />
+                <ScalarProperty Name="IsReadOnly" ColumnName="IsReadOnly" />
+                <ScalarProperty Name="CreatedUtc" ColumnName="CreatedUtc" />
+                <ScalarProperty Name="LastAccessedUtc" ColumnName="LastAccessedUtc" />
+                <ScalarProperty Name="LastUpdatedUtc" ColumnName="LastUpdatedUtc" />
+                <ScalarProperty Name="LastVerifiedUtc" ColumnName="LastVerifiedUtc" />
+              </ComplexTypeMapping>
+            </ResultMapping>
+          </FunctionImportMapping>
+          <FunctionImportMapping FunctionImportName="usp_UserFolder_Delete" FunctionName="AuroraModels.Store.usp_UserFolder_Delete">
+            <ResultMapping>
+              <ComplexTypeMapping TypeName="AuroraModels.usp_UserFolder_Delete_Result">
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="IdentityId" ColumnName="IdentityId" />
+                <ScalarProperty Name="ParentId" ColumnName="ParentId" />
+                <ScalarProperty Name="VirtualName" ColumnName="VirtualName" />
+                <ScalarProperty Name="IsReadOnly" ColumnName="IsReadOnly" />
+                <ScalarProperty Name="CreatedUtc" ColumnName="CreatedUtc" />
+                <ScalarProperty Name="LastAccessedUtc" ColumnName="LastAccessedUtc" />
+                <ScalarProperty Name="LastUpdatedUtc" ColumnName="LastUpdatedUtc" />
+              </ComplexTypeMapping>
+            </ResultMapping>
+          </FunctionImportMapping>
+          <FunctionImportMapping FunctionImportName="usp_UserFolder_Insert" FunctionName="AuroraModels.Store.usp_UserFolder_Insert">
+            <ResultMapping>
+              <ComplexTypeMapping TypeName="AuroraModels.usp_UserFolder_Insert_Result">
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="IdentityId" ColumnName="IdentityId" />
+                <ScalarProperty Name="ParentId" ColumnName="ParentId" />
+                <ScalarProperty Name="VirtualName" ColumnName="VirtualName" />
+                <ScalarProperty Name="IsReadOnly" ColumnName="IsReadOnly" />
+                <ScalarProperty Name="CreatedUtc" ColumnName="CreatedUtc" />
+                <ScalarProperty Name="LastAccessedUtc" ColumnName="LastAccessedUtc" />
+                <ScalarProperty Name="LastUpdatedUtc" ColumnName="LastUpdatedUtc" />
+              </ComplexTypeMapping>
+            </ResultMapping>
+          </FunctionImportMapping>
+          <FunctionImportMapping FunctionImportName="usp_UserFolder_Update" FunctionName="AuroraModels.Store.usp_UserFolder_Update">
+            <ResultMapping>
+              <ComplexTypeMapping TypeName="AuroraModels.usp_UserFolder_Update_Result">
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="IdentityId" ColumnName="IdentityId" />
+                <ScalarProperty Name="ParentId" ColumnName="ParentId" />
+                <ScalarProperty Name="VirtualName" ColumnName="VirtualName" />
+                <ScalarProperty Name="IsReadOnly" ColumnName="IsReadOnly" />
+                <ScalarProperty Name="CreatedUtc" ColumnName="CreatedUtc" />
+                <ScalarProperty Name="LastAccessedUtc" ColumnName="LastAccessedUtc" />
+                <ScalarProperty Name="LastUpdatedUtc" ColumnName="LastUpdatedUtc" />
+              </ComplexTypeMapping>
+            </ResultMapping>
+          </FunctionImportMapping>
+          <FunctionImportMapping FunctionImportName="usp_UserMount_Delete" FunctionName="AuroraModels.Store.usp_UserMount_Delete">
+            <ResultMapping>
+              <ComplexTypeMapping TypeName="AuroraModels.usp_UserMount_Delete_Result">
+                <ScalarProperty Name="IdentityId" ColumnName="IdentityId" />
+                <ScalarProperty Name="CredentialId" ColumnName="CredentialId" />
+                <ScalarProperty Name="AuthType" ColumnName="AuthType" />
+                <ScalarProperty Name="ServerAddress" ColumnName="ServerAddress" />
+                <ScalarProperty Name="ServerShare" ColumnName="ServerShare" />
+                <ScalarProperty Name="IsEnabled" ColumnName="IsEnabled" />
+                <ScalarProperty Name="IsDeletable" ColumnName="IsDeletable" />
+                <ScalarProperty Name="CreatedUtc" ColumnName="CreatedUtc" />
+                <ScalarProperty Name="LastUpdatedUtc" ColumnName="LastUpdatedUtc" />
+              </ComplexTypeMapping>
+            </ResultMapping>
+          </FunctionImportMapping>
+          <FunctionImportMapping FunctionImportName="usp_UserMount_Insert" FunctionName="AuroraModels.Store.usp_UserMount_Insert">
+            <ResultMapping>
+              <ComplexTypeMapping TypeName="AuroraModels.usp_UserMount_Insert_Result">
+                <ScalarProperty Name="IdentityId" ColumnName="IdentityId" />
+                <ScalarProperty Name="CredentialId" ColumnName="CredentialId" />
+                <ScalarProperty Name="AuthType" ColumnName="AuthType" />
+                <ScalarProperty Name="ServerAddress" ColumnName="ServerAddress" />
+                <ScalarProperty Name="ServerShare" ColumnName="ServerShare" />
+                <ScalarProperty Name="IsEnabled" ColumnName="IsEnabled" />
+                <ScalarProperty Name="IsDeletable" ColumnName="IsDeletable" />
+                <ScalarProperty Name="CreatedUtc" ColumnName="CreatedUtc" />
+                <ScalarProperty Name="LastUpdatedUtc" ColumnName="LastUpdatedUtc" />
+              </ComplexTypeMapping>
+            </ResultMapping>
+          </FunctionImportMapping>
+          <FunctionImportMapping FunctionImportName="usp_UserMount_Update" FunctionName="AuroraModels.Store.usp_UserMount_Update">
+            <ResultMapping>
+              <ComplexTypeMapping TypeName="AuroraModels.usp_UserMount_Update_Result">
+                <ScalarProperty Name="IdentityId" ColumnName="IdentityId" />
+                <ScalarProperty Name="CredentialId" ColumnName="CredentialId" />
+                <ScalarProperty Name="AuthType" ColumnName="AuthType" />
+                <ScalarProperty Name="ServerAddress" ColumnName="ServerAddress" />
+                <ScalarProperty Name="ServerShare" ColumnName="ServerShare" />
+                <ScalarProperty Name="IsEnabled" ColumnName="IsEnabled" />
+                <ScalarProperty Name="IsDeletable" ColumnName="IsDeletable" />
+                <ScalarProperty Name="CreatedUtc" ColumnName="CreatedUtc" />
+                <ScalarProperty Name="LastUpdatedUtc" ColumnName="LastUpdatedUtc" />
+              </ComplexTypeMapping>
+            </ResultMapping>
+          </FunctionImportMapping>
+        </EntityContainerMapping>
+      </Mapping>
+    </edmx:Mappings>
+  </edmx:Runtime>
+  <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <Connection>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </DesignerInfoPropertySet>
+    </Connection>
+    <Options>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <DesignerProperty Name="EnablePluralization" Value="true" />
+        <DesignerProperty Name="IncludeForeignKeysInModel" Value="true" />
+        <DesignerProperty Name="UseLegacyProvider" Value="false" />
+        <DesignerProperty Name="CodeGenerationStrategy" Value="None" />
+      </DesignerInfoPropertySet>
+    </Options>
+    <!-- Diagram content (shape and connector positions) -->
+    <Diagrams></Diagrams>
+  </Designer>
+</edmx:Edmx>

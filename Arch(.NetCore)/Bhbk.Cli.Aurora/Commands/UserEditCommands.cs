@@ -1,5 +1,5 @@
-﻿using Bhbk.Lib.Aurora.Data.Infrastructure_DIRECT;
-using Bhbk.Lib.Aurora.Data.Models_DIRECT;
+﻿using Bhbk.Lib.Aurora.Data_EF6.Infrastructure;
+using Bhbk.Lib.Aurora.Data_EF6.Models;
 using Bhbk.Lib.Aurora.Primitives.Enums;
 using Bhbk.Lib.CommandLine.IO;
 using Bhbk.Lib.Common.Primitives.Enums;
@@ -17,7 +17,7 @@ namespace Bhbk.Cli.Aurora.Commands
     {
         private readonly IConfiguration _conf;
         private readonly IUnitOfWork _uow;
-        private tbl_User _user;
+        private User _user;
         private FileSystemTypes _fileSystem;
         private readonly string _fileSystemList = string.Join(", ", Enum.GetNames(typeof(FileSystemTypes)));
 
@@ -37,7 +37,7 @@ namespace Bhbk.Cli.Aurora.Commands
                 if (string.IsNullOrEmpty(arg))
                     throw new ConsoleHelpAsException($"  *** No user given ***");
 
-                _user = _uow.Users.Get(QueryExpressionFactory.GetQueryExpression<tbl_User>()
+                _user = _uow.Users.Get(QueryExpressionFactory.GetQueryExpression<User>()
                     .Where(x => x.IdentityAlias == arg && x.IsDeletable == true).ToLambda())
                     .SingleOrDefault();
 

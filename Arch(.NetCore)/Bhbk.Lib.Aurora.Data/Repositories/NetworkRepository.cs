@@ -1,7 +1,7 @@
 ﻿using Bhbk.Lib.Aurora.Data.Models;
+using Bhbk.Lib.DataAccess.EFCore.Extensions;
 using Bhbk.Lib.DataAccess.EFCore.Repositories;
 using Microsoft.Data.SqlClient;
-using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -17,33 +17,20 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
 
         public override uvw_Network Create(uvw_Network entity)
         {
-            var pvalues = new List<SqlParameter>
+            var rvalue = new SqlParameter("ReturnValue", SqlDbType.Int) { Direction = ParameterDirection.Output };
+
+            var pvalues = new []
             {
                 new SqlParameter("@IdentityId", SqlDbType.UniqueIdentifier) { Value = entity.IdentityId },
                 new SqlParameter("@Address", SqlDbType.NVarChar) { Value = entity.Address },
                 new SqlParameter("@Action", SqlDbType.NVarChar) { Value = entity.Action },
                 new SqlParameter("@Enabled", SqlDbType.Bit) { Value = entity.IsEnabled },
+                rvalue,
             };
 
-            return _context.Set<uvw_Network>().FromSqlRaw("[svc].[usp_Network_Insert]"
-                + "@IdentityId, @Address, @Action, @Enabled", pvalues.ToArray())
-                    .AsEnumerable().Single();
-
-            /*
-            using (var conn = _context.Database.GetDbConnection())
-            {
-                var cmd = conn.CreateCommand();
-                cmd.CommandType = CommandType.StoredProcedure;
-                cmd.CommandText = "[svc].[usp_Network_Insert]";
-                cmd.Parameters.AddRange(pvalues.ToArray());
-                cmd.Connection = conn;
-                conn.Open();
-
-                var reader = cmd.ExecuteReader();
-
-                return reader.Cast<uvw_SysConnections>().Single();
-            }
-            */
+            return _context.SqlQuery<uvw_Network>("EXEC @ReturnValue = [svc].[usp_Network_Insert]"
+                + "@IdentityId, @Address, @Action, @Enabled", pvalues)
+                    .Single();
         }
 
         public override IEnumerable<uvw_Network> Create(IEnumerable<uvw_Network> entities)
@@ -62,13 +49,16 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
 
         public override uvw_Network Delete(uvw_Network entity)
         {
-            var pvalues = new List<SqlParameter>
+            var rvalue = new SqlParameter("ReturnValue", SqlDbType.Int) { Direction = ParameterDirection.Output };
+
+            var pvalues = new []
             {
-                new SqlParameter("@Id", SqlDbType.UniqueIdentifier) { Value = entity.Id }
+                new SqlParameter("@Id", SqlDbType.UniqueIdentifier) { Value = entity.Id },
+                rvalue,
             };
 
-            return _context.Set<uvw_Network>().FromSqlRaw("[svc].[usp_Network_Delete] @Id", pvalues.ToArray())
-                .AsEnumerable().Single();
+            return _context.SqlQuery<uvw_Network>("EXEC @ReturnValue = [svc].[usp_Network_Delete] @Id", pvalues)
+                .Single();
         }
 
         public override IEnumerable<uvw_Network> Delete(IEnumerable<uvw_Network> entities)
@@ -87,23 +77,30 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
 
         public override IEnumerable<uvw_Network> Delete(LambdaExpression lambda)
         {
-            throw new NotImplementedException();
+            var entities = _context.Set<uvw_Network>().AsQueryable()
+                .Compile(lambda)
+                .ToList();
+
+            return Delete(entities);
         }
 
         public override uvw_Network Update(uvw_Network entity)
         {
-            var pvalues = new List<SqlParameter>
+            var rvalue = new SqlParameter("ReturnValue", SqlDbType.Int) { Direction = ParameterDirection.Output };
+
+            var pvalues = new []
             {
                 new SqlParameter("@Id", SqlDbType.UniqueIdentifier) { Value = entity.Id },
                 new SqlParameter("@IdentityId", SqlDbType.UniqueIdentifier) { Value = entity.IdentityId },
                 new SqlParameter("@Address", SqlDbType.NVarChar) { Value = entity.Address },
                 new SqlParameter("@Action", SqlDbType.NVarChar) { Value = entity.Action },
                 new SqlParameter("@Enabled", SqlDbType.Bit) { Value = entity.IsEnabled },
+                rvalue,
             };
 
-            return _context.Set<uvw_Network>().FromSqlRaw("[svc].[usp_Network_Update]"
-                + "@Id, @IdentityId, @Address, @Action, @Enabled", pvalues.ToArray())
-                    .AsEnumerable().Single();
+            return _context.SqlQuery<uvw_Network>("EXEC @ReturnValue = [svc].[usp_Network_Update]"
+                + "@Id, @IdentityId, @Address, @Action, @Enabled", pvalues)
+                    .Single();
         }
 
         public override IEnumerable<uvw_Network> Update(IEnumerable<uvw_Network> entities)

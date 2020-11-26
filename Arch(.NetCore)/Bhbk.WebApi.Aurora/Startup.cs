@@ -1,10 +1,13 @@
 using AutoMapper;
-using Bhbk.Lib.Aurora.Data.Infrastructure_DIRECT;
-using Bhbk.Lib.Aurora.Domain.Infrastructure;
+using Bhbk.Lib.Aurora.Data_EF6.Infrastructure;
+using Bhbk.Lib.Aurora.Data_EF6.Models;
 using Bhbk.Lib.Aurora.Domain.Primitives.Enums;
+using Bhbk.Lib.Aurora.Domain.Profiles;
 using Bhbk.Lib.Common.Primitives.Enums;
 using Bhbk.Lib.Common.Services;
 using Bhbk.Lib.Identity.Validators;
+using Bhbk.Lib.QueryExpression.Extensions;
+using Bhbk.Lib.QueryExpression.Factories;
 using Bhbk.WebApi.Aurora.Tasks;
 using CronExpressionDescriptor;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -40,7 +43,7 @@ namespace Bhbk.WebApi.Aurora
                 .Build();
 
             var instance = new ContextService(InstanceContext.DeployedOrLocal);
-            var mapper = new MapperConfiguration(x => x.AddProfile<AutoMapperProfile_DIRECT>()).CreateMapper();
+            var mapper = new MapperConfiguration(x => x.AddProfile<AutoMapperProfile>()).CreateMapper();
 
             sc.AddSingleton<IConfiguration>(conf);
             sc.AddSingleton<IContextService>(instance);
@@ -92,12 +95,13 @@ namespace Bhbk.WebApi.Aurora
              * only for owin authentication configuration.
              */
 
-            var seeds = new UnitOfWork(conf["Databases:AuroraEntities"], instance);
+            var uow = new UnitOfWork(conf["Databases:AuroraEntities"], instance);
 
-            var key = seeds.Settings.Get(x => x.ConfigKey == "RebexLicense")
-                .OrderBy(x => x.CreatedUtc).Last();
+            var license = uow.Settings.Get(QueryExpressionFactory.GetQueryExpression<Setting>()
+                .Where(x => x.ConfigKey == "RebexLicense").ToLambda()).OrderBy(x => x.CreatedUtc)
+                .Last();
 
-            Rebex.Licensing.Key = key.ConfigValue;
+            Rebex.Licensing.Key = license.ConfigValue;
 
             var issuers = conf.GetSection("IdentityTenants:AllowedIssuers").GetChildren()
                 .Select(x => x.Value + ":" + conf["IdentityTenants:Salt"]);

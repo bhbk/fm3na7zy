@@ -17,7 +17,7 @@
     "AuroraSecret": "ArjIkORpBGdZDprSZI1uEKKT+c4Lyi1r"
   },
   "Storage": {
-    "UnstructuredDataPath": "..\\.data"
+    "UnstructuredData": "..\\.data"
   },
   "IdentityCredentials": {
     "IssuerName": "Bhbk",

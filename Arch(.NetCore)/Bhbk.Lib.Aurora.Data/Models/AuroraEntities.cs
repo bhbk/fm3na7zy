@@ -17,7 +17,6 @@ namespace Bhbk.Lib.Aurora.Data.Models
         {
         }
 
-        public virtual DbSet<uvw_Activity> uvw_Activities { get; set; }
         public virtual DbSet<uvw_Credential> uvw_Credentials { get; set; }
         public virtual DbSet<uvw_Network> uvw_Networks { get; set; }
         public virtual DbSet<uvw_PrivateKey> uvw_PrivateKeys { get; set; }
@@ -32,19 +31,6 @@ namespace Bhbk.Lib.Aurora.Data.Models
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.HasAnnotation("Relational:Collation", "SQL_Latin1_General_CP1_CI_AS");
-
-            modelBuilder.Entity<uvw_Activity>(entity =>
-            {
-                entity.HasNoKey();
-
-                entity.ToView("uvw_Activity", "svc");
-
-                entity.Property(e => e.ActivityType)
-                    .IsRequired()
-                    .HasMaxLength(64);
-
-                entity.Property(e => e.TableName).HasMaxLength(256);
-            });
 
             modelBuilder.Entity<uvw_Credential>(entity =>
             {

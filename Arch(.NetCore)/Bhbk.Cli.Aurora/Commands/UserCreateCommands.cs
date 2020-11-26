@@ -1,5 +1,5 @@
-﻿using Bhbk.Lib.Aurora.Data.Infrastructure_DIRECT;
-using Bhbk.Lib.Aurora.Data.Models_DIRECT;
+﻿using Bhbk.Lib.Aurora.Data_EF6.Infrastructure;
+using Bhbk.Lib.Aurora.Data_EF6.Models;
 using Bhbk.Lib.Aurora.Primitives.Enums;
 using Bhbk.Lib.CommandLine.IO;
 using Bhbk.Lib.Common.Primitives.Enums;
@@ -42,7 +42,7 @@ namespace Bhbk.Cli.Aurora.Commands
                 if (string.IsNullOrEmpty(arg))
                     throw new ConsoleHelpAsException($"  *** No user given ***");
 
-                var user = _uow.Users.Get(QueryExpressionFactory.GetQueryExpression<tbl_User>()
+                var user = _uow.Users.Get(QueryExpressionFactory.GetQueryExpression<User>()
                     .Where(x => x.IdentityAlias == arg).ToLambda()).SingleOrDefault();
 
                 if (user != null)
@@ -86,7 +86,7 @@ namespace Bhbk.Cli.Aurora.Commands
                 Console.Out.WriteLine();
 
                 var user = _uow.Users.Create(
-                    new tbl_User
+                    new User
                     {
                         IdentityId = Guid.Parse(input),
                         IdentityAlias = _userName,

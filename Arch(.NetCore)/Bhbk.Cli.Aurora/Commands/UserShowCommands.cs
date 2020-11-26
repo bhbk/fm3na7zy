@@ -1,6 +1,6 @@
 ﻿using Bhbk.Cli.Aurora.Helpers;
-using Bhbk.Lib.Aurora.Data.Infrastructure_DIRECT;
-using Bhbk.Lib.Aurora.Data.Models_DIRECT;
+using Bhbk.Lib.Aurora.Data_EF6.Infrastructure;
+using Bhbk.Lib.Aurora.Data_EF6.Models;
 using Bhbk.Lib.CommandLine.IO;
 using Bhbk.Lib.Common.Primitives.Enums;
 using Bhbk.Lib.Common.Services;
@@ -19,7 +19,7 @@ namespace Bhbk.Cli.Aurora.Commands
     {
         private readonly IConfiguration _conf;
         private readonly IUnitOfWork _uow;
-        private tbl_User _user;
+        private User _user;
 
         public UserShowCommands()
         {
@@ -37,13 +37,13 @@ namespace Bhbk.Cli.Aurora.Commands
                 if (string.IsNullOrEmpty(arg))
                     throw new ConsoleHelpAsException($"  *** No user given ***");
 
-                _user = _uow.Users.Get(QueryExpressionFactory.GetQueryExpression<tbl_User>()
+                _user = _uow.Users.Get(QueryExpressionFactory.GetQueryExpression<User>()
                     .Where(x => x.IdentityAlias == arg).ToLambda(),
-                        new List<Expression<Func<tbl_User, object>>>()
+                        new List<Expression<Func<User, object>>>()
                         {
-                            x => x.tbl_UserMount,
-                            x => x.tbl_PrivateKeys,
-                            x => x.tbl_PublicKeys,
+                            x => x.Mount,
+                            x => x.PrivateKeys,
+                            x => x.PublicKeys,
                         }).SingleOrDefault();
 
                 if (_user == null)
@@ -55,9 +55,9 @@ namespace Bhbk.Cli.Aurora.Commands
         {
             try
             {
-                ConsoleHelper.StdOutKeyPairs(_user.tbl_PublicKeys.OrderBy(x => x.CreatedUtc));
+                ConsoleHelper.StdOutKeyPairs(_user.PublicKeys.OrderBy(x => x.CreatedUtc));
                 Console.Out.WriteLine();
-                ConsoleHelper.StdOutUserMounts(new List<tbl_UserMount> { _user.tbl_UserMount });
+                ConsoleHelper.StdOutUserMounts(new List<UserMount> { _user.Mount });
 
                 return StandardOutput.FondFarewell();
             }

@@ -1,4 +1,4 @@
-﻿using Bhbk.Lib.Aurora.Data.Models_DIRECT;
+﻿using Bhbk.Lib.Aurora.Data_EF6.Models;
 using Bhbk.Lib.Aurora.Domain.Primitives.Enums;
 using System;
 using System.Collections.Generic;
@@ -8,7 +8,7 @@ namespace Bhbk.Cli.Aurora.Helpers
 {
     public class ConsoleHelper
     {
-        public static void StdOutCredentials(IEnumerable<tbl_Credential> creds)
+        public static void StdOutCredentials(IEnumerable<Credential> creds)
         {
             foreach (var cred in creds)
             {
@@ -17,7 +17,7 @@ namespace Bhbk.Cli.Aurora.Helpers
             }
         }
 
-        public static void StdOutCredentialSecrets(IEnumerable<tbl_Credential> creds)
+        public static void StdOutCredentialSecrets(IEnumerable<Credential> creds)
         {
             foreach (var cred in creds)
             {
@@ -26,7 +26,7 @@ namespace Bhbk.Cli.Aurora.Helpers
             }
         }
 
-        public static void StdOutKeyPairs(IEnumerable<tbl_PublicKey> keys)
+        public static void StdOutKeyPairs(IEnumerable<PublicKey> keys)
         {
             foreach (var key in keys)
             {
@@ -42,7 +42,7 @@ namespace Bhbk.Cli.Aurora.Helpers
             };
         }
 
-        public static void StdOutKeyPairSecrets(IEnumerable<tbl_PrivateKey> keys)
+        public static void StdOutKeyPairSecrets(IEnumerable<PrivateKey> keys)
         {
             foreach (var key in keys)
             {
@@ -52,7 +52,7 @@ namespace Bhbk.Cli.Aurora.Helpers
             };
         }
 
-        public static void StdOutNetworks(IEnumerable<tbl_Network> nets)
+        public static void StdOutNetworks(IEnumerable<Network> nets)
         {
             foreach (var net in nets.Where(x => x.Action == NetworkAction.Deny.ToString()).OrderBy(x => x.Address))
                 Console.Out.WriteLine($"  Deny {net.Address} with GUID '{net.Id}'");
@@ -61,7 +61,7 @@ namespace Bhbk.Cli.Aurora.Helpers
                 Console.Out.WriteLine($"  Allow {net.Address} with GUID '{net.Id}'");
         }
 
-        public static void StdOutSettings(IEnumerable<tbl_Setting> configs)
+        public static void StdOutSettings(IEnumerable<Setting> configs)
         {
             foreach (var config in configs)
             {
@@ -70,7 +70,7 @@ namespace Bhbk.Cli.Aurora.Helpers
             }
         }
 
-        public static void StdOutUserMounts(IEnumerable<tbl_UserMount> mounts)
+        public static void StdOutUserMounts(IEnumerable<UserMount> mounts)
         {
             foreach (var mount in mounts)
             {

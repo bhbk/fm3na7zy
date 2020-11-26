@@ -1,4 +1,4 @@
-﻿using Bhbk.Lib.Aurora.Data.Models_DIRECT;
+﻿using Bhbk.Lib.Aurora.Data_EF6.Models;
 using Rebex.IO.FileSystem;
 using Serilog;
 using System.Collections.Generic;
@@ -24,7 +24,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Helpers
         internal static void CreatePubKeysFile(DirectoryNode root,
             Dictionary<NodePath, NodeBase> path,
             Dictionary<NodeBase, MemoryNodeData> store,
-            tbl_User user,
+            User user,
             StringBuilder content)
         {
             var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";

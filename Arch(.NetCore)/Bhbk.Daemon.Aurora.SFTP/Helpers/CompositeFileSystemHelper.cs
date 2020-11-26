@@ -1,5 +1,5 @@
-﻿using Bhbk.Lib.Aurora.Data.Infrastructure_DIRECT;
-using Bhbk.Lib.Aurora.Data.Models_DIRECT;
+﻿using Bhbk.Lib.Aurora.Data_EF6.Infrastructure;
+using Bhbk.Lib.Aurora.Data_EF6.Models;
 using Bhbk.Lib.Common.Primitives;
 using Bhbk.Lib.Identity.Services;
 using Bhbk.Lib.QueryExpression.Extensions;
@@ -20,9 +20,9 @@ namespace Bhbk.Daemon.Aurora.SFTP.Helpers
 {
     internal class CompositeFileSystemHelper
     {
-        internal static void EnsureRootExists(IUnitOfWork uow, tbl_User user)
+        internal static void EnsureRootExists(IUnitOfWork uow, User user)
         {
-            var folder = uow.UserFolders.Get(QueryExpressionFactory.GetQueryExpression<tbl_UserFolder>()
+            var folder = uow.UserFolders.Get(QueryExpressionFactory.GetQueryExpression<UserFolder>()
                 .Where(x => x.IdentityId == user.IdentityId && x.ParentId == null).ToLambda())
                 .SingleOrDefault();
 
@@ -31,7 +31,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Helpers
                 var now = DateTime.UtcNow;
 
                 var newFolder = uow.UserFolders.Create(
-                    new tbl_UserFolder
+                    new UserFolder
                     {
                         Id = Guid.NewGuid(),
                         IdentityId = user.IdentityId,
@@ -48,7 +48,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Helpers
             }
         }
 
-        internal static tbl_UserFile FilePathToEntity(IUnitOfWork uow, tbl_User user, string path)
+        internal static UserFile FilePathToEntity(IUnitOfWork uow, User user, string path)
         {
             if (path.FirstOrDefault() == '/')
                 path = path.Substring(1);
@@ -62,19 +62,19 @@ namespace Bhbk.Daemon.Aurora.SFTP.Helpers
 
             var folder = FolderPathToEntity(uow, user, folderPath);
 
-            var file = uow.UserFiles.Get(QueryExpressionFactory.GetQueryExpression<tbl_UserFile>()
+            var file = uow.UserFiles.Get(QueryExpressionFactory.GetQueryExpression<UserFile>()
                 .Where(x => x.IdentityId == user.IdentityId && x.FolderId == folder.Id && x.VirtualName == filePath).ToLambda())
                 .SingleOrDefault();
 
             return file;
         }
 
-        internal static tbl_UserFolder FolderPathToEntity(IUnitOfWork uow, tbl_User user, string path)
+        internal static UserFolder FolderPathToEntity(IUnitOfWork uow, User user, string path)
         {
             if (path.FirstOrDefault() == '/')
                 path = path.Substring(1);
 
-            var folder = uow.UserFolders.Get(QueryExpressionFactory.GetQueryExpression<tbl_UserFolder>()
+            var folder = uow.UserFolders.Get(QueryExpressionFactory.GetQueryExpression<UserFolder>()
                 .Where(x => x.IdentityId == user.IdentityId && x.ParentId == null).ToLambda())
                 .SingleOrDefault();
 
@@ -83,7 +83,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Helpers
 
             foreach (var entry in path.Split("/"))
             {
-                folder = uow.UserFolders.Get(QueryExpressionFactory.GetQueryExpression<tbl_UserFolder>()
+                folder = uow.UserFolders.Get(QueryExpressionFactory.GetQueryExpression<UserFolder>()
                     .Where(x => x.IdentityId == user.IdentityId && x.ParentId == folder.Id && x.VirtualName == entry).ToLambda())
                     .SingleOrDefault();
             };
@@ -91,12 +91,12 @@ namespace Bhbk.Daemon.Aurora.SFTP.Helpers
             return folder;
         }
 
-        internal static string FileEntityToPath(IUnitOfWork uow, tbl_User user, tbl_UserFile file)
+        internal static string FileEntityToPath(IUnitOfWork uow, User user, UserFile file)
         {
             var path = string.Empty;
             var paths = new List<string> { };
 
-            var folder = uow.UserFolders.Get(QueryExpressionFactory.GetQueryExpression<tbl_UserFolder>()
+            var folder = uow.UserFolders.Get(QueryExpressionFactory.GetQueryExpression<UserFolder>()
                 .Where(x => x.IdentityId == user.IdentityId && x.Id == file.FolderId).ToLambda())
                 .Single();
 
@@ -114,7 +114,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Helpers
             return path;
         }
 
-        internal static string FolderEntityToPath(IUnitOfWork uow, tbl_User user, tbl_UserFolder folder)
+        internal static string FolderEntityToPath(IUnitOfWork uow, User user, UserFolder folder)
         {
             var path = string.Empty;
             var paths = new List<string> { };
@@ -131,15 +131,15 @@ namespace Bhbk.Daemon.Aurora.SFTP.Helpers
             return path;
         }
 
-        internal static tbl_UserFile SaveFileStream(IConfiguration conf, Stream content, tbl_UserFile fileEntity)
+        internal static UserFile SaveFileStream(IConfiguration conf, Stream content, UserFile fileEntity)
         {
-            var folder = new DirectoryInfo(conf["Storage:UnstructuredDataPath"]
+            var folder = new DirectoryInfo(conf["Storage:UnstructuredData"]
                 + Path.DirectorySeparatorChar + fileEntity.RealPath);
 
             if (!folder.Exists)
                 folder.Create();
 
-            var file = new FileInfo(conf["Storage:UnstructuredDataPath"]
+            var file = new FileInfo(conf["Storage:UnstructuredData"]
                 + Path.DirectorySeparatorChar + fileEntity.RealPath
                 + Path.DirectorySeparatorChar + fileEntity.RealFileName);
 

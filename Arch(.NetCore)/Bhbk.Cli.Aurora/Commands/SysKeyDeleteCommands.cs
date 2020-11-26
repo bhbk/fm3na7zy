@@ -1,6 +1,6 @@
 ﻿using Bhbk.Cli.Aurora.Helpers;
-using Bhbk.Lib.Aurora.Data.Infrastructure_DIRECT;
-using Bhbk.Lib.Aurora.Data.Models_DIRECT;
+using Bhbk.Lib.Aurora.Data_EF6.Infrastructure;
+using Bhbk.Lib.Aurora.Data_EF6.Models;
 using Bhbk.Lib.CommandLine.IO;
 using Bhbk.Lib.Common.Primitives.Enums;
 using Bhbk.Lib.Common.Services;
@@ -47,9 +47,9 @@ namespace Bhbk.Cli.Aurora.Commands
         {
             try
             {
-                var keys = _uow.PublicKeys.Get(QueryExpressionFactory.GetQueryExpression<tbl_PublicKey>()
+                var keys = _uow.PublicKeys.Get(QueryExpressionFactory.GetQueryExpression<PublicKey>()
                     .Where(x => x.IdentityId == null && x.IsDeletable == false).ToLambda(),
-                        new List<Expression<Func<tbl_PublicKey, object>>>()
+                        new List<Expression<Func<PublicKey, object>>>()
                         {
                             x => x.PrivateKey,
                         });
@@ -63,19 +63,19 @@ namespace Bhbk.Cli.Aurora.Commands
                     var input = Guid.Parse(StandardInput.GetInput());
                     Console.Out.WriteLine();
 
-                    var pubKey = _uow.PublicKeys.Get(QueryExpressionFactory.GetQueryExpression<tbl_PublicKey>()
+                    var pubKey = _uow.PublicKeys.Get(QueryExpressionFactory.GetQueryExpression<PublicKey>()
                         .Where(x => x.Id == input).ToLambda(),
-                            new List<Expression<Func<tbl_PublicKey, object>>>()
+                            new List<Expression<Func<PublicKey, object>>>()
                             {
                                 x => x.PrivateKey,
                             }).SingleOrDefault();
 
                     if (pubKey != null)
                     {
-                        _uow.PublicKeys.Delete(QueryExpressionFactory.GetQueryExpression<tbl_PublicKey>()
+                        _uow.PublicKeys.Delete(QueryExpressionFactory.GetQueryExpression<PublicKey>()
                             .Where(x => x.Id == pubKey.Id).ToLambda());
 
-                        _uow.PrivateKeys.Delete(QueryExpressionFactory.GetQueryExpression<tbl_PrivateKey>()
+                        _uow.PrivateKeys.Delete(QueryExpressionFactory.GetQueryExpression<PrivateKey>()
                             .Where(x => x.Id == pubKey.PrivateKeyId).ToLambda());
 
                         _uow.Commit();
@@ -83,10 +83,10 @@ namespace Bhbk.Cli.Aurora.Commands
                 }
                 else if (_deleteAll)
                 {
-                    _uow.PublicKeys.Delete(QueryExpressionFactory.GetQueryExpression<tbl_PublicKey>()
+                    _uow.PublicKeys.Delete(QueryExpressionFactory.GetQueryExpression<PublicKey>()
                         .Where(x => x.IdentityId == null && x.IsDeletable == false).ToLambda());
 
-                    _uow.PrivateKeys.Delete(QueryExpressionFactory.GetQueryExpression<tbl_PrivateKey>()
+                    _uow.PrivateKeys.Delete(QueryExpressionFactory.GetQueryExpression<PrivateKey>()
                         .Where(x => x.IdentityId == null && x.IsDeletable == false).ToLambda());
 
                     _uow.Commit();

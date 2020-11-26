@@ -1,6 +1,6 @@
 ﻿using Bhbk.Cli.Aurora.Helpers;
-using Bhbk.Lib.Aurora.Data.Infrastructure_DIRECT;
-using Bhbk.Lib.Aurora.Data.Models_DIRECT;
+using Bhbk.Lib.Aurora.Data_EF6.Infrastructure;
+using Bhbk.Lib.Aurora.Data_EF6.Models;
 using Bhbk.Lib.Aurora.Primitives.Enums;
 using Bhbk.Lib.CommandLine.IO;
 using Bhbk.Lib.Common.Primitives.Enums;
@@ -48,7 +48,7 @@ namespace Bhbk.Cli.Aurora.Commands
             try
             {
                 var config = _uow.Settings.Create(
-                    new tbl_Setting
+                    new Setting
                     {
                         Id = Guid.NewGuid(),
                         ConfigKey = _configType.ToString(),
@@ -58,7 +58,7 @@ namespace Bhbk.Cli.Aurora.Commands
                     });
                 _uow.Commit();
 
-                ConsoleHelper.StdOutSettings(new List<tbl_Setting>() { config });
+                ConsoleHelper.StdOutSettings(new List<Setting>() { config });
 
                 return StandardOutput.FondFarewell();
             }

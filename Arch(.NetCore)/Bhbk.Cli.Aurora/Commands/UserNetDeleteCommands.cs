@@ -1,6 +1,6 @@
 ﻿using Bhbk.Cli.Aurora.Helpers;
-using Bhbk.Lib.Aurora.Data.Infrastructure_DIRECT;
-using Bhbk.Lib.Aurora.Data.Models_DIRECT;
+using Bhbk.Lib.Aurora.Data_EF6.Infrastructure;
+using Bhbk.Lib.Aurora.Data_EF6.Models;
 using Bhbk.Lib.CommandLine.IO;
 using Bhbk.Lib.Common.Primitives.Enums;
 using Bhbk.Lib.Common.Services;
@@ -19,7 +19,7 @@ namespace Bhbk.Cli.Aurora.Commands
     {
         private readonly IConfiguration _conf;
         private readonly IUnitOfWork _uow;
-        private tbl_User _user;
+        private User _user;
         private bool _delete = false, _deleteAll = false;
 
         public UserNetDeleteCommands()
@@ -38,12 +38,12 @@ namespace Bhbk.Cli.Aurora.Commands
                 if (string.IsNullOrEmpty(arg))
                     throw new ConsoleHelpAsException($"  *** No user name given ***");
 
-                _user = _uow.Users.Get(QueryExpressionFactory.GetQueryExpression<tbl_User>()
+                _user = _uow.Users.Get(QueryExpressionFactory.GetQueryExpression<User>()
                     .Where(x => x.IdentityAlias == arg).ToLambda(),
-                        new List<Expression<Func<tbl_User, object>>>()
+                        new List<Expression<Func<User, object>>>()
                         {
-                            x => x.tbl_PrivateKeys,
-                            x => x.tbl_PublicKeys,
+                            x => x.PrivateKeys,
+                            x => x.PublicKeys,
                         }).SingleOrDefault();
 
                 if (_user == null)
@@ -65,7 +65,7 @@ namespace Bhbk.Cli.Aurora.Commands
         {
             try
             {
-                var nets = _uow.Networks.Get(QueryExpressionFactory.GetQueryExpression<tbl_Network>()
+                var nets = _uow.Networks.Get(QueryExpressionFactory.GetQueryExpression<Network>()
                     .Where(x => x.IdentityId == _user.IdentityId).ToLambda());
 
                 ConsoleHelper.StdOutNetworks(nets);
@@ -76,13 +76,13 @@ namespace Bhbk.Cli.Aurora.Commands
                     Console.Out.Write("  *** Enter GUID of network to delete *** : ");
                     var input = Guid.Parse(StandardInput.GetInput());
 
-                    var key = _uow.Networks.Get(QueryExpressionFactory.GetQueryExpression<tbl_Network>()
+                    var key = _uow.Networks.Get(QueryExpressionFactory.GetQueryExpression<Network>()
                         .Where(x => x.IdentityId == _user.IdentityId && x.Id == input).ToLambda())
                         .SingleOrDefault();
 
                     if(key != null)
                     {
-                        _uow.Networks.Delete(QueryExpressionFactory.GetQueryExpression<tbl_Network>()
+                        _uow.Networks.Delete(QueryExpressionFactory.GetQueryExpression<Network>()
                             .Where(x => x.IdentityId == _user.IdentityId && x.Id == key.Id).ToLambda());
 
                         _uow.Commit();
@@ -90,7 +90,7 @@ namespace Bhbk.Cli.Aurora.Commands
                 }
                 else if (_deleteAll)
                 {
-                    _uow.Networks.Delete(QueryExpressionFactory.GetQueryExpression<tbl_Network>()
+                    _uow.Networks.Delete(QueryExpressionFactory.GetQueryExpression<Network>()
                         .Where(x => x.IdentityId == _user.IdentityId).ToLambda());
 
                     _uow.Commit();

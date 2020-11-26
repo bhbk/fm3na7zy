@@ -1,6 +1,6 @@
 ﻿using Bhbk.Cli.Aurora.Helpers;
-using Bhbk.Lib.Aurora.Data.Infrastructure_DIRECT;
-using Bhbk.Lib.Aurora.Data.Models_DIRECT;
+using Bhbk.Lib.Aurora.Data_EF6.Infrastructure;
+using Bhbk.Lib.Aurora.Data_EF6.Models;
 using Bhbk.Lib.Aurora.Domain.Helpers;
 using Bhbk.Lib.CommandLine.IO;
 using Bhbk.Lib.Common.Primitives.Enums;
@@ -48,7 +48,7 @@ namespace Bhbk.Cli.Aurora.Commands
         {
             try
             {
-                var license = _uow.Settings.Get(QueryExpressionFactory.GetQueryExpression<tbl_Setting>()
+                var license = _uow.Settings.Get(QueryExpressionFactory.GetQueryExpression<Setting>()
                     .Where(x => x.ConfigKey == "RebexLicense").ToLambda()).OrderBy(x => x.CreatedUtc)
                     .Last();
 

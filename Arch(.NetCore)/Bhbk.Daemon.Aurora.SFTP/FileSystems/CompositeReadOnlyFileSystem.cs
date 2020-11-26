@@ -1,6 +1,6 @@
 ﻿using Bhbk.Daemon.Aurora.SFTP.Helpers;
-using Bhbk.Lib.Aurora.Data.Infrastructure_DIRECT;
-using Bhbk.Lib.Aurora.Data.Models_DIRECT;
+using Bhbk.Lib.Aurora.Data_EF6.Infrastructure;
+using Bhbk.Lib.Aurora.Data_EF6.Models;
 using Bhbk.Lib.Aurora.Domain.Helpers;
 using Bhbk.Lib.QueryExpression.Extensions;
 using Bhbk.Lib.QueryExpression.Factories;
@@ -19,10 +19,10 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
     internal class CompositeReadOnlyFileSystem : ReadOnlyFileSystemProvider, IDisposable
     {
         private readonly IServiceScopeFactory _factory;
-        private readonly tbl_User _userEntity;
+        private readonly User _userEntity;
         private bool _disposed = false;
 
-        internal CompositeReadOnlyFileSystem(FileSystemProviderSettings settings, IServiceScopeFactory factory, tbl_User userEntity)
+        internal CompositeReadOnlyFileSystem(FileSystemProviderSettings settings, IServiceScopeFactory factory, User userEntity)
             : base(settings)
         {
             _factory = factory;
@@ -32,7 +32,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
             {
                 var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
 
-                var pubKeys = uow.PublicKeys.Get(QueryExpressionFactory.GetQueryExpression<tbl_PublicKey>()
+                var pubKeys = uow.PublicKeys.Get(QueryExpressionFactory.GetQueryExpression<PublicKey>()
                     .Where(x => x.IdentityId == _userEntity.IdentityId).ToLambda()).ToList();
 
                 var pubKeysContent = KeyHelper.ExportPubKeyBase64(_userEntity, pubKeys);
@@ -130,7 +130,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
 
                     var parentFolder = CompositeFileSystemHelper.FolderPathToEntity(uow, _userEntity, parent.Path.StringPath);
 
-                    var folderEntities = uow.UserFolders.Get(QueryExpressionFactory.GetQueryExpression<tbl_UserFolder>()
+                    var folderEntities = uow.UserFolders.Get(QueryExpressionFactory.GetQueryExpression<UserFolder>()
                         .Where(x => x.IdentityId == _userEntity.IdentityId && x.ParentId == parentFolder.Id && x.VirtualName == name).ToLambda())
                         .SingleOrDefault();
 
@@ -139,7 +139,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                             new NodeTimeInfo(folderEntities.CreatedUtc.UtcDateTime,
                                 folderEntities.LastAccessedUtc?.UtcDateTime, folderEntities.LastUpdatedUtc?.UtcDateTime));
 
-                    var fileEntities = uow.UserFiles.Get(QueryExpressionFactory.GetQueryExpression<tbl_UserFile>()
+                    var fileEntities = uow.UserFiles.Get(QueryExpressionFactory.GetQueryExpression<UserFile>()
                         .Where(x => x.IdentityId == _userEntity.IdentityId && x.FolderId == parentFolder.Id && x.VirtualName == name).ToLambda())
                         .SingleOrDefault();
 
@@ -173,20 +173,20 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
 
                     var parentFolder = CompositeFileSystemHelper.FolderPathToEntity(uow, _userEntity, parent.Path.StringPath);
 
-                    _userEntity.tbl_UserFolders = uow.UserFolders.Get(QueryExpressionFactory.GetQueryExpression<tbl_UserFolder>()
+                    _userEntity.Folders = uow.UserFolders.Get(QueryExpressionFactory.GetQueryExpression<UserFolder>()
                         .Where(x => x.IdentityId == _userEntity.IdentityId).ToLambda())
                         .ToList();
 
-                    _userEntity.tbl_UserFiles = uow.UserFiles.Get(QueryExpressionFactory.GetQueryExpression<tbl_UserFile>()
+                    _userEntity.Files = uow.UserFiles.Get(QueryExpressionFactory.GetQueryExpression<UserFile>()
                         .Where(x => x.IdentityId == _userEntity.IdentityId).ToLambda())
                         .ToList();
 
-                    foreach (var folder in _userEntity.tbl_UserFolders.Where(x => x.IdentityId == _userEntity.IdentityId && x.ParentId == parentFolder.Id))
+                    foreach (var folder in _userEntity.Folders.Where(x => x.IdentityId == _userEntity.IdentityId && x.ParentId == parentFolder.Id))
                         children.Add(new DirectoryNode(folder.VirtualName, parent,
                             new NodeTimeInfo(folder.CreatedUtc.UtcDateTime,
                                 folder.LastAccessedUtc?.UtcDateTime, folder.LastUpdatedUtc?.UtcDateTime)));
 
-                    foreach (var file in _userEntity.tbl_UserFiles.Where(x => x.IdentityId == _userEntity.IdentityId && x.FolderId == parentFolder.Id))
+                    foreach (var file in _userEntity.Files.Where(x => x.IdentityId == _userEntity.IdentityId && x.FolderId == parentFolder.Id))
                         children.Add(new FileNode(file.VirtualName, parent,
                             new NodeTimeInfo(file.CreatedUtc.UtcDateTime,
                                 file.LastAccessedUtc?.UtcDateTime, file.LastUpdatedUtc?.UtcDateTime)));
@@ -219,11 +219,11 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
 
                         var folderEntity = CompositeFileSystemHelper.FolderPathToEntity(uow, _userEntity, node.Parent.Path.StringPath);
 
-                        var fileEntity = uow.UserFiles.Get(QueryExpressionFactory.GetQueryExpression<tbl_UserFile>()
+                        var fileEntity = uow.UserFiles.Get(QueryExpressionFactory.GetQueryExpression<UserFile>()
                             .Where(x => x.IdentityId == _userEntity.IdentityId && x.FolderId == folderEntity.Id && x.VirtualName == node.Name).ToLambda())
                             .Single();
 
-                        var file = new FileInfo(conf["Storage:UnstructuredDataPath"]
+                        var file = new FileInfo(conf["Storage:UnstructuredData"]
                             + Path.DirectorySeparatorChar + fileEntity.RealPath
                             + Path.DirectorySeparatorChar + fileEntity.RealFileName);
 

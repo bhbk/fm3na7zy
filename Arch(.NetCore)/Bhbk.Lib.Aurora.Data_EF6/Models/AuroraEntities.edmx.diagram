@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+ <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <!-- Diagram content (shape and connector positions) -->
+    <edmx:Diagrams>
+      <Diagram DiagramId="9987c23f50ce4740a09964d44d420b3b" Name="Diagram1" ZoomLevel="100">
+        <EntityTypeShape EntityType="AuroraModels.Credential" Width="1.5" PointX="0.75" PointY="9.5" IsExpanded="true" />
+        <EntityTypeShape EntityType="AuroraModels.Network" Width="1.5" PointX="3" PointY="22.625" IsExpanded="true" />
+        <EntityTypeShape EntityType="AuroraModels.PrivateKey" Width="1.5" PointX="3" PointY="25.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="AuroraModels.PublicKey" Width="1.5" PointX="5.25" PointY="20.5" IsExpanded="true" />
+        <EntityTypeShape EntityType="AuroraModels.Setting" Width="1.5" PointX="3" PointY="10.5" IsExpanded="true" />
+        <EntityTypeShape EntityType="AuroraModels.User" Width="1.5" PointX="0.75" PointY="13.5" IsExpanded="true" />
+        <EntityTypeShape EntityType="AuroraModels.UserAlert" Width="1.5" PointX="3" PointY="30.125" IsExpanded="true" />
+        <EntityTypeShape EntityType="AuroraModels.UserFile" Width="1.5" PointX="5.25" PointY="15.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="AuroraModels.UserFolder" Width="1.5" PointX="3" PointY="18.5" IsExpanded="true" />
+        <EntityTypeShape EntityType="AuroraModels.UserMount" Width="1.5" PointX="3" PointY="14.375" IsExpanded="true" />
+        <AssociationConnector Association="AuroraModels.UserUserFile" />
+        <AssociationConnector Association="AuroraModels.UserUserFolder" />
+        <AssociationConnector Association="AuroraModels.UserUserMount" />
+        <AssociationConnector Association="AuroraModels.UserPrivateKey" />
+        <AssociationConnector Association="AuroraModels.UserPublicKey" />
+        <AssociationConnector Association="AuroraModels.UserNetwork" />
+        <AssociationConnector Association="AuroraModels.UserUserAlert" />
+        <AssociationConnector Association="AuroraModels.UserSetting" />
+        <AssociationConnector Association="AuroraModels.CredentialUserMount" />
+        <AssociationConnector Association="AuroraModels.PrivateKeyPublicKey" />
+        <AssociationConnector Association="AuroraModels.UserFolder_UserFile" />
+        <AssociationConnector Association="AuroraModels.UserFolder_UserFolder" />
+      </Diagram>
+    </edmx:Diagrams>
+  </edmx:Designer>
+</edmx:Edmx>

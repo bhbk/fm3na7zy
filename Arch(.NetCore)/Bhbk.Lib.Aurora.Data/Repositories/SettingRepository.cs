@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
+using Bhbk.Lib.DataAccess.EFCore.Extensions;
 
 namespace Bhbk.Lib.Aurora.Data.Repositories
 {
@@ -17,33 +18,20 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
 
         public override uvw_Setting Create(uvw_Setting entity)
         {
-            var pvalues = new List<SqlParameter>
+            var rvalue = new SqlParameter("ReturnValue", SqlDbType.Int) { Direction = ParameterDirection.Output };
+
+            var pvalues = new []
             {
                 new SqlParameter("@IdentityId", SqlDbType.UniqueIdentifier) { Value = entity.IdentityId },
                 new SqlParameter("@ConfigKey", SqlDbType.NVarChar) { Value = entity.ConfigKey },
                 new SqlParameter("@ConfigValue", SqlDbType.NVarChar) { Value = entity.ConfigValue },
                 new SqlParameter("@IdDeletable", SqlDbType.Bit) { Value = entity.IsDeletable },
+                rvalue,
             };
 
-            return _context.Set<uvw_Setting>().FromSqlRaw("[svc].[usp_Setting_Insert]"
-                + "@IdentityId, @ConfigKey, @ConfigValue, @IdDeletable", pvalues.ToArray())
-                    .AsEnumerable().Single();
-
-            /*
-            using (var conn = _context.Database.GetDbConnection())
-            {
-                var cmd = conn.CreateCommand();
-                cmd.CommandType = CommandType.StoredProcedure;
-                cmd.CommandText = "[svc].[usp_Setting_Insert]";
-                cmd.Parameters.AddRange(pvalues.ToArray());
-                cmd.Connection = conn;
-                conn.Open();
-
-                var reader = cmd.ExecuteReader();
-
-                return reader.Cast<uvw_Settings>().Single();
-            }
-            */
+            return _context.SqlQuery<uvw_Setting>("EXEC @ReturnValue = [svc].[usp_Setting_Insert]"
+                + "@IdentityId, @ConfigKey, @ConfigValue, @IdDeletable", pvalues)
+                    .Single();
         }
 
         public override IEnumerable<uvw_Setting> Create(IEnumerable<uvw_Setting> entities)
@@ -62,13 +50,16 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
 
         public override uvw_Setting Delete(uvw_Setting entity)
         {
-            var pvalues = new List<SqlParameter>
+            var rvalue = new SqlParameter("ReturnValue", SqlDbType.Int) { Direction = ParameterDirection.Output };
+
+            var pvalues = new []
             {
-                new SqlParameter("@Id", SqlDbType.UniqueIdentifier) { Value = entity.Id }
+                new SqlParameter("@Id", SqlDbType.UniqueIdentifier) { Value = entity.Id },
+                rvalue,
             };
 
-            return _context.Set<uvw_Setting>().FromSqlRaw("[svc].[usp_Setting_Delete] @Id", pvalues.ToArray())
-                .AsEnumerable().Single();
+            return _context.SqlQuery<uvw_Setting>("EXEC @ReturnValue = [svc].[usp_Setting_Delete] @Id", pvalues)
+                .Single();
         }
 
         public override IEnumerable<uvw_Setting> Delete(IEnumerable<uvw_Setting> entities)
@@ -87,23 +78,30 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
 
         public override IEnumerable<uvw_Setting> Delete(LambdaExpression lambda)
         {
-            throw new NotImplementedException();
+            var entities = _context.Set<uvw_Setting>().AsQueryable()
+                .Compile(lambda)
+                .ToList();
+
+            return Delete(entities);
         }
 
         public override uvw_Setting Update(uvw_Setting entity)
         {
-            var pvalues = new List<SqlParameter>
+            var rvalue = new SqlParameter("ReturnValue", SqlDbType.Int) { Direction = ParameterDirection.Output };
+
+            var pvalues = new []
             {
                 new SqlParameter("@Id", SqlDbType.UniqueIdentifier) { Value = entity.Id },
                 new SqlParameter("@IdentityId", SqlDbType.UniqueIdentifier) { Value = entity.IdentityId },
                 new SqlParameter("@ConfigKey", SqlDbType.NVarChar) { Value = entity.ConfigKey },
                 new SqlParameter("@ConfigValue", SqlDbType.NVarChar) { Value = entity.ConfigValue },
-                new SqlParameter("@IsDeletable", SqlDbType.Bit) { Value = entity.IsDeletable }
+                new SqlParameter("@IsDeletable", SqlDbType.Bit) { Value = entity.IsDeletable },
+                rvalue,
             };
 
-            return _context.Set<uvw_Setting>().FromSqlRaw("[svc].[usp_Setting_Update]"
-                + "@Id, @IdentityId, @ConfigKey, @ConfigValue, @IsDeletable", pvalues.ToArray())
-                    .AsEnumerable().Single();
+            return _context.SqlQuery<uvw_Setting>("EXEC @ReturnValue = [svc].[usp_Setting_Update]"
+                + "@Id, @IdentityId, @ConfigKey, @ConfigValue, @IsDeletable", pvalues)
+                    .Single();
         }
 
         public override IEnumerable<uvw_Setting> Update(IEnumerable<uvw_Setting> entities)

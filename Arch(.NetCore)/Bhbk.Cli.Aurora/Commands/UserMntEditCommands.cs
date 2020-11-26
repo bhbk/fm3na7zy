@@ -1,6 +1,6 @@
 ﻿using Bhbk.Cli.Aurora.Helpers;
-using Bhbk.Lib.Aurora.Data.Infrastructure_DIRECT;
-using Bhbk.Lib.Aurora.Data.Models_DIRECT;
+using Bhbk.Lib.Aurora.Data_EF6.Infrastructure;
+using Bhbk.Lib.Aurora.Data_EF6.Models;
 using Bhbk.Lib.CommandLine.IO;
 using Bhbk.Lib.Common.Primitives.Enums;
 using Bhbk.Lib.Common.Services;
@@ -20,7 +20,7 @@ namespace Bhbk.Cli.Aurora.Commands
     {
         private readonly IConfiguration _conf;
         private readonly IUnitOfWork _uow;
-        private tbl_User _user;
+        private User _user;
         private AuthType _authType;
         private readonly string _authTypeList = string.Join(", ", Enum.GetNames(typeof(AuthType)));
         
@@ -40,11 +40,11 @@ namespace Bhbk.Cli.Aurora.Commands
                 if (string.IsNullOrEmpty(arg))
                     throw new ConsoleHelpAsException($"  *** No user name given ***");
 
-                _user = _uow.Users.Get(QueryExpressionFactory.GetQueryExpression<tbl_User>()
+                _user = _uow.Users.Get(QueryExpressionFactory.GetQueryExpression<User>()
                     .Where(x => x.IdentityAlias == arg).ToLambda(),
-                        new List<Expression<Func<tbl_User, object>>>()
+                        new List<Expression<Func<User, object>>>()
                         {
-                            x => x.tbl_UserMount
+                            x => x.Mount
                         }).SingleOrDefault();
 
                 if (_user == null)
@@ -54,13 +54,13 @@ namespace Bhbk.Cli.Aurora.Commands
             HasOption("s|server=", "Enter server DNS/IP address", arg =>
             {
                 if(_user != null)
-                    _user.tbl_UserMount.ServerAddress = arg;
+                    _user.Mount.ServerAddress = arg;
             });
 
             HasOption("p|path=", "Enter server share path", arg =>
             {
                 if (_user != null)
-                    _user.tbl_UserMount.ServerShare = arg;
+                    _user.Mount.ServerShare = arg;
             });
 
             HasOption("a|auth=", "Enter type of auth to use", arg =>
@@ -69,7 +69,7 @@ namespace Bhbk.Cli.Aurora.Commands
                     throw new ConsoleHelpAsException($"*** Invalid auth type. Options are '{_authTypeList}' ***");
 
                 if (_user != null)
-                    _user.tbl_UserMount.AuthType = _authType.ToString();
+                    _user.Mount.AuthType = _authType.ToString();
             });
         }
 
@@ -77,11 +77,11 @@ namespace Bhbk.Cli.Aurora.Commands
         {
             try
             {
-                if (_user.tbl_UserMount != null)
+                if (_user.Mount != null)
                 {
                     Console.Out.WriteLine("  *** The user already has a mount ***");
                     Console.Out.WriteLine();
-                    ConsoleHelper.StdOutUserMounts(new List<tbl_UserMount> { _user.tbl_UserMount });
+                    ConsoleHelper.StdOutUserMounts(new List<UserMount> { _user.Mount });
 
                     return StandardOutput.FondFarewell();
                 }
@@ -96,12 +96,12 @@ namespace Bhbk.Cli.Aurora.Commands
                 var input = StandardInput.GetInput();
                 Console.Out.WriteLine();
 
-                _user.tbl_UserMount.CredentialId = Guid.Parse(input);
+                _user.Mount.CredentialId = Guid.Parse(input);
 
                 _uow.Users.Update(_user);
                 _uow.Commit();
 
-                ConsoleHelper.StdOutUserMounts(new List<tbl_UserMount>() { _user.tbl_UserMount });
+                ConsoleHelper.StdOutUserMounts(new List<UserMount>() { _user.Mount });
 
                 return StandardOutput.FondFarewell();
             }

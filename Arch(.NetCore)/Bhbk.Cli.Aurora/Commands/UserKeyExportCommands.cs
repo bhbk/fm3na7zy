@@ -1,6 +1,6 @@
 ﻿using Bhbk.Cli.Aurora.Helpers;
-using Bhbk.Lib.Aurora.Data.Infrastructure_DIRECT;
-using Bhbk.Lib.Aurora.Data.Models_DIRECT;
+using Bhbk.Lib.Aurora.Data_EF6.Infrastructure;
+using Bhbk.Lib.Aurora.Data_EF6.Models;
 using Bhbk.Lib.Aurora.Domain.Helpers;
 using Bhbk.Lib.CommandLine.IO;
 using Bhbk.Lib.Common.Primitives.Enums;
@@ -23,7 +23,7 @@ namespace Bhbk.Cli.Aurora.Commands
     {
         private readonly IConfiguration _conf;
         private readonly IUnitOfWork _uow;
-        private tbl_User _user;
+        private User _user;
 
         public UserKeyExportCommands()
         {
@@ -41,7 +41,7 @@ namespace Bhbk.Cli.Aurora.Commands
                 if (string.IsNullOrEmpty(arg))
                     throw new ConsoleHelpAsException($"  *** No user name given ***");
 
-                _user = _uow.Users.Get(QueryExpressionFactory.GetQueryExpression<tbl_User>()
+                _user = _uow.Users.Get(QueryExpressionFactory.GetQueryExpression<User>()
                     .Where(x => x.IdentityAlias == arg).ToLambda())
                     .SingleOrDefault();
 
@@ -59,9 +59,9 @@ namespace Bhbk.Cli.Aurora.Commands
                 if (!Directory.Exists(dir))
                     Directory.CreateDirectory(dir);
 
-                var keys = _uow.PublicKeys.Get(QueryExpressionFactory.GetQueryExpression<tbl_PublicKey>()
+                var keys = _uow.PublicKeys.Get(QueryExpressionFactory.GetQueryExpression<PublicKey>()
                     .Where(x => x.IdentityId == _user.IdentityId).ToLambda(),
-                        new List<Expression<Func<tbl_PublicKey, object>>>()
+                        new List<Expression<Func<PublicKey, object>>>()
                         {
                             x => x.PrivateKey,
                         });
@@ -77,7 +77,7 @@ namespace Bhbk.Cli.Aurora.Commands
                 {
                     //public opensshbase64 key format in "authorized_keys"
                     var pubOpenSshBase64File = new FileInfo(dir + Path.DirectorySeparatorChar + "authorized_keys.txt");
-                    var pubOpenSshBase64Str = KeyHelper.ExportPubKeyBase64(_user, new List<tbl_PublicKey>() { pubKey });
+                    var pubOpenSshBase64Str = KeyHelper.ExportPubKeyBase64(_user, new List<PublicKey>() { pubKey });
                     File.WriteAllText(pubOpenSshBase64File.FullName, pubOpenSshBase64Str.ToString());
                     Console.Out.WriteLine("Created " + pubOpenSshBase64File);
 

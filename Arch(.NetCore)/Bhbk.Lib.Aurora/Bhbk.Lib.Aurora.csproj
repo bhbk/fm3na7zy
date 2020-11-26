@@ -6,16 +6,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Bhbk.Lib.Common" Version="2020.11.13.2100" />
-    <PackageReference Include="Bhbk.Lib.DataState" Version="2020.11.13.2100" />
+    <PackageReference Include="Bhbk.Lib.Common" Version="2020.11.21.2300" />
+    <PackageReference Include="Bhbk.Lib.DataState" Version="2020.11.21.2300" />
     <PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="5.2.7" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="5.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
     <PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Models\" />
   </ItemGroup>
 
 </Project>

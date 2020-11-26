@@ -1,17 +1,17 @@
 ﻿using Bhbk.Daemon.Aurora.SFTP.Helpers;
-using Bhbk.Lib.Aurora.Data.Infrastructure_DIRECT;
-using Bhbk.Lib.Aurora.Data.Models_DIRECT;
+using Bhbk.Lib.Aurora.Data_EF6.Infrastructure;
+using Bhbk.Lib.Aurora.Data_EF6.Models;
 using Bhbk.Lib.Aurora.Domain.Helpers;
 using Bhbk.Lib.Common.Primitives;
 using Bhbk.Lib.QueryExpression.Extensions;
 using Bhbk.Lib.QueryExpression.Factories;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Rebex.IO.FileSystem;
 using Serilog;
 using System;
 using System.Collections.Generic;
+using System.Data.Entity.Infrastructure;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -20,13 +20,13 @@ using Hashing = Bhbk.Lib.Cryptography.Hashing;
 
 namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
 {
-    internal class CompositeReadWriteFileSystem : ReadWriteFileSystemProvider, IDisposable
+    internal class CompositeReadWriteFileSystem : ReadWriteFileSystemProvider
     {
         private readonly IServiceScopeFactory _factory;
-        private readonly tbl_User _userEntity;
+        private readonly User _userEntity;
         private bool _disposed = false;
 
-        internal CompositeReadWriteFileSystem(FileSystemProviderSettings settings, IServiceScopeFactory factory, tbl_User userEntity)
+        internal CompositeReadWriteFileSystem(FileSystemProviderSettings settings, IServiceScopeFactory factory, User userEntity)
             : base(settings)
         {
             _factory = factory;
@@ -36,7 +36,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
             {
                 var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
 
-                var pubKeys = uow.PublicKeys.Get(QueryExpressionFactory.GetQueryExpression<tbl_PublicKey>()
+                var pubKeys = uow.PublicKeys.Get(QueryExpressionFactory.GetQueryExpression<PublicKey>()
                     .Where(x => x.IdentityId == _userEntity.IdentityId).ToLambda()).ToList();
 
                 var pubKeysContent = KeyHelper.ExportPubKeyBase64(_userEntity, pubKeys);
@@ -58,13 +58,11 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                     var folderEntity = CompositeFileSystemHelper.FolderPathToEntity(uow, _userEntity, parent.Path.StringPath);
 
                     uow.UserFolders.Create(
-                        new tbl_UserFolder
+                        new UserFolder
                         {
-                            Id = Guid.NewGuid(),
                             IdentityId = _userEntity.IdentityId,
                             ParentId = folderEntity.Id,
                             VirtualName = child.Name,
-                            CreatedUtc = DateTime.UtcNow,
                             IsReadOnly = false,
                         });
                     uow.Commit();
@@ -97,29 +95,25 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                     var folderEntity = CompositeFileSystemHelper.FolderPathToEntity(uow, _userEntity, parent.Path.StringPath);
                     var filePath = Strings.GetDirectoryHash($"{_userEntity.ToString()}{parent.Path.StringPath}{child.Name}");
                     var fileName = Hashing.MD5.Create(Guid.NewGuid().ToString());
-                    var now = DateTime.UtcNow;
 
-                    var folder = new DirectoryInfo(conf["Storage:UnstructuredDataPath"]
+                    var folder = new DirectoryInfo(conf["Storage:UnstructuredData"]
                         + Path.DirectorySeparatorChar + filePath);
 
                     if (!folder.Exists)
                         folder.Create();
 
-                    file = new FileInfo(conf["Storage:UnstructuredDataPath"]
+                    file = new FileInfo(conf["Storage:UnstructuredData"]
                         + Path.DirectorySeparatorChar + filePath
                         + Path.DirectorySeparatorChar + fileName);
 
-                    var fileEntity = new tbl_UserFile
+                    var fileEntity = new UserFile
                     {
-                        Id = Guid.NewGuid(),
                         IdentityId = _userEntity.IdentityId,
                         FolderId = folderEntity.Id,
                         VirtualName = child.Name,
                         RealPath = filePath,
                         RealFileName = fileName,
                         IsReadOnly = false,
-                        CreatedUtc = now,
-                        LastVerifiedUtc = now,
                     };
 
                     using (var sha256 = new SHA256Managed())
@@ -184,7 +178,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
 
                         var fileEntity = CompositeFileSystemHelper.FilePathToEntity(uow, _userEntity, node.Path.StringPath);
 
-                        var file = new FileInfo(conf["Storage:UnstructuredDataPath"]
+                        var file = new FileInfo(conf["Storage:UnstructuredData"]
                             + Path.DirectorySeparatorChar + fileEntity.RealPath
                             + Path.DirectorySeparatorChar + fileEntity.RealFileName);
 
@@ -297,7 +291,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
 
                     var parentFolder = CompositeFileSystemHelper.FolderPathToEntity(uow, _userEntity, parent.Path.StringPath);
 
-                    var folderEntities = uow.UserFolders.Get(QueryExpressionFactory.GetQueryExpression<tbl_UserFolder>()
+                    var folderEntities = uow.UserFolders.Get(QueryExpressionFactory.GetQueryExpression<UserFolder>()
                         .Where(x => x.IdentityId == _userEntity.IdentityId && x.ParentId == parentFolder.Id && x.VirtualName == name).ToLambda())
                         .SingleOrDefault();
 
@@ -306,7 +300,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                             new NodeTimeInfo(folderEntities.CreatedUtc.UtcDateTime,
                                 folderEntities.LastAccessedUtc?.UtcDateTime, folderEntities.LastUpdatedUtc?.UtcDateTime));
 
-                    var fileEntities = uow.UserFiles.Get(QueryExpressionFactory.GetQueryExpression<tbl_UserFile>()
+                    var fileEntities = uow.UserFiles.Get(QueryExpressionFactory.GetQueryExpression<UserFile>()
                         .Where(x => x.IdentityId == _userEntity.IdentityId && x.FolderId == parentFolder.Id && x.VirtualName == name).ToLambda())
                         .SingleOrDefault();
 
@@ -340,20 +334,20 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
 
                     var parentFolder = CompositeFileSystemHelper.FolderPathToEntity(uow, _userEntity, parent.Path.StringPath);
 
-                    _userEntity.tbl_UserFolders = uow.UserFolders.Get(QueryExpressionFactory.GetQueryExpression<tbl_UserFolder>()
+                    _userEntity.Folders = uow.UserFolders.Get(QueryExpressionFactory.GetQueryExpression<UserFolder>()
                         .Where(x => x.IdentityId == _userEntity.IdentityId).ToLambda())
                         .ToList();
 
-                    _userEntity.tbl_UserFiles = uow.UserFiles.Get(QueryExpressionFactory.GetQueryExpression<tbl_UserFile>()
+                    _userEntity.Files = uow.UserFiles.Get(QueryExpressionFactory.GetQueryExpression<UserFile>()
                         .Where(x => x.IdentityId == _userEntity.IdentityId).ToLambda())
                         .ToList();
 
-                    foreach (var folder in _userEntity.tbl_UserFolders.Where(x => x.IdentityId == _userEntity.IdentityId && x.ParentId == parentFolder.Id))
+                    foreach (var folder in _userEntity.Folders.Where(x => x.IdentityId == _userEntity.IdentityId && x.ParentId == parentFolder.Id))
                         children.Add(new DirectoryNode(folder.VirtualName, parent,
                             new NodeTimeInfo(folder.CreatedUtc.UtcDateTime,
                                 folder.LastAccessedUtc?.UtcDateTime, folder.LastUpdatedUtc?.UtcDateTime)));
 
-                    foreach (var file in _userEntity.tbl_UserFiles.Where(x => x.IdentityId == _userEntity.IdentityId && x.FolderId == parentFolder.Id))
+                    foreach (var file in _userEntity.Files.Where(x => x.IdentityId == _userEntity.IdentityId && x.FolderId == parentFolder.Id))
                         children.Add(new FileNode(file.VirtualName, parent,
                             new NodeTimeInfo(file.CreatedUtc.UtcDateTime,
                                 file.LastAccessedUtc?.UtcDateTime, file.LastUpdatedUtc?.UtcDateTime)));
@@ -386,11 +380,11 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
 
                         var folderEntity = CompositeFileSystemHelper.FolderPathToEntity(uow, _userEntity, node.Parent.Path.StringPath);
 
-                        var fileEntity = uow.UserFiles.Get(QueryExpressionFactory.GetQueryExpression<tbl_UserFile>()
+                        var fileEntity = uow.UserFiles.Get(QueryExpressionFactory.GetQueryExpression<UserFile>()
                             .Where(x => x.IdentityId == _userEntity.IdentityId && x.FolderId == folderEntity.Id && x.VirtualName == node.Name).ToLambda())
                             .Single();
 
-                        var file = new FileInfo(conf["Storage:UnstructuredDataPath"]
+                        var file = new FileInfo(conf["Storage:UnstructuredData"]
                             + Path.DirectorySeparatorChar + fileEntity.RealPath
                             + Path.DirectorySeparatorChar + fileEntity.RealFileName);
 
@@ -546,6 +540,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                         var folderEntity = CompositeFileSystemHelper.FolderPathToEntity(uow, _userEntity, node.Path.StringPath);
 
                         folderEntity.VirtualName = newName;
+                        folderEntity.LastUpdatedUtc = DateTime.UtcNow;
 
                         uow.UserFolders.Update(folderEntity);
                         uow.Commit();
@@ -561,6 +556,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                         var fileEntity = CompositeFileSystemHelper.FilePathToEntity(uow, _userEntity, node.Path.StringPath);
 
                         fileEntity.VirtualName = newName;
+                        fileEntity.LastUpdatedUtc = DateTime.UtcNow;
 
                         uow.UserFiles.Update(fileEntity);
                         uow.Commit();
@@ -602,11 +598,19 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
 
                         var fileEntity = CompositeFileSystemHelper.FilePathToEntity(uow, _userEntity, node.Path.StringPath);
 
-                        file = new FileInfo(conf["Storage:UnstructuredDataPath"]
+                        file = new FileInfo(conf["Storage:UnstructuredData"]
                             + Path.DirectorySeparatorChar + fileEntity.RealPath
                             + Path.DirectorySeparatorChar + fileEntity.RealFileName);
 
                         fileEntity = CompositeFileSystemHelper.SaveFileStream(conf, content.GetStream(), fileEntity);
+
+                        /*
+                         * the vendor library calls createfile and then savecontent for non-zero size files. the current band-aid
+                         * is set lastaccessed and lastupdated to null in update call after create call for same event.
+                         */
+
+                        fileEntity.LastAccessedUtc = null;
+                        fileEntity.LastUpdatedUtc = null;
 
                         uow.UserFiles.Update(fileEntity);
                         uow.Commit();
@@ -699,8 +703,8 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                     {
                         var fileEntity = CompositeFileSystemHelper.FilePathToEntity(uow, _userEntity, node.Path.StringPath);
 
-                        fileEntity.LastAccessedUtc = timeInfo.LastAccessTime;
-                        fileEntity.LastUpdatedUtc = timeInfo.LastWriteTime;
+                        //fileEntity.LastAccessedUtc = timeInfo.LastAccessTime;
+                        //fileEntity.LastUpdatedUtc = timeInfo.LastWriteTime;
 
                         uow.UserFiles.Update(fileEntity);
                         uow.Commit();

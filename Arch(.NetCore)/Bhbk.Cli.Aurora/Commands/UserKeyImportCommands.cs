@@ -1,5 +1,5 @@
-﻿using Bhbk.Lib.Aurora.Data.Infrastructure_DIRECT;
-using Bhbk.Lib.Aurora.Data.Models_DIRECT;
+﻿using Bhbk.Lib.Aurora.Data_EF6.Infrastructure;
+using Bhbk.Lib.Aurora.Data_EF6.Models;
 using Bhbk.Lib.Aurora.Domain.Helpers;
 using Bhbk.Lib.CommandLine.IO;
 using Bhbk.Lib.Common.Primitives.Enums;
@@ -23,7 +23,7 @@ namespace Bhbk.Cli.Aurora.Commands
         private readonly IConfiguration _conf;
         private readonly IUnitOfWork _uow;
         private FileInfo _path;
-        private tbl_User _user;
+        private User _user;
         private string _privKeyPass, _pubKeyComment;
 
         public UserKeyImportCommands()
@@ -42,12 +42,12 @@ namespace Bhbk.Cli.Aurora.Commands
                 if (string.IsNullOrEmpty(arg))
                     throw new ConsoleHelpAsException($"  *** No user name given ***");
 
-                _user = _uow.Users.Get(QueryExpressionFactory.GetQueryExpression<tbl_User>()
+                _user = _uow.Users.Get(QueryExpressionFactory.GetQueryExpression<User>()
                     .Where(x => x.IdentityAlias == arg).ToLambda(),
-                        new List<Expression<Func<tbl_User, object>>>()
+                        new List<Expression<Func<User, object>>>()
                         {
-                            x => x.tbl_PrivateKeys,
-                            x => x.tbl_PublicKeys,
+                            x => x.PrivateKeys,
+                            x => x.PublicKeys,
                         }).SingleOrDefault();
 
                 if (_user == null)
@@ -74,7 +74,7 @@ namespace Bhbk.Cli.Aurora.Commands
         {
             try
             {
-                var license = _uow.Settings.Get(QueryExpressionFactory.GetQueryExpression<tbl_Setting>()
+                var license = _uow.Settings.Get(QueryExpressionFactory.GetQueryExpression<Setting>()
                     .Where(x => x.ConfigKey == "RebexLicense").ToLambda()).OrderBy(x => x.CreatedUtc)
                     .Last();
 

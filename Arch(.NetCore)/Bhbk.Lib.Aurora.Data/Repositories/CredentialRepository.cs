@@ -1,7 +1,7 @@
 ﻿using Bhbk.Lib.Aurora.Data.Models;
+using Bhbk.Lib.DataAccess.EFCore.Extensions;
 using Bhbk.Lib.DataAccess.EFCore.Repositories;
 using Microsoft.Data.SqlClient;
-using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -17,34 +17,21 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
 
         public override uvw_Credential Create(uvw_Credential entity)
         {
-            var pvalues = new List<SqlParameter>
+            var rvalue = new SqlParameter("ReturnValue", SqlDbType.Int) { Direction = ParameterDirection.Output };
+
+            var pvalues = new []
             {
                 new SqlParameter("@Domain", SqlDbType.NVarChar) { Value = (object)entity.Domain ?? DBNull.Value },
                 new SqlParameter("@UserName", SqlDbType.NVarChar) { Value = entity.UserName },
                 new SqlParameter("@Password", SqlDbType.NVarChar) { Value = entity.Password },
                 new SqlParameter("@Enabled", SqlDbType.Bit) { Value = entity.IsEnabled },
                 new SqlParameter("@Deletable", SqlDbType.Bit) { Value = entity.IsDeletable },
+                rvalue,
             };
 
-            return _context.Set<uvw_Credential>().FromSqlRaw("[svc].[usp_Credential_Insert]"
-                + "@Domain, @UserName, @Password, @Enabled, @Deletable", pvalues.ToArray())
-                    .AsEnumerable().Single();
-
-            /*
-            using (var conn = _context.Database.GetDbConnection())
-            {
-                var cmd = conn.CreateCommand();
-                cmd.CommandType = CommandType.StoredProcedure;
-                cmd.CommandText = "[svc].[usp_Credential_Insert]";
-                cmd.Parameters.AddRange(pvalues.ToArray());
-                cmd.Connection = conn;
-                conn.Open();
-
-                var reader = cmd.ExecuteReader();
-
-                return reader.Cast<uvw_Credentials>().Single();
-            }
-            */
+            return _context.SqlQuery<uvw_Credential>("EXEC @ReturnValue = [svc].[usp_Credential_Insert]"
+                + "@Domain, @UserName, @Password, @Enabled, @Deletable", pvalues)
+                .Single();
         }
 
         public override IEnumerable<uvw_Credential> Create(IEnumerable<uvw_Credential> entities)
@@ -63,13 +50,16 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
 
         public override uvw_Credential Delete(uvw_Credential entity)
         {
-            var pvalues = new List<SqlParameter>
+            var rvalue = new SqlParameter("ReturnValue", SqlDbType.Int) { Direction = ParameterDirection.Output };
+
+            var pvalues = new []
             {
-                new SqlParameter("@Id", SqlDbType.UniqueIdentifier) { Value = entity.Id }
+                new SqlParameter("@Id", SqlDbType.UniqueIdentifier) { Value = entity.Id },
+                rvalue,
             };
 
-            return _context.Set<uvw_Credential>().FromSqlRaw("[svc].[usp_Credential_Delete] @Id", pvalues.ToArray())
-                .AsEnumerable().Single();
+            return _context.SqlQuery<uvw_Credential>("EXEC @ReturnValue = [svc].[usp_Credential_Delete] @Id", pvalues)
+                .Single();
         }
 
         public override IEnumerable<uvw_Credential> Delete(IEnumerable<uvw_Credential> entities)
@@ -88,24 +78,31 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
 
         public override IEnumerable<uvw_Credential> Delete(LambdaExpression lambda)
         {
-            throw new NotImplementedException();
+            var entities = _context.Set<uvw_Credential>().AsQueryable()
+                .Compile(lambda)
+                .ToList();
+
+            return Delete(entities);
         }
 
         public override uvw_Credential Update(uvw_Credential entity)
         {
-            var pvalues = new List<SqlParameter>
+            var rvalue = new SqlParameter("ReturnValue", SqlDbType.Int) { Direction = ParameterDirection.Output };
+
+            var pvalues = new []
             {
                 new SqlParameter("@Id", SqlDbType.UniqueIdentifier) { Value = entity.Id },
                 new SqlParameter("@Domain", SqlDbType.NVarChar) { Value = (object)entity.Domain ?? DBNull.Value },
                 new SqlParameter("@UserName", SqlDbType.NVarChar) { Value = entity.UserName },
                 new SqlParameter("@Password", SqlDbType.NVarChar) { Value = entity.Password },
                 new SqlParameter("@Enabled", SqlDbType.Bit) { Value = entity.IsEnabled },
-                new SqlParameter("@Deletable", SqlDbType.Bit) { Value = entity.IsDeletable }
+                new SqlParameter("@Deletable", SqlDbType.Bit) { Value = entity.IsDeletable },
+                rvalue,
             };
 
-            return _context.Set<uvw_Credential>().FromSqlRaw("[svc].[usp_Credential_Update]"
-                + "@Id, @Domain, @UserName, @Password, @Enabled, @Deletable", pvalues.ToArray())
-                    .AsEnumerable().Single();
+            return _context.SqlQuery<uvw_Credential>("EXEC @ReturnValue = [svc].[usp_Credential_Update]"
+                + "@Id, @Domain, @UserName, @Password, @Enabled, @Deletable", pvalues)
+                .Single();
         }
 
         public override IEnumerable<uvw_Credential> Update(IEnumerable<uvw_Credential> entities)

@@ -1,6 +1,6 @@
 using Bhbk.Daemon.Aurora.SFTP.Factories;
-using Bhbk.Lib.Aurora.Data.Infrastructure_DIRECT;
-using Bhbk.Lib.Aurora.Data.Models_DIRECT;
+using Bhbk.Lib.Aurora.Data_EF6.Infrastructure;
+using Bhbk.Lib.Aurora.Data_EF6.Models;
 using Bhbk.Lib.Aurora.Domain.Helpers;
 using Bhbk.Lib.Aurora.Domain.Primitives;
 using Bhbk.Lib.Aurora.Domain.Primitives.Enums;
@@ -71,7 +71,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                         if (!Enum.TryParse<LogLevel>(conf["Rebex:LogLevel"], true, out _level))
                             throw new InvalidCastException();
 
-                        var license = uow.Settings.Get(QueryExpressionFactory.GetQueryExpression<tbl_Setting>()
+                        var license = uow.Settings.Get(QueryExpressionFactory.GetQueryExpression<Setting>()
                             .Where(x => x.ConfigKey == "RebexLicense").ToLambda()).OrderBy(x => x.CreatedUtc)
                             .Last();
 
@@ -87,7 +87,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                         var secret = conf["Databases:AuroraSecret"];
 
                         var dsaStr = SshHostKeyAlgorithm.DSS.ToString();
-                        var dsaPrivKey = uow.PrivateKeys.Get(QueryExpressionFactory.GetQueryExpression<tbl_PrivateKey>()
+                        var dsaPrivKey = uow.PrivateKeys.Get(QueryExpressionFactory.GetQueryExpression<PrivateKey>()
                             .Where(x => x.KeyAlgo == dsaStr && x.IdentityId == null).ToLambda()).OrderBy(x => x.CreatedUtc)
                             .Single();
 
@@ -95,7 +95,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                         _server.Keys.Add(new SshPrivateKey(dsaBytes, AES.DecryptString(dsaPrivKey.KeyPass, secret)));
 
                         var rsaStr = SshHostKeyAlgorithm.RSA.ToString();
-                        var rsaPrivKey = uow.PrivateKeys.Get(QueryExpressionFactory.GetQueryExpression<tbl_PrivateKey>()
+                        var rsaPrivKey = uow.PrivateKeys.Get(QueryExpressionFactory.GetQueryExpression<PrivateKey>()
                             .Where(x => x.KeyAlgo == rsaStr && x.IdentityId == null).ToLambda()).OrderBy(x => x.CreatedUtc)
                             .Single();
 
@@ -103,7 +103,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                         _server.Keys.Add(new SshPrivateKey(rsaBytes, AES.DecryptString(rsaPrivKey.KeyPass, secret)));
 
                         var ecdsa256Str = SshHostKeyAlgorithm.ECDsaNistP256.ToString();
-                        var ecdsa256PrivKey = uow.PrivateKeys.Get(QueryExpressionFactory.GetQueryExpression<tbl_PrivateKey>()
+                        var ecdsa256PrivKey = uow.PrivateKeys.Get(QueryExpressionFactory.GetQueryExpression<PrivateKey>()
                             .Where(x => x.KeyAlgo == ecdsa256Str && x.IdentityId == null).ToLambda()).OrderBy(x => x.CreatedUtc)
                             .Single();
 
@@ -111,7 +111,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                         _server.Keys.Add(new SshPrivateKey(ecdsa256Bytes, AES.DecryptString(ecdsa256PrivKey.KeyPass, secret)));
 
                         var ecdsa384Str = SshHostKeyAlgorithm.ECDsaNistP384.ToString();
-                        var ecdsa384PrivKey = uow.PrivateKeys.Get(QueryExpressionFactory.GetQueryExpression<tbl_PrivateKey>()
+                        var ecdsa384PrivKey = uow.PrivateKeys.Get(QueryExpressionFactory.GetQueryExpression<PrivateKey>()
                             .Where(x => x.KeyAlgo == ecdsa384Str && x.IdentityId == null).ToLambda()).OrderBy(x => x.CreatedUtc)
                             .Single();
 
@@ -119,7 +119,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                         _server.Keys.Add(new SshPrivateKey(ecdsa384Bytes, AES.DecryptString(ecdsa384PrivKey.KeyPass, secret)));
 
                         var ecdsa521Str = SshHostKeyAlgorithm.ECDsaNistP521.ToString();
-                        var ecdsa521PrivKey = uow.PrivateKeys.Get(QueryExpressionFactory.GetQueryExpression<tbl_PrivateKey>()
+                        var ecdsa521PrivKey = uow.PrivateKeys.Get(QueryExpressionFactory.GetQueryExpression<PrivateKey>()
                             .Where(x => x.KeyAlgo == ecdsa521Str && x.IdentityId == null).ToLambda()).OrderBy(x => x.CreatedUtc)
                             .Single();
 
@@ -127,7 +127,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                         _server.Keys.Add(new SshPrivateKey(ecdsa521Bytes, AES.DecryptString(ecdsa521PrivKey.KeyPass, secret)));
 
                         var ed25519Str = SshHostKeyAlgorithm.ED25519.ToString();
-                        var ed25519PrivKey = uow.PrivateKeys.Get(QueryExpressionFactory.GetQueryExpression<tbl_PrivateKey>()
+                        var ed25519PrivKey = uow.PrivateKeys.Get(QueryExpressionFactory.GetQueryExpression<PrivateKey>()
                             .Where(x => x.KeyAlgo == ed25519Str && x.IdentityId == null).ToLambda()).OrderBy(x => x.CreatedUtc)
                             .Single();
 
@@ -260,14 +260,14 @@ namespace Bhbk.Daemon.Aurora.SFTP
                         var admin = scope.ServiceProvider.GetRequiredService<IAdminService>();
                         var alert = scope.ServiceProvider.GetRequiredService<IAlertService>();
 
-                        var user = uow.Users.Get(QueryExpressionFactory.GetQueryExpression<tbl_User>()
+                        var user = uow.Users.Get(QueryExpressionFactory.GetQueryExpression<User>()
                             .Where(x => x.IdentityAlias == ServerSession.Current.UserName).ToLambda())
                             .Single();
 
-                        foreach (var email in uow.UserAlerts.Get(QueryExpressionFactory.GetQueryExpression<tbl_UserAlert>()
-                            .Where(x => x.IdentityId == user.IdentityId && !string.IsNullOrWhiteSpace(x.ToEmailAddress) && x.OnDelete == true).ToLambda()))
+                        foreach (var email in uow.UserAlerts.Get(QueryExpressionFactory.GetQueryExpression<UserAlert>()
+                            .Where(x => x.IdentityId == user.IdentityId && x.ToEmailAddress != null && x.IsEnabled == true && x.OnDelete == true).ToLambda()))
                         {
-                            alert.Enqueue_EmailV1(new EmailV1()
+                            _ = alert.Enqueue_EmailV1(new EmailV1()
                             {
                                 FromEmail = conf["Notifications:EmailFromAddress"],
                                 FromDisplay = conf["Notifications:EmailFromDisplayName"],
@@ -276,19 +276,19 @@ namespace Bhbk.Daemon.Aurora.SFTP
                                 Subject = "File Delete Alert",
                                 Body = Templates.NotifyEmailOnFileDelete(conf["Daemons:SftpService:Dns"], ServerSession.Current.UserName,
                                     email.ToFirstName, email.ToLastName, e.ResultNode.Path.StringPath)
-                            }).AsTask();
+                            }).AsTask().Result;
                         }
 
-                        foreach (var text in uow.UserAlerts.Get(QueryExpressionFactory.GetQueryExpression<tbl_UserAlert>()
-                            .Where(x => x.IdentityId == user.IdentityId && !string.IsNullOrWhiteSpace(x.ToPhoneNumber) && x.OnDelete == true).ToLambda()))
+                        foreach (var text in uow.UserAlerts.Get(QueryExpressionFactory.GetQueryExpression<UserAlert>()
+                            .Where(x => x.IdentityId == user.IdentityId && x.ToPhoneNumber != null && x.IsEnabled == true && x.OnDelete == true).ToLambda()))
                         {
-                            alert.Enqueue_TextV1(new TextV1()
+                            _ = alert.Enqueue_TextV1(new TextV1()
                             {
                                 FromPhoneNumber = conf["Notifications:TextFromPhoneNumber"],
                                 ToPhoneNumber = text.ToPhoneNumber,
                                 Body = Templates.NotifyTextOnFileDelete(conf["Daemons:SftpService:Dns"], ServerSession.Current.UserName,
                                     text.ToFirstName, text.ToLastName, e.ResultNode.Path.StringPath)
-                            }).AsTask();
+                            }).AsTask().Result;
                         }
                     }
 
@@ -313,12 +313,12 @@ namespace Bhbk.Daemon.Aurora.SFTP
                 using (var scope = _factory.CreateScope())
                 {
                     var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
-                    var user = uow.Users.Get(QueryExpressionFactory.GetQueryExpression<tbl_User>()
+                    var user = uow.Users.Get(QueryExpressionFactory.GetQueryExpression<User>()
                         .Where(x => x.IdentityAlias == e.UserName && x.IsEnabled).ToLambda(),
-                            new List<Expression<Func<tbl_User, object>>>()
+                            new List<Expression<Func<User, object>>>()
                             {
-                                x => x.tbl_Networks,
-                                x => x.tbl_PublicKeys,
+                                x => x.Networks,
+                                x => x.PublicKeys,
                             }).SingleOrDefault();
 
                     if (user == null
@@ -331,7 +331,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                     }
 
                     var action = NetworkAction.Deny.ToString();
-                    if (NetworkHelper.ValidateAddress(user.tbl_Networks.Where(x => x.Action == action && x.IsEnabled), e.ClientAddress))
+                    if (NetworkHelper.ValidateAddress(user.Networks.Where(x => x.Action == action && x.IsEnabled), e.ClientAddress))
                     {
                         Log.Warning($"'{callPath}' '{e.UserName}' is denied from '{e.ClientEndPoint}' running '{e.ClientSoftwareIdentifier}'");
 
@@ -340,7 +340,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                     }
 
                     action = NetworkAction.Allow.ToString();
-                    if (!NetworkHelper.ValidateAddress(user.tbl_Networks.Where(x => x.Action == action && x.IsEnabled), e.ClientAddress))
+                    if (!NetworkHelper.ValidateAddress(user.Networks.Where(x => x.Action == action && x.IsEnabled), e.ClientAddress))
                     {
                         Log.Warning($"'{callPath}' '{e.UserName}' is not allowed from '{e.ClientEndPoint}' running '{e.ClientSoftwareIdentifier}'");
 
@@ -406,19 +406,19 @@ namespace Bhbk.Daemon.Aurora.SFTP
                     var admin = scope.ServiceProvider.GetRequiredService<IAdminService>();
                     var sts = scope.ServiceProvider.GetRequiredService<IStsService>();
 
-                    var user = uow.Users.Get(QueryExpressionFactory.GetQueryExpression<tbl_User>()
+                    var user = uow.Users.Get(QueryExpressionFactory.GetQueryExpression<User>()
                         .Where(x => x.IdentityAlias == e.UserName && x.IsEnabled).ToLambda(),
-                            new List<Expression<Func<tbl_User, object>>>()
+                            new List<Expression<Func<User, object>>>()
                             {
-                                x => x.tbl_PublicKeys,
-                                x => x.tbl_UserMount,
+                                x => x.PublicKeys,
+                                x => x.Mount,
                             }).SingleOrDefault();
 
                     if (e.Key != null)
                     {
                         Log.Information($"'{callPath}' '{e.UserName}' in-progress with public key");
 
-                        if (UserHelper.ValidatePubKey(user.tbl_PublicKeys.Where(x => x.IsEnabled).ToList(), e.Key)
+                        if (UserHelper.ValidatePubKey(user.PublicKeys.Where(x => x.IsEnabled).ToList(), e.Key)
                             && admin.User_VerifyV1(user.IdentityId).AsTask().Result)
                         {
                             Log.Information($"'{callPath}' '{e.UserName}' success with public key");
@@ -430,7 +430,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                                  * an smb mount will not succeed without a user password or ambassador credential.
                                  */
                                 if (user.FileSystemType == FileSystemTypes.SMB.ToString()
-                                    && !user.tbl_UserMount.CredentialId.HasValue)
+                                    && !user.Mount.CredentialId.HasValue)
                                 {
                                     Log.Warning($"'{callPath}' '{e.UserName}' failure no credential to create {FileSystemTypes.SMB} filesystem");
 
@@ -477,7 +477,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                         {
                             var identity = admin.User_GetV1(user.IdentityId.ToString()).AsTask().Result;
 
-                            var auth = sts.ResourceOwner_GrantV2(
+                            _ = sts.ResourceOwner_GrantV2(
                                 new ResourceOwnerV2()
                                 {
                                     issuer = conf["IdentityCredentials:IssuerName"],
@@ -567,14 +567,14 @@ namespace Bhbk.Daemon.Aurora.SFTP
                     var admin = scope.ServiceProvider.GetRequiredService<IAdminService>();
                     var alert = scope.ServiceProvider.GetRequiredService<IAlertService>();
 
-                    var user = uow.Users.Get(QueryExpressionFactory.GetQueryExpression<tbl_User>()
+                    var user = uow.Users.Get(QueryExpressionFactory.GetQueryExpression<User>()
                         .Where(x => x.IdentityAlias == ServerSession.Current.UserName).ToLambda())
                         .Single();
 
-                    foreach (var email in uow.UserAlerts.Get(QueryExpressionFactory.GetQueryExpression<tbl_UserAlert>()
-                        .Where(x => x.IdentityId == user.IdentityId && !string.IsNullOrWhiteSpace(x.ToEmailAddress) && x.OnDownload == true).ToLambda()))
+                    foreach (var email in uow.UserAlerts.Get(QueryExpressionFactory.GetQueryExpression<UserAlert>()
+                        .Where(x => x.IdentityId == user.IdentityId && x.ToEmailAddress != null && x.IsEnabled == true && x.OnDownload == true).ToLambda()))
                     {
-                        alert.Enqueue_EmailV1(new EmailV1()
+                        _ = alert.Enqueue_EmailV1(new EmailV1()
                         {
                             FromEmail = conf["Notifications:EmailFromAddress"],
                             FromDisplay = conf["Notifications:EmailFromDisplayName"],
@@ -583,19 +583,19 @@ namespace Bhbk.Daemon.Aurora.SFTP
                             Subject = "File Download Alert",
                             Body = Templates.NotifyEmailOnFileDownload(conf["Daemons:SftpService:Dns"], ServerSession.Current.UserName,
                                 email.ToFirstName, email.ToLastName, "/" + e.FullPath, e.BytesTransferred.ToString(), e.Session.ClientEndPoint.ToString())
-                        }).AsTask();
+                        }).AsTask().Result;
                     }
 
-                    foreach (var text in uow.UserAlerts.Get(QueryExpressionFactory.GetQueryExpression<tbl_UserAlert>()
-                        .Where(x => x.IdentityId == user.IdentityId && !string.IsNullOrWhiteSpace(x.ToPhoneNumber) && x.OnDownload == true).ToLambda()))
+                    foreach (var text in uow.UserAlerts.Get(QueryExpressionFactory.GetQueryExpression<UserAlert>()
+                        .Where(x => x.IdentityId == user.IdentityId && x.ToPhoneNumber != null && x.IsEnabled == true && x.OnDownload == true).ToLambda()))
                     {
-                        alert.Enqueue_TextV1(new TextV1()
+                        _ = alert.Enqueue_TextV1(new TextV1()
                         {
                             FromPhoneNumber = conf["Notifications:TextFromPhoneNumber"],
                             ToPhoneNumber = text.ToPhoneNumber,
                             Body = Templates.NotifyTextOnFileDownload(conf["Daemons:SftpService:Dns"], ServerSession.Current.UserName,
                                 text.ToFirstName, text.ToLastName, "/" + e.FullPath, e.BytesTransferred.ToString(), e.Session.ClientEndPoint.ToString())
-                        }).AsTask();
+                        }).AsTask().Result;
                     }
                 }
 
@@ -620,14 +620,14 @@ namespace Bhbk.Daemon.Aurora.SFTP
                     var admin = scope.ServiceProvider.GetRequiredService<IAdminService>();
                     var alert = scope.ServiceProvider.GetRequiredService<IAlertService>();
 
-                    var user = uow.Users.Get(QueryExpressionFactory.GetQueryExpression<tbl_User>()
+                    var user = uow.Users.Get(QueryExpressionFactory.GetQueryExpression<User>()
                         .Where(x => x.IdentityAlias == ServerSession.Current.UserName).ToLambda())
                         .Single();
 
-                    foreach (var email in uow.UserAlerts.Get(QueryExpressionFactory.GetQueryExpression<tbl_UserAlert>()
-                        .Where(x => x.IdentityId == user.IdentityId && !string.IsNullOrWhiteSpace(x.ToEmailAddress) && x.OnUpload == true).ToLambda()))
+                    foreach (var email in uow.UserAlerts.Get(QueryExpressionFactory.GetQueryExpression<UserAlert>()
+                        .Where(x => x.IdentityId == user.IdentityId && x.ToEmailAddress != null && x.IsEnabled == true && x.OnUpload == true).ToLambda()))
                     {
-                        alert.Enqueue_EmailV1(new EmailV1()
+                        _ = alert.Enqueue_EmailV1(new EmailV1()
                         {
                             FromEmail = conf["Notifications:EmailFromAddress"],
                             FromDisplay = conf["Notifications:EmailFromDisplayName"],
@@ -636,19 +636,19 @@ namespace Bhbk.Daemon.Aurora.SFTP
                             Subject = "File Upload Alert",
                             Body = Templates.NotifyEmailOnFileUpload(conf["Daemons:SftpService:Dns"], ServerSession.Current.UserName,
                                 email.ToFirstName, email.ToLastName, "/" + e.FullPath, e.BytesTransferred.ToString(), e.Session.ClientEndPoint.ToString())
-                        }).AsTask();
+                        }).AsTask().Result;
                     }
 
-                    foreach (var text in uow.UserAlerts.Get(QueryExpressionFactory.GetQueryExpression<tbl_UserAlert>()
-                        .Where(x => x.IdentityId == user.IdentityId && !string.IsNullOrWhiteSpace(x.ToPhoneNumber) && x.OnUpload == true).ToLambda()))
+                    foreach (var text in uow.UserAlerts.Get(QueryExpressionFactory.GetQueryExpression<UserAlert>()
+                            .Where(x => x.IdentityId == user.IdentityId && x.ToPhoneNumber != null && x.IsEnabled == true && x.OnUpload == true).ToLambda()))
                     {
-                        alert.Enqueue_TextV1(new TextV1()
+                        _ = alert.Enqueue_TextV1(new TextV1()
                         {
                             FromPhoneNumber = conf["Notifications:TextFromPhoneNumber"],
                             ToPhoneNumber = text.ToPhoneNumber,
                             Body = Templates.NotifyTextOnFileUpload(conf["Daemons:SftpService:Dns"], ServerSession.Current.UserName,
                                 text.ToFirstName, text.ToLastName, "/" + e.FullPath, e.BytesTransferred.ToString(), e.Session.ClientEndPoint.ToString())
-                        }).AsTask();
+                        }).AsTask().Result;
                     }
                 }
 

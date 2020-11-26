@@ -1,4 +1,4 @@
-﻿using Bhbk.Lib.Aurora.Data.Models_DIRECT;
+﻿using Bhbk.Lib.Aurora.Data_EF6.Models;
 using System.Collections.Generic;
 using System.Net;
 
@@ -6,7 +6,7 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 {
     public static class NetworkHelper
     {
-        public static bool ValidateAddress(IEnumerable<tbl_Network> networks, IPAddress client)
+        public static bool ValidateAddress(IEnumerable<Network> networks, IPAddress client)
         {
             var found = false;
 

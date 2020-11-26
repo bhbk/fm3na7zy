@@ -1,6 +1,6 @@
 ﻿using Bhbk.Cli.Aurora.Helpers;
-using Bhbk.Lib.Aurora.Data.Infrastructure_DIRECT;
-using Bhbk.Lib.Aurora.Data.Models_DIRECT;
+using Bhbk.Lib.Aurora.Data_EF6.Infrastructure;
+using Bhbk.Lib.Aurora.Data_EF6.Models;
 using Bhbk.Lib.CommandLine.IO;
 using Bhbk.Lib.Common.Primitives.Enums;
 using Bhbk.Lib.Common.Services;
@@ -20,7 +20,7 @@ namespace Bhbk.Cli.Aurora.Commands
     {
         private readonly IConfiguration _conf;
         private readonly IUnitOfWork _uow;
-        private tbl_User _user;
+        private User _user;
         private AuthType _authType;
         private readonly string _authTypeList = string.Join(", ", Enum.GetNames(typeof(AuthType)));
         private string _serverAddress, _serverShare;
@@ -42,11 +42,11 @@ namespace Bhbk.Cli.Aurora.Commands
                 if (string.IsNullOrEmpty(arg))
                     throw new ConsoleHelpAsException($"  *** No user name given ***");
 
-                _user = _uow.Users.Get(QueryExpressionFactory.GetQueryExpression<tbl_User>()
+                _user = _uow.Users.Get(QueryExpressionFactory.GetQueryExpression<User>()
                     .Where(x => x.IdentityAlias == arg).ToLambda(),
-                        new List<Expression<Func<tbl_User, object>>>()
+                        new List<Expression<Func<User, object>>>()
                         {
-                            x => x.tbl_UserMount
+                            x => x.Mount
                         }).SingleOrDefault();
 
                 if (_user == null)
@@ -79,15 +79,15 @@ namespace Bhbk.Cli.Aurora.Commands
         {
             try
             {
-                if (_user.tbl_UserMount != null)
+                if (_user.Mount != null)
                 {
                     Console.Out.WriteLine("  *** The user already has a mount ***");
-                    ConsoleHelper.StdOutUserMounts(new List<tbl_UserMount> { _user.tbl_UserMount });
+                    ConsoleHelper.StdOutUserMounts(new List<UserMount> { _user.Mount });
 
                     return StandardOutput.FondFarewell();
                 }
 
-                tbl_UserMount mount;
+                UserMount mount;
 
                 if (_alternateCredential)
                 {
@@ -101,7 +101,7 @@ namespace Bhbk.Cli.Aurora.Commands
                     Console.Out.WriteLine();
 
                     mount = _uow.UserMounts.Create(
-                        new tbl_UserMount
+                        new UserMount
                         {
                             IdentityId = _user.IdentityId,
                             CredentialId = Guid.Parse(input),
@@ -117,7 +117,7 @@ namespace Bhbk.Cli.Aurora.Commands
                 else
                 {
                     mount = _uow.UserMounts.Create(
-                        new tbl_UserMount
+                        new UserMount
                         {
                             IdentityId = _user.IdentityId,
                             CredentialId = null,
@@ -131,7 +131,7 @@ namespace Bhbk.Cli.Aurora.Commands
                     _uow.Commit();
                 }
 
-                ConsoleHelper.StdOutUserMounts(new List<tbl_UserMount>() { mount });
+                ConsoleHelper.StdOutUserMounts(new List<UserMount>() { mount });
 
                 return StandardOutput.FondFarewell();
             }

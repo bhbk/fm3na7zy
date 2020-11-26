@@ -1,5 +1,5 @@
-﻿using Bhbk.Lib.Aurora.Data.Infrastructure_DIRECT;
-using Bhbk.Lib.Aurora.Data.Models_DIRECT;
+﻿using Bhbk.Lib.Aurora.Data_EF6.Infrastructure;
+using Bhbk.Lib.Aurora.Data_EF6.Models;
 using Bhbk.Lib.Common.Primitives;
 using Bhbk.Lib.QueryExpression.Extensions;
 using Bhbk.Lib.QueryExpression.Factories;
@@ -39,14 +39,14 @@ namespace Bhbk.WebApi.Aurora.Tasks
 
                         var staggerVerify = int.Parse(conf["Jobs:UnstructuredData:StaggerVerify"]);
 
-                        var files = uow.UserFiles.Get(QueryExpressionFactory.GetQueryExpression<tbl_UserFile>()
+                        var files = uow.UserFiles.Get(QueryExpressionFactory.GetQueryExpression<UserFile>()
                             .Where(x => x.LastVerifiedUtc < DateTime.UtcNow.AddSeconds(-staggerVerify)).ToLambda());
 
-                        var problems = new List<tbl_UserFile>();
+                        var problems = new List<UserFile>();
 
                         foreach (var file in files)
                         {
-                            var filePath = new FileInfo(conf["Storage:UnstructuredDataPath"]
+                            var filePath = new FileInfo(conf["Storage:UnstructuredData"]
                                 + Path.DirectorySeparatorChar + file.RealPath
                                 + Path.DirectorySeparatorChar + file.RealFileName);
 

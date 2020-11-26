@@ -1,6 +1,6 @@
 ﻿using Bhbk.Daemon.Aurora.SFTP.Helpers;
-using Bhbk.Lib.Aurora.Data.Infrastructure_DIRECT;
-using Bhbk.Lib.Aurora.Data.Models_DIRECT;
+using Bhbk.Lib.Aurora.Data_EF6.Infrastructure;
+using Bhbk.Lib.Aurora.Data_EF6.Models;
 using Bhbk.Lib.Aurora.Domain.Helpers;
 using Bhbk.Lib.Cryptography.Encryption;
 using Bhbk.Lib.QueryExpression.Extensions;
@@ -24,11 +24,11 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
     internal class SmbReadOnlyFileSystem : ReadOnlyFileSystemProvider, IDisposable
     {
         private readonly SafeAccessTokenHandle _userToken;
-        private readonly tbl_User _userEntity;
+        private readonly User _userEntity;
         private readonly string _userMount;
         private bool _disposed = false;
 
-        internal SmbReadOnlyFileSystem(FileSystemProviderSettings settings, IServiceScopeFactory factory, tbl_User userEntity, 
+        internal SmbReadOnlyFileSystem(FileSystemProviderSettings settings, IServiceScopeFactory factory, User userEntity, 
             string identityUser, string identityPass)
             : base(settings)
         {
@@ -46,13 +46,13 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                 var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
                 var conf = scope.ServiceProvider.GetRequiredService<IConfiguration>();
 
-                var userMount = uow.UserMounts.Get(QueryExpressionFactory.GetQueryExpression<tbl_UserMount>()
+                var userMount = uow.UserMounts.Get(QueryExpressionFactory.GetQueryExpression<UserMount>()
                     .Where(x => x.IdentityId == _userEntity.IdentityId).ToLambda())
                     .Single();
 
                 if (userMount.CredentialId.HasValue)
                 {
-                    var userCred = uow.Credentials.Get(QueryExpressionFactory.GetQueryExpression<tbl_Credential>()
+                    var userCred = uow.Credentials.Get(QueryExpressionFactory.GetQueryExpression<Credential>()
                         .Where(x => x.Id == userMount.CredentialId).ToLambda())
                         .Single();
 
@@ -73,7 +73,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
 
                 _userMount = userMount.ServerAddress + userMount.ServerShare;
 
-                var pubKeys = uow.PublicKeys.Get(QueryExpressionFactory.GetQueryExpression<tbl_PublicKey>()
+                var pubKeys = uow.PublicKeys.Get(QueryExpressionFactory.GetQueryExpression<PublicKey>()
                     .Where(x => x.IdentityId == _userEntity.IdentityId).ToLambda()).ToList();
 
                 var pubKeysContent = KeyHelper.ExportPubKeyBase64(_userEntity, pubKeys);

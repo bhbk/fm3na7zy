@@ -1,6 +1,6 @@
 ﻿using Bhbk.Cli.Aurora.Helpers;
-using Bhbk.Lib.Aurora.Data.Infrastructure_DIRECT;
-using Bhbk.Lib.Aurora.Data.Models_DIRECT;
+using Bhbk.Lib.Aurora.Data_EF6.Infrastructure;
+using Bhbk.Lib.Aurora.Data_EF6.Models;
 using Bhbk.Lib.Aurora.Domain.Primitives.Enums;
 using Bhbk.Lib.CommandLine.IO;
 using Bhbk.Lib.Common.Primitives.Enums;
@@ -21,7 +21,7 @@ namespace Bhbk.Cli.Aurora.Commands
     {
         private readonly IConfiguration _conf;
         private readonly IUnitOfWork _uow;
-        private tbl_User _user;
+        private User _user;
         private IPNetwork _cidr;
         private NetworkAction _actionType;
         private readonly string _actionTypeList = string.Join(", ", Enum.GetNames(typeof(NetworkAction)));
@@ -42,11 +42,11 @@ namespace Bhbk.Cli.Aurora.Commands
                 if (string.IsNullOrEmpty(arg))
                     throw new ConsoleHelpAsException($"  *** No user name given ***");
 
-                _user = _uow.Users.Get(QueryExpressionFactory.GetQueryExpression<tbl_User>()
+                _user = _uow.Users.Get(QueryExpressionFactory.GetQueryExpression<User>()
                     .Where(x => x.IdentityAlias == arg).ToLambda(),
-                        new List<Expression<Func<tbl_User, object>>>()
+                        new List<Expression<Func<User, object>>>()
                         {
-                            x => x.tbl_UserMount,
+                            x => x.Mount,
                         }).SingleOrDefault();
 
                 if (_user == null)
@@ -71,7 +71,7 @@ namespace Bhbk.Cli.Aurora.Commands
             try
             {
                 var network = _uow.Networks.Create(
-                    new tbl_Network
+                    new Network
                     {
                         Id = Guid.NewGuid(),
                         IdentityId = _user.IdentityId,
@@ -82,7 +82,7 @@ namespace Bhbk.Cli.Aurora.Commands
                     });
                 _uow.Commit();
 
-                ConsoleHelper.StdOutNetworks(new List<tbl_Network>() { network });
+                ConsoleHelper.StdOutNetworks(new List<Network>() { network });
 
                 return StandardOutput.FondFarewell();
             }
