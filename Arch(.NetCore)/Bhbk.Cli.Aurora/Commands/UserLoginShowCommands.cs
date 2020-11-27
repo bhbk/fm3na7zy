@@ -1,6 +1,6 @@
 ﻿using Bhbk.Cli.Aurora.Factories;
-using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
 using Bhbk.Lib.Aurora.Data_EF6.Models;
+using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
 using Bhbk.Lib.CommandLine.IO;
 using Bhbk.Lib.Common.Primitives.Enums;
 using Bhbk.Lib.Common.Services;
@@ -62,7 +62,7 @@ namespace Bhbk.Cli.Aurora.Commands
                 if (_user.Mount != null)
                     OutputFactory.StdOutUserMounts(new List<UserMount> { _user.Mount });
 
-                OutputFactory.StdOutKeyPairs(_user.PublicKeys.OrderBy(x => x.CreatedUtc));
+                OutputFactory.StdOutKeyPairs(_user.PublicKeys.OrderBy(x => x.CreatedUtc), _user.PrivateKeys);
                 OutputFactory.StdOutNetworks(_user.Networks.OrderBy(x => x.Action));
 
                 return StandardOutput.FondFarewell();

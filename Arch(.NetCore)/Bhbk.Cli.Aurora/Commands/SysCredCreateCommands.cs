@@ -83,14 +83,14 @@ namespace Bhbk.Cli.Aurora.Commands
                     {
                         Domain = _credDomain,
                         UserName = _credLogin,
-                        Password = cipherText,
+                        EncryptedPassword = cipherText,
                         IsEnabled = true,
                         IsDeletable = true,
                     });
 
                 _uow.Commit();
 
-                OutputFactory.StdOutCredentials(new List<Credential>() { credential });
+                OutputFactory.StdOutCredentials(new List<Credential> { credential });
 
                 return StandardOutput.FondFarewell();
             }

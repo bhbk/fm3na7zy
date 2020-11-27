@@ -42,7 +42,7 @@ namespace Bhbk.Lib.Aurora.Data.Models
                     .HasMaxLength(128)
                     .IsUnicode(false);
 
-                entity.Property(e => e.Password)
+                entity.Property(e => e.EncryptedPassword)
                     .IsRequired()
                     .HasMaxLength(128)
                     .IsUnicode(false);

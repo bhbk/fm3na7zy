@@ -2,10 +2,10 @@
 CREATE PROCEDURE [svc].[usp_User_Insert]
      @IdentityId			UNIQUEIDENTIFIER
     ,@IdentityAlias			NVARCHAR (128) 
-    ,@RequirePassword		BIT
-    ,@RequirePublicKey		BIT
     ,@FileSystemType		NVARCHAR (16) 
-    ,@FileSystemReadOnly	BIT
+    ,@IsPasswordRequired	BIT
+    ,@IsPublicKeyRequired	BIT
+    ,@IsFileSystemReadOnly	BIT
     ,@Debugger				NVARCHAR (16) 
     ,@IsEnabled				BIT
     ,@IsDeletable			BIT
@@ -22,10 +22,10 @@ BEGIN
 			(
 			 IdentityId
 			,IdentityAlias
-			,RequirePassword
-			,RequirePublicKey
 			,FileSystemType
-			,FileSystemReadOnly
+			,IsPasswordRequired
+			,IsPublicKeyRequired
+			,IsFileSystemReadOnly
 			,QuotaInBytes
 			,QuotaUsedInBytes
 			,Debugger
@@ -37,10 +37,10 @@ BEGIN
 			(
 			@IdentityId
 			,@IdentityAlias
-			,@RequirePassword
-			,@RequirePublicKey
 			,@FileSystemType
-			,@FileSystemReadOnly
+			,@IsPasswordRequired
+			,@IsPublicKeyRequired
+			,@IsFileSystemReadOnly
 			,2147483647
 			,0
 			,@Debugger

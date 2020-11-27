@@ -19,7 +19,7 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 {
 	public class KeyHelper
 	{
-		public static void CheckPrivKey(IConfiguration conf, IUnitOfWork uow,
+		public static void CheckKeyPair(IConfiguration conf, IUnitOfWork uow,
 			SshHostKeyAlgorithm keyAlgo, int privKeySize, string privKeyPass, SignatureHashAlgorithm sigAlgo)
 		{
 			var keyAlgoStr = keyAlgo.ToString();
@@ -28,10 +28,10 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 				.SingleOrDefault();
 
 			if (privKey == null)
-				CreatePrivKey(conf, uow, keyAlgo, privKeySize, privKeyPass, sigAlgo);
+				CreateKeyPair(conf, uow, keyAlgo, privKeySize, privKeyPass, sigAlgo);
 		}
 
-		public static PrivateKey CreatePrivKey(IConfiguration conf, IUnitOfWork uow,
+		public static (PublicKey, PrivateKey) CreateKeyPair(IConfiguration conf, IUnitOfWork uow,
 			SshHostKeyAlgorithm keyAlgo, int privKeySize, string privKeyPass, SignatureHashAlgorithm sigAlgo)
 		{
 			var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
@@ -44,50 +44,44 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 			keyPair.Save(privStream, privKeyPass, SshPrivateKeyFormat.Pkcs8);
 			keyPair.SavePublicKey(pubStream, SshPublicKeyFormat.Pkcs8);
 
-			var privKey = uow.PrivateKeys.Create(
-				new PrivateKey
-				{
-					Id = privId,
-					PublicKeyId = pubId,
-					IdentityId = null,
-					KeyValue = Encoding.ASCII.GetString(privStream.ToArray()),
-					KeyAlgo = keyPair.KeyAlgorithm.ToString(),
-					KeyPass = AES.EncryptString(privKeyPass, conf["Databases:AuroraSecret"]),
-					KeyFormat = SshPrivateKeyFormat.Pkcs8.ToString(),
-					IsEnabled = true,
-					IsDeletable = false,
-					CreatedUtc = DateTime.UtcNow,
-					LastUpdatedUtc = null,
-				});
+			var privKey = new PrivateKey
+			{
+				Id = privId,
+				PublicKeyId = pubId,
+				KeyValue = Encoding.ASCII.GetString(privStream.ToArray()),
+				KeyAlgo = keyPair.KeyAlgorithm.ToString(),
+				KeyPass = AES.EncryptString(privKeyPass, conf["Databases:AuroraSecret"]),
+				KeyFormat = SshPrivateKeyFormat.Pkcs8.ToString(),
+				IsEnabled = true,
+				IsDeletable = true,
+			};
 
-			Log.Information($"'{callPath}' 'system' private key algo {keyPair.KeyAlgorithm} sig {keyPair.Fingerprint.ToString(sigAlgo, false)}" +
+			Log.Information($"'{callPath}' 'system' creating new private key... " +
+				$"{Environment.NewLine} algo: {privKey.KeyAlgo} format: {privKey.KeyFormat} " +
 				$"{Environment.NewLine}{privKey.KeyValue}");
 
-			var pubKey = uow.PublicKeys.Create(
-				new PublicKey
-				{
-					Id = pubId,
-					PrivateKeyId = privId,
-					IdentityId = null,
-					KeyValue = Encoding.ASCII.GetString(pubStream.ToArray()),
-					KeyAlgo = keyPair.KeyAlgorithm.ToString(),
-					KeyFormat = SshPublicKeyFormat.Pkcs8.ToString(),
-					SigValue = keyPair.Fingerprint.ToString(sigAlgo, false),
-					SigAlgo = sigAlgo.ToString(),
-					IsEnabled = true,
-					IsDeletable = false,
-					CreatedUtc = DateTime.UtcNow,
-				});
+			var pubKey = new PublicKey
+			{
+				Id = pubId,
+				PrivateKeyId = privId,
+				KeyValue = Encoding.ASCII.GetString(pubStream.ToArray()),
+				KeyAlgo = keyPair.KeyAlgorithm.ToString(),
+				KeyFormat = SshPublicKeyFormat.Pkcs8.ToString(),
+				SigValue = keyPair.Fingerprint.ToString(sigAlgo, false),
+				SigAlgo = sigAlgo.ToString(),
+				IsEnabled = true,
+				IsDeletable = true,
+			};
 
-			Log.Information($"'{callPath}' 'system' public key algo {keyPair.KeyAlgorithm} sig {keyPair.Fingerprint.ToString(sigAlgo, false)}" +
+			Log.Information($"'{callPath}' 'system' creating new public key... " +
+				$"{Environment.NewLine} algo: {pubKey.KeyAlgo} format: {pubKey.KeyFormat} " +
+				$"{Environment.NewLine} sig: {pubKey.SigValue}" +
 				$"{Environment.NewLine}{pubKey.KeyValue}");
 
-			uow.Commit();
-
-			return privKey;
+			return (pubKey, privKey);
 		}
 
-		public static PrivateKey CreatePrivKey(IConfiguration conf, IUnitOfWork uow, User user,
+		public static (PublicKey, PrivateKey) CreateKeyPair(IConfiguration conf, IUnitOfWork uow, User user,
 			SshHostKeyAlgorithm keyAlgo, int privKeySize, string privKeyPass, SignatureHashAlgorithm sigAlgo, string comment)
 		{
 			var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
@@ -100,48 +94,44 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 			keyPair.Save(privStream, privKeyPass, SshPrivateKeyFormat.Pkcs8);
 			keyPair.SavePublicKey(pubStream, SshPublicKeyFormat.Pkcs8);
 
-			var privKey = uow.PrivateKeys.Create(
-				new PrivateKey
-				{
-					Id = privId,
-					PublicKeyId = pubId,
-					IdentityId = user.IdentityId,
-					KeyValue = Encoding.ASCII.GetString(privStream.ToArray()),
-					KeyAlgo = keyPair.KeyAlgorithm.ToString(),
-					KeyPass = AES.EncryptString(privKeyPass, conf["Databases:AuroraSecret"]),
-					KeyFormat = SshPrivateKeyFormat.Pkcs8.ToString(),
-					IsEnabled = true,
-					IsDeletable = true,
-					CreatedUtc = DateTime.UtcNow,
-				});
+			var privKey = new PrivateKey
+			{
+				Id = privId,
+				PublicKeyId = pubId,
+				IdentityId = user.IdentityId,
+				KeyValue = Encoding.ASCII.GetString(privStream.ToArray()),
+				KeyAlgo = keyPair.KeyAlgorithm.ToString(),
+				KeyPass = AES.EncryptString(privKeyPass, conf["Databases:AuroraSecret"]),
+				KeyFormat = SshPrivateKeyFormat.Pkcs8.ToString(),
+				IsEnabled = true,
+				IsDeletable = true,
+			};
 
-			Log.Information($"'{callPath}' '{user.IdentityAlias}' private key algo {keyPair.KeyAlgorithm} sig {keyPair.Fingerprint.ToString(sigAlgo, false)}" +
+			Log.Information($"'{callPath}' '{user.IdentityAlias}' creating new private key... " +
+				$"{Environment.NewLine} algo: {privKey.KeyAlgo} format: {privKey.KeyFormat} " +
 				$"{Environment.NewLine}{privKey.KeyValue}");
 
-			var pubKey = uow.PublicKeys.Create(
-				new PublicKey
-				{
-					Id = pubId,
-					PrivateKeyId = privId,
-					IdentityId = user.IdentityId,
-					KeyValue = Encoding.ASCII.GetString(pubStream.ToArray()),
-					KeyAlgo = keyPair.KeyAlgorithm.ToString(),
-					KeyFormat = SshPublicKeyFormat.Pkcs8.ToString(),
-					SigValue = keyPair.Fingerprint.ToString(sigAlgo, false),
-					SigAlgo = sigAlgo.ToString(),
-					Comment = comment,
-					IsEnabled = true,
-					IsDeletable = true,
-					CreatedUtc = DateTime.UtcNow,
-					LastUpdatedUtc = null,
-				});
+			var pubKey = new PublicKey
+			{
+				Id = pubId,
+				PrivateKeyId = privId,
+				IdentityId = user.IdentityId,
+				KeyValue = Encoding.ASCII.GetString(pubStream.ToArray()),
+				KeyAlgo = keyPair.KeyAlgorithm.ToString(),
+				KeyFormat = SshPublicKeyFormat.Pkcs8.ToString(),
+				SigValue = keyPair.Fingerprint.ToString(sigAlgo, false),
+				SigAlgo = sigAlgo.ToString(),
+				Comment = comment,
+				IsEnabled = true,
+				IsDeletable = true,
+			};
 
-			Log.Information($"'{callPath}' '{user.IdentityAlias}' public key algo {keyPair.KeyAlgorithm} sig {keyPair.Fingerprint.ToString(sigAlgo, false)}" +
+			Log.Information($"'{callPath}' '{user.IdentityAlias}' creating new public key... " +
+				$"{Environment.NewLine} algo: {pubKey.KeyAlgo} format: {pubKey.KeyFormat} " +
+				$"{Environment.NewLine} sig: {pubKey.SigValue}" +
 				$"{Environment.NewLine}{pubKey.KeyValue}");
 
-			uow.Commit();
-
-			return privKey;
+			return (pubKey, privKey);
 		}
 
 		public static ICollection<PrivateKey> EditPrivKeySecrets(IUnitOfWork uow,
@@ -169,7 +159,6 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 				privKey.Save(privStream, plainText, keyFormat);
 
 				key.KeyPass = AES.EncryptString(plainText, secretNew);
-				key.LastUpdatedUtc = DateTime.UtcNow;
 
 				uow.PrivateKeys.Update(key);
 
@@ -221,11 +210,11 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 
 				var pubStream = new MemoryStream();
 				var pubKey = new SshPublicKey(pubKeyInfo);
-				pubKey.SavePublicKey(pubStream, SshPublicKeyFormat.Pkcs8);
+				pubKey.SavePublicKey(pubStream, SshPublicKeyFormat.Ssh2Base64);
 
-                string algo;
+				var algo = string.Empty;
 
-                switch (pubKey.KeyAlgorithm)
+				switch (pubKey.KeyAlgorithm)
 				{
 					case SshHostKeyAlgorithm.DSS:
 						algo = "ssh-dsa";
@@ -235,21 +224,17 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 						algo = "ssh-rsa";
 						break;
 
-					//case SshHostKeyAlgorithm.ECDsaNistP256:
-					//	algo = "ecdsa-sha2-nistp256";
-					//	break;
+					case SshHostKeyAlgorithm.ECDsaNistP256:
+					//algo = "ecdsa-sha2-nistp256";
 
-					//case SshHostKeyAlgorithm.ECDsaNistP384:
-					//	algo = "ecdsa-sha2-nistp384";
-					//	break;
+					case SshHostKeyAlgorithm.ECDsaNistP384:
+					//algo = "ecdsa-sha2-nistp384";
 
-					//case SshHostKeyAlgorithm.ECDsaNistP521:
-					//	algo = "ecdsa-sha2-nistp521";
-					//	break;
+					case SshHostKeyAlgorithm.ECDsaNistP521:
+					//algo = "ecdsa-sha2-nistp521";
 
-					//case SshHostKeyAlgorithm.ED25519:
-					//	algo = "ssh-ed25519";
-					//	break;
+					case SshHostKeyAlgorithm.ED25519:
+					//algo = "ssh-ed25519";
 
 					default:
 						{
@@ -264,13 +249,16 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 			return sb;
 		}
 
-		public static PrivateKey ImportPrivKey(IConfiguration conf, IUnitOfWork uow,
-			string privKeyPass, SignatureHashAlgorithm sigAlgo, FileInfo inputFile)
+		public static (PublicKey, PrivateKey) ImportKeyPair(IConfiguration conf, IUnitOfWork uow,
+			string privKeyPass, SignatureHashAlgorithm sigAlgo, MemoryStream memoryStream)
 		{
 			var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
 
-			PrivateKey pubKey = null;
-			var keyPair = new SshPrivateKey(inputFile.FullName, privKeyPass);
+			memoryStream.Position = 0;
+
+			PrivateKey privKey = null;
+			PublicKey pubKey = null;
+			var keyPair = new SshPrivateKey(memoryStream, privKeyPass);
 			var privId = Guid.NewGuid();
 			var pubId = Guid.NewGuid();
 			var privStream = new MemoryStream();
@@ -293,97 +281,105 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 			if (privKeyFound == null
 				&& pubKeyFound == null)
 			{
-				uow.PrivateKeys.Create(
-					new PrivateKey
-					{
-						Id = privId,
-						PublicKeyId = pubId,
-						KeyValue = privKeyValue,
-						KeyAlgo = keyPair.KeyAlgorithm.ToString(),
-						KeyPass = AES.EncryptString(privKeyPass, conf["Databases:AuroraSecret"]),
-						KeyFormat = SshPrivateKeyFormat.Pkcs8.ToString(),
-						IsEnabled = true,
-						IsDeletable = false,
-						CreatedUtc = DateTime.UtcNow,
-					});
+				privKey = new PrivateKey
+				{
+					Id = privId,
+					PublicKeyId = pubId,
+					KeyValue = privKeyValue,
+					KeyAlgo = keyPair.KeyAlgorithm.ToString(),
+					KeyPass = AES.EncryptString(privKeyPass, conf["Databases:AuroraSecret"]),
+					KeyFormat = SshPrivateKeyFormat.Pkcs8.ToString(),
+					IsEnabled = true,
+					IsDeletable = true,
+				};
 
-				Log.Information($"'{callPath}' 'system' private key algo {keyPair.KeyAlgorithm} sig {keyPair.Fingerprint.ToString(sigAlgo, false)}" +
-					$"{Environment.NewLine}{privKeyValue}");
+				Log.Information($"'{callPath}' 'system' import private key... " +
+					$"{Environment.NewLine} algo: {privKey.KeyAlgo} format: {privKey.KeyFormat} " +
+					$"{Environment.NewLine}{privKey.KeyValue}");
 
-				uow.PublicKeys.Create(
-					new PublicKey
-					{
-						Id = pubId,
-						PrivateKeyId = privId,
-						KeyValue = pubKeyValue,
-						KeyAlgo = keyPair.KeyAlgorithm.ToString(),
-						KeyFormat = SshPublicKeyFormat.Pkcs8.ToString(),
-						SigValue = keyPair.Fingerprint.ToString(sigAlgo, false),
-						SigAlgo = sigAlgo.ToString(),
-						Comment = null,
-						IsEnabled = true,
-						IsDeletable = false,
-						CreatedUtc = DateTime.UtcNow,
-					});
+				pubKey = new PublicKey
+				{
+					Id = pubId,
+					PrivateKeyId = privId,
+					KeyValue = pubKeyValue,
+					KeyAlgo = keyPair.KeyAlgorithm.ToString(),
+					KeyFormat = SshPublicKeyFormat.Pkcs8.ToString(),
+					SigValue = keyPair.Fingerprint.ToString(sigAlgo, false),
+					SigAlgo = sigAlgo.ToString(),
+					IsEnabled = true,
+					IsDeletable = true,
+				};
 
-				Log.Information($"'{callPath}' 'system' public key algo {keyPair.KeyAlgorithm} sig {keyPair.Fingerprint.ToString(sigAlgo, false)}" +
-					$"{Environment.NewLine}{pubKeyValue}");
+				Log.Information($"'{callPath}' 'system' import public key... " +
+					$"{Environment.NewLine} algo: {pubKey.KeyAlgo} format: {pubKey.KeyFormat} " +
+					$"{Environment.NewLine} sig: {pubKey.SigValue}" +
+					$"{Environment.NewLine}{pubKey.KeyValue}");
 			}
 			else if (privKeyFound != null
 				&& pubKeyFound == null)
 			{
-				uow.PublicKeys.Create(
-					new PublicKey
-					{
-						Id = pubId,
-						PrivateKeyId = privKeyFound.Id,
-						KeyValue = pubKeyValue,
-						KeyAlgo = keyPair.KeyAlgorithm.ToString(),
-						KeyFormat = SshPublicKeyFormat.Pkcs8.ToString(),
-						SigValue = keyPair.Fingerprint.ToString(sigAlgo, false),
-						SigAlgo = sigAlgo.ToString(),
-						Comment = null,
-						IsEnabled = true,
-						IsDeletable = false,
-						CreatedUtc = DateTime.UtcNow,
-					});
+				Log.Warning($"'{callPath}' 'system' skip import... " +
+					$"{Environment.NewLine} *** private key with GUID {privKeyFound.Id} already exists ***" +
+					$"{Environment.NewLine} algo: {privKeyFound.KeyAlgo} format: {privKeyFound.KeyFormat} " +
+					$"{Environment.NewLine}{privKeyFound.KeyValue}");
 
-				Log.Information($"'{callPath}' 'system' public key algo {keyPair.KeyAlgorithm} sig {keyPair.Fingerprint.ToString(sigAlgo, false)}" +
-					$"{Environment.NewLine}{pubKeyValue}");
+				pubKey = new PublicKey
+				{
+					Id = pubId,
+					PrivateKeyId = privKeyFound.Id,
+					KeyValue = pubKeyValue,
+					KeyAlgo = keyPair.KeyAlgorithm.ToString(),
+					KeyFormat = SshPublicKeyFormat.Pkcs8.ToString(),
+					SigValue = keyPair.Fingerprint.ToString(sigAlgo, false),
+					SigAlgo = sigAlgo.ToString(),
+					IsEnabled = true,
+					IsDeletable = true,
+				};
+
+				Log.Information($"'{callPath}' 'system' import public key... " +
+					$"{Environment.NewLine} algo: {pubKey.KeyAlgo} format: {pubKey.KeyFormat} " +
+					$"{Environment.NewLine} sig: {pubKey.SigValue}" +
+					$"{Environment.NewLine}{pubKey.KeyValue}");
 			}
 			else if (privKeyFound == null
 				&& pubKeyFound != null)
 			{
-				uow.PrivateKeys.Create(
-					new PrivateKey
-					{
-						Id = privId,
-						PublicKeyId = pubKeyFound.Id,
-						KeyValue = privKeyValue,
-						KeyAlgo = keyPair.KeyAlgorithm.ToString(),
-						KeyPass = AES.EncryptString(privKeyPass, conf["Databases:AuroraSecret"]),
-						KeyFormat = SshPrivateKeyFormat.Pkcs8.ToString(),
-						IsEnabled = true,
-						IsDeletable = false,
-						CreatedUtc = DateTime.UtcNow,
-					});
+				Log.Warning($"'{callPath}' 'system' skip import... " +
+					$"{Environment.NewLine} *** public key with GUID {pubKeyFound.Id} already exists ***" +
+					$"{Environment.NewLine} algo: {pubKeyFound.KeyAlgo} format: {pubKeyFound.KeyFormat} " +
+					$"{Environment.NewLine} sig: {pubKeyFound.SigValue}" +
+					$"{Environment.NewLine}{pubKeyFound.KeyValue}");
 
-				Log.Information($"'{callPath}' 'system' private key algo {keyPair.KeyAlgorithm} sig {keyPair.Fingerprint.ToString(sigAlgo, false)}" +
-					$"{Environment.NewLine}{privKeyValue}");
+				privKey = new PrivateKey
+				{
+					Id = privId,
+					PublicKeyId = pubKeyFound.Id,
+					KeyValue = privKeyValue,
+					KeyAlgo = keyPair.KeyAlgorithm.ToString(),
+					KeyPass = AES.EncryptString(privKeyPass, conf["Databases:AuroraSecret"]),
+					KeyFormat = SshPrivateKeyFormat.Pkcs8.ToString(),
+					IsEnabled = true,
+					IsDeletable = true,
+				};
+
+				Log.Information($"'{callPath}' 'system' import private key... " +
+					$"{Environment.NewLine} algo: {privKey.KeyAlgo} format: {privKey.KeyFormat} " +
+					$"{Environment.NewLine}{privKey.KeyValue}");
 			}
 
-			uow.Commit();
-
-			return pubKey;
+			return (pubKey, privKey);
 		}
 
-		public static PrivateKey ImportPrivKey(IConfiguration conf, IUnitOfWork uow, User user,
-			string privKeyPass, SignatureHashAlgorithm sigAlgo, string comment, FileInfo inputFile)
+		public static (PublicKey, PrivateKey) ImportKeyPair(IConfiguration conf, IUnitOfWork uow, User user,
+			string privKeyPass, SignatureHashAlgorithm sigAlgo, string comment, MemoryStream stream)
 		{
 			var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
 
-			PrivateKey pubKey = null;
-			var keyPair = new SshPrivateKey(inputFile.FullName, privKeyPass);
+			stream.Position = 0;
+
+			PrivateKey privKey = null;
+			PublicKey pubKey = null;
+			var keyPair = new SshPrivateKey(stream, privKeyPass);
 			var privId = Guid.NewGuid();
 			var pubId = Guid.NewGuid();
 			var privStream = new MemoryStream();
@@ -396,147 +392,163 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 			var pubKeyValue = Encoding.ASCII.GetString(pubStream.ToArray());
 
 			var privKeyFound = uow.PrivateKeys.Get(QueryExpressionFactory.GetQueryExpression<PrivateKey>()
-				.Where(x => x.Id == user.IdentityId && x.KeyValue == privKeyValue).ToLambda())
+				.Where(x => x.IdentityId == user.IdentityId && x.KeyValue == privKeyValue).ToLambda())
 				.SingleOrDefault();
 
 			var pubKeyFound = uow.PublicKeys.Get(QueryExpressionFactory.GetQueryExpression<PublicKey>()
-				.Where(x => x.Id == user.IdentityId && x.KeyValue == pubKeyValue).ToLambda())
+				.Where(x => x.IdentityId == user.IdentityId && x.KeyValue == pubKeyValue).ToLambda())
 				.SingleOrDefault();
 
 			if (privKeyFound == null
 				&& pubKeyFound == null)
 			{
-				uow.PrivateKeys.Create(
-					new PrivateKey
-					{
-						Id = privId,
-						PublicKeyId = pubId,
-						IdentityId = user.IdentityId,
-						KeyValue = privKeyValue,
-						KeyAlgo = keyPair.KeyAlgorithm.ToString(),
-						KeyPass = AES.EncryptString(privKeyPass, conf["Databases:AuroraSecret"]),
-						KeyFormat = SshPrivateKeyFormat.Pkcs8.ToString(),
-						IsEnabled = true,
-						IsDeletable = true,
-						CreatedUtc = DateTime.UtcNow,
-					});
+				privKey = new PrivateKey
+				{
+					Id = privId,
+					PublicKeyId = pubId,
+					IdentityId = user.IdentityId,
+					KeyValue = privKeyValue,
+					KeyAlgo = keyPair.KeyAlgorithm.ToString(),
+					KeyPass = AES.EncryptString(privKeyPass, conf["Databases:AuroraSecret"]),
+					KeyFormat = SshPrivateKeyFormat.Pkcs8.ToString(),
+					IsEnabled = true,
+					IsDeletable = true,
+				};
 
-				Log.Information($"'{callPath}' '{user.IdentityAlias}' private key algo {keyPair.KeyAlgorithm} sig {keyPair.Fingerprint.ToString(sigAlgo, false)}" +
-					$"{Environment.NewLine}{privKeyValue}");
+				Log.Information($"'{callPath}' '{user.IdentityAlias}' import private key... " +
+					$"{Environment.NewLine} algo: {privKey.KeyAlgo} format: {privKey.KeyFormat} " +
+					$"{Environment.NewLine}{privKey.KeyValue}");
 
-				uow.PublicKeys.Create(
-					new PublicKey
-					{
-						Id = pubId,
-						PrivateKeyId = privId,
-						IdentityId = user.IdentityId,
-						KeyValue = pubKeyValue,
-						KeyAlgo = keyPair.KeyAlgorithm.ToString(),
-						KeyFormat = SshPublicKeyFormat.Pkcs8.ToString(),
-						SigValue = keyPair.Fingerprint.ToString(sigAlgo, false),
-						SigAlgo = sigAlgo.ToString(),
-						Comment = comment,
-						IsEnabled = true,
-						IsDeletable = true,
-						CreatedUtc = DateTime.UtcNow,
-					});
+				pubKey = new PublicKey
+				{
+					Id = pubId,
+					PrivateKeyId = privId,
+					IdentityId = user.IdentityId,
+					KeyValue = pubKeyValue,
+					KeyAlgo = keyPair.KeyAlgorithm.ToString(),
+					KeyFormat = SshPublicKeyFormat.Pkcs8.ToString(),
+					SigValue = keyPair.Fingerprint.ToString(sigAlgo, false),
+					SigAlgo = sigAlgo.ToString(),
+					Comment = comment,
+					IsEnabled = true,
+					IsDeletable = true,
+				};
 
-				Log.Information($"'{callPath}' '{user.IdentityAlias}' public key algo {keyPair.KeyAlgorithm} sig {keyPair.Fingerprint.ToString(sigAlgo, false)}" +
-					$"{Environment.NewLine}{pubKeyValue}");
+				Log.Information($"'{callPath}' '{user.IdentityAlias}' import public key... " +
+					$"{Environment.NewLine} algo: {pubKey.KeyAlgo} format: {pubKey.KeyFormat} " +
+					$"{Environment.NewLine} sig: {pubKey.SigValue}" +
+					$"{Environment.NewLine}{pubKey.KeyValue}");
 			}
 			else if (privKeyFound != null
 				&& pubKeyFound == null)
 			{
-				uow.PublicKeys.Create(
-					new PublicKey
-					{
-						Id = pubId,
-						PrivateKeyId = privKeyFound.Id,
-						IdentityId = user.IdentityId,
-						KeyValue = pubKeyValue,
-						KeyAlgo = keyPair.KeyAlgorithm.ToString(),
-						KeyFormat = SshPublicKeyFormat.Pkcs8.ToString(),
-						SigValue = keyPair.Fingerprint.ToString(sigAlgo, false),
-						SigAlgo = sigAlgo.ToString(),
-						Comment = comment,
-						IsEnabled = true,
-						IsDeletable = true,
-						CreatedUtc = DateTime.UtcNow,
-					});
+				Log.Warning($"'{callPath}' '{user.IdentityAlias}' skip import... " +
+					$"{Environment.NewLine} *** private key with GUID {privKeyFound.Id} already exists ***" +
+					$"{Environment.NewLine} algo: {privKeyFound.KeyAlgo} format: {privKeyFound.KeyFormat} " +
+					$"{Environment.NewLine}{privKeyFound.KeyValue}");
 
-				Log.Information($"'{callPath}' '{user.IdentityAlias}' public key algo {keyPair.KeyAlgorithm} sig {keyPair.Fingerprint.ToString(sigAlgo, false)}" +
-					$"{Environment.NewLine}{pubKeyValue}");
+				pubKey = new PublicKey
+				{
+					Id = pubId,
+					PrivateKeyId = privKeyFound.Id,
+					IdentityId = user.IdentityId,
+					KeyValue = pubKeyValue,
+					KeyAlgo = keyPair.KeyAlgorithm.ToString(),
+					KeyFormat = SshPublicKeyFormat.Pkcs8.ToString(),
+					SigValue = keyPair.Fingerprint.ToString(sigAlgo, false),
+					SigAlgo = sigAlgo.ToString(),
+					Comment = comment,
+					IsEnabled = true,
+					IsDeletable = true,
+				};
+
+				Log.Information($"'{callPath}' '{user.IdentityAlias}' import public key... " +
+					$"{Environment.NewLine} algo: {pubKey.KeyAlgo} format: {pubKey.KeyFormat} " +
+					$"{Environment.NewLine} sig: {pubKey.SigValue}" +
+					$"{Environment.NewLine}{pubKey.KeyValue}");
 			}
 			else if (privKeyFound == null
 				&& pubKeyFound != null)
 			{
-				uow.PrivateKeys.Create(
-					new PrivateKey
-					{
-						Id = privId,
-						PublicKeyId = pubKeyFound.Id,
-						IdentityId = user.IdentityId,
-						KeyValue = privKeyValue,
-						KeyAlgo = keyPair.Fingerprint.ToString(sigAlgo, false).ToString(),
-						KeyPass = AES.EncryptString(privKeyPass, conf["Databases:AuroraSecret"]),
-						IsEnabled = true,
-						IsDeletable = true,
-						CreatedUtc = DateTime.UtcNow,
-					});
+				Log.Warning($"'{callPath}' '{user.IdentityAlias}' skip import... " +
+					$"{Environment.NewLine} *** public key with GUID {pubKeyFound.Id} already exists ***" +
+					$"{Environment.NewLine} algo: {pubKeyFound.KeyAlgo} format: {pubKeyFound.KeyFormat} " +
+					$"{Environment.NewLine} sig: {pubKeyFound.SigValue}" +
+					$"{Environment.NewLine}{pubKeyFound.KeyValue}");
 
-				Log.Information($"'{callPath}' '{user.IdentityAlias}' private key algo {keyPair.KeyAlgorithm} sig {keyPair.Fingerprint.ToString(sigAlgo, false)}" +
-					$"{Environment.NewLine}{privKeyValue}");
+				privKey = new PrivateKey
+				{
+					Id = privId,
+					PublicKeyId = pubKeyFound.Id,
+					IdentityId = user.IdentityId,
+					KeyValue = privKeyValue,
+					KeyAlgo = keyPair.Fingerprint.ToString(sigAlgo, false).ToString(),
+					KeyPass = AES.EncryptString(privKeyPass, conf["Databases:AuroraSecret"]),
+					IsEnabled = true,
+					IsDeletable = true,
+				};
+
+				Log.Information($"'{callPath}' '{user.IdentityAlias}' import private key... " +
+					$"{Environment.NewLine} algo: {privKey.KeyAlgo} format: {privKey.KeyFormat} " +
+					$"{Environment.NewLine}{privKey.KeyValue}");
 			}
 
-			uow.Commit();
-
-			return pubKey;
+			return (pubKey, privKey);
 		}
 
 		public static PublicKey ImportPubKey(IUnitOfWork uow, User user,
-			SignatureHashAlgorithm sigAlgo, string hostname, FileInfo inputFile)
+			SignatureHashAlgorithm sigAlgo, string comment, MemoryStream stream)
 		{
 			var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
 
-			PublicKey pubKeyEntity = null;
-			var pubKey = new SshPublicKey(inputFile.FullName);
-			var pubKeyStream = new MemoryStream();
-			pubKey.SavePublicKey(pubKeyStream, SshPublicKeyFormat.Pkcs8);
+			stream.Position = 0;
 
-			var pubKeyValue = Encoding.ASCII.GetString(pubKeyStream.ToArray());
+			PublicKey pubKey = null;
+			var importedPubKey = new SshPublicKey(stream);
+			var importedPubKeyStream = new MemoryStream();
+			importedPubKey.SavePublicKey(importedPubKeyStream, SshPublicKeyFormat.Pkcs8);
+
+			Log.Information($"'{callPath}' '{user.IdentityAlias}' show original public key... " +
+				$"{Environment.NewLine} algo: {importedPubKey.KeyAlgorithm} " +
+				$"{Environment.NewLine} sig: {importedPubKey.Fingerprint.ToString(sigAlgo, false)}" +
+				$"{Environment.NewLine}{Encoding.UTF8.GetString(stream.ToArray())}");
+
+			var pubKeyValue = Encoding.UTF8.GetString(importedPubKeyStream.ToArray());
 			var pubKeyFound = uow.PublicKeys.Get(QueryExpressionFactory.GetQueryExpression<PublicKey>()
-				.Where(x => x.Id == user.IdentityId && x.KeyValue == pubKeyValue).ToLambda());
+				.Where(x => x.IdentityId == user.IdentityId && x.KeyValue == pubKeyValue).ToLambda())
+				.SingleOrDefault();
 
 			if (pubKeyFound == null)
 			{
-				pubKeyEntity = uow.PublicKeys.Create(
-					new PublicKey
-					{
-						Id = Guid.NewGuid(),
-						IdentityId = user.IdentityId,
-						KeyValue = pubKeyValue,
-						KeyAlgo = pubKey.KeyAlgorithm.ToString(),
-						KeyFormat = SshPublicKeyFormat.Pkcs8.ToString(),
-						SigValue = pubKey.Fingerprint.ToString(sigAlgo, false),
-						SigAlgo = sigAlgo.ToString(),
-						Comment = hostname,
-						IsEnabled = true,
-						IsDeletable = true,
-						CreatedUtc = DateTime.UtcNow,
-					});
+				pubKey = new PublicKey
+				{
+					Id = Guid.NewGuid(),
+					IdentityId = user.IdentityId,
+					KeyValue = pubKeyValue,
+					KeyAlgo = importedPubKey.KeyAlgorithm.ToString(),
+					KeyFormat = SshPublicKeyFormat.Pkcs8.ToString(),
+					SigValue = importedPubKey.Fingerprint.ToString(sigAlgo, false),
+					SigAlgo = sigAlgo.ToString(),
+					Comment = comment,
+					IsEnabled = true,
+					IsDeletable = true,
+				};
 
-				Log.Information($"'{callPath}' '{user.IdentityAlias}' public key algo {pubKey.KeyAlgorithm} sig {pubKey.Fingerprint.ToString(sigAlgo, false)}" +
-					$"{Environment.NewLine}{pubKeyValue}");
+				Log.Information($"'{callPath}' '{user.IdentityAlias}' import public key... " +
+					$"{Environment.NewLine} algo: {pubKey.KeyAlgo} format: {pubKey.KeyFormat} " +
+					$"{Environment.NewLine} sig: {pubKey.SigValue}" +
+					$"{Environment.NewLine}{pubKey.KeyValue}");
 			}
 			else
 			{
-				Log.Warning($"'{callPath}' '{user.IdentityAlias}' skip public key algo {pubKey.KeyAlgorithm} sig {pubKey.Fingerprint.ToString(sigAlgo, false)}" +
-					$"{Environment.NewLine}{pubKeyValue}");
+				Log.Warning($"'{callPath}' '{user.IdentityAlias}' skip import... " +
+					$"{Environment.NewLine} *** public key with GUID {pubKeyFound.Id} already exists ***" +
+					$"{Environment.NewLine} algo: {pubKeyFound.KeyAlgo} format: {pubKeyFound.KeyFormat} " +
+					$"{Environment.NewLine} sig: {pubKeyFound.SigValue}" +
+					$"{Environment.NewLine}{pubKeyFound.KeyValue}");
 			}
 
-			uow.Commit();
-
-			return pubKeyEntity;
+			return pubKey;
 		}
 
 		/*
@@ -544,11 +556,22 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 		 * https://man.openbsd.org/ssh-keygen
 		 */
 		public static ICollection<PublicKey> ImportPubKeyBase64(IUnitOfWork uow, User user,
-			SignatureHashAlgorithm sigAlgo, FileInfo inputFile)
+			SignatureHashAlgorithm sigAlgo, MemoryStream stream)
 		{
 			var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
-			var pubKeyLines = File.ReadAllLines(inputFile.FullName);
+
 			var pubKeys = new List<PublicKey>();
+			var pubKeyLines = new List<string>();
+
+			stream.Position = 0;
+
+			using (var reader = new StreamReader(stream, Encoding.ASCII))
+			{
+				string line = String.Empty;
+
+				while ((line = reader.ReadLine()) != null)
+					pubKeyLines.Add(line);
+			}
 
 			foreach (var line in pubKeyLines)
 			{
@@ -562,17 +585,13 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 					case "ssh-rsa":
 						break;
 
-					//case "ecdsa-sha2-nistp256":
-					//	break;
+					case "ecdsa-sha2-nistp256":
 
-					//case "ecdsa-sha2-nistp384":
-					//	break;
+					case "ecdsa-sha2-nistp384":
 
-					//case "ecdsa-sha2-nistp521":
-					//	break;
+					case "ecdsa-sha2-nistp521":
 
-					//case "ssh-ed25519":
-					//	break;
+					case "ssh-ed25519":
 
 					default:
 						{
@@ -581,44 +600,52 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 						}
 				}
 
-				var pubKey = new SshPublicKey(Convert.FromBase64String(base64[1]));
-				var pubKeyStream = new MemoryStream();
-				pubKey.SavePublicKey(pubKeyStream, SshPublicKeyFormat.Pkcs8);
+				var importedPubKey = new SshPublicKey(Convert.FromBase64String(base64[1]));
+				var importedPubKeyStream = new MemoryStream();
+				importedPubKey.SavePublicKey(importedPubKeyStream, SshPublicKeyFormat.Pkcs8);
 
-				var pubKeyValue = Encoding.ASCII.GetString(pubKeyStream.ToArray());
+				Log.Information($"'{callPath}' '{user.IdentityAlias}' show original public key... " +
+					$"{Environment.NewLine} algo: {base64[0]}" +
+					$"{Environment.NewLine} comment: {base64[2]}" +
+					$"{Environment.NewLine}{base64[1]}");
 
-				if (!uow.PublicKeys.Get(QueryExpressionFactory.GetQueryExpression<PublicKey>()
-					.Where(x => x.Id == user.IdentityId && x.KeyValue == pubKeyValue).ToLambda()).Any())
+				var pubKeyValue = Encoding.ASCII.GetString(importedPubKeyStream.ToArray());
+				var pubKeyFound = uow.PublicKeys.Get(QueryExpressionFactory.GetQueryExpression<PublicKey>()
+					.Where(x => x.IdentityId == user.IdentityId && x.KeyValue == pubKeyValue).ToLambda())
+					.SingleOrDefault();
+
+				if (pubKeyFound == null)
 				{
-					var newPubKey = uow.PublicKeys.Create(
-						new PublicKey
-						{
-							Id = Guid.NewGuid(),
-							IdentityId = user.IdentityId,
-							KeyValue = pubKeyValue,
-							KeyAlgo = pubKey.KeyAlgorithm.ToString(),
-							KeyFormat = SshPublicKeyFormat.Pkcs8.ToString(),
-							SigValue = pubKey.Fingerprint.ToString(sigAlgo, false),
-							SigAlgo = sigAlgo.ToString(),
-							Comment = base64[2],
-							IsEnabled = true,
-							IsDeletable = true,
-							CreatedUtc = DateTime.UtcNow,
-						});
+					var pubKey = new PublicKey
+					{
+						Id = Guid.NewGuid(),
+						IdentityId = user.IdentityId,
+						KeyValue = pubKeyValue,
+						KeyAlgo = importedPubKey.KeyAlgorithm.ToString(),
+						KeyFormat = SshPublicKeyFormat.Pkcs8.ToString(),
+						SigValue = importedPubKey.Fingerprint.ToString(sigAlgo, false),
+						SigAlgo = sigAlgo.ToString(),
+						Comment = base64[2],
+						IsEnabled = true,
+						IsDeletable = true,
+					};
 
-					pubKeys.Add(newPubKey);
+					pubKeys.Add(pubKey);
 
-					Log.Information($"'{callPath}' '{user.IdentityAlias}' public key algo {pubKey.KeyAlgorithm} sig {pubKey.Fingerprint.ToString(sigAlgo, false)}" +
-						$"{Environment.NewLine}{pubKeyValue}");
+					Log.Information($"'{callPath}' '{user.IdentityAlias}' import public key... " +
+						$"{Environment.NewLine} algo: {pubKey.KeyAlgo} format: {pubKey.KeyFormat} " +
+						$"{Environment.NewLine} sig: {pubKey.SigValue}" +
+						$"{Environment.NewLine}{pubKey.KeyValue}");
 				}
 				else
 				{
-					Log.Warning($"'{callPath}' '{user.IdentityAlias}' skip public key algo {pubKey.KeyAlgorithm} sig {pubKey.Fingerprint.ToString(sigAlgo, false)}" +
-						$"{Environment.NewLine}{pubKeyValue}");
+					Log.Warning($"'{callPath}' '{user.IdentityAlias}' skip import..." +
+						$"{Environment.NewLine} *** public key with GUID {pubKeyFound.Id} already exists ***" +
+						$"{Environment.NewLine} algo: {pubKeyFound.KeyAlgo} format: {pubKeyFound.KeyFormat} " +
+						$"{Environment.NewLine} sig: {pubKeyFound.SigValue}" +
+						$"{Environment.NewLine}{pubKeyFound.KeyValue}");
 				}
 			}
-
-			uow.Commit();
 
 			return pubKeys;
 		}

@@ -22,10 +22,10 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
             var pvalues = new []
             {
                 new SqlParameter("@IdentityAlias", SqlDbType.NVarChar) { Value = entity.IdentityAlias },
-                new SqlParameter("@RequirePublicKey", SqlDbType.Bit) { Value = entity.RequirePublicKey },
-                new SqlParameter("@RequirePassword", SqlDbType.Bit) { Value = entity.RequirePassword },
                 new SqlParameter("@FileSystemType", SqlDbType.NVarChar) { Value = entity.FileSystemType },
-                new SqlParameter("@FileSystemReadOnly", SqlDbType.Bit) { Value = entity.FileSystemReadOnly },
+                new SqlParameter("@IsPasswordRequired", SqlDbType.Bit) { Value = entity.IsPasswordRequired },
+                new SqlParameter("@IsPublicKeyRequired", SqlDbType.Bit) { Value = entity.IsPublicKeyRequired },
+                new SqlParameter("@IsFileSystemReadOnly", SqlDbType.Bit) { Value = entity.IsFileSystemReadOnly },
                 new SqlParameter("@Debugger", SqlDbType.NVarChar) { Value = (object)entity.Debugger ?? DBNull.Value },
                 new SqlParameter("@IsEnabled", SqlDbType.Bit) { Value = entity.IsEnabled },
                 new SqlParameter("@IsDeletable", SqlDbType.Bit) { Value = entity.IsDeletable },
@@ -33,7 +33,8 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
             };
 
             return _context.SqlQuery<uvw_User>("EXEC @ReturnValue = [svc].[usp_User_Insert] "
-                + "@IdentityAlias, @RequirePublicKey, @RequirePassword, @FileSystemType, @FileSystemReadOnly, @Debugger, @IsEnabled, @IsDeletable", pvalues)
+                + "@IdentityAlias, @FileSystemType, @IsPasswordRequired, @IsPublicKeyRequired, @IsFileSystemReadOnly, "
+                + "@Debugger, @IsEnabled, @IsDeletable", pvalues)
                     .Single();
         }
 
@@ -96,10 +97,10 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
             {
                 new SqlParameter("@IdentityId", SqlDbType.UniqueIdentifier) { Value = entity.IdentityId },
                 new SqlParameter("@IdentityAlias", SqlDbType.NVarChar) { Value = entity.IdentityAlias },
-                new SqlParameter("@RequirePublicKey", SqlDbType.Bit) { Value = entity.RequirePublicKey },
-                new SqlParameter("@RequirePassword", SqlDbType.Bit) { Value = entity.RequirePassword },
                 new SqlParameter("@FileSystemType", SqlDbType.NVarChar) { Value = entity.FileSystemType },
-                new SqlParameter("@FileSystemReadOnly", SqlDbType.Bit) { Value = entity.FileSystemReadOnly },
+                new SqlParameter("@IsPublicKeyRequired", SqlDbType.Bit) { Value = entity.IsPublicKeyRequired },
+                new SqlParameter("@IsPasswordRequired", SqlDbType.Bit) { Value = entity.IsPasswordRequired },
+                new SqlParameter("@IsFileSystemReadOnly", SqlDbType.Bit) { Value = entity.IsFileSystemReadOnly },
                 new SqlParameter("@QuotaInBytes", SqlDbType.BigInt) { Value = entity.QuotaInBytes },
                 new SqlParameter("@QuotaUsedInBytes", SqlDbType.BigInt) { Value = entity.QuotaUsedInBytes },
                 new SqlParameter("@Debugger", SqlDbType.NVarChar) { Value = (object)entity.Debugger ?? DBNull.Value },
@@ -109,7 +110,7 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
             };
 
             return _context.SqlQuery<uvw_User>("EXEC @ReturnValue = [svc].[usp_User_Update] "
-                + "@IdentityId, @IdentityId, @IdentityAlias, @RequirePublicKey, @RequirePassword, @FileSystemType, @FileSystemReadOnly, "
+                + "@IdentityId, @IdentityAlias, @IsPublicKeyRequired, @IsPasswordRequired, @FileSystemType, @IsFileSystemReadOnly, "
                 + "@QuotaInBytes, @QuotaUsedInBytes, @Debugger, @IsEnabled, @IsDeletable", pvalues)
                     .Single();
         }

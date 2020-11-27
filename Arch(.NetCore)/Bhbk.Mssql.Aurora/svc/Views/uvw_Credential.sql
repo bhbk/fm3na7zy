@@ -1,11 +1,13 @@
 ﻿
+
+
 CREATE VIEW [svc].[uvw_Credential]
 AS
 SELECT
 	Id
 	,Domain
 	,UserName
-	,Password
+	,EncryptedPassword
 	,IsEnabled
 	,IsDeletable
 	,CreatedUtc

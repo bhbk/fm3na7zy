@@ -1,7 +1,8 @@
 ﻿
 CREATE PROCEDURE [svc].[usp_Network_Update]
      @Id					UNIQUEIDENTIFIER 
-    ,@IdentityId			UNIQUEIDENTIFIER 
+    ,@IdentityId			UNIQUEIDENTIFIER
+	,@SequenceId			INT
     ,@Address				NVARCHAR (128) 
     ,@Action				NVARCHAR (8) 
     ,@IsEnabled				BIT
@@ -17,7 +18,8 @@ BEGIN
 
         UPDATE [dbo].[tbl_Network]
         SET
-			 Address				= @Address
+			 SequenceId				= @SequenceId
+			,Address				= @Address
 			,Action					= @Action
 			,IsEnabled				= @IsEnabled
             ,IsDeletable            = @IsDeletable

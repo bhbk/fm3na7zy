@@ -12,22 +12,20 @@ using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Net;
 
 namespace Bhbk.Cli.Aurora.Commands
 {
-    public class UserNetCreateCommands : ConsoleCommand
+    public class SysNetCreateCommands : ConsoleCommand
     {
-        private readonly IConfiguration _conf;
-        private readonly IUnitOfWork _uow;
-        private User _user;
-        private Int32 _sequence;
+        private IConfiguration _conf;
+        private IUnitOfWork _uow;
         private IPNetwork _cidr;
+        private Int32 _sequence;
         private NetworkActionType _actionType;
         private string _actionTypeList = string.Join(", ", Enum.GetNames(typeof(NetworkActionType)));
 
-        public UserNetCreateCommands()
+        public SysNetCreateCommands()
         {
             _conf = (IConfiguration)new ConfigurationBuilder()
                 .AddJsonFile("clisettings.json", optional: false, reloadOnChange: true)
@@ -36,23 +34,7 @@ namespace Bhbk.Cli.Aurora.Commands
             var instance = new ContextService(InstanceContext.DeployedOrLocal);
             _uow = new UnitOfWork(_conf["Databases:AuroraEntities"], instance);
 
-            IsCommand("user-net-create", "Create allow/deny network for user");
-
-            HasRequiredOption("u|user=", "Enter user that already exists", arg =>
-            {
-                if (string.IsNullOrEmpty(arg))
-                    throw new ConsoleHelpAsException($"  *** No user name given ***");
-
-                _user = _uow.Users.Get(QueryExpressionFactory.GetQueryExpression<User>()
-                    .Where(x => x.IdentityAlias == arg).ToLambda(),
-                        new List<Expression<Func<User, object>>>()
-                        {
-                            x => x.Mount
-                        }).SingleOrDefault();
-
-                if (_user == null)
-                    throw new ConsoleHelpAsException($"  *** Invalid user '{arg}' ***");
-            });
+            IsCommand("sys-net-create", "Create allow/deny network for system");
 
             HasRequiredOption("s|sequence=", "Enter sequence value to use", arg =>
             {
@@ -77,7 +59,10 @@ namespace Bhbk.Cli.Aurora.Commands
         {
             try
             {
-                var exists = _user.Networks.Where(x => x.Address == _cidr.ToString())
+                var networks = _uow.Networks.Get(QueryExpressionFactory.GetQueryExpression<Network>()
+                    .Where(x => x.IdentityId == null && x.IsEnabled == true).ToLambda());
+
+                var exists = networks.Where(x => x.Address == _cidr.ToString())
                     .SingleOrDefault();
 
                 if (exists != null)
@@ -91,7 +76,6 @@ namespace Bhbk.Cli.Aurora.Commands
                 var network = _uow.Networks.Create(
                     new Network
                     {
-                        IdentityId = _user.IdentityId,
                         SequenceId = _sequence,
                         Address = _cidr.ToString(),
                         Action = _actionType.ToString(),

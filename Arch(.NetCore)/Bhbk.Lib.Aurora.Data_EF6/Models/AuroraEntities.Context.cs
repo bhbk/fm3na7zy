@@ -47,7 +47,7 @@ namespace Bhbk.Lib.Aurora.Data_EF6.Models
             return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<usp_Credential_Delete_Result>("usp_Credential_Delete", idParameter);
         }
     
-        public virtual ObjectResult<usp_Credential_Insert_Result> usp_Credential_Insert(string domain, string userName, string password, Nullable<bool> isEnabled, Nullable<bool> isDeletable)
+        public virtual ObjectResult<usp_Credential_Insert_Result> usp_Credential_Insert(string domain, string userName, string encryptedPassword, Nullable<bool> isEnabled, Nullable<bool> isDeletable)
         {
             var domainParameter = domain != null ?
                 new ObjectParameter("Domain", domain) :
@@ -57,9 +57,9 @@ namespace Bhbk.Lib.Aurora.Data_EF6.Models
                 new ObjectParameter("UserName", userName) :
                 new ObjectParameter("UserName", typeof(string));
     
-            var passwordParameter = password != null ?
-                new ObjectParameter("Password", password) :
-                new ObjectParameter("Password", typeof(string));
+            var encryptedPasswordParameter = encryptedPassword != null ?
+                new ObjectParameter("EncryptedPassword", encryptedPassword) :
+                new ObjectParameter("EncryptedPassword", typeof(string));
     
             var isEnabledParameter = isEnabled.HasValue ?
                 new ObjectParameter("IsEnabled", isEnabled) :
@@ -69,10 +69,10 @@ namespace Bhbk.Lib.Aurora.Data_EF6.Models
                 new ObjectParameter("IsDeletable", isDeletable) :
                 new ObjectParameter("IsDeletable", typeof(bool));
     
-            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<usp_Credential_Insert_Result>("usp_Credential_Insert", domainParameter, userNameParameter, passwordParameter, isEnabledParameter, isDeletableParameter);
+            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<usp_Credential_Insert_Result>("usp_Credential_Insert", domainParameter, userNameParameter, encryptedPasswordParameter, isEnabledParameter, isDeletableParameter);
         }
     
-        public virtual ObjectResult<usp_Credential_Update_Result> usp_Credential_Update(Nullable<System.Guid> id, string domain, string userName, string password, Nullable<bool> isEnabled, Nullable<bool> isDeletable)
+        public virtual ObjectResult<usp_Credential_Update_Result> usp_Credential_Update(Nullable<System.Guid> id, string domain, string userName, string encryptedPassword, Nullable<bool> isEnabled, Nullable<bool> isDeletable)
         {
             var idParameter = id.HasValue ?
                 new ObjectParameter("Id", id) :
@@ -86,9 +86,9 @@ namespace Bhbk.Lib.Aurora.Data_EF6.Models
                 new ObjectParameter("UserName", userName) :
                 new ObjectParameter("UserName", typeof(string));
     
-            var passwordParameter = password != null ?
-                new ObjectParameter("Password", password) :
-                new ObjectParameter("Password", typeof(string));
+            var encryptedPasswordParameter = encryptedPassword != null ?
+                new ObjectParameter("EncryptedPassword", encryptedPassword) :
+                new ObjectParameter("EncryptedPassword", typeof(string));
     
             var isEnabledParameter = isEnabled.HasValue ?
                 new ObjectParameter("IsEnabled", isEnabled) :
@@ -98,7 +98,7 @@ namespace Bhbk.Lib.Aurora.Data_EF6.Models
                 new ObjectParameter("IsDeletable", isDeletable) :
                 new ObjectParameter("IsDeletable", typeof(bool));
     
-            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<usp_Credential_Update_Result>("usp_Credential_Update", idParameter, domainParameter, userNameParameter, passwordParameter, isEnabledParameter, isDeletableParameter);
+            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<usp_Credential_Update_Result>("usp_Credential_Update", idParameter, domainParameter, userNameParameter, encryptedPasswordParameter, isEnabledParameter, isDeletableParameter);
         }
     
         public virtual ObjectResult<usp_Network_Delete_Result> usp_Network_Delete(Nullable<System.Guid> id)
@@ -110,11 +110,15 @@ namespace Bhbk.Lib.Aurora.Data_EF6.Models
             return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<usp_Network_Delete_Result>("usp_Network_Delete", idParameter);
         }
     
-        public virtual ObjectResult<usp_Network_Insert_Result> usp_Network_Insert(Nullable<System.Guid> identityId, string address, string action, Nullable<bool> isEnabled, Nullable<bool> isDeletable)
+        public virtual ObjectResult<usp_Network_Insert_Result> usp_Network_Insert(Nullable<System.Guid> identityId, Nullable<int> sequenceId, string address, string action, Nullable<bool> isEnabled, Nullable<bool> isDeletable)
         {
             var identityIdParameter = identityId.HasValue ?
                 new ObjectParameter("IdentityId", identityId) :
                 new ObjectParameter("IdentityId", typeof(System.Guid));
+    
+            var sequenceIdParameter = sequenceId.HasValue ?
+                new ObjectParameter("SequenceId", sequenceId) :
+                new ObjectParameter("SequenceId", typeof(int));
     
             var addressParameter = address != null ?
                 new ObjectParameter("Address", address) :
@@ -132,10 +136,10 @@ namespace Bhbk.Lib.Aurora.Data_EF6.Models
                 new ObjectParameter("IsDeletable", isDeletable) :
                 new ObjectParameter("IsDeletable", typeof(bool));
     
-            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<usp_Network_Insert_Result>("usp_Network_Insert", identityIdParameter, addressParameter, actionParameter, isEnabledParameter, isDeletableParameter);
+            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<usp_Network_Insert_Result>("usp_Network_Insert", identityIdParameter, sequenceIdParameter, addressParameter, actionParameter, isEnabledParameter, isDeletableParameter);
         }
     
-        public virtual ObjectResult<usp_Network_Update_Result> usp_Network_Update(Nullable<System.Guid> id, Nullable<System.Guid> identityId, string address, string action, Nullable<bool> isEnabled, Nullable<bool> isDeletable)
+        public virtual ObjectResult<usp_Network_Update_Result> usp_Network_Update(Nullable<System.Guid> id, Nullable<System.Guid> identityId, Nullable<int> sequenceId, string address, string action, Nullable<bool> isEnabled, Nullable<bool> isDeletable)
         {
             var idParameter = id.HasValue ?
                 new ObjectParameter("Id", id) :
@@ -145,6 +149,10 @@ namespace Bhbk.Lib.Aurora.Data_EF6.Models
                 new ObjectParameter("IdentityId", identityId) :
                 new ObjectParameter("IdentityId", typeof(System.Guid));
     
+            var sequenceIdParameter = sequenceId.HasValue ?
+                new ObjectParameter("SequenceId", sequenceId) :
+                new ObjectParameter("SequenceId", typeof(int));
+    
             var addressParameter = address != null ?
                 new ObjectParameter("Address", address) :
                 new ObjectParameter("Address", typeof(string));
@@ -161,7 +169,7 @@ namespace Bhbk.Lib.Aurora.Data_EF6.Models
                 new ObjectParameter("IsDeletable", isDeletable) :
                 new ObjectParameter("IsDeletable", typeof(bool));
     
-            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<usp_Network_Update_Result>("usp_Network_Update", idParameter, identityIdParameter, addressParameter, actionParameter, isEnabledParameter, isDeletableParameter);
+            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<usp_Network_Update_Result>("usp_Network_Update", idParameter, identityIdParameter, sequenceIdParameter, addressParameter, actionParameter, isEnabledParameter, isDeletableParameter);
         }
     
         public virtual ObjectResult<usp_PrivateKey_Delete_Result> usp_PrivateKey_Delete(Nullable<System.Guid> id)
@@ -418,7 +426,7 @@ namespace Bhbk.Lib.Aurora.Data_EF6.Models
             return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<usp_User_Delete_Result>("usp_User_Delete", identityIdParameter);
         }
     
-        public virtual ObjectResult<usp_User_Insert_Result> usp_User_Insert(Nullable<System.Guid> identityId, string identityAlias, Nullable<bool> requirePassword, Nullable<bool> requirePublicKey, string fileSystemType, Nullable<bool> fileSystemReadOnly, string debugger, Nullable<bool> isEnabled, Nullable<bool> isDeletable)
+        public virtual ObjectResult<usp_User_Insert_Result> usp_User_Insert(Nullable<System.Guid> identityId, string identityAlias, string fileSystemType, Nullable<bool> isPasswordRequired, Nullable<bool> isPublicKeyRequired, Nullable<bool> isFileSystemReadOnly, string debugger, Nullable<bool> isEnabled, Nullable<bool> isDeletable)
         {
             var identityIdParameter = identityId.HasValue ?
                 new ObjectParameter("IdentityId", identityId) :
@@ -428,21 +436,21 @@ namespace Bhbk.Lib.Aurora.Data_EF6.Models
                 new ObjectParameter("IdentityAlias", identityAlias) :
                 new ObjectParameter("IdentityAlias", typeof(string));
     
-            var requirePasswordParameter = requirePassword.HasValue ?
-                new ObjectParameter("RequirePassword", requirePassword) :
-                new ObjectParameter("RequirePassword", typeof(bool));
-    
-            var requirePublicKeyParameter = requirePublicKey.HasValue ?
-                new ObjectParameter("RequirePublicKey", requirePublicKey) :
-                new ObjectParameter("RequirePublicKey", typeof(bool));
-    
             var fileSystemTypeParameter = fileSystemType != null ?
                 new ObjectParameter("FileSystemType", fileSystemType) :
                 new ObjectParameter("FileSystemType", typeof(string));
     
-            var fileSystemReadOnlyParameter = fileSystemReadOnly.HasValue ?
-                new ObjectParameter("FileSystemReadOnly", fileSystemReadOnly) :
-                new ObjectParameter("FileSystemReadOnly", typeof(bool));
+            var isPasswordRequiredParameter = isPasswordRequired.HasValue ?
+                new ObjectParameter("IsPasswordRequired", isPasswordRequired) :
+                new ObjectParameter("IsPasswordRequired", typeof(bool));
+    
+            var isPublicKeyRequiredParameter = isPublicKeyRequired.HasValue ?
+                new ObjectParameter("IsPublicKeyRequired", isPublicKeyRequired) :
+                new ObjectParameter("IsPublicKeyRequired", typeof(bool));
+    
+            var isFileSystemReadOnlyParameter = isFileSystemReadOnly.HasValue ?
+                new ObjectParameter("IsFileSystemReadOnly", isFileSystemReadOnly) :
+                new ObjectParameter("IsFileSystemReadOnly", typeof(bool));
     
             var debuggerParameter = debugger != null ?
                 new ObjectParameter("Debugger", debugger) :
@@ -456,10 +464,10 @@ namespace Bhbk.Lib.Aurora.Data_EF6.Models
                 new ObjectParameter("IsDeletable", isDeletable) :
                 new ObjectParameter("IsDeletable", typeof(bool));
     
-            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<usp_User_Insert_Result>("usp_User_Insert", identityIdParameter, identityAliasParameter, requirePasswordParameter, requirePublicKeyParameter, fileSystemTypeParameter, fileSystemReadOnlyParameter, debuggerParameter, isEnabledParameter, isDeletableParameter);
+            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<usp_User_Insert_Result>("usp_User_Insert", identityIdParameter, identityAliasParameter, fileSystemTypeParameter, isPasswordRequiredParameter, isPublicKeyRequiredParameter, isFileSystemReadOnlyParameter, debuggerParameter, isEnabledParameter, isDeletableParameter);
         }
     
-        public virtual ObjectResult<usp_User_Update_Result> usp_User_Update(Nullable<System.Guid> identityId, string identityAlias, Nullable<bool> requirePassword, Nullable<bool> requirePublicKey, string fileSystemType, Nullable<bool> fileSystemReadOnly, Nullable<long> quotaInBytes, Nullable<long> quotaUsedInBytes, string debugger, Nullable<bool> isEnabled, Nullable<bool> isDeletable)
+        public virtual ObjectResult<usp_User_Update_Result> usp_User_Update(Nullable<System.Guid> identityId, string identityAlias, string fileSystemType, Nullable<bool> isPasswordRequired, Nullable<bool> isPublicKeyRequired, Nullable<bool> isFileSystemReadOnly, Nullable<long> quotaInBytes, Nullable<long> quotaUsedInBytes, string debugger, Nullable<bool> isEnabled, Nullable<bool> isDeletable)
         {
             var identityIdParameter = identityId.HasValue ?
                 new ObjectParameter("IdentityId", identityId) :
@@ -469,21 +477,21 @@ namespace Bhbk.Lib.Aurora.Data_EF6.Models
                 new ObjectParameter("IdentityAlias", identityAlias) :
                 new ObjectParameter("IdentityAlias", typeof(string));
     
-            var requirePasswordParameter = requirePassword.HasValue ?
-                new ObjectParameter("RequirePassword", requirePassword) :
-                new ObjectParameter("RequirePassword", typeof(bool));
-    
-            var requirePublicKeyParameter = requirePublicKey.HasValue ?
-                new ObjectParameter("RequirePublicKey", requirePublicKey) :
-                new ObjectParameter("RequirePublicKey", typeof(bool));
-    
             var fileSystemTypeParameter = fileSystemType != null ?
                 new ObjectParameter("FileSystemType", fileSystemType) :
                 new ObjectParameter("FileSystemType", typeof(string));
     
-            var fileSystemReadOnlyParameter = fileSystemReadOnly.HasValue ?
-                new ObjectParameter("FileSystemReadOnly", fileSystemReadOnly) :
-                new ObjectParameter("FileSystemReadOnly", typeof(bool));
+            var isPasswordRequiredParameter = isPasswordRequired.HasValue ?
+                new ObjectParameter("IsPasswordRequired", isPasswordRequired) :
+                new ObjectParameter("IsPasswordRequired", typeof(bool));
+    
+            var isPublicKeyRequiredParameter = isPublicKeyRequired.HasValue ?
+                new ObjectParameter("IsPublicKeyRequired", isPublicKeyRequired) :
+                new ObjectParameter("IsPublicKeyRequired", typeof(bool));
+    
+            var isFileSystemReadOnlyParameter = isFileSystemReadOnly.HasValue ?
+                new ObjectParameter("IsFileSystemReadOnly", isFileSystemReadOnly) :
+                new ObjectParameter("IsFileSystemReadOnly", typeof(bool));
     
             var quotaInBytesParameter = quotaInBytes.HasValue ?
                 new ObjectParameter("QuotaInBytes", quotaInBytes) :
@@ -505,7 +513,7 @@ namespace Bhbk.Lib.Aurora.Data_EF6.Models
                 new ObjectParameter("IsDeletable", isDeletable) :
                 new ObjectParameter("IsDeletable", typeof(bool));
     
-            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<usp_User_Update_Result>("usp_User_Update", identityIdParameter, identityAliasParameter, requirePasswordParameter, requirePublicKeyParameter, fileSystemTypeParameter, fileSystemReadOnlyParameter, quotaInBytesParameter, quotaUsedInBytesParameter, debuggerParameter, isEnabledParameter, isDeletableParameter);
+            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<usp_User_Update_Result>("usp_User_Update", identityIdParameter, identityAliasParameter, fileSystemTypeParameter, isPasswordRequiredParameter, isPublicKeyRequiredParameter, isFileSystemReadOnlyParameter, quotaInBytesParameter, quotaUsedInBytesParameter, debuggerParameter, isEnabledParameter, isDeletableParameter);
         }
     
         public virtual ObjectResult<usp_UserAlert_Delete_Result> usp_UserAlert_Delete(Nullable<System.Guid> id)

@@ -44,7 +44,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Factories
             {
                 case FileSystemProviderType.Composite:
                     {
-                        if (user.FileSystemReadOnly)
+                        if (user.IsFileSystemReadOnly)
                         {
                             Log.Information($"'{callPath}' '{user.IdentityAlias}' initialize '{typeof(CompositeReadOnlyFileSystem).Name}'");
 
@@ -60,7 +60,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Factories
 
                 case FileSystemProviderType.Memory:
                     {
-                        if (user.FileSystemReadOnly)
+                        if (user.IsFileSystemReadOnly)
                         {
                             Log.Information($"'{callPath}' '{user.IdentityAlias}' initialize '{typeof(MemoryReadOnlyFileSystem).Name}'");
 
@@ -76,7 +76,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Factories
 
                 case FileSystemProviderType.SMB:
                     {
-                        if (user.FileSystemReadOnly)
+                        if (user.IsFileSystemReadOnly)
                         {
                             Log.Information($"'{callPath}' '{user.IdentityAlias}' initialize '{typeof(SmbReadOnlyFileSystem).Name}'");
 

@@ -35,22 +35,24 @@ namespace Bhbk.Cli.Aurora.Commands
 
             IsCommand("user-login-edit", "Edit user login");
 
-            HasRequiredOption("u|user=", "Enter user that exists already", arg =>
+            HasRequiredOption("i|id=", "Enter GUID of user to edit", arg =>
             {
-                if (string.IsNullOrEmpty(arg))
-                    throw new ConsoleHelpAsException($"  *** No user given ***");
+                _id = Guid.Parse(arg);
 
                 _user = _uow.Users.Get(QueryExpressionFactory.GetQueryExpression<User>()
-                    .Where(x => x.IdentityAlias == arg && x.IsDeletable == true).ToLambda())
+                    .Where(x => x.IdentityId == _id).ToLambda())
                     .SingleOrDefault();
 
                 if (_user == null)
                     throw new ConsoleHelpAsException($"  *** Invalid user '{arg}' or immutable ***");
             });
 
-            HasRequiredOption("i|id=", "Enter GUID of network to edit", arg =>
+            HasOption("a|alias=", "Enter alias for user", arg =>
             {
-                _id = Guid.Parse(arg);
+                if (string.IsNullOrEmpty(arg))
+                    throw new ConsoleHelpAsException($"  *** No user given ***");
+
+                _user.IdentityAlias = arg;
             });
 
             HasOption("f|filesystem=", "Enter type of filesystem for user", arg =>
@@ -58,18 +60,17 @@ namespace Bhbk.Cli.Aurora.Commands
                 if (!Enum.TryParse(arg, out _fileSystem))
                     throw new ConsoleHelpAsException($"*** Invalid filesystem type. Options are '{_fileSystemList}' ***");
 
-                if (_user != null)
-                    _user.FileSystemType = _fileSystem.ToString();
+                _user.FileSystemType = _fileSystem.ToString();
             });
 
             HasOption("k|public-key=", "Require public key for user", arg =>
             {
-                _user.RequirePublicKey = bool.Parse(arg);
+                _user.IsPublicKeyRequired = bool.Parse(arg);
             });
 
             HasOption("p|pass=", "Require password for user", arg =>
             {
-                _user.RequirePassword = bool.Parse(arg);
+                _user.IsPasswordRequired = bool.Parse(arg);
             });
         }
 

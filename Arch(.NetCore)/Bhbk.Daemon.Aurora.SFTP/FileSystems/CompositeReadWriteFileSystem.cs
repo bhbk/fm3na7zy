@@ -1,9 +1,7 @@
 ﻿using Bhbk.Daemon.Aurora.SFTP.Factories;
 using Bhbk.Lib.Aurora.Data_EF6.Models;
 using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
-#if !RELEASE
 using Bhbk.Lib.Aurora.Domain.Helpers;
-#endif
 using Bhbk.Lib.Common.Primitives;
 using Bhbk.Lib.QueryExpression.Extensions;
 using Bhbk.Lib.QueryExpression.Factories;
@@ -18,9 +16,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Security.Cryptography;
-#if !RELEASE
 using System.Text;
-#endif
 using Hashing = Bhbk.Lib.Cryptography.Hashing;
 
 namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
@@ -42,9 +38,9 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
 
                 CompositePathFactory.CheckFolder(uow, _user);
             }
-#if !RELEASE
+
             var folderKeysNode = new DirectoryNode(".ssh", Root);
-            var fileKeysNode = new FileNode("authorized_users", folderKeysNode);
+            var fileKeysNode = new FileNode("authorized_keys", folderKeysNode);
 
             if (!Exists(folderKeysNode.Path, NodeType.Directory))
                 CreateDirectory(Root, folderKeysNode);
@@ -57,7 +53,6 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
             CreateFile(folderKeysNode, fileKeysNode);
             SaveContent(fileKeysNode, NodeContent.CreateDelayedWriteContent(
                 new MemoryStream(Encoding.UTF8.GetBytes(pubKeysContent.ToString()))));
-#endif
         }
 
         protected override DirectoryNode CreateDirectory(DirectoryNode parent, DirectoryNode child)

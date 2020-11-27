@@ -1,6 +1,6 @@
 ﻿using Bhbk.Cli.Aurora.Factories;
-using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
 using Bhbk.Lib.Aurora.Data_EF6.Models;
+using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
 using Bhbk.Lib.CommandLine.IO;
 using Bhbk.Lib.Common.Primitives.Enums;
 using Bhbk.Lib.Common.Services;
@@ -22,9 +22,9 @@ namespace Bhbk.Cli.Aurora.Commands
         private readonly IUnitOfWork _uow;
         private User _user;
         private AuthType _authType;
-        private readonly string _authTypeList = string.Join(", ", Enum.GetNames(typeof(AuthType)));
-        private string _serverAddress, _serverShare;
         private bool _alternateCredential;
+        private string _serverAddress, _serverShare;
+        private string _authTypeList = string.Join(", ", Enum.GetNames(typeof(AuthType)));
 
         public UserMntCreateCommands()
         {
@@ -98,6 +98,7 @@ namespace Bhbk.Cli.Aurora.Commands
 
                     OutputFactory.StdOutCredentials(credentials);
 
+                    Console.Out.WriteLine();
                     Console.Out.Write("  *** Enter GUID of credential to use for mount *** : ");
                     var input = StandardInput.GetInput();
                     Console.Out.WriteLine();
@@ -132,7 +133,7 @@ namespace Bhbk.Cli.Aurora.Commands
                     _uow.Commit();
                 }
 
-                OutputFactory.StdOutUserMounts(new List<UserMount>() { mount });
+                OutputFactory.StdOutUserMounts(new List<UserMount> { mount });
 
                 return StandardOutput.FondFarewell();
             }

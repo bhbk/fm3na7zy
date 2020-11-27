@@ -4,10 +4,10 @@ AS
 SELECT
 	IdentityId
 	,IdentityAlias
-	,RequirePassword
-	,RequirePublicKey
 	,FileSystemType
-	,FileSystemReadOnly
+	,IsPasswordRequired
+	,IsPublicKeyRequired
+	,IsFileSystemReadOnly
 	,QuotaInBytes
 	,QuotaUsedInBytes
 	,Debugger

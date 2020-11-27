@@ -19,7 +19,7 @@
   "Storage": {
     "UnstructuredData": "..\\.data"
   },
-  "IdentityCredentials": {
+  "IdentityCredential": {
     "IssuerName": "Bhbk",
     "AudienceName": "",
     "UserName": "aurora@system.ochap.local",

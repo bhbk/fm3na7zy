@@ -45,7 +45,6 @@ namespace Bhbk.Daemon.Aurora.SFTP
         private readonly FileServer _server;
         private IEnumerable<string> _binding;
         private LogLevel _level;
-        private bool _disposed;
 
         public Daemon(IServiceScopeFactory factory)
         {
@@ -77,59 +76,65 @@ namespace Bhbk.Daemon.Aurora.SFTP
 
                         Rebex.Licensing.Key = license.ConfigValue;
 
-                        KeyHelper.CheckPrivKey(conf, uow, SshHostKeyAlgorithm.DSS, 1024, AlphaNumeric.CreateString(32), SignatureHashAlgorithm.SHA256);
-                        KeyHelper.CheckPrivKey(conf, uow, SshHostKeyAlgorithm.RSA, 4096, AlphaNumeric.CreateString(32), SignatureHashAlgorithm.SHA256);
-                        KeyHelper.CheckPrivKey(conf, uow, SshHostKeyAlgorithm.ECDsaNistP256, 256, AlphaNumeric.CreateString(32), SignatureHashAlgorithm.SHA256);
-                        KeyHelper.CheckPrivKey(conf, uow, SshHostKeyAlgorithm.ECDsaNistP384, 384, AlphaNumeric.CreateString(32), SignatureHashAlgorithm.SHA256);
-                        KeyHelper.CheckPrivKey(conf, uow, SshHostKeyAlgorithm.ECDsaNistP521, 521, AlphaNumeric.CreateString(32), SignatureHashAlgorithm.SHA256);
-                        KeyHelper.CheckPrivKey(conf, uow, SshHostKeyAlgorithm.ED25519, 256, AlphaNumeric.CreateString(32), SignatureHashAlgorithm.SHA256);
+                        KeyHelper.CheckKeyPair(conf, uow, SshHostKeyAlgorithm.DSS, 1024, AlphaNumeric.CreateString(32), SignatureHashAlgorithm.SHA256);
+                        KeyHelper.CheckKeyPair(conf, uow, SshHostKeyAlgorithm.RSA, 4096, AlphaNumeric.CreateString(32), SignatureHashAlgorithm.SHA256);
+                        KeyHelper.CheckKeyPair(conf, uow, SshHostKeyAlgorithm.ECDsaNistP256, 256, AlphaNumeric.CreateString(32), SignatureHashAlgorithm.SHA256);
+                        KeyHelper.CheckKeyPair(conf, uow, SshHostKeyAlgorithm.ECDsaNistP384, 384, AlphaNumeric.CreateString(32), SignatureHashAlgorithm.SHA256);
+                        KeyHelper.CheckKeyPair(conf, uow, SshHostKeyAlgorithm.ECDsaNistP521, 521, AlphaNumeric.CreateString(32), SignatureHashAlgorithm.SHA256);
+                        KeyHelper.CheckKeyPair(conf, uow, SshHostKeyAlgorithm.ED25519, 256, AlphaNumeric.CreateString(32), SignatureHashAlgorithm.SHA256);
 
                         var secret = conf["Databases:AuroraSecret"];
 
                         var dsaStr = SshHostKeyAlgorithm.DSS.ToString();
                         var dsaPrivKey = uow.PrivateKeys.Get(QueryExpressionFactory.GetQueryExpression<PrivateKey>()
-                            .Where(x => x.KeyAlgo == dsaStr && x.IdentityId == null).ToLambda()).OrderBy(x => x.CreatedUtc)
-                            .Single();
+                            .Where(x => x.IdentityId == null && x.KeyAlgo == dsaStr).ToLambda())
+                            .OrderBy(x => x.CreatedUtc)
+                            .Last();
 
                         var dsaBytes = Encoding.ASCII.GetBytes(dsaPrivKey.KeyValue);
                         _server.Keys.Add(new SshPrivateKey(dsaBytes, AES.DecryptString(dsaPrivKey.KeyPass, secret)));
 
                         var rsaStr = SshHostKeyAlgorithm.RSA.ToString();
                         var rsaPrivKey = uow.PrivateKeys.Get(QueryExpressionFactory.GetQueryExpression<PrivateKey>()
-                            .Where(x => x.KeyAlgo == rsaStr && x.IdentityId == null).ToLambda()).OrderBy(x => x.CreatedUtc)
-                            .Single();
+                            .Where(x => x.IdentityId == null && x.KeyAlgo == rsaStr).ToLambda())
+                            .OrderBy(x => x.CreatedUtc)
+                            .Last();
 
                         var rsaBytes = Encoding.ASCII.GetBytes(rsaPrivKey.KeyValue);
                         _server.Keys.Add(new SshPrivateKey(rsaBytes, AES.DecryptString(rsaPrivKey.KeyPass, secret)));
 
                         var ecdsa256Str = SshHostKeyAlgorithm.ECDsaNistP256.ToString();
                         var ecdsa256PrivKey = uow.PrivateKeys.Get(QueryExpressionFactory.GetQueryExpression<PrivateKey>()
-                            .Where(x => x.KeyAlgo == ecdsa256Str && x.IdentityId == null).ToLambda()).OrderBy(x => x.CreatedUtc)
-                            .Single();
+                            .Where(x => x.IdentityId == null && x.KeyAlgo == ecdsa256Str).ToLambda())
+                            .OrderBy(x => x.CreatedUtc)
+                            .Last();
 
                         var ecdsa256Bytes = Encoding.ASCII.GetBytes(ecdsa256PrivKey.KeyValue);
                         _server.Keys.Add(new SshPrivateKey(ecdsa256Bytes, AES.DecryptString(ecdsa256PrivKey.KeyPass, secret)));
 
                         var ecdsa384Str = SshHostKeyAlgorithm.ECDsaNistP384.ToString();
                         var ecdsa384PrivKey = uow.PrivateKeys.Get(QueryExpressionFactory.GetQueryExpression<PrivateKey>()
-                            .Where(x => x.KeyAlgo == ecdsa384Str && x.IdentityId == null).ToLambda()).OrderBy(x => x.CreatedUtc)
-                            .Single();
+                            .Where(x => x.IdentityId == null && x.KeyAlgo == ecdsa384Str).ToLambda())
+                            .OrderBy(x => x.CreatedUtc)
+                            .Last();
 
                         var ecdsa384Bytes = Encoding.ASCII.GetBytes(ecdsa384PrivKey.KeyValue);
                         _server.Keys.Add(new SshPrivateKey(ecdsa384Bytes, AES.DecryptString(ecdsa384PrivKey.KeyPass, secret)));
 
                         var ecdsa521Str = SshHostKeyAlgorithm.ECDsaNistP521.ToString();
                         var ecdsa521PrivKey = uow.PrivateKeys.Get(QueryExpressionFactory.GetQueryExpression<PrivateKey>()
-                            .Where(x => x.KeyAlgo == ecdsa521Str && x.IdentityId == null).ToLambda()).OrderBy(x => x.CreatedUtc)
-                            .Single();
+                            .Where(x => x.IdentityId == null && x.KeyAlgo == ecdsa521Str).ToLambda())
+                            .OrderBy(x => x.CreatedUtc)
+                            .Last();
 
                         var ecdsa521Bytes = Encoding.ASCII.GetBytes(ecdsa521PrivKey.KeyValue);
                         _server.Keys.Add(new SshPrivateKey(ecdsa521Bytes, AES.DecryptString(ecdsa521PrivKey.KeyPass, secret)));
 
                         var ed25519Str = SshHostKeyAlgorithm.ED25519.ToString();
                         var ed25519PrivKey = uow.PrivateKeys.Get(QueryExpressionFactory.GetQueryExpression<PrivateKey>()
-                            .Where(x => x.KeyAlgo == ed25519Str && x.IdentityId == null).ToLambda()).OrderBy(x => x.CreatedUtc)
-                            .Single();
+                            .Where(x => x.IdentityId == null && x.KeyAlgo == ed25519Str).ToLambda())
+                            .OrderBy(x => x.CreatedUtc)
+                            .Last();
 
                         var ed25519Bytes = Encoding.ASCII.GetBytes(ed25519PrivKey.KeyValue);
                         _server.Keys.Add(new SshPrivateKey(ed25519Bytes, AES.DecryptString(ed25519PrivKey.KeyPass, secret)));
@@ -142,24 +147,26 @@ namespace Bhbk.Daemon.Aurora.SFTP
                         var pair = binding.Split("|");
 
                         _server.Bind(new IPEndPoint(IPAddress.Parse(pair[0]), int.Parse(pair[1])), FileServerProtocol.Sftp);
-#if !RELEASE
                         _server.Bind(new IPEndPoint(IPAddress.Parse(pair[0]), int.Parse(pair[1])), FileServerProtocol.Shell);
+#if !RELEASE
+                        _server.Bind(new IPEndPoint(IPAddress.Parse(pair[0]), int.Parse(pair[1])), FileServerProtocol.Tunneling);
 #endif
                     }
 
                     _server.LogWriter = new ConsoleLogWriter(_level);
+                    _server.Settings.MaxAuthenticationAttempts = 3;
                     _server.Settings.AllowedAuthenticationMethods = AuthenticationMethods.PublicKey | AuthenticationMethods.Password;
                     _server.Settings.SshParameters.EncryptionAlgorithms = SshEncryptionAlgorithm.Any;
                     _server.Settings.SshParameters.EncryptionModes = SshEncryptionMode.Any;
                     _server.Settings.SshParameters.KeyExchangeAlgorithms = SshKeyExchangeAlgorithm.Any;
                     _server.Settings.SshParameters.HostKeyAlgorithms = SshHostKeyAlgorithm.Any;
                     _server.Settings.SshParameters.MacAlgorithms = SshMacAlgorithm.Any;
-                    _server.Authentication += FsUser_Authentication;
-                    _server.Connecting += FsUser_Connecting;
-                    _server.Disconnected += FsUser_Disconnected;
-                    _server.FileDownloaded += FsUser_FileDownloaded;
-                    _server.FileUploaded += FsUser_FileUploaded;
-                    _server.PreAuthentication += FsUser_PreAuthentication;
+                    _server.Connecting += System_Connecting;
+                    _server.Disconnected += System_Disconnected;
+                    _server.PreAuthentication += User_PreAuthentication;
+                    _server.Authentication += User_Authentication;
+                    _server.FileDownloaded += User_FileDownloaded;
+                    _server.FileUploaded += User_FileUploaded;
                     _server.Start();
                 }
                 catch (Exception ex)
@@ -194,7 +201,444 @@ namespace Bhbk.Daemon.Aurora.SFTP
             }, cancellationToken);
         }
 
-        private void FsNotify_CreatePreview(object sender, PreviewSingleNodeOperationEventArgs e)
+        private void System_Connecting(object sender, ConnectingEventArgs e)
+        {
+            /*
+             * https://www.rebex.net/file-server/features/events.aspx#connecting
+             */
+
+            var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
+
+            try
+            {
+                using (var scope = _factory.CreateScope())
+                {
+                    var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+
+                    var networks = uow.Networks.Get(QueryExpressionFactory.GetQueryExpression<Network>()
+                        .Where(x => x.IdentityId == null && x.IsEnabled).ToLambda())
+                        .OrderBy(x => x.SequenceId);
+
+                    foreach (var network in networks)
+                    {
+                        var found = NetworkHelper.ValidateAddress(network, e.ClientAddress);
+
+                        if (network.Action == NetworkActionType.Allow.ToString()
+                            && found == true)
+                        {
+                            Log.Information($"'{callPath}' system allow from '{e.ClientEndPoint}'");
+
+                            e.Accept = true;
+                            return;
+                        }
+
+                        if (network.Action == NetworkActionType.Deny.ToString()
+                            && found == true)
+                        {
+                            Log.Warning($"'{callPath}' system deny from '{e.ClientEndPoint}'");
+
+                            e.Accept = false;
+                            return;
+                        }
+                    }
+                }
+
+                Log.Warning($"'{callPath}' system deny (default) from {e.ClientEndPoint}");
+
+                e.Accept = false;
+                return;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex.ToString());
+
+                e.Accept = false;
+                return;
+            }
+        }
+
+        private void System_Disconnected(object sender, DisconnectedEventArgs e)
+        {
+            /*
+             * https://www.rebex.net/file-server/features/events.aspx#disconnected
+             */
+
+            var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
+
+            try
+            {
+                Log.Information($"'{callPath}' from {e.Session.ClientEndPoint} after {e.Session.Duration}");
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex.ToString());
+            }
+        }
+
+        private void User_PreAuthentication(object sender, PreAuthenticationEventArgs e)
+        {
+            /*
+             * https://www.rebex.net/file-server/features/events.aspx#pre-authentication
+             */
+
+            var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
+
+            try
+            {
+                using (var scope = _factory.CreateScope())
+                {
+                    var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+                    var user = uow.Users.Get(QueryExpressionFactory.GetQueryExpression<User>()
+                        .Where(x => x.IdentityAlias == e.UserName && x.IsEnabled).ToLambda(),
+                            new List<Expression<Func<User, object>>>()
+                            {
+                                x => x.Networks,
+                                x => x.PublicKeys,
+                            }).SingleOrDefault();
+
+                    if (user == null
+                        || user.IsEnabled == false)
+                    {
+                        Log.Warning($"'{callPath}' '{e.UserName}' not found or not enabled");
+
+                        e.Reject();
+                        return;
+                    }
+
+                    var networks = uow.Networks.Get(QueryExpressionFactory.GetQueryExpression<Network>()
+                        .Where(x => x.IdentityId == user.IdentityId && x.IsEnabled).ToLambda())
+                        .OrderBy(x => x.SequenceId);
+
+                    var allowed = false;
+
+                    foreach (var network in networks)
+                    {
+                        var found = NetworkHelper.ValidateAddress(network, e.ClientAddress);
+
+                        if (network.Action == NetworkActionType.Allow.ToString()
+                            && found == true)
+                        {
+                            Log.Information($"'{callPath}' '{e.UserName}' allowed from '{e.ClientEndPoint}' running '{e.ClientSoftwareIdentifier}'");
+
+                            allowed = true;
+                            break;
+                        }
+
+                        if (network.Action == NetworkActionType.Deny.ToString()
+                            && found == true)
+                        {
+                            Log.Warning($"'{callPath}' '{e.UserName}' is denied from '{e.ClientEndPoint}' running '{e.ClientSoftwareIdentifier}'");
+
+                            e.Reject();
+                            return;
+                        }
+                    }
+
+                    if (allowed == false)
+                    {
+                        Log.Warning($"'{callPath}' '{e.UserName}' is denied (default) from '{e.ClientEndPoint}' running '{e.ClientSoftwareIdentifier}'");
+
+                        e.Reject();
+                        return;
+                    }
+
+                    if (user.IsPublicKeyRequired
+                        && user.IsPasswordRequired)
+                    {
+                        Log.Information($"'{callPath}' '{e.UserName}' allowed with public key and password");
+
+                        e.Accept(AuthenticationMethods.PublicKey | AuthenticationMethods.Password);
+                        return;
+                    }
+
+                    if (user.IsPublicKeyRequired
+                        && !user.IsPasswordRequired)
+                    {
+                        Log.Information($"'{callPath}' '{e.UserName}' allowed with public key");
+
+                        e.Accept(AuthenticationMethods.PublicKey);
+                        return;
+                    }
+
+                    if (!user.IsPublicKeyRequired
+                        && user.IsPasswordRequired)
+                    {
+                        Log.Information($"'{callPath}' '{e.UserName}' allowed with password");
+
+                        e.Accept(AuthenticationMethods.Password);
+                        return;
+                    }
+
+                    Log.Warning($"'{callPath}' '{e.UserName}' denied");
+
+                    e.Reject();
+                    return;
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex.ToString());
+            }
+        }
+
+        private void User_Authentication(object sender, AuthenticationEventArgs e)
+        {
+            /*
+             * https://www.rebex.net/file-server/features/events.aspx#authentication
+             */
+
+            var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
+
+            try
+            {
+                using (var scope = _factory.CreateScope())
+                {
+                    var log = scope.ServiceProvider.GetRequiredService<ILogger>();
+                    var conf = scope.ServiceProvider.GetRequiredService<IConfiguration>();
+                    var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+                    var admin = scope.ServiceProvider.GetRequiredService<IAdminService>();
+                    var sts = scope.ServiceProvider.GetRequiredService<IStsService>();
+
+                    var user = uow.Users.Get(QueryExpressionFactory.GetQueryExpression<User>()
+                        .Where(x => x.IdentityAlias == e.UserName && x.IsEnabled).ToLambda(),
+                            new List<Expression<Func<User, object>>>()
+                            {
+                                x => x.Mount,
+                                x => x.PublicKeys,
+                            }).SingleOrDefault();
+
+                    if (e.Key != null)
+                    {
+                        Log.Information($"'{callPath}' '{e.UserName}' in-progress with public key");
+
+                        if (!UserHelper.ValidatePubKey(user.PublicKeys.Where(x => x.IsEnabled).ToList(), e.Key)
+                            || !admin.User_VerifyV1(user.IdentityId).AsTask().Result)
+                        {
+                            Log.Warning($"'{callPath}' '{e.UserName}' failure with public key");
+
+                            e.Reject();
+                            return;
+                        }
+
+                        Log.Information($"'{callPath}' '{e.UserName}' success with public key");
+
+                        if (e.PartiallyAccepted
+                            || !user.IsPasswordRequired)
+                        {
+                            /*
+                             * an smb mount will not succeed without a user password or ambassador credential.
+                             */
+
+                            if (user.FileSystemType == FileSystemProviderType.SMB.ToString()
+                                && !user.Mount.CredentialId.HasValue)
+                            {
+                                Log.Warning($"'{callPath}' '{e.UserName}' failure with no user or ambassador password" +
+                                    $" available to mount {FileSystemProviderType.SMB} filesystem");
+
+                                e.Reject();
+                                return;
+                            }
+
+                            var fs = FileSystemFactory.CreateFileSystem(_factory, log, user, e.UserName, e.Password);
+
+                            var fsNotify = fs.GetFileSystemNotifier();
+                            fsNotify.CreatePreview += UserNotify_CreatePreview;
+                            fsNotify.CreateCompleted += UserNotify_CreateCompleted;
+                            fsNotify.DeletePreview += UserNotify_DeletePreview;
+                            fsNotify.DeleteCompleted += UserNotify_DeleteCompleted;
+
+                            var fsUser = new FileServerUser(e.UserName, e.Password, ShellType.Scp);
+                            fsUser.SetFileSystem(fs);
+
+                            e.Accept(fsUser);
+                            return;
+                        }
+
+                        /*
+                         * authenticate partially if another kind of credential has not been provided yet.
+                         */
+
+                        e.AcceptPartially();
+                        return;
+                    }
+
+                    if (e.Password != null)
+                    {
+                        Log.Information($"'{callPath}' '{e.UserName}' in-progress with password");
+
+                        try
+                        {
+                            var identity = admin.User_GetV1(user.IdentityId.ToString()).AsTask().Result;
+
+                            _ = sts.ResourceOwner_GrantV2(
+                                new ResourceOwnerV2()
+                                {
+                                    issuer = conf["IdentityCredential:IssuerName"],
+                                    client = conf["IdentityCredential:AudienceName"],
+                                    grant_type = "password",
+                                    user = identity.UserName,
+                                    password = e.Password,
+                                }).AsTask().Result;
+                        }
+                        catch (HttpRequestException ex)
+                        {
+                            Log.Warning($"'{callPath}' '{e.UserName}' failure with password");
+
+                            Log.Warning($"'{callPath}'" +
+                                $"{Environment.NewLine} {ex.Message}" +
+                                $"{Environment.NewLine} {ex.InnerException}");
+
+                            e.Reject();
+                            return;
+                        }
+
+                        Log.Information($"'{callPath}' '{e.UserName}' success with password");
+
+                        if (e.PartiallyAccepted
+                            || !user.IsPublicKeyRequired)
+                        {
+                            var fs = FileSystemFactory.CreateFileSystem(_factory, log, user, e.UserName, e.Password);
+
+                            var fsNotify = fs.GetFileSystemNotifier();
+                            fsNotify.CreatePreview += UserNotify_CreatePreview;
+                            fsNotify.CreateCompleted += UserNotify_CreateCompleted;
+                            fsNotify.DeletePreview += UserNotify_DeletePreview;
+                            fsNotify.DeleteCompleted += UserNotify_DeleteCompleted;
+
+                            var fsUser = new FileServerUser(e.UserName, e.Password, ShellType.Scp);
+                            fsUser.SetFileSystem(fs);
+
+                            e.Accept(fsUser);
+                            return;
+                        }
+
+                        /*
+                         * authenticate partially if another kind of credential has not been provided yet.
+                         */
+
+                        e.AcceptPartially();
+                        return;
+                    }
+
+                    Log.Warning($"'{callPath}' '{e.UserName}' denied");
+
+                    e.Reject();
+                    return;
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex.ToString());
+            }
+        }
+
+        private void User_FileDownloaded(object sender, FileTransferredEventArgs e)
+        {
+            var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
+
+            try
+            {
+                using (var scope = _factory.CreateScope())
+                {
+                    var conf = scope.ServiceProvider.GetRequiredService<IConfiguration>();
+                    var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+                    var admin = scope.ServiceProvider.GetRequiredService<IAdminService>();
+                    var alert = scope.ServiceProvider.GetRequiredService<IAlertService>();
+
+                    var user = uow.Users.Get(QueryExpressionFactory.GetQueryExpression<User>()
+                        .Where(x => x.IdentityAlias == ServerSession.Current.UserName).ToLambda())
+                        .Single();
+
+                    foreach (var email in uow.UserAlerts.Get(QueryExpressionFactory.GetQueryExpression<UserAlert>()
+                        .Where(x => x.IdentityId == user.IdentityId && x.ToEmailAddress != null && x.IsEnabled == true && x.OnDownload == true).ToLambda()))
+                    {
+                        _ = alert.Enqueue_EmailV1(new EmailV1()
+                        {
+                            FromEmail = conf["Notifications:EmailFromAddress"],
+                            FromDisplay = conf["Notifications:EmailFromDisplayName"],
+                            ToEmail = email.ToEmailAddress,
+                            ToDisplay = $"{email.ToFirstName} {email.ToLastName}",
+                            Subject = "File Download Alert",
+                            Body = Templates.NotifyEmailOnFileDownload(conf["Daemons:SftpService:Dns"], ServerSession.Current.UserName,
+                                email.ToFirstName, email.ToLastName, "/" + e.FullPath, e.BytesTransferred.ToString(), e.Session.ClientEndPoint.ToString())
+                        }).AsTask().Result;
+                    }
+
+                    foreach (var text in uow.UserAlerts.Get(QueryExpressionFactory.GetQueryExpression<UserAlert>()
+                        .Where(x => x.IdentityId == user.IdentityId && x.ToPhoneNumber != null && x.IsEnabled == true && x.OnDownload == true).ToLambda()))
+                    {
+                        _ = alert.Enqueue_TextV1(new TextV1()
+                        {
+                            FromPhoneNumber = conf["Notifications:TextFromPhoneNumber"],
+                            ToPhoneNumber = text.ToPhoneNumber,
+                            Body = Templates.NotifyTextOnFileDownload(conf["Daemons:SftpService:Dns"], ServerSession.Current.UserName,
+                                text.ToFirstName, text.ToLastName, "/" + e.FullPath, e.BytesTransferred.ToString(), e.Session.ClientEndPoint.ToString())
+                        }).AsTask().Result;
+                    }
+                }
+
+                Log.Information($"'{callPath}' '{ServerSession.Current.UserName}' file '/{e.FullPath}' bytes {e.BytesTransferred} from {e.Session.ClientEndPoint}");
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex.ToString());
+            }
+        }
+
+        private void User_FileUploaded(object sender, FileTransferredEventArgs e)
+        {
+            var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
+
+            try
+            {
+                using (var scope = _factory.CreateScope())
+                {
+                    var conf = scope.ServiceProvider.GetRequiredService<IConfiguration>();
+                    var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+                    var admin = scope.ServiceProvider.GetRequiredService<IAdminService>();
+                    var alert = scope.ServiceProvider.GetRequiredService<IAlertService>();
+
+                    var user = uow.Users.Get(QueryExpressionFactory.GetQueryExpression<User>()
+                        .Where(x => x.IdentityAlias == ServerSession.Current.UserName).ToLambda())
+                        .Single();
+
+                    foreach (var email in uow.UserAlerts.Get(QueryExpressionFactory.GetQueryExpression<UserAlert>()
+                        .Where(x => x.IdentityId == user.IdentityId && x.ToEmailAddress != null && x.IsEnabled == true && x.OnUpload == true).ToLambda()))
+                    {
+                        _ = alert.Enqueue_EmailV1(new EmailV1()
+                        {
+                            FromEmail = conf["Notifications:EmailFromAddress"],
+                            FromDisplay = conf["Notifications:EmailFromDisplayName"],
+                            ToEmail = email.ToEmailAddress,
+                            ToDisplay = $"{email.ToFirstName} {email.ToLastName}",
+                            Subject = "File Upload Alert",
+                            Body = Templates.NotifyEmailOnFileUpload(conf["Daemons:SftpService:Dns"], ServerSession.Current.UserName,
+                                email.ToFirstName, email.ToLastName, "/" + e.FullPath, e.BytesTransferred.ToString(), e.Session.ClientEndPoint.ToString())
+                        }).AsTask().Result;
+                    }
+
+                    foreach (var text in uow.UserAlerts.Get(QueryExpressionFactory.GetQueryExpression<UserAlert>()
+                            .Where(x => x.IdentityId == user.IdentityId && x.ToPhoneNumber != null && x.IsEnabled == true && x.OnUpload == true).ToLambda()))
+                    {
+                        _ = alert.Enqueue_TextV1(new TextV1()
+                        {
+                            FromPhoneNumber = conf["Notifications:TextFromPhoneNumber"],
+                            ToPhoneNumber = text.ToPhoneNumber,
+                            Body = Templates.NotifyTextOnFileUpload(conf["Daemons:SftpService:Dns"], ServerSession.Current.UserName,
+                                text.ToFirstName, text.ToLastName, "/" + e.FullPath, e.BytesTransferred.ToString(), e.Session.ClientEndPoint.ToString())
+                        }).AsTask().Result;
+                    }
+                }
+
+                Log.Information($"'{callPath}' '{ServerSession.Current.UserName}' file '/{e.FullPath}' bytes {e.BytesTransferred} from {e.Session.ClientEndPoint}");
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex.ToString());
+            }
+        }
+
+        private void UserNotify_CreatePreview(object sender, PreviewSingleNodeOperationEventArgs e)
         {
             var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
 
@@ -211,7 +655,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
             }
         }
 
-        private void FsNotify_CreateCompleted(object sender, SingleNodeOperationEventArgs e)
+        private void UserNotify_CreateCompleted(object sender, SingleNodeOperationEventArgs e)
         {
             var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
 
@@ -225,7 +669,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
             }
         }
 
-        private void FsNotify_DeletePreview(object sender, PreviewSingleNodeOperationEventArgs e)
+        private void UserNotify_DeletePreview(object sender, PreviewSingleNodeOperationEventArgs e)
         {
             var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
 
@@ -242,7 +686,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
             }
         }
 
-        private void FsNotify_DeleteCompleted(object sender, SingleNodeOperationEventArgs e)
+        private void UserNotify_DeleteCompleted(object sender, SingleNodeOperationEventArgs e)
         {
             var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
 
@@ -298,418 +742,9 @@ namespace Bhbk.Daemon.Aurora.SFTP
             }
         }
 
-        private void FsUser_PreAuthentication(object sender, PreAuthenticationEventArgs e)
-        {
-            /*
-             * https://www.rebex.net/file-server/features/events.aspx#pre-authentication
-             */
-
-            var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
-
-            try
-            {
-                using (var scope = _factory.CreateScope())
-                {
-                    var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
-                    var user = uow.Users.Get(QueryExpressionFactory.GetQueryExpression<User>()
-                        .Where(x => x.IdentityAlias == e.UserName && x.IsEnabled).ToLambda(),
-                            new List<Expression<Func<User, object>>>()
-                            {
-                                x => x.Networks,
-                                x => x.PublicKeys,
-                            }).SingleOrDefault();
-
-                    if (user == null
-                        || user.IsEnabled == false)
-                    {
-                        Log.Warning($"'{callPath}' '{e.UserName}' not found or not enabled");
-
-                        e.Reject();
-                        return;
-                    }
-
-                    var action = NetworkActionType.Deny.ToString();
-                    if (NetworkHelper.ValidateAddress(user.Networks.Where(x => x.Action == action && x.IsEnabled), e.ClientAddress))
-                    {
-                        Log.Warning($"'{callPath}' '{e.UserName}' is denied from '{e.ClientEndPoint}' running '{e.ClientSoftwareIdentifier}'");
-
-                        e.Reject();
-                        return;
-                    }
-
-                    action = NetworkActionType.Allow.ToString();
-                    if (!NetworkHelper.ValidateAddress(user.Networks.Where(x => x.Action == action && x.IsEnabled), e.ClientAddress))
-                    {
-                        Log.Warning($"'{callPath}' '{e.UserName}' is not allowed from '{e.ClientEndPoint}' running '{e.ClientSoftwareIdentifier}'");
-
-                        e.Reject();
-                        return;
-                    }
-
-                    Log.Information($"'{callPath}' '{e.UserName}' allowed from '{e.ClientEndPoint}' running '{e.ClientSoftwareIdentifier}'");
-
-                    if (user.RequirePublicKey
-                        && user.RequirePassword)
-                    {
-                        Log.Information($"'{callPath}' '{e.UserName}' allowed with public key and password");
-
-                        e.Accept(AuthenticationMethods.PublicKey | AuthenticationMethods.Password);
-                        return;
-                    }
-
-                    if (user.RequirePublicKey
-                        && !user.RequirePassword)
-                    {
-                        Log.Information($"'{callPath}' '{e.UserName}' allowed with public key");
-
-                        e.Accept(AuthenticationMethods.PublicKey);
-                        return;
-                    }
-
-                    if (!user.RequirePublicKey
-                        && user.RequirePassword)
-                    {
-                        Log.Information($"'{callPath}' '{e.UserName}' allowed with password");
-
-                        e.Accept(AuthenticationMethods.Password);
-                        return;
-                    }
-
-                    Log.Warning($"'{callPath}' '{e.UserName}' denied");
-
-                    e.Reject();
-                    return;
-                }
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex.ToString());
-            }
-        }
-
-        private void FsUser_Authentication(object sender, AuthenticationEventArgs e)
-        {
-            /*
-             * https://www.rebex.net/file-server/features/events.aspx#authentication
-             */
-
-            var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
-
-            try
-            {
-                using (var scope = _factory.CreateScope())
-                {
-                    var log = scope.ServiceProvider.GetRequiredService<ILogger>();
-                    var conf = scope.ServiceProvider.GetRequiredService<IConfiguration>();
-                    var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
-                    var admin = scope.ServiceProvider.GetRequiredService<IAdminService>();
-                    var sts = scope.ServiceProvider.GetRequiredService<IStsService>();
-
-                    var user = uow.Users.Get(QueryExpressionFactory.GetQueryExpression<User>()
-                        .Where(x => x.IdentityAlias == e.UserName && x.IsEnabled).ToLambda(),
-                            new List<Expression<Func<User, object>>>()
-                            {
-                                x => x.Mount,
-                                x => x.PublicKeys,
-                            }).SingleOrDefault();
-
-                    if (e.Key != null)
-                    {
-                        Log.Information($"'{callPath}' '{e.UserName}' in-progress with public key");
-
-                        if (!UserHelper.ValidatePubKey(user.PublicKeys.Where(x => x.IsEnabled).ToList(), e.Key)
-                            || !admin.User_VerifyV1(user.IdentityId).AsTask().Result)
-                        {
-                            Log.Warning($"'{callPath}' '{e.UserName}' failure with public key");
-
-                            e.Reject();
-                            return;
-                        }
-
-                        Log.Information($"'{callPath}' '{e.UserName}' success with public key");
-
-                        if (e.PartiallyAccepted
-                            || !user.RequirePassword)
-                        {
-                            /*
-                             * an smb mount will not succeed without a user password or ambassador credential.
-                             */
-
-                            if (user.FileSystemType == FileSystemProviderType.SMB.ToString()
-                                && !user.Mount.CredentialId.HasValue)
-                            {
-                                Log.Warning($"'{callPath}' '{e.UserName}' failure with no user or ambassador password" +
-                                    $" available to mount {FileSystemProviderType.SMB} filesystem");
-
-                                e.Reject();
-                                return;
-                            }
-
-                            var fs = FileSystemFactory.CreateFileSystem(_factory, log, user, e.UserName, e.Password);
-
-                            var fsNotify = fs.GetFileSystemNotifier();
-                            fsNotify.CreatePreview += FsNotify_CreatePreview;
-                            fsNotify.CreateCompleted += FsNotify_CreateCompleted;
-                            fsNotify.DeletePreview += FsNotify_DeletePreview;
-                            fsNotify.DeleteCompleted += FsNotify_DeleteCompleted;
-
-                            var fsUser = new FileServerUser(e.UserName, e.Password);
-                            fsUser.SetFileSystem(fs);
-
-                            e.Accept(fsUser);
-                            return;
-                        }
-
-                        /*
-                         * authenticate partially if another kind of credential has not been provided yet.
-                         */
-
-                        e.AcceptPartially();
-                        return;
-                    }
-
-                    if (e.Password != null)
-                    {
-                        Log.Information($"'{callPath}' '{e.UserName}' in-progress with password");
-
-                        try
-                        {
-                            var identity = admin.User_GetV1(user.IdentityId.ToString()).AsTask().Result;
-
-                            _ = sts.ResourceOwner_GrantV2(
-                                new ResourceOwnerV2()
-                                {
-                                    issuer = conf["IdentityCredentials:IssuerName"],
-                                    client = conf["IdentityCredentials:AudienceName"],
-                                    grant_type = "password",
-                                    user = identity.UserName,
-                                    password = e.Password,
-                                }).AsTask().Result;
-                        }
-                        catch (HttpRequestException ex)
-                        {
-                            Log.Warning($"'{callPath}' '{e.UserName}' failure with password");
-
-                            Log.Warning($"'{callPath}'" +
-                                $"{Environment.NewLine} {ex.Message}" +
-                                $"{Environment.NewLine} {ex.InnerException}");
-
-                            e.Reject();
-                            return;
-                        }
-
-                        Log.Information($"'{callPath}' '{e.UserName}' success with password");
-
-                        if (e.PartiallyAccepted
-                            || !user.RequirePublicKey)
-                        {
-                            var fs = FileSystemFactory.CreateFileSystem(_factory, log, user, e.UserName, e.Password);
-
-                            var fsNotify = fs.GetFileSystemNotifier();
-                            fsNotify.CreatePreview += FsNotify_CreatePreview;
-                            fsNotify.CreateCompleted += FsNotify_CreateCompleted;
-                            fsNotify.DeletePreview += FsNotify_DeletePreview;
-                            fsNotify.DeleteCompleted += FsNotify_DeleteCompleted;
-
-                            var fsUser = new FileServerUser(e.UserName, e.Password);
-                            fsUser.SetFileSystem(fs);
-
-                            e.Accept(fsUser);
-                            return;
-                        }
-
-                        /*
-                         * authenticate partially if another kind of credential has not been provided yet.
-                         */
-
-                        e.AcceptPartially();
-                        return;
-                    }
-
-                    Log.Warning($"'{callPath}' '{e.UserName}' denied");
-
-                    e.Reject();
-                    return;
-                }
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex.ToString());
-            }
-        }
-
-        private void FsUser_Connecting(object sender, ConnectingEventArgs e)
-        {
-            /*
-             * https://www.rebex.net/file-server/features/events.aspx#connecting
-             */
-
-            var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
-
-            try
-            {
-                Log.Information($"'{callPath}' from {e.ClientEndPoint}");
-
-                e.Accept = true;
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex.ToString());
-            }
-        }
-
-        private void FsUser_FileDownloaded(object sender, FileTransferredEventArgs e)
-        {
-            var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
-
-            try
-            {
-                using (var scope = _factory.CreateScope())
-                {
-                    var conf = scope.ServiceProvider.GetRequiredService<IConfiguration>();
-                    var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
-                    var admin = scope.ServiceProvider.GetRequiredService<IAdminService>();
-                    var alert = scope.ServiceProvider.GetRequiredService<IAlertService>();
-
-                    var user = uow.Users.Get(QueryExpressionFactory.GetQueryExpression<User>()
-                        .Where(x => x.IdentityAlias == ServerSession.Current.UserName).ToLambda())
-                        .Single();
-
-                    foreach (var email in uow.UserAlerts.Get(QueryExpressionFactory.GetQueryExpression<UserAlert>()
-                        .Where(x => x.IdentityId == user.IdentityId && x.ToEmailAddress != null && x.IsEnabled == true && x.OnDownload == true).ToLambda()))
-                    {
-                        _ = alert.Enqueue_EmailV1(new EmailV1()
-                        {
-                            FromEmail = conf["Notifications:EmailFromAddress"],
-                            FromDisplay = conf["Notifications:EmailFromDisplayName"],
-                            ToEmail = email.ToEmailAddress,
-                            ToDisplay = $"{email.ToFirstName} {email.ToLastName}",
-                            Subject = "File Download Alert",
-                            Body = Templates.NotifyEmailOnFileDownload(conf["Daemons:SftpService:Dns"], ServerSession.Current.UserName,
-                                email.ToFirstName, email.ToLastName, "/" + e.FullPath, e.BytesTransferred.ToString(), e.Session.ClientEndPoint.ToString())
-                        }).AsTask().Result;
-                    }
-
-                    foreach (var text in uow.UserAlerts.Get(QueryExpressionFactory.GetQueryExpression<UserAlert>()
-                        .Where(x => x.IdentityId == user.IdentityId && x.ToPhoneNumber != null && x.IsEnabled == true && x.OnDownload == true).ToLambda()))
-                    {
-                        _ = alert.Enqueue_TextV1(new TextV1()
-                        {
-                            FromPhoneNumber = conf["Notifications:TextFromPhoneNumber"],
-                            ToPhoneNumber = text.ToPhoneNumber,
-                            Body = Templates.NotifyTextOnFileDownload(conf["Daemons:SftpService:Dns"], ServerSession.Current.UserName,
-                                text.ToFirstName, text.ToLastName, "/" + e.FullPath, e.BytesTransferred.ToString(), e.Session.ClientEndPoint.ToString())
-                        }).AsTask().Result;
-                    }
-                }
-
-                Log.Information($"'{callPath}' '{ServerSession.Current.UserName}' file '/{e.FullPath}' bytes {e.BytesTransferred} from {e.Session.ClientEndPoint}");
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex.ToString());
-            }
-        }
-
-        private void FsUser_FileUploaded(object sender, FileTransferredEventArgs e)
-        {
-            var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
-
-            try
-            {
-                using (var scope = _factory.CreateScope())
-                {
-                    var conf = scope.ServiceProvider.GetRequiredService<IConfiguration>();
-                    var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
-                    var admin = scope.ServiceProvider.GetRequiredService<IAdminService>();
-                    var alert = scope.ServiceProvider.GetRequiredService<IAlertService>();
-
-                    var user = uow.Users.Get(QueryExpressionFactory.GetQueryExpression<User>()
-                        .Where(x => x.IdentityAlias == ServerSession.Current.UserName).ToLambda())
-                        .Single();
-
-                    foreach (var email in uow.UserAlerts.Get(QueryExpressionFactory.GetQueryExpression<UserAlert>()
-                        .Where(x => x.IdentityId == user.IdentityId && x.ToEmailAddress != null && x.IsEnabled == true && x.OnUpload == true).ToLambda()))
-                    {
-                        _ = alert.Enqueue_EmailV1(new EmailV1()
-                        {
-                            FromEmail = conf["Notifications:EmailFromAddress"],
-                            FromDisplay = conf["Notifications:EmailFromDisplayName"],
-                            ToEmail = email.ToEmailAddress,
-                            ToDisplay = $"{email.ToFirstName} {email.ToLastName}",
-                            Subject = "File Upload Alert",
-                            Body = Templates.NotifyEmailOnFileUpload(conf["Daemons:SftpService:Dns"], ServerSession.Current.UserName,
-                                email.ToFirstName, email.ToLastName, "/" + e.FullPath, e.BytesTransferred.ToString(), e.Session.ClientEndPoint.ToString())
-                        }).AsTask().Result;
-                    }
-
-                    foreach (var text in uow.UserAlerts.Get(QueryExpressionFactory.GetQueryExpression<UserAlert>()
-                            .Where(x => x.IdentityId == user.IdentityId && x.ToPhoneNumber != null && x.IsEnabled == true && x.OnUpload == true).ToLambda()))
-                    {
-                        _ = alert.Enqueue_TextV1(new TextV1()
-                        {
-                            FromPhoneNumber = conf["Notifications:TextFromPhoneNumber"],
-                            ToPhoneNumber = text.ToPhoneNumber,
-                            Body = Templates.NotifyTextOnFileUpload(conf["Daemons:SftpService:Dns"], ServerSession.Current.UserName,
-                                text.ToFirstName, text.ToLastName, "/" + e.FullPath, e.BytesTransferred.ToString(), e.Session.ClientEndPoint.ToString())
-                        }).AsTask().Result;
-                    }
-                }
-
-                Log.Information($"'{callPath}' '{ServerSession.Current.UserName}' file '/{e.FullPath}' bytes {e.BytesTransferred} from {e.Session.ClientEndPoint}");
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex.ToString());
-            }
-        }
-
-        private void FsUser_Disconnected(object sender, DisconnectedEventArgs e)
-        {
-            /*
-             * https://www.rebex.net/file-server/features/events.aspx#disconnected
-             */
-
-            var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
-
-            try
-            {
-                Log.Information($"'{callPath}' from {e.Session.ClientEndPoint} after {e.Session.Duration}");
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex.ToString());
-            }
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!_disposed)
-            {
-                if (disposing)
-                {
-                    // TODO: dispose managed state (managed objects)
-                    _server.Dispose();
-                }
-
-                // TODO: free unmanaged resources (unmanaged objects) and override finalizer
-                // TODO: set large fields to null
-                _disposed = true;
-            }
-        }
-
-        // // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
-        // ~Daemon()
-        // {
-        //     // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-        //     Dispose(disposing: false);
-        // }
-
         public void Dispose()
         {
-            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-            Dispose(disposing: true);
-            GC.SuppressFinalize(this);
+            _server.Dispose();
         }
     }
 }

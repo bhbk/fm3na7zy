@@ -6,6 +6,17 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 {
     public static class NetworkHelper
     {
+        public static bool ValidateAddress(Network network, IPAddress client)
+        {
+            IPNetwork cidr;
+
+            if (IPNetwork.TryParse(network.Address, out cidr))
+                if (cidr.Contains(client))
+                    return true;
+
+            return false;
+        }
+
         public static bool ValidateAddress(IEnumerable<Network> networks, IPAddress client)
         {
             var found = false;

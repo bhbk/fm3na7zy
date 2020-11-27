@@ -91,13 +91,38 @@ namespace Bhbk.Cli.Aurora.Commands
                     {
                         IdentityId = Guid.Parse(input),
                         IdentityAlias = _userName,
-                        RequirePassword = true,
-                        RequirePublicKey = false,
                         FileSystemType = _fileSystem.ToString(),
-                        FileSystemReadOnly = true,
+                        IsPasswordRequired = true,
+                        IsPublicKeyRequired = false,
+                        IsFileSystemReadOnly = true,
                         IsEnabled = true,
                         IsDeletable = false,
                     });
+
+                _uow.Commit();
+
+                _uow.Networks.Create(
+                    new Network
+                    {
+                        IdentityId = user.IdentityId,
+                        SequenceId = 0,
+                        Address = "::1",
+                        Action = NetworkActionType.Allow.ToString(),
+                        IsEnabled = true,
+                        IsDeletable = true,
+                    });
+
+                _uow.Networks.Create(
+                    new Network
+                    {
+                        IdentityId = user.IdentityId,
+                        SequenceId = 100,
+                        Address = "0.0.0.0/0",
+                        Action = NetworkActionType.Allow.ToString(),
+                        IsEnabled = true,
+                        IsDeletable = true,
+                    });
+
                 _uow.Commit();
 
                 OutputFactory.StdOutUsers(new List<User> { user });

@@ -1,5 +1,5 @@
-﻿using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
-using Bhbk.Lib.Aurora.Data_EF6.Models;
+﻿using Bhbk.Lib.Aurora.Data_EF6.Models;
+using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
 using Bhbk.Lib.Aurora.Domain.Helpers;
 using Bhbk.Lib.CommandLine.IO;
 using Bhbk.Lib.Common.Primitives.Enums;
@@ -67,8 +67,22 @@ namespace Bhbk.Cli.Aurora.Commands
 
                 Console.Out.WriteLine();
                 Console.Out.WriteLine("Opened " + _path.FullName);
+                Console.Out.WriteLine();
 
-                KeyHelper.ImportPrivKey(_conf, _uow, _privKeyPass, SignatureHashAlgorithm.SHA256, new FileInfo(_path.FullName));
+                var stream = new MemoryStream();
+
+                using (FileStream fileStream = new FileStream(_path.FullName, FileMode.Open, FileAccess.Read))
+                    fileStream.CopyTo(stream);
+
+                var keyPair = KeyHelper.ImportKeyPair(_conf, _uow, _privKeyPass, SignatureHashAlgorithm.SHA256, stream);
+
+                if (keyPair.Item1 != null)
+                    _uow.PublicKeys.Create(keyPair.Item1);
+
+                if (keyPair.Item2 != null)
+                    _uow.PrivateKeys.Create(keyPair.Item2);
+
+                _uow.Commit();
 
                 return StandardOutput.FondFarewell();
             }

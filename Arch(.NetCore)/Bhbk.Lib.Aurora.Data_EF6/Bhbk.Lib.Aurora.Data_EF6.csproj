@@ -70,11 +70,11 @@
     <ErrorReport>prompt</ErrorReport>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Bhbk.Lib.Common, Version=2020.11.21.2300, Culture=neutral, processorArchitecture=AMD64">
-      <HintPath>..\packages\Bhbk.Lib.Common.2020.11.21.2300\lib\netstandard2.0\Bhbk.Lib.Common.dll</HintPath>
+    <Reference Include="Bhbk.Lib.Common, Version=2020.11.25.1900, Culture=neutral, processorArchitecture=AMD64">
+      <HintPath>..\packages\Bhbk.Lib.Common.2020.11.25.1900\lib\netstandard2.0\Bhbk.Lib.Common.dll</HintPath>
     </Reference>
     <Reference Include="Bhbk.Lib.DataAccess.EF, Version=1.0.0.0, Culture=neutral, processorArchitecture=AMD64">
-      <HintPath>..\packages\Bhbk.Lib.DataAccess.EF.2020.11.21.2300\lib\net48\Bhbk.Lib.DataAccess.EF.dll</HintPath>
+      <HintPath>..\packages\Bhbk.Lib.DataAccess.EF.2020.11.25.1900\lib\net48\Bhbk.Lib.DataAccess.EF.dll</HintPath>
     </Reference>
     <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
       <HintPath>..\packages\EntityFramework.6.4.4\lib\net45\EntityFramework.dll</HintPath>
@@ -108,24 +108,6 @@
     <Compile Include="ModelsMem\UserMem.cs" />
     <Compile Include="ModelsMem\UserFileMem.cs" />
     <Compile Include="ModelsMem\UserFolderMem.cs" />
-    <Compile Include="UnitOfWork\IUnitOfWork.cs" />
-    <Compile Include="UnitOfWork\UnitOfWork.cs" />
-    <Compile Include="Models\AuroraEntities.Context.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>AuroraEntities.Context.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\AuroraEntities.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>AuroraEntities.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\AuroraEntities.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>AuroraEntities.edmx</DependentUpon>
-    </Compile>
-    <Compile Include="Models\AuroraEntitiesFactory.cs" />
     <Compile Include="Models\Credential.cs">
       <DependentUpon>AuroraEntities.tt</DependentUpon>
     </Compile>
@@ -246,6 +228,24 @@
     <Compile Include="Models\usp_User_Update_Result.cs">
       <DependentUpon>AuroraEntities.tt</DependentUpon>
     </Compile>
+    <Compile Include="UnitOfWork\IUnitOfWork.cs" />
+    <Compile Include="UnitOfWork\UnitOfWork.cs" />
+    <Compile Include="Models\AuroraEntities.Context.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>AuroraEntities.Context.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\AuroraEntities.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>AuroraEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\AuroraEntities.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>AuroraEntities.edmx</DependentUpon>
+    </Compile>
+    <Compile Include="Models\AuroraEntitiesFactory.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UnitOfWorkMem\IUnitOfWorkMem.cs" />
     <Compile Include="UnitOfWorkMem\UnitOfWorkMem.cs" />

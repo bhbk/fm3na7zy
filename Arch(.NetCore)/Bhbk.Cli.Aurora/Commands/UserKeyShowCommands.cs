@@ -54,7 +54,7 @@ namespace Bhbk.Cli.Aurora.Commands
         {
             try
             {
-                OutputFactory.StdOutKeyPairs(_user.PublicKeys.OrderBy(x => x.CreatedUtc));
+                OutputFactory.StdOutKeyPairs(_user.PublicKeys.OrderBy(x => x.CreatedUtc), _user.PrivateKeys);
 
                 return StandardOutput.FondFarewell();
             }

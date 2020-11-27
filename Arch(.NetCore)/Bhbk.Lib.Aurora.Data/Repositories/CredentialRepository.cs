@@ -23,14 +23,14 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
             {
                 new SqlParameter("@Domain", SqlDbType.NVarChar) { Value = (object)entity.Domain ?? DBNull.Value },
                 new SqlParameter("@UserName", SqlDbType.NVarChar) { Value = entity.UserName },
-                new SqlParameter("@Password", SqlDbType.NVarChar) { Value = entity.Password },
+                new SqlParameter("@EncryptedPassword", SqlDbType.NVarChar) { Value = entity.EncryptedPassword },
                 new SqlParameter("@IsEnabled", SqlDbType.Bit) { Value = entity.IsEnabled },
                 new SqlParameter("@IsDeletable", SqlDbType.Bit) { Value = entity.IsDeletable },
                 rvalue,
             };
 
             return _context.SqlQuery<uvw_Credential>("EXEC @ReturnValue = [svc].[usp_Credential_Insert] "
-                + "@Domain, @UserName, @Password, @IsEnabled, @IsDeletable", pvalues)
+                + "@Domain, @UserName, @EncryptedPassword, @IsEnabled, @IsDeletable", pvalues)
                 .Single();
         }
 
@@ -94,7 +94,7 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
                 new SqlParameter("@Id", SqlDbType.UniqueIdentifier) { Value = entity.Id },
                 new SqlParameter("@Domain", SqlDbType.NVarChar) { Value = (object)entity.Domain ?? DBNull.Value },
                 new SqlParameter("@UserName", SqlDbType.NVarChar) { Value = entity.UserName },
-                new SqlParameter("@Password", SqlDbType.NVarChar) { Value = entity.Password },
+                new SqlParameter("@EncryptedPassword", SqlDbType.NVarChar) { Value = entity.EncryptedPassword },
                 new SqlParameter("@IsEnabled", SqlDbType.Bit) { Value = entity.IsEnabled },
                 new SqlParameter("@IsDeletable", SqlDbType.Bit) { Value = entity.IsDeletable },
                 rvalue,

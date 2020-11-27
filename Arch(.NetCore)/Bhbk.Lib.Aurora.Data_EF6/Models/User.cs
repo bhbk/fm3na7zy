@@ -28,10 +28,10 @@ namespace Bhbk.Lib.Aurora.Data_EF6.Models
     
         public System.Guid IdentityId { get; set; }
         public string IdentityAlias { get; set; }
-        public bool RequirePassword { get; set; }
-        public bool RequirePublicKey { get; set; }
         public string FileSystemType { get; set; }
-        public bool FileSystemReadOnly { get; set; }
+        public bool IsPasswordRequired { get; set; }
+        public bool IsPublicKeyRequired { get; set; }
+        public bool IsFileSystemReadOnly { get; set; }
         public long QuotaInBytes { get; set; }
         public long QuotaUsedInBytes { get; set; }
         public string Debugger { get; set; }

@@ -10,7 +10,7 @@ namespace Bhbk.Lib.Aurora.Data.Models
         public Guid Id { get; set; }
         public string Domain { get; set; }
         public string UserName { get; set; }
-        public string Password { get; set; }
+        public string EncryptedPassword { get; set; }
         public bool IsEnabled { get; set; }
         public bool IsDeletable { get; set; }
         public DateTimeOffset CreatedUtc { get; set; }

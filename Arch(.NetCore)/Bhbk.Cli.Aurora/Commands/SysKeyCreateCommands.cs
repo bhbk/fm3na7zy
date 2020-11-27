@@ -1,21 +1,17 @@
 ﻿using Bhbk.Cli.Aurora.Factories;
-using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
 using Bhbk.Lib.Aurora.Data_EF6.Models;
+using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
 using Bhbk.Lib.Aurora.Domain.Helpers;
 using Bhbk.Lib.CommandLine.IO;
 using Bhbk.Lib.Common.Primitives.Enums;
 using Bhbk.Lib.Common.Services;
 using Bhbk.Lib.Cryptography.Entropy;
-using Bhbk.Lib.QueryExpression.Extensions;
-using Bhbk.Lib.QueryExpression.Factories;
 using ManyConsole;
 using Microsoft.Extensions.Configuration;
 using Rebex.Net;
 using Rebex.Security.Certificates;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
 
 namespace Bhbk.Cli.Aurora.Commands
 {
@@ -61,28 +57,29 @@ namespace Bhbk.Cli.Aurora.Commands
         {
             try
             {
-                if (!string.IsNullOrEmpty(_privKeyPass))
+                if (string.IsNullOrEmpty(_privKeyPass))
                 {
-                    Console.Out.Write("  *** Enter password for the private key *** : ");
-                    _privKeyPass = StandardInput.GetHiddenInput();
+                    Console.Out.WriteLine($"  *** The password for the private key *** : {_privKeyPass}");
+                    _privKeyPass = AlphaNumeric.CreateString(32);
                 }
                 else
                 {
-                    _privKeyPass = AlphaNumeric.CreateString(32);
-                    Console.Out.WriteLine($"  *** The password for the private key *** : {_privKeyPass}");
+                    Console.Out.Write("  *** Enter password for the private key *** : ");
+                    _privKeyPass = StandardInput.GetHiddenInput();
+                    Console.Out.WriteLine();
                 }
 
-                var privKey = KeyHelper.CreatePrivKey(_conf, _uow, _keyAlgo, _privKeySize, _privKeyPass, SignatureHashAlgorithm.SHA256);
+                var keyPair = KeyHelper.CreateKeyPair(_conf, _uow, _keyAlgo, _privKeySize, _privKeyPass, SignatureHashAlgorithm.SHA256);
 
-                var pubKey = _uow.PublicKeys.Get(QueryExpressionFactory.GetQueryExpression<PublicKey>()
-                    .Where(x => x.PrivateKeyId == privKey.Id).ToLambda(),
-                        new List<Expression<Func<PublicKey, object>>>()
-                        {
-                            x => x.PrivateKey,
-                        })
-                    .Single();
+                if (keyPair.Item1 != null)
+                    _uow.PublicKeys.Create(keyPair.Item1);
 
-                OutputFactory.StdOutKeyPairs(new List<PublicKey>() { pubKey });
+                if (keyPair.Item2 != null)
+                    _uow.PrivateKeys.Create(keyPair.Item2);
+
+                _uow.Commit();
+
+                OutputFactory.StdOutKeyPairs(new List<PublicKey> { keyPair.Item1 }, new List<PrivateKey> { keyPair.Item2 });
 
                 return StandardOutput.FondFarewell();
             }

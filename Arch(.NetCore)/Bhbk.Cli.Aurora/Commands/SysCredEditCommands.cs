@@ -20,7 +20,7 @@ namespace Bhbk.Cli.Aurora.Commands
         private readonly IConfiguration _conf;
         private readonly IUnitOfWork _uow;
         private Guid _id;
-        private string _credDomain, _credLogin, _credPass;
+        private string _credDomain, _credLogin;
 
         public SysCredEditCommands()
         {
@@ -47,11 +47,6 @@ namespace Bhbk.Cli.Aurora.Commands
             {
                 _credLogin = arg;
             });
-
-            HasOption("p|pass=", "Enter credential password", arg =>
-            {
-                _credPass = arg;
-            });
         }
 
         public override int Run(string[] remainingArguments)
@@ -59,25 +54,22 @@ namespace Bhbk.Cli.Aurora.Commands
             try
             {
                 var credential = _uow.Credentials.Get(QueryExpressionFactory.GetQueryExpression<Credential>()
-                    .Where(x => x.Domain == _credDomain && x.UserName == _credLogin).ToLambda())
+                    .Where(x => x.Id == _id).ToLambda())
                     .SingleOrDefault();
 
                 if (credential == null)
                     throw new ConsoleHelpAsException($"  *** Invalid credential GUID '{_id}' ***");
 
-                if (string.IsNullOrEmpty(_credPass))
-                {
-                    Console.Out.Write("  *** Enter credential password to use *** : ");
-                    _credPass = StandardInput.GetHiddenInput();
+                Console.Out.Write("  *** Enter credential password to use *** : ");
+                var credPass = StandardInput.GetHiddenInput();
 
-                    Console.Out.WriteLine();
-                }
+                Console.Out.WriteLine();
 
                 var secret = _conf["Databases:AuroraSecret"];
-                var cipherText = AES.EncryptString(_credPass, secret);
-                var plainText = AES.DecryptString(cipherText, secret);
+                var encryptedPass = AES.EncryptString(credPass, secret);
+                var decryptedPass = AES.DecryptString(encryptedPass, secret);
 
-                if (_credPass != plainText)
+                if (credPass != decryptedPass)
                     throw new ArithmeticException();
 
                 if (_credDomain != null)
@@ -86,13 +78,13 @@ namespace Bhbk.Cli.Aurora.Commands
                 if (_credLogin != null)
                     credential.UserName = _credLogin;
 
-                if (_credPass != null)
-                    credential.Password = cipherText;
+                if (credPass != null)
+                    credential.EncryptedPassword = encryptedPass;
 
-                credential = _uow.Credentials.Update(credential);
+                _uow.Credentials.Update(credential);
                 _uow.Commit();
 
-                OutputFactory.StdOutCredentials(new List<Credential>() { credential });
+                OutputFactory.StdOutCredentials(new List<Credential> { credential });
 
                 return StandardOutput.FondFarewell();
             }

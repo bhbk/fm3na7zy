@@ -1,5 +1,4 @@
 ﻿using Bhbk.Lib.Aurora.Data_EF6.Models;
-using Bhbk.Lib.Aurora.Primitives.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,49 +13,31 @@ namespace Bhbk.Cli.Aurora.Factories
             {
                 Console.Out.WriteLine();
 
-                Console.Out.WriteLine($"  Credential GUID '{cred.Id}'{(!cred.IsDeletable ? " is immutable" : null)}");
+                Console.Out.WriteLine($"  Credential GUID '{cred.Id}'{(!cred.IsDeletable ? " is not deletable" : null)}'. " +
+                    $"Created {cred.CreatedUtc.LocalDateTime}.");
                 Console.Out.WriteLine($"    Login domain '{cred.Domain}' Login user '{cred.UserName}'");
             }
         }
 
-        public static void StdOutCredentialSecrets(IEnumerable<Credential> creds)
+        public static void StdOutKeyPairs(IEnumerable<PublicKey> pubKeys, IEnumerable<PrivateKey> privKeys)
         {
-            foreach (var cred in creds)
+            foreach (var pubKey in pubKeys)
             {
                 Console.Out.WriteLine();
 
-                Console.Out.WriteLine($"  Credential GUID '{cred.Id}'{(!cred.IsDeletable ? " is immutable" : null)}");
-                Console.Out.WriteLine($"    Pass ciphertext '{cred.Password}'");
-            }
-        }
+                Console.Out.WriteLine($"  Public key GUID '{pubKey.Id}' of type '{pubKey.KeyAlgo}'{(!pubKey.IsDeletable ? " is not deletable" : null)}. " +
+                    $"Created {pubKey.CreatedUtc.LocalDateTime}.");
+                Console.Out.WriteLine($"    Sig '{pubKey.SigValue}'");
 
-        public static void StdOutKeyPairs(IEnumerable<PublicKey> keys)
-        {
-            foreach (var key in keys)
-            {
-                Console.Out.WriteLine();
+                if (pubKey.PrivateKeyId != null)
+                {
+                    var privKey = privKeys.Where(x => x.Id == pubKey.PrivateKeyId).Single();
 
-                Console.Out.WriteLine($"  Public key GUID '{key.Id}' of type '{key.KeyAlgo}'{(!key.IsDeletable ? " is not deletable" : null)}. " +
-                    $"Created {key.CreatedUtc}.");
-                Console.Out.WriteLine($"    Sig '{key.SigValue}'");
-
-                if (key.PrivateKeyId != null)
-                    Console.Out.WriteLine($"    Private key GUID '{key.PrivateKeyId}' of type '{key.KeyAlgo}'{(!key.PrivateKey.IsDeletable ? " is not deletable" : null)}. " +
-                        $"Created {key.CreatedUtc}.");
+                    Console.Out.WriteLine($"    Private key GUID '{privKey.Id}' of type '{privKey.KeyAlgo}'{(!privKey.IsDeletable ? " is not deletable" : null)}. " +
+                        $"Created {pubKey.CreatedUtc.LocalDateTime}.");
+                }
                 else
                     Console.Out.WriteLine($"    Private key not available");
-            };
-        }
-
-        public static void StdOutKeyPairSecrets(IEnumerable<PrivateKey> keys)
-        {
-            foreach (var key in keys)
-            {
-                Console.Out.WriteLine();
-
-                Console.Out.WriteLine($"  Private key GUID '{key.Id}' of type '{key.KeyAlgo}'{(!key.IsDeletable ? " is immutable" : null)}. " +
-                    $"Created {key.CreatedUtc}.");
-                Console.Out.WriteLine($"    Key pass ciphertext '{key.KeyPass}'");
             };
         }
 
@@ -64,15 +45,34 @@ namespace Bhbk.Cli.Aurora.Factories
         {
             Console.Out.WriteLine();
 
-            foreach (var net in nets.Where(x => x.Action == NetworkActionType.Deny.ToString()).OrderBy(x => x.Address))
+            foreach (var net in nets.OrderBy(x => x.SequenceId))
             {
-                Console.Out.WriteLine($"  Network GUID '{net.Id}' is {net.Action} for {net.Address}");
+                Console.Out.WriteLine($"  Network GUID '{net.Id}' sequence '{net.SequenceId}' is '{net.Action}' for '{net.Address}'.");
             }
+        }
 
-            foreach (var net in nets.Where(x => x.Action == NetworkActionType.Allow.ToString()).OrderBy(x => x.Address))
+        public static void StdOutSecretsCredentials(IEnumerable<Credential> creds)
+        {
+            foreach (var cred in creds)
             {
-                Console.Out.WriteLine($"  Network GUID '{net.Id}' is {net.Action} for {net.Address}");
+                Console.Out.WriteLine();
+
+                Console.Out.WriteLine($"  Credential GUID '{cred.Id}'{(!cred.IsDeletable ? " is not deletable" : null)}'. " +
+                    $"Created {cred.CreatedUtc.LocalDateTime}.");
+                Console.Out.WriteLine($"    Pass ciphertext '{cred.EncryptedPassword}'");
             }
+        }
+
+        public static void StdOutSecretsKeypairs(IEnumerable<PrivateKey> keys)
+        {
+            foreach (var key in keys)
+            {
+                Console.Out.WriteLine();
+
+                Console.Out.WriteLine($"  Private key GUID '{key.Id}' of type '{key.KeyAlgo}'{(!key.IsDeletable ? " is not deletable" : null)}. " +
+                    $"Created {key.CreatedUtc}.");
+                Console.Out.WriteLine($"    Key pass ciphertext '{key.KeyPass}'");
+            };
         }
 
         public static void StdOutSettings(IEnumerable<Setting> configs)
@@ -81,21 +81,22 @@ namespace Bhbk.Cli.Aurora.Factories
             {
                 Console.Out.WriteLine();
 
-                Console.Out.WriteLine($"  Config GUID '{config.Id}'{(!config.IsDeletable ? " is immutable" : null)}");
+                Console.Out.WriteLine($"  Config GUID '{config.Id}'{(!config.IsDeletable ? " is not deletable" : null)}. " +
+                    $"Created {config.CreatedUtc.LocalDateTime}.");
                 Console.Out.WriteLine($"    Config key '{config.ConfigKey}' Config value '{config.ConfigValue}'");
             }
         }
 
         public static void StdOutUsers(IEnumerable<User> users)
         {
-            foreach(var user in users)
+            foreach (var user in users)
             {
                 Console.Out.WriteLine();
 
-                Console.Out.WriteLine($"  User GUID '{user.IdentityId}' with alias '{user.IdentityAlias}'");
-                Console.Out.WriteLine($"    File system is '{user.FileSystemType}' and mount as {(user.FileSystemReadOnly ? "read only" : "read write")}");
-                Console.Out.WriteLine($"    Public key authentication is {(user.RequirePublicKey ? "enabled" : "disabled")}");
-                Console.Out.WriteLine($"    Password authentication is {(user.RequirePassword ? "enabled" : "disabled")}");
+                Console.Out.WriteLine($"  User GUID '{user.IdentityId}' with alias '{user.IdentityAlias}'. Created {user.CreatedUtc.LocalDateTime}.");
+                Console.Out.WriteLine($"    Public key authentication is {(user.IsPublicKeyRequired ? "enabled" : "disabled")}");
+                Console.Out.WriteLine($"    Password authentication is {(user.IsPasswordRequired ? "enabled" : "disabled")}");
+                Console.Out.WriteLine($"    File system is '{user.FileSystemType}' and mounts as {(user.IsFileSystemReadOnly ? "read only" : "read write")}");
             }
         }
 
@@ -105,7 +106,7 @@ namespace Bhbk.Cli.Aurora.Factories
             {
                 Console.Out.WriteLine();
 
-                Console.Out.WriteLine($"  Mount for user GUID '{mount.User.IdentityId}' with alias '{mount.User.IdentityAlias}'{(!mount.IsDeletable ? " is not deletable" : null)}");
+                Console.Out.WriteLine($"  Mount for user '{mount.User.IdentityAlias}'{(!mount.IsDeletable ? " is not deletable" : null)}");
                 Console.Out.WriteLine($"    Mount path '{mount.ServerAddress}{mount.ServerShare}' using '{mount.AuthType}' protocol");
 
                 if (mount.CredentialId.HasValue)

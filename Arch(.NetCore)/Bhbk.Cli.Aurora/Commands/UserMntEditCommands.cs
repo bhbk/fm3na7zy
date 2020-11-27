@@ -21,9 +21,10 @@ namespace Bhbk.Cli.Aurora.Commands
         private readonly IConfiguration _conf;
         private readonly IUnitOfWork _uow;
         private User _user;
+        private bool _alternateCredential;
         private AuthType _authType;
-        private readonly string _authTypeList = string.Join(", ", Enum.GetNames(typeof(AuthType)));
-        
+        private string _authTypeList = string.Join(", ", Enum.GetNames(typeof(AuthType)));
+
         public UserMntEditCommands()
         {
             _conf = (IConfiguration)new ConfigurationBuilder()
@@ -68,35 +69,35 @@ namespace Bhbk.Cli.Aurora.Commands
 
                 _user.Mount.AuthType = _authType.ToString();
             });
+
+            HasOption("c|credential", "Enter to use alternate credential for mount", arg =>
+            {
+                _alternateCredential = true;
+            });
         }
 
         public override int Run(string[] remainingArguments)
         {
             try
             {
-                if (_user.Mount != null)
+                if (_alternateCredential)
                 {
-                    Console.Out.WriteLine("  *** The user already has a mount ***");
+                    var credentials = _uow.Credentials.Get();
+
+                    OutputFactory.StdOutCredentials(credentials);
+
                     Console.Out.WriteLine();
-                    OutputFactory.StdOutUserMounts(new List<UserMount> { _user.Mount });
+                    Console.Out.Write("  *** Enter GUID of credential to use for mount *** : ");
+                    var input = StandardInput.GetInput();
+                    Console.Out.WriteLine();
 
-                    return StandardOutput.FondFarewell();
+                    _user.Mount.CredentialId = Guid.Parse(input);
                 }
-
-                var credentials = _uow.Credentials.Get();
-
-                OutputFactory.StdOutCredentials(credentials);
-
-                Console.Out.Write("  *** Enter GUID of credential to use for mount *** : ");
-                var input = StandardInput.GetInput();
-                Console.Out.WriteLine();
-
-                _user.Mount.CredentialId = Guid.Parse(input);
 
                 _uow.Users.Update(_user);
                 _uow.Commit();
 
-                OutputFactory.StdOutUserMounts(new List<UserMount>() { _user.Mount });
+                OutputFactory.StdOutUserMounts(new List<UserMount> { _user.Mount });
 
                 return StandardOutput.FondFarewell();
             }

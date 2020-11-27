@@ -1,6 +1,6 @@
 ﻿using Bhbk.Cli.Aurora.Factories;
-using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
 using Bhbk.Lib.Aurora.Data_EF6.Models;
+using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
 using Bhbk.Lib.CommandLine.IO;
 using Bhbk.Lib.Common.Primitives.Enums;
 using Bhbk.Lib.Common.Services;
@@ -65,7 +65,10 @@ namespace Bhbk.Cli.Aurora.Commands
         {
             try
             {
-                OutputFactory.StdOutKeyPairs(_user.PublicKeys.OrderBy(x => x.CreatedUtc));
+                var pubKeys = _user.PublicKeys.Where(x => x.IsDeletable == true);
+                var privKeys = _user.PrivateKeys.Where(x => x.IsDeletable == true);
+
+                OutputFactory.StdOutKeyPairs(pubKeys.OrderBy(x => x.CreatedUtc), privKeys);
 
                 if (_delete)
                 {
@@ -74,28 +77,27 @@ namespace Bhbk.Cli.Aurora.Commands
                     var input = Guid.Parse(StandardInput.GetInput());
                     Console.Out.WriteLine();
 
-                    var key = _uow.PublicKeys.Get(QueryExpressionFactory.GetQueryExpression<PublicKey>()
-                        .Where(x => x.IdentityId == _user.IdentityId && x.Id == input).ToLambda())
+                    var pubKey = pubKeys.Where(x => x.Id == input)
                         .SingleOrDefault();
 
-                    if(key != null)
+                    if (pubKey != null)
                     {
-                        _uow.PublicKeys.Delete(QueryExpressionFactory.GetQueryExpression<PublicKey>()
-                            .Where(x => x.IdentityId == _user.IdentityId && x.IsDeletable == false && x.Id == key.Id).ToLambda());
-
                         _uow.PrivateKeys.Delete(QueryExpressionFactory.GetQueryExpression<PrivateKey>()
-                            .Where(x => x.IdentityId == _user.IdentityId && x.IsDeletable == false && x.Id == key.PrivateKeyId).ToLambda());
+                            .Where(x => x.IdentityId == _user.IdentityId && x.Id == pubKey.PrivateKeyId && x.IsDeletable == true).ToLambda());
+
+                        _uow.PublicKeys.Delete(QueryExpressionFactory.GetQueryExpression<PublicKey>()
+                            .Where(x => x.IdentityId == _user.IdentityId && x.Id == pubKey.Id && x.IsDeletable == true).ToLambda());
 
                         _uow.Commit();
                     }
                 }
                 else if (_deleteAll)
                 {
-                    _uow.PublicKeys.Delete(QueryExpressionFactory.GetQueryExpression<PublicKey>()
-                        .Where(x => x.IdentityId == _user.IdentityId && x.IsDeletable == false).ToLambda());
-
                     _uow.PrivateKeys.Delete(QueryExpressionFactory.GetQueryExpression<PrivateKey>()
-                        .Where(x => x.IdentityId == _user.IdentityId && x.IsDeletable == false).ToLambda());
+                        .Where(x => x.IdentityId == _user.IdentityId && x.IsDeletable == true).ToLambda());
+
+                    _uow.PublicKeys.Delete(QueryExpressionFactory.GetQueryExpression<PublicKey>()
+                        .Where(x => x.IdentityId == _user.IdentityId && x.IsDeletable == true).ToLambda());
 
                     _uow.Commit();
                 }

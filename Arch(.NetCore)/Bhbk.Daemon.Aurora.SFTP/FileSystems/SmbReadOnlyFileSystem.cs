@@ -16,6 +16,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Versioning;
+using System.Security.Cryptography;
 using System.Security.Principal;
 
 namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
@@ -31,7 +32,9 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
             : base(settings)
         {
             _user = user;
-            
+
+            var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
+
             using (var scope = factory.CreateScope())
             {
                 var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
@@ -45,19 +48,27 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
 
                 if (userMount.CredentialId.HasValue)
                 {
-                    var userCred = uow.Credentials.Get(QueryExpressionFactory.GetQueryExpression<Credential>()
+                    var ambassadorCred = uow.Credentials.Get(QueryExpressionFactory.GetQueryExpression<Credential>()
                         .Where(x => x.Id == userMount.CredentialId).ToLambda())
                         .Single();
 
                     var secret = conf["Databases:AuroraSecret"];
+                    string decryptedPass = string.Empty;
+                    string encryptedPass = string.Empty;
 
-                    var plainText = AES.DecryptString(userCred.Password, secret);
-                    var cipherText = AES.EncryptString(plainText, secret);
+                    try
+                    {
+                        decryptedPass = AES.DecryptString(ambassadorCred.EncryptedPassword, secret);
+                        encryptedPass = AES.EncryptString(decryptedPass, secret);
+                    }
+                    catch (CryptographicException)
+                    {
+                        Log.Error($"'{callPath}' '{_user.IdentityAlias}' failure to decrypt the encrypted password used by mount credential. " +
+                            $"Verify the system secret key is valid and/or reset the password for the mount credential.");
+                        throw;
+                    }
 
-                    if (userCred.Password != cipherText)
-                        throw new UnauthorizedAccessException();
-
-                    _userToken = UserHelper.GetSafeAccessTokenHandle(userCred.Domain, userCred.UserName, plainText);
+                    _userToken = UserHelper.GetSafeAccessTokenHandle(ambassadorCred.Domain, ambassadorCred.UserName, decryptedPass);
                 }
                 else
                 {

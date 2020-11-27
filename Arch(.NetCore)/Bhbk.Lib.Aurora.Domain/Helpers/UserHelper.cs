@@ -71,14 +71,13 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 
             foreach (var cred in creds)
             {
-                var plainText = AES.DecryptString(cred.Password, secretCurrent);
+                var plainText = AES.DecryptString(cred.EncryptedPassword, secretCurrent);
                 var cipherText = AES.EncryptString(plainText, secretCurrent);
 
-                if (cred.Password != cipherText)
+                if (cred.EncryptedPassword != cipherText)
                     throw new UnauthorizedAccessException();
 
-                cred.Password = AES.EncryptString(plainText, secretNew);
-                cred.LastUpdatedUtc = DateTime.UtcNow;
+                cred.EncryptedPassword = AES.EncryptString(plainText, secretNew);
 
                 uow.Credentials.Update(cred);
 

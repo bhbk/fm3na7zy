@@ -103,13 +103,13 @@ namespace Bhbk.WebApi.Aurora
 
             Rebex.Licensing.Key = license.ConfigValue;
 
-            var issuers = conf.GetSection("IdentityTenants:AllowedIssuers").GetChildren()
-                .Select(x => x.Value + ":" + conf["IdentityTenants:Salt"]);
+            var issuers = conf.GetSection("IdentityTenant:AllowedIssuers").GetChildren()
+                .Select(x => x.Value + ":" + conf["IdentityTenant:Salt"]);
 
-            var issuerKeys = conf.GetSection("IdentityTenants:AllowedIssuerKeys").GetChildren()
+            var issuerKeys = conf.GetSection("IdentityTenant:AllowedIssuerKeys").GetChildren()
                 .Select(x => x.Value);
 
-            var audiences = conf.GetSection("IdentityTenants:AllowedAudiences").GetChildren()
+            var audiences = conf.GetSection("IdentityTenant:AllowedAudiences").GetChildren()
                 .Select(x => x.Value);
 
             sc.AddLogging(opt =>
@@ -132,10 +132,10 @@ namespace Bhbk.WebApi.Aurora
                 opt.DefaultSignInScheme = JwtBearerDefaults.AuthenticationScheme;
             }).AddJwtBearer(jwt =>
             {
-#if RELEASE
-                jwt.IncludeErrorDetails = false;
-#elif !RELEASE
+#if !RELEASE
                 jwt.IncludeErrorDetails = true;
+#else
+                jwt.IncludeErrorDetails = false;
 #endif
                 jwt.TokenValidationParameters = new TokenValidationParameters
                 {

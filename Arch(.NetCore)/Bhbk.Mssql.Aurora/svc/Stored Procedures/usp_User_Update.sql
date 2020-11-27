@@ -2,10 +2,10 @@
 CREATE PROCEDURE [svc].[usp_User_Update]
      @IdentityId			UNIQUEIDENTIFIER
     ,@IdentityAlias			NVARCHAR (128) 
-    ,@RequirePassword		BIT
-    ,@RequirePublicKey		BIT
     ,@FileSystemType		NVARCHAR (16) 
-    ,@FileSystemReadOnly	BIT
+    ,@IsPasswordRequired	BIT
+    ,@IsPublicKeyRequired	BIT
+    ,@IsFileSystemReadOnly	BIT
 	,@QuotaInBytes			BIGINT
 	,@QuotaUsedInBytes		BIGINT
     ,@Debugger				NVARCHAR (16) 
@@ -23,10 +23,10 @@ BEGIN
         UPDATE [dbo].[tbl_User]
         SET
 			 IdentityAlias			= @IdentityAlias
-			,RequirePassword		= @RequirePassword
-			,RequirePublicKey		= @RequirePublicKey
 			,FileSystemType			= @FileSystemType
-			,FileSystemReadOnly		= @FileSystemReadOnly
+			,IsPasswordRequired		= @IsPasswordRequired
+			,IsPublicKeyRequired	= @IsPublicKeyRequired
+			,IsFileSystemReadOnly	= @IsFileSystemReadOnly
 			,QuotaInBytes			= @QuotaInBytes
 			,QuotaUsedInBytes		= @QuotaUsedInBytes
 			,Debugger				= @Debugger

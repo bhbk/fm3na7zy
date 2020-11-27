@@ -14,12 +14,6 @@ namespace Bhbk.Lib.Aurora.Data_EF6.Models
     
     public partial class PrivateKey
     {
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
-        public PrivateKey()
-        {
-            this.PublicKey = new HashSet<PublicKey>();
-        }
-    
         public System.Guid Id { get; set; }
         public Nullable<System.Guid> IdentityId { get; set; }
         public System.Guid PublicKeyId { get; set; }
@@ -33,7 +27,5 @@ namespace Bhbk.Lib.Aurora.Data_EF6.Models
         public Nullable<System.DateTimeOffset> LastUpdatedUtc { get; set; }
     
         public virtual User User { get; set; }
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<PublicKey> PublicKey { get; set; }
     }
 }

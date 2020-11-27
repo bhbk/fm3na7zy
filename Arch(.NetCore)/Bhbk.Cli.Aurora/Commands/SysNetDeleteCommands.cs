@@ -9,20 +9,17 @@ using Bhbk.Lib.QueryExpression.Factories;
 using ManyConsole;
 using Microsoft.Extensions.Configuration;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
 
 namespace Bhbk.Cli.Aurora.Commands
 {
-    public class UserNetDeleteCommands : ConsoleCommand
+    public class SysNetDeleteCommands : ConsoleCommand
     {
-        private readonly IConfiguration _conf;
-        private readonly IUnitOfWork _uow;
-        private User _user;
+        private IConfiguration _conf;
+        private IUnitOfWork _uow;
         private bool _delete = false, _deleteAll = false;
 
-        public UserNetDeleteCommands()
+        public SysNetDeleteCommands()
         {
             _conf = (IConfiguration)new ConfigurationBuilder()
                 .AddJsonFile("clisettings.json", optional: false, reloadOnChange: true)
@@ -31,23 +28,7 @@ namespace Bhbk.Cli.Aurora.Commands
             var instance = new ContextService(InstanceContext.DeployedOrLocal);
             _uow = new UnitOfWork(_conf["Databases:AuroraEntities"], instance);
 
-            IsCommand("user-net-delete", "Delete allow/deny network for user");
-
-            HasRequiredOption("u|user=", "Enter existing user", arg =>
-            {
-                if (string.IsNullOrEmpty(arg))
-                    throw new ConsoleHelpAsException($"  *** No user name given ***");
-
-                _user = _uow.Users.Get(QueryExpressionFactory.GetQueryExpression<User>()
-                    .Where(x => x.IdentityAlias == arg).ToLambda(),
-                        new List<Expression<Func<User, object>>>()
-                        {
-                            x => x.Networks,
-                        }).SingleOrDefault();
-
-                if (_user == null)
-                    throw new ConsoleHelpAsException($"  *** Invalid user '{arg}' ***");
-            });
+            IsCommand("sys-net-delete", "Delete allow/deny network for system");
 
             HasOption("d|delete", "Delete a network for user", arg =>
             {
@@ -64,9 +45,10 @@ namespace Bhbk.Cli.Aurora.Commands
         {
             try
             {
-                var exists = _user.Networks.Where(x => x.IsDeletable == true);
+                var networks = _uow.Networks.Get(QueryExpressionFactory.GetQueryExpression<Network>()
+                    .Where(x => x.IdentityId == null && x.IsDeletable == true).ToLambda());
 
-                OutputFactory.StdOutNetworks(exists);
+                OutputFactory.StdOutNetworks(networks);
 
                 if (_delete)
                 {
@@ -74,7 +56,7 @@ namespace Bhbk.Cli.Aurora.Commands
                     Console.Out.Write("  *** Enter GUID of network for user to delete *** : ");
                     var input = Guid.Parse(StandardInput.GetInput());
 
-                    var network = exists.Where(x => x.Id == input)
+                    var network = networks.Where(x => x.Id == input)
                         .SingleOrDefault();
 
                     if (network != null)
@@ -85,7 +67,7 @@ namespace Bhbk.Cli.Aurora.Commands
                 }
                 else if (_deleteAll)
                 {
-                    _uow.Networks.Delete(exists);
+                    _uow.Networks.Delete(networks);
                     _uow.Commit();
                 }
 

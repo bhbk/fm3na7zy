@@ -1,6 +1,6 @@
 ﻿using Bhbk.Cli.Aurora.Factories;
-using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
 using Bhbk.Lib.Aurora.Data_EF6.Models;
+using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
 using Bhbk.Lib.CommandLine.IO;
 using Bhbk.Lib.Common.Primitives.Enums;
 using Bhbk.Lib.Common.Services;
@@ -54,6 +54,9 @@ namespace Bhbk.Cli.Aurora.Commands
             try
             {
                 OutputFactory.StdOutUserMounts(new List<UserMount> { _user.Mount });
+
+                if (_user.Mount.IsDeletable == false)
+                    throw new ConsoleHelpAsException($"  *** Invalid, will not delete. Marked as non-deletable ***");
 
                 _uow.UserMounts.Delete(_user.Mount);
                 _uow.Commit();

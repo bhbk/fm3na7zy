@@ -48,16 +48,6 @@ namespace Bhbk.Cli.Aurora.Commands
         {
             try
             {
-                var license = _uow.Settings.Get(QueryExpressionFactory.GetQueryExpression<Setting>()
-                    .Where(x => x.ConfigKey == "RebexLicense").ToLambda()).OrderBy(x => x.CreatedUtc)
-                    .Last();
-
-                Rebex.Licensing.Key = license.ConfigValue;
-
-                AsymmetricKeyAlgorithm.Register(Curve25519.Create);
-                AsymmetricKeyAlgorithm.Register(Ed25519.Create);
-                AsymmetricKeyAlgorithm.Register(EllipticCurveAlgorithm.Create);
-
                 if (string.IsNullOrEmpty(_secretCurrent))
                 {
                     Console.Out.Write("  *** Enter current secret to encrypt passwords *** : ");
@@ -78,24 +68,20 @@ namespace Bhbk.Cli.Aurora.Commands
                 var keys = _uow.PrivateKeys.Get().ToList();
                 var creds = _uow.Credentials.Get().ToList();
 
-                Console.Out.WriteLine();
                 Console.Out.WriteLine("  *** Current private key pass ciphertexts *** ");
-                OutputFactory.StdOutKeyPairSecrets(keys);
+                OutputFactory.StdOutSecretsKeypairs(keys);
 
-                Console.Out.WriteLine();
                 Console.Out.WriteLine("  *** Current credential password ciphertexts *** ");
-                OutputFactory.StdOutCredentialSecrets(creds);
+                OutputFactory.StdOutSecretsCredentials(creds);
 
                 keys = KeyHelper.EditPrivKeySecrets(_uow, keys, _secretCurrent, _secretNew).ToList();
                 creds = UserHelper.EditCredentialSecrets(_uow, creds, _secretCurrent, _secretNew).ToList();
 
-                Console.Out.WriteLine();
                 Console.Out.WriteLine("  *** New private key pass ciphertexts *** ");
-                OutputFactory.StdOutKeyPairSecrets(keys);
+                OutputFactory.StdOutSecretsKeypairs(keys);
 
-                Console.Out.WriteLine();
                 Console.Out.WriteLine("  *** New credential password ciphertexts *** ");
-                OutputFactory.StdOutCredentialSecrets(creds);
+                OutputFactory.StdOutSecretsCredentials(creds);
 
                 return StandardOutput.FondFarewell();
             }

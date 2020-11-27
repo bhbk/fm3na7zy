@@ -1,5 +1,6 @@
-﻿using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
+﻿using Bhbk.Cli.Aurora.Factories;
 using Bhbk.Lib.Aurora.Data_EF6.Models;
+using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
 using Bhbk.Lib.Aurora.Domain.Helpers;
 using Bhbk.Lib.CommandLine.IO;
 using Bhbk.Lib.Common.Primitives.Enums;
@@ -23,8 +24,8 @@ namespace Bhbk.Cli.Aurora.Commands
         private readonly IUnitOfWork _uow;
         private FileInfo _path;
         private User _user;
-        private string _pubKeyComment;
         private bool _base64;
+        private string _pubKeyComment;
 
         public UserKeyImportPubCommands()
         {
@@ -47,7 +48,7 @@ namespace Bhbk.Cli.Aurora.Commands
                         new List<Expression<Func<User, object>>>()
                         {
                             x => x.PrivateKeys,
-                            x => x.PublicKeys,
+                            x => x.PublicKeys
                         }).SingleOrDefault();
 
                 if (_user == null)
@@ -64,9 +65,9 @@ namespace Bhbk.Cli.Aurora.Commands
                 _pubKeyComment = arg;
             });
 
-            HasOption("b|base64=", "Is base64 \"authorized_keys\" format?", arg =>
+            HasOption("b|base64", "Is base64 \"authorized_keys\" format?", arg =>
             {
-                _base64 = bool.Parse(arg);
+                _base64 = true;
             });
         }
 
@@ -74,19 +75,41 @@ namespace Bhbk.Cli.Aurora.Commands
         {
             try
             {
-                if (!string.IsNullOrEmpty(_pubKeyComment))
+                OutputFactory.StdOutKeyPairs(_user.PublicKeys.OrderBy(x => x.CreatedUtc), _user.PrivateKeys);
+
+                if (string.IsNullOrEmpty(_pubKeyComment))
                 {
                     Console.Out.Write("  *** Enter user@hostname or a comment for the public key *** : ");
                     _pubKeyComment = StandardInput.GetInput();
                 }
 
+                Console.Out.WriteLine();
                 Console.Out.WriteLine("Opened " + _path.FullName);
                 Console.Out.WriteLine();
 
+                var pubKeys = new List<PublicKey>();
+                var stream = new MemoryStream();
+
+                using (FileStream fileStream = new FileStream(_path.FullName, FileMode.Open, FileAccess.Read))
+                    fileStream.CopyTo(stream);
+
                 if (_base64)
-                    KeyHelper.ImportPubKeyBase64(_uow, _user, SignatureHashAlgorithm.SHA256, new FileInfo(_path.FullName));
+                    pubKeys = KeyHelper.ImportPubKeyBase64(_uow, _user, SignatureHashAlgorithm.SHA256, stream).ToList();
                 else
-                    KeyHelper.ImportPubKey(_uow, _user, SignatureHashAlgorithm.SHA256, _pubKeyComment, new FileInfo(_path.FullName));
+                {
+                    var pubKey = KeyHelper.ImportPubKey(_uow, _user, SignatureHashAlgorithm.SHA256, _pubKeyComment, stream);
+
+                    if (pubKey != null)
+                        pubKeys = new List<PublicKey>() { pubKey };
+                }
+
+                if (pubKeys != null)
+                {
+                    _uow.PublicKeys.Create(pubKeys);
+                    _uow.Commit();
+
+                    OutputFactory.StdOutKeyPairs(pubKeys.OrderBy(x => x.CreatedUtc), _user.PrivateKeys);
+                }
 
                 return StandardOutput.FondFarewell();
             }

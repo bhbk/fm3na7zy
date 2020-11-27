@@ -25,11 +25,11 @@ namespace Bhbk.Cli.Aurora.Commands
         private readonly IConfiguration _conf;
         private readonly IUnitOfWork _uow;
         private User _user;
+        private int _privKeySize;
         private SshHostKeyAlgorithm _keyAlgo;
-        private readonly string _keyAlgoList = string.Join(", ", Enum.GetNames(typeof(SshHostKeyAlgorithm)));
+        private string _keyAlgoList = string.Join(", ", Enum.GetNames(typeof(SshHostKeyAlgorithm)));
         private string _privKeyPass;
         private string _pubKeyComment;
-        private int _privKeySize;
 
         public UserKeyCreateCommands()
         {
@@ -101,17 +101,17 @@ namespace Bhbk.Cli.Aurora.Commands
                 if (string.IsNullOrEmpty(_pubKeyComment))
                     _pubKeyComment = Dns.GetHostName();
 
-                var privKey = KeyHelper.CreatePrivKey(_conf, _uow, _user, _keyAlgo, _privKeySize, _privKeyPass, SignatureHashAlgorithm.SHA256, _pubKeyComment);
+                var keyPair = KeyHelper.CreateKeyPair(_conf, _uow, _user, _keyAlgo, _privKeySize, _privKeyPass, SignatureHashAlgorithm.SHA256, _pubKeyComment);
 
-                var pubKey = _uow.PublicKeys.Get(QueryExpressionFactory.GetQueryExpression<PublicKey>()
-                    .Where(x => x.PrivateKeyId == privKey.Id).ToLambda(),
-                        new List<Expression<Func<PublicKey, object>>>()
-                        {
-                            x => x.PrivateKey,
-                        })
-                    .Single();
+                if (keyPair.Item1 != null)
+                    _uow.PublicKeys.Create(keyPair.Item1);
 
-                OutputFactory.StdOutKeyPairs(new List<PublicKey>() { pubKey });
+                if (keyPair.Item2 != null)
+                    _uow.PrivateKeys.Create(keyPair.Item2);
+
+                _uow.Commit();
+
+                OutputFactory.StdOutKeyPairs(new List<PublicKey> { keyPair.Item1 }, new List<PrivateKey> { keyPair.Item2 });
 
                 return StandardOutput.FondFarewell();
             }

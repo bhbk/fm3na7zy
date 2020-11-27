@@ -66,13 +66,13 @@ namespace Bhbk.Cli.Aurora.Commands
                 if (_configType.ToString() != null)
                     config.ConfigKey = _configType.ToString();
 
-                if(_configValue != null)
+                if (_configValue != null)
                     config.ConfigValue = _configValue;
 
                 _uow.Settings.Update(config);
                 _uow.Commit();
 
-                OutputFactory.StdOutSettings(new List<Setting>() { config });
+                OutputFactory.StdOutSettings(new List<Setting> { config });
 
                 return StandardOutput.FondFarewell();
             }

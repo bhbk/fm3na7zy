@@ -12,23 +12,21 @@ using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Net;
 
 namespace Bhbk.Cli.Aurora.Commands
 {
-    public class UserNetEditCommands : ConsoleCommand
+    public class SysNetEditCommands : ConsoleCommand
     {
-        private readonly IConfiguration _conf;
-        private readonly IUnitOfWork _uow;
-        private User _user;
+        private IConfiguration _conf;
+        private IUnitOfWork _uow;
         private Guid _id;
         private Int32 _sequence = Int32.MinValue;
         private IPNetwork _cidr = null;
         private NetworkActionType _actionType;
         private readonly string _actionTypeList = string.Join(", ", Enum.GetNames(typeof(NetworkActionType)));
 
-        public UserNetEditCommands()
+        public SysNetEditCommands()
         {
             _conf = (IConfiguration)new ConfigurationBuilder()
                 .AddJsonFile("clisettings.json", optional: false, reloadOnChange: true)
@@ -37,23 +35,7 @@ namespace Bhbk.Cli.Aurora.Commands
             var instance = new ContextService(InstanceContext.DeployedOrLocal);
             _uow = new UnitOfWork(_conf["Databases:AuroraEntities"], instance);
 
-            IsCommand("user-net-edit", "Edit allow/deny network for user");
-
-            HasRequiredOption("u|user=", "Enter user that exists already", arg =>
-            {
-                if (string.IsNullOrEmpty(arg))
-                    throw new ConsoleHelpAsException($"  *** No user name given ***");
-
-                _user = _uow.Users.Get(QueryExpressionFactory.GetQueryExpression<User>()
-                    .Where(x => x.IdentityAlias == arg).ToLambda(),
-                        new List<Expression<Func<User, object>>>()
-                        {
-                            x => x.Networks,
-                        }).SingleOrDefault();
-
-                if (_user == null)
-                    throw new ConsoleHelpAsException($"  *** Invalid user '{arg}' ***");
-            });
+            IsCommand("sys-net-edit", "Edit allow/deny network for system");
 
             HasRequiredOption("i|id=", "Enter GUID of network to edit", arg =>
             {
@@ -83,7 +65,10 @@ namespace Bhbk.Cli.Aurora.Commands
         {
             try
             {
-                var network = _user.Networks.Where(x => x.Id == _id)
+                var networks = _uow.Networks.Get(QueryExpressionFactory.GetQueryExpression<Network>()
+                    .Where(x => x.IdentityId == null).ToLambda());
+
+                var network = networks.Where(x => x.Id == _id)
                     .SingleOrDefault();
 
                 if (network == null)

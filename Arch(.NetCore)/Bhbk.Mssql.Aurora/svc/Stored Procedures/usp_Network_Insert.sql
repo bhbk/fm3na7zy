@@ -1,6 +1,7 @@
 ﻿
 CREATE PROCEDURE [svc].[usp_Network_Insert]
      @IdentityId			UNIQUEIDENTIFIER
+	,@SequenceId			INT
     ,@Address				NVARCHAR (128) 
     ,@Action				NVARCHAR (8) 
     ,@IsEnabled				BIT
@@ -19,6 +20,7 @@ BEGIN
 			(
 			 Id         
 			,IdentityId
+			,SequenceId
 			,Address   
 			,Action
 			,IsEnabled
@@ -29,6 +31,7 @@ BEGIN
 			(
 			 @NETWORKID          
 			,@IdentityId
+			,@SequenceId
 			,@Address
 			,@Action
 			,@IsEnabled
