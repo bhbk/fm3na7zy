@@ -1,18 +1,12 @@
 ﻿using Bhbk.Lib.Aurora.Data_EF6.Infrastructure;
 using Bhbk.Lib.Aurora.Data_EF6.Models;
-using Bhbk.Lib.Aurora.Domain.Helpers;
-using Bhbk.Lib.Common.Primitives;
 using Bhbk.Lib.QueryExpression.Extensions;
 using Bhbk.Lib.QueryExpression.Factories;
-using Microsoft.Extensions.Configuration;
-using Rebex.IO.FileSystem;
 using Serilog;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Security.Cryptography;
 
 namespace Bhbk.Daemon.Aurora.SFTP.Helpers
 {
@@ -124,35 +118,6 @@ namespace Bhbk.Daemon.Aurora.SFTP.Helpers
                 path += "/" + paths.ElementAt(i);
 
             return path;
-        }
-
-        internal static UserFile SaveFileStream(IConfiguration conf, Stream content, UserFile fileEntity)
-        {
-            var folder = new DirectoryInfo(conf["Storage:UnstructuredData"]
-                + Path.DirectorySeparatorChar + fileEntity.RealPath);
-
-            if (!folder.Exists)
-                folder.Create();
-
-            var file = new FileInfo(conf["Storage:UnstructuredData"]
-                + Path.DirectorySeparatorChar + fileEntity.RealPath
-                + Path.DirectorySeparatorChar + fileEntity.RealFileName);
-
-            using (var fs = new FileStream(file.FullName, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite))
-                content.CopyTo(fs);
-
-            using (var sha256 = new SHA256Managed())
-            using (var fs = new FileStream(file.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-            {
-                var hash = sha256.ComputeHash(fs);
-
-                fileEntity.RealFileSize = fs.Length;
-                fileEntity.HashSHA256 = Strings.GetHexString(hash);
-                fileEntity.IsReadOnly = false;
-                fileEntity.CreatedUtc = DateTime.UtcNow;
-            }
-
-            return fileEntity;
         }
     }
 }

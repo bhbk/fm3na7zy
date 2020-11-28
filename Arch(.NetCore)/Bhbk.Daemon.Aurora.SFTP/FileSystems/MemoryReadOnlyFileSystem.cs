@@ -1,9 +1,5 @@
 ﻿using Bhbk.Daemon.Aurora.SFTP.Helpers;
-using Bhbk.Lib.Aurora.Data_EF6.Infrastructure;
 using Bhbk.Lib.Aurora.Data_EF6.Models;
-using Bhbk.Lib.Aurora.Domain.Helpers;
-using Bhbk.Lib.QueryExpression.Extensions;
-using Bhbk.Lib.QueryExpression.Factories;
 using Microsoft.Extensions.DependencyInjection;
 using Rebex.IO.FileSystem;
 using Serilog;
@@ -67,17 +63,17 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
 
             var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
 
-            var resultStream = new MemoryStream();
-            _store[node].Content.CopyTo(resultStream);
+            var content = new MemoryStream();
+            _store[node].Content.CopyTo(content);
 
-            resultStream.Position = 0;
+            content.Position = 0;
             _store[node].Content.Position = 0;
 
             Log.Information($"'{callPath}' '{_userEntity.IdentityAlias}' file '{node.Path}' from memory");
 
             return contentParameters.AccessType == NodeContentAccess.Read
-                ? NodeContent.CreateReadOnlyContent(resultStream)
-                : NodeContent.CreateDelayedWriteContent(resultStream);
+                ? NodeContent.CreateReadOnlyContent(content)
+                : NodeContent.CreateDelayedWriteContent(content);
         }
 
         protected override long GetLength(NodeBase node)

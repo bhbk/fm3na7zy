@@ -1,9 +1,6 @@
 ﻿using Bhbk.Daemon.Aurora.SFTP.Helpers;
-using Bhbk.Lib.Aurora.Data_EF6.Infrastructure;
 using Bhbk.Lib.Aurora.Data_EF6.Models;
 using Bhbk.Lib.Aurora.Domain.Helpers;
-using Bhbk.Lib.QueryExpression.Extensions;
-using Bhbk.Lib.QueryExpression.Factories;
 using Microsoft.Extensions.DependencyInjection;
 using Rebex.IO.FileSystem;
 using Serilog;
@@ -64,11 +61,15 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
         {
             var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
 
+            /*
+             * a zero size file will always be created first regardless of actual size of file. 
+             */
+
             _store.Add(child, new MemoryNodeData());
             _store[parent].Children.Add(child);
             _path.Add(child.Path, child);
 
-            Log.Information($"'{callPath}' '{_userEntity.IdentityAlias}' file '{child.Path}' in memory");
+            Log.Information($"'{callPath}' '{_userEntity.IdentityAlias}' empty file '{child.Path}' in memory");
 
             return child;
         }
@@ -135,17 +136,17 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
 
             var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
 
-            var resultStream = new MemoryStream();
-            _store[node].Content.CopyTo(resultStream);
+            var content = new MemoryStream();
+            _store[node].Content.CopyTo(content);
 
-            resultStream.Position = 0;
+            content.Position = 0;
             _store[node].Content.Position = 0;
 
             Log.Information($"'{callPath}' '{_userEntity.IdentityAlias}' file '{node.Path}' from memory");
 
             return contentParameters.AccessType == NodeContentAccess.Read
-                ? NodeContent.CreateReadOnlyContent(resultStream)
-                : NodeContent.CreateDelayedWriteContent(resultStream);
+                ? NodeContent.CreateReadOnlyContent(content)
+                : NodeContent.CreateDelayedWriteContent(content);
         }
 
         protected override long GetLength(NodeBase node)
@@ -173,11 +174,11 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
             NodeBase newNode;
             MemoryNodeData newNodeData;
 
-            if (node.NodeType == NodeType.Directory)
-                newNode = new DirectoryNode(newName, node.Parent);
-
-            else if (node.NodeType == NodeType.File)
+            if (node.NodeType == NodeType.File)
                 newNode = new FileNode(newName, node.Parent);
+
+            else if (node.NodeType == NodeType.Directory)
+                newNode = new DirectoryNode(newName, node.Parent);
 
             else
                 throw new NotImplementedException();

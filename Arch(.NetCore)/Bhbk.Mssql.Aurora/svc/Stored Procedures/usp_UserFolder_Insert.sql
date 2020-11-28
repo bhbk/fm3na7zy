@@ -28,6 +28,8 @@ BEGIN
 			,VirtualName  
 			,IsReadOnly
 			,CreatedUtc
+			,LastAccessedUtc
+			,LastUpdatedUtc
 			)
 		VALUES
 			(
@@ -36,6 +38,8 @@ BEGIN
 			,@ParentId
 			,@VirtualName
 			,@IsReadOnly
+			,@CREATEDUTC
+			,@CREATEDUTC
 			,@CREATEDUTC
 			);
 

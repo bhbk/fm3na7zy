@@ -1,4 +1,5 @@
 using Bhbk.Daemon.Aurora.SFTP.Factories;
+using Bhbk.Daemon.Aurora.SFTP.Helpers;
 using Bhbk.Lib.Aurora.Data_EF6.Infrastructure;
 using Bhbk.Lib.Aurora.Data_EF6.Models;
 using Bhbk.Lib.Aurora.Domain.Helpers;
@@ -198,12 +199,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
         {
             try
             {
-                if (e.Node.IsFile)
-                {
-                    var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
 
-                    Log.Information($"'{callPath}' '{ServerSession.Current.UserName}' file '{e.Node.Path.StringPath}'");
-                }
             }
             catch (Exception ex)
             {
@@ -215,12 +211,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
         {
             try
             {
-                if (e.ResultNode.IsFile)
-                {
-                    var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
 
-                    Log.Information($"'{callPath}' '{ServerSession.Current.UserName}' file '{e.ResultNode.Path.StringPath}'");
-                }
             }
             catch (Exception ex)
             {
@@ -232,12 +223,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
         {
             try
             {
-                if (e.Node.IsFile)
-                {
-                    var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
 
-                    Log.Information($"'{callPath}' '{ServerSession.Current.UserName}' file '{e.Node.Path.StringPath}'");
-                }
             }
             catch (Exception ex)
             {

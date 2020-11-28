@@ -1906,6 +1906,7 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_UserMount' does not have a prim
                   <ScalarProperty Name="IdentityId" ParameterName="IdentityId" Version="Current" />
                   <ScalarProperty Name="FolderId" ParameterName="FolderId" Version="Current" />
                   <ScalarProperty Name="Id" ParameterName="Id" Version="Current" />
+                  <ResultBinding Name="CreatedUtc" ColumnName="CreatedUtc" />
                 </UpdateFunction>
                 <InsertFunction FunctionName="AuroraModels.Store.usp_UserFile_Insert">
                   <ScalarProperty Name="RealFileSize" ParameterName="RealFileSize" />
@@ -1918,6 +1919,9 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_UserMount' does not have a prim
                   <ScalarProperty Name="IdentityId" ParameterName="IdentityId" />
                   <ResultBinding Name="Id" ColumnName="Id" />
                   <ResultBinding Name="CreatedUtc" ColumnName="CreatedUtc" />
+                  <ResultBinding Name="LastAccessedUtc" ColumnName="LastAccessedUtc" />
+                  <ResultBinding Name="LastUpdatedUtc" ColumnName="LastUpdatedUtc" />
+                  <ResultBinding Name="LastVerifiedUtc" ColumnName="LastVerifiedUtc" />
                 </InsertFunction>
               </ModificationFunctionMapping>
             </EntityTypeMapping>
@@ -1948,7 +1952,7 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_UserMount' does not have a prim
                   <ScalarProperty Name="ParentId" ParameterName="ParentId" Version="Current" />
                   <ScalarProperty Name="IdentityId" ParameterName="IdentityId" Version="Current" />
                   <ScalarProperty Name="Id" ParameterName="Id" Version="Current" />
-                  <ResultBinding Name="LastUpdatedUtc" ColumnName="LastUpdatedUtc" />
+                  <ResultBinding Name="CreatedUtc" ColumnName="CreatedUtc" />
                 </UpdateFunction>
                 <InsertFunction FunctionName="AuroraModels.Store.usp_UserFolder_Insert">
                   <ScalarProperty Name="IsReadOnly" ParameterName="IsReadOnly" />
@@ -1957,6 +1961,8 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_UserMount' does not have a prim
                   <ScalarProperty Name="IdentityId" ParameterName="IdentityId" />
                   <ResultBinding Name="Id" ColumnName="Id" />
                   <ResultBinding Name="CreatedUtc" ColumnName="CreatedUtc" />
+                  <ResultBinding Name="LastAccessedUtc" ColumnName="LastAccessedUtc" />
+                  <ResultBinding Name="LastUpdatedUtc" ColumnName="LastUpdatedUtc" />
                 </InsertFunction>
               </ModificationFunctionMapping>
             </EntityTypeMapping>

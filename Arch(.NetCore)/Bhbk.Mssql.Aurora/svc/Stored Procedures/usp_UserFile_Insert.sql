@@ -35,6 +35,8 @@ BEGIN
 			,RealFileSize
 			,HashSHA256
 			,CreatedUtc
+			,LastAccessedUtc
+			,LastUpdatedUtc
 			,LastVerifiedUtc
 			)
 		VALUES
@@ -48,6 +50,8 @@ BEGIN
 			,@RealFileName
 			,@RealFileSize
 			,@HashSHA256
+			,@CREATEDUTC
+			,@CREATEDUTC
 			,@CREATEDUTC
 			,@CREATEDUTC
 			);

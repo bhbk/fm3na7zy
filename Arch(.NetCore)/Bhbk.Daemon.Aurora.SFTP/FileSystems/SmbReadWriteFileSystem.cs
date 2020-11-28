@@ -103,7 +103,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                     var folder = SmbFileSystemHelper.FolderPathToCIFS(_userMount + child.Path.StringPath);
                     folder.Create();
 
-                    Log.Information($"'{callPath}' '{_userEntity.IdentityAlias}' folder '{child.Path}'" +
+                    Log.Information($"'{callPath}' '{_userEntity.IdentityAlias}' folder '{child.Path}' at '{folder.FullName}'" +
                         $" run as '{WindowsIdentity.GetCurrent().Name}'");
                 });
 
@@ -132,9 +132,13 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
 
                     var file = SmbFileSystemHelper.FilePathToCIFS(_userMount + child.Path.StringPath);
 
+                    /*
+                     * a zero size file will always be created first regardless of actual size of file. 
+                     */
+
                     using (var fs = new FileStream(file.FullName, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite)) { }
 
-                    Log.Information($"'{callPath}' '{_userEntity.IdentityAlias}' file '{child.Path}'" +
+                    Log.Information($"'{callPath}' '{_userEntity.IdentityAlias}' empty file '{child.Path}' at '{file.FullName}'" +
                         $" run as '{WindowsIdentity.GetCurrent().Name}'");
                 });
 
@@ -157,30 +161,33 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
 
             try
             {
-                if (node.NodeType == NodeType.Directory)
+                switch (node.NodeType)
                 {
-                    WindowsIdentity.RunImpersonated(_userToken, () =>
-                    {
-                        var folder = SmbFileSystemHelper.FolderPathToCIFS(_userMount + node.Path.StringPath);
-                        folder.Delete();
+                    case NodeType.File:
+                        WindowsIdentity.RunImpersonated(_userToken, () =>
+                        {
+                            var file = SmbFileSystemHelper.FilePathToCIFS(_userMount + node.Path.StringPath);
+                            file.Delete();
 
-                        Log.Information($"'{callPath}' '{_userEntity.IdentityAlias}' folder '{node.Path}' from '{folder.FullName}'" +
-                            $" run as '{WindowsIdentity.GetCurrent().Name}'");
-                    });
-                }
-                else if (node.NodeType == NodeType.File)
-                {
-                    WindowsIdentity.RunImpersonated(_userToken, () =>
-                    {
-                        var file = SmbFileSystemHelper.FilePathToCIFS(_userMount + node.Path.StringPath);
-                        file.Delete();
+                            Log.Information($"'{callPath}' '{_userEntity.IdentityAlias}' file '{node.Path}' from '{file.FullName}'" +
+                                $" run as '{WindowsIdentity.GetCurrent().Name}'");
+                        });
+                        break;
 
-                        Log.Information($"'{callPath}' '{_userEntity.IdentityAlias}' file '{node.Path}' from '{file.FullName}'" +
-                            $" run as '{WindowsIdentity.GetCurrent().Name}'");
-                    });
+                    case NodeType.Directory:
+                        WindowsIdentity.RunImpersonated(_userToken, () =>
+                        {
+                            var folder = SmbFileSystemHelper.FolderPathToCIFS(_userMount + node.Path.StringPath);
+                            folder.Delete();
+
+                            Log.Information($"'{callPath}' '{_userEntity.IdentityAlias}' folder '{node.Path}' from '{folder.FullName}'" +
+                                $" run as '{WindowsIdentity.GetCurrent().Name}'");
+                        });
+                        break;
+
+                    default:
+                        throw new NotImplementedException();
                 }
-                else
-                    throw new NotImplementedException();
 
                 return node;
             }
@@ -198,28 +205,31 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
             {
                 bool exists = false;
 
-                if (nodeType == NodeType.Directory)
+                switch (nodeType)
                 {
-                    WindowsIdentity.RunImpersonated(_userToken, () =>
-                    {
-                        var folder = SmbFileSystemHelper.FolderPathToCIFS(_userMount + path.StringPath);
+                    case NodeType.File:
+                        WindowsIdentity.RunImpersonated(_userToken, () =>
+                        {
+                            var file = SmbFileSystemHelper.FilePathToCIFS(_userMount + path.StringPath);
 
-                        if (folder.Exists)
-                            exists = true;
-                    });
-                }
-                else if (nodeType == NodeType.File)
-                {
-                    WindowsIdentity.RunImpersonated(_userToken, () =>
-                    {
-                        var file = SmbFileSystemHelper.FilePathToCIFS(_userMount + path.StringPath);
+                            if (file.Exists)
+                                exists = true;
+                        });
+                        break;
 
-                        if (file.Exists)
-                            exists = true;
-                    });
+                    case NodeType.Directory:
+                        WindowsIdentity.RunImpersonated(_userToken, () =>
+                        {
+                            var folder = SmbFileSystemHelper.FolderPathToCIFS(_userMount + path.StringPath);
+
+                            if (folder.Exists)
+                                exists = true;
+                        });
+                        break;
+
+                    default:
+                        throw new NotImplementedException();
                 }
-                else
-                    throw new NotImplementedException();
 
                 return exists;
             }
@@ -238,30 +248,31 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
 
             try
             {
-                NodeAttributes attributes = null;
-
-                if (node.NodeType == NodeType.Directory)
+                switch (node.NodeType)
                 {
-                    WindowsIdentity.RunImpersonated(_userToken, () =>
-                    {
-                        var folder = SmbFileSystemHelper.FolderPathToCIFS(_userMount + node.Path.StringPath);
+                    case NodeType.File:
+                        WindowsIdentity.RunImpersonated(_userToken, () =>
+                        {
+                            var file = SmbFileSystemHelper.FilePathToCIFS(_userMount + node.Path.StringPath);
 
-                        attributes = new NodeAttributes(FileAttributes.Directory);
-                    });
+                            node.SetAttributes(new NodeAttributes(file.Attributes));
+                        });
+                        break;
+
+                    case NodeType.Directory:
+                        WindowsIdentity.RunImpersonated(_userToken, () =>
+                        {
+                            var folder = SmbFileSystemHelper.FolderPathToCIFS(_userMount + node.Path.StringPath);
+
+                            node.SetAttributes(new NodeAttributes(folder.Attributes));
+                        });
+                        break;
+
+                    default:
+                        throw new NotImplementedException();
                 }
-                else if (node.NodeType == NodeType.File)
-                {
-                    WindowsIdentity.RunImpersonated(_userToken, () =>
-                    {
-                        var file = SmbFileSystemHelper.FilePathToCIFS(_userMount + node.Path.StringPath);
 
-                        attributes = new NodeAttributes(FileAttributes.Normal);
-                    });
-                }
-                else
-                    throw new NotImplementedException();
-
-                return attributes;
+                return node.Attributes;
             }
             catch (Exception ex)
             {
@@ -315,9 +326,9 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
 
                 WindowsIdentity.RunImpersonated(_userToken, () =>
                 {
-                    var parentFolder = SmbFileSystemHelper.FolderPathToCIFS(_userMount + parent.Path.StringPath);
+                    var folderParent = SmbFileSystemHelper.FolderPathToCIFS(_userMount + parent.Path.StringPath);
 
-                    foreach (var folderPath in Directory.GetDirectories(parentFolder.FullName))
+                    foreach (var folderPath in Directory.GetDirectories(folderParent.FullName))
                     {
                         var folder = new DirectoryInfo(folderPath);
 
@@ -325,7 +336,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                             new NodeTimeInfo(folder.CreationTime, folder.LastAccessTime, folder.LastWriteTime)));
                     }
 
-                    foreach (var filePath in Directory.GetFiles(parentFolder.FullName))
+                    foreach (var filePath in Directory.GetFiles(folderParent.FullName))
                     {
                         var file = new FileInfo(filePath);
 
@@ -355,20 +366,18 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
             {
                 NodeContent content = null;
 
-                if (node.NodeType == NodeType.File)
+                WindowsIdentity.RunImpersonated(_userToken, () =>
                 {
-                    WindowsIdentity.RunImpersonated(_userToken, () =>
-                    {
-                        var file = SmbFileSystemHelper.FilePathToCIFS(_userMount + node.Path.StringPath);
+                    var file = SmbFileSystemHelper.FilePathToCIFS(_userMount + node.Path.StringPath);
 
-                        content = NodeContent.CreateDelayedWriteContent(File.Open(file.FullName, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite));
+                    var stream = File.Open(file.FullName, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite);
 
-                        Log.Information($"'{callPath}' '{_userEntity.IdentityAlias}' file '{node.Path}' from '{file.FullName}'" +
-                            $" run as '{WindowsIdentity.GetCurrent().Name}'");
-                    });
-                }
-                else
-                    throw new NotImplementedException();
+                    content = contentParameters.AccessType == NodeContentAccess.Read
+                        ? NodeContent.CreateReadOnlyContent(stream)
+                        : NodeContent.CreateDelayedWriteContent(stream);
+
+                    Log.Information($"'{callPath}' '{_userEntity.IdentityAlias}' file '{node.Path}' from '{file.FullName}'");
+                });
 
                 return content;
             }
@@ -382,21 +391,31 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
         [SupportedOSPlatform("windows")]
         protected override long GetLength(NodeBase node)
         {
+            if (!node.Exists())
+                return 0L;
+
             try
             {
                 long length = 0L;
 
-                if (node.NodeType == NodeType.File)
+                switch (node.NodeType)
                 {
-                    WindowsIdentity.RunImpersonated(_userToken, () =>
-                    {
-                        var file = SmbFileSystemHelper.FilePathToCIFS(_userMount + node.Path.StringPath);
+                    case NodeType.File:
+                        WindowsIdentity.RunImpersonated(_userToken, () =>
+                        {
+                            var file = SmbFileSystemHelper.FilePathToCIFS(_userMount + node.Path.StringPath);
 
-                        length = file.Length;
-                    });
+                            length = file.Length;
+                        });
+                        break;
+
+                    case NodeType.Directory:
+                        length = 0L;
+                        break;
+
+                    default:
+                        throw new NotImplementedException();
                 }
-                else
-                    throw new NotImplementedException();
 
                 return length;
             }
@@ -412,30 +431,31 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
         {
             try
             {
-                NodeTimeInfo timeInfo = null;
-
-                if (node.NodeType == NodeType.Directory)
+                switch (node.NodeType)
                 {
-                    WindowsIdentity.RunImpersonated(_userToken, () =>
-                    {
-                        var folder = SmbFileSystemHelper.FolderPathToCIFS(_userMount + node.Path.StringPath);
+                    case NodeType.File:
+                        WindowsIdentity.RunImpersonated(_userToken, () =>
+                        {
+                            var file = SmbFileSystemHelper.FilePathToCIFS(_userMount + node.Path.StringPath);
 
-                        timeInfo = new NodeTimeInfo(folder.CreationTime, folder.LastAccessTime, folder.LastWriteTime);
-                    });
+                            node.SetTimeInfo(new NodeTimeInfo(file.CreationTime, file.LastAccessTime, file.LastWriteTime));
+                        });
+                        break;
+
+                    case NodeType.Directory:
+                        WindowsIdentity.RunImpersonated(_userToken, () =>
+                        {
+                            var folder = SmbFileSystemHelper.FolderPathToCIFS(_userMount + node.Path.StringPath);
+
+                            node.SetTimeInfo(new NodeTimeInfo(folder.CreationTime, folder.LastAccessTime, folder.LastWriteTime));
+                        });
+                        break;
+
+                    default:
+                        throw new NotImplementedException();
                 }
-                else if (node.NodeType == NodeType.File)
-                {
-                    WindowsIdentity.RunImpersonated(_userToken, () =>
-                    {
-                        var file = SmbFileSystemHelper.FilePathToCIFS(_userMount + node.Path.StringPath);
 
-                        timeInfo = new NodeTimeInfo(file.CreationTime, file.LastAccessTime, file.LastWriteTime);
-                    });
-                }
-                else
-                    throw new NotImplementedException();
-
-                return timeInfo;
+                return node.TimeInfo;
             }
             catch (Exception ex)
             {
@@ -451,43 +471,46 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
 
             try
             {
-                NodeBase newNode = null;
-                var parentFolder = SmbFileSystemHelper.FolderPathToCIFS(_userMount + toBeMovedNode.Parent.Path.StringPath);
+                if (toBeMovedNode.Attributes.IsReadOnly)
+                    throw new FileSystemOperationCanceledException();
 
-                if (toBeMovedNode.NodeType == NodeType.Directory)
+                switch (toBeMovedNode.NodeType)
                 {
-                    WindowsIdentity.RunImpersonated(_userToken, () =>
-                    {
-                        var folder = SmbFileSystemHelper.FolderPathToCIFS(_userMount + toBeMovedNode.Path.StringPath);
-                        var newPath = SmbFileSystemHelper.FolderPathToCIFS(_userMount + targetDirectory.Path.StringPath);
+                    case NodeType.File:
+                        WindowsIdentity.RunImpersonated(_userToken, () =>
+                        {
+                            var file = SmbFileSystemHelper.FilePathToCIFS(_userMount + toBeMovedNode.Path.StringPath);
+                            var newPath = SmbFileSystemHelper.FilePathToCIFS(_userMount + targetDirectory.Path.StringPath);
 
-                        folder.MoveTo(newPath.FullName);
+                            file.MoveTo(newPath.FullName);
 
-                        Log.Information($"'{callPath}' '{_userEntity.IdentityAlias}' from '{folder.Name}' [{folder.FullName}] to '{newPath.Name}' [{newPath.FullName}]" +
-                            $" run as '{WindowsIdentity.GetCurrent().Name}'");
-                    });
+                            Log.Information($"'{callPath}' '{_userEntity.IdentityAlias}' from '{file.Name}' [{file.FullName}] to '{newPath.Name}' [{newPath.FullName}]" +
+                                $" run as '{WindowsIdentity.GetCurrent().Name}'");
+                        });
 
-                    newNode = new DirectoryNode(toBeMovedNode.Name, targetDirectory);
+                        toBeMovedNode = new FileNode(toBeMovedNode.Name, targetDirectory);
+                        break;
+
+                    case NodeType.Directory:
+                        WindowsIdentity.RunImpersonated(_userToken, () =>
+                        {
+                            var folder = SmbFileSystemHelper.FolderPathToCIFS(_userMount + toBeMovedNode.Path.StringPath);
+                            var newPath = SmbFileSystemHelper.FolderPathToCIFS(_userMount + targetDirectory.Path.StringPath);
+
+                            folder.MoveTo(newPath.FullName);
+
+                            Log.Information($"'{callPath}' '{_userEntity.IdentityAlias}' from '{folder.Name}' [{folder.FullName}] to '{newPath.Name}' [{newPath.FullName}]" +
+                                $" run as '{WindowsIdentity.GetCurrent().Name}'");
+                        });
+
+                        toBeMovedNode = new DirectoryNode(toBeMovedNode.Name, targetDirectory);
+                        break;
+
+                    default:
+                        throw new NotImplementedException();
                 }
-                else if (toBeMovedNode.NodeType == NodeType.File)
-                {
-                    WindowsIdentity.RunImpersonated(_userToken, () =>
-                    {
-                        var file = SmbFileSystemHelper.FilePathToCIFS(_userMount + toBeMovedNode.Path.StringPath);
-                        var newPath = SmbFileSystemHelper.FilePathToCIFS(_userMount + targetDirectory.Path.StringPath);
 
-                        file.MoveTo(newPath.FullName);
-
-                        Log.Information($"'{callPath}' '{_userEntity.IdentityAlias}' from '{file.Name}' [{file.FullName}] to '{newPath.Name}' [{newPath.FullName}]" +
-                            $" run as '{WindowsIdentity.GetCurrent().Name}'");
-                    });
-
-                    newNode = new FileNode(toBeMovedNode.Name, targetDirectory);
-                }
-                else
-                    throw new NotImplementedException();
-
-                return newNode;
+                return toBeMovedNode;
             }
             catch (Exception ex)
             {
@@ -503,45 +526,47 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
 
             try
             {
-                NodeBase newNode = null;
-                var parentFolder = SmbFileSystemHelper.FolderPathToCIFS(_userMount + node.Parent.Path.StringPath);
+                NodeBase toBeNamedNode = null;
 
-                if (node.NodeType == NodeType.Directory)
+                switch (node.NodeType)
                 {
-                    WindowsIdentity.RunImpersonated(_userToken, () =>
-                    {
-                        var folder = SmbFileSystemHelper.FolderPathToCIFS(_userMount + node.Path.StringPath);
-                        var newFolder = SmbFileSystemHelper.FolderPathToCIFS(_userMount + node.Parent.Path.StringPath
-                            + Path.DirectorySeparatorChar + newName);
+                    case NodeType.File:
+                        WindowsIdentity.RunImpersonated(_userToken, () =>
+                        {
+                            var file = SmbFileSystemHelper.FilePathToCIFS(_userMount + node.Path.StringPath);
+                            var newFile = SmbFileSystemHelper.FilePathToCIFS(_userMount + node.Parent.Path.StringPath
+                                + Path.DirectorySeparatorChar + newName);
 
-                        folder.MoveTo(newFolder.FullName);
+                            file.MoveTo(newFile.FullName);
 
-                        Log.Information($"'{callPath}' '{_userEntity.IdentityAlias}' from '{folder.Name}' [{folder.FullName}] to '{newFolder.Name}' [{newFolder.FullName}]" +
-                            $" run as '{WindowsIdentity.GetCurrent().Name}'");
-                    });
+                            Log.Information($"'{callPath}' '{_userEntity.IdentityAlias}' from '{file.Name}' [{file.FullName}] to '{newFile.Name}' [{newFile.FullName}]" +
+                                $" run as '{WindowsIdentity.GetCurrent().Name}'");
+                        });
 
-                    newNode = new DirectoryNode(newName, node.Parent);
+                        toBeNamedNode = new FileNode(newName, node.Parent);
+                        break;
+
+                    case NodeType.Directory:
+                        WindowsIdentity.RunImpersonated(_userToken, () =>
+                        {
+                            var folder = SmbFileSystemHelper.FolderPathToCIFS(_userMount + node.Path.StringPath);
+                            var newFolder = SmbFileSystemHelper.FolderPathToCIFS(_userMount + node.Parent.Path.StringPath
+                                + Path.DirectorySeparatorChar + newName);
+
+                            folder.MoveTo(newFolder.FullName);
+
+                            Log.Information($"'{callPath}' '{_userEntity.IdentityAlias}' from '{folder.Name}' [{folder.FullName}] to '{newFolder.Name}' [{newFolder.FullName}]" +
+                                $" run as '{WindowsIdentity.GetCurrent().Name}'");
+                        });
+
+                        toBeNamedNode = new DirectoryNode(newName, node.Parent);
+                        break;
+
+                    default:
+                        throw new NotImplementedException();
                 }
-                else if (node.NodeType == NodeType.File)
-                {
-                    WindowsIdentity.RunImpersonated(_userToken, () =>
-                    {
-                        var file = SmbFileSystemHelper.FilePathToCIFS(_userMount + node.Path.StringPath);
-                        var newFile = SmbFileSystemHelper.FilePathToCIFS(_userMount + node.Parent.Path.StringPath
-                            + Path.DirectorySeparatorChar + newName);
 
-                        file.MoveTo(newFile.FullName);
-
-                        Log.Information($"'{callPath}' '{_userEntity.IdentityAlias}' from '{file.Name}' [{file.FullName}] to '{newFile.Name}' [{newFile.FullName}]" +
-                            $" run as '{WindowsIdentity.GetCurrent().Name}'");
-                    });
-
-                    newNode = new FileNode(newName, node.Parent);
-                }
-                else
-                    throw new NotImplementedException();
-
-                return newNode;
+                return toBeNamedNode;
             }
             catch (Exception ex)
             {
@@ -560,29 +585,29 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
 
             try
             {
-                DirectoryInfo folder = null;
-                FileInfo file = null;
-
-                if (node.NodeType == NodeType.File)
+                switch (node.NodeType)
                 {
-                    WindowsIdentity.RunImpersonated(_userToken, () =>
-                    {
-                        folder = SmbFileSystemHelper.FolderPathToCIFS(_userMount + node.Parent.Path.StringPath);
+                    case NodeType.File:
+                        WindowsIdentity.RunImpersonated(_userToken, () =>
+                        {
+                            var folder = SmbFileSystemHelper.FolderPathToCIFS(_userMount + node.Parent.Path.StringPath);
 
-                        if (!folder.Exists)
-                            folder.Create();
+                            if (!folder.Exists)
+                                folder.Create();
 
-                        file = SmbFileSystemHelper.FilePathToCIFS(_userMount + node.Path.StringPath);
+                            var file = SmbFileSystemHelper.FilePathToCIFS(_userMount + node.Path.StringPath);
 
-                        using (var fs = new FileStream(file.FullName, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite))
-                            content.GetStream().CopyTo(fs);
+                            using (var fs = new FileStream(file.FullName, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite))
+                                content.GetStream().CopyTo(fs);
 
-                        Log.Information($"'{callPath}' '{_userEntity.IdentityAlias}' file '{node.Path}' to '{file.FullName}'" +
-                            $" run as '{WindowsIdentity.GetCurrent().Name}'");
-                    });
+                            Log.Information($"'{callPath}' '{_userEntity.IdentityAlias}' file '{node.Path}' at '{file.FullName}'" +
+                                $" run as '{WindowsIdentity.GetCurrent().Name}'");
+                        });
+                        break;
+
+                    default:
+                        throw new NotImplementedException();
                 }
-                else
-                    throw new NotImplementedException();
 
                 return node;
             }
@@ -596,28 +621,29 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
         [SupportedOSPlatform("windows")]
         protected override NodeBase SetAttributes(NodeBase node, NodeAttributes attributes)
         {
+            var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
+
             try
             {
-                if (node.NodeType == NodeType.Directory)
+                switch (node.NodeType)
                 {
-                    WindowsIdentity.RunImpersonated(_userToken, () =>
-                    {
-                        var folder = SmbFileSystemHelper.FolderPathToCIFS(_userMount + node.Path.StringPath);
+                    case NodeType.File:
+                        WindowsIdentity.RunImpersonated(_userToken, () =>
+                        {
 
-                        folder.Attributes = attributes.FileAttributes;
-                    });
-                }
-                else if (node.NodeType == NodeType.File)
-                {
-                    WindowsIdentity.RunImpersonated(_userToken, () =>
-                    {
-                        var file = SmbFileSystemHelper.FilePathToCIFS(_userMount + node.Path.StringPath);
+                        });
+                        break;
 
-                        file.Attributes = attributes.FileAttributes;
-                    });
+                    case NodeType.Directory:
+                        WindowsIdentity.RunImpersonated(_userToken, () =>
+                        {
+
+                        });
+                        break;
+
+                    default:
+                        throw new NotImplementedException();
                 }
-                else
-                    throw new NotImplementedException();
 
                 return node;
             }
@@ -629,34 +655,31 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
         }
 
         [SupportedOSPlatform("windows")]
-        protected override NodeBase SetTimeInfo(NodeBase node, NodeTimeInfo newTimeInfo)
+        protected override NodeBase SetTimeInfo(NodeBase node, NodeTimeInfo timeInfo)
         {
+            var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
+
             try
             {
-                if (node.NodeType == NodeType.Directory)
+                switch (node.NodeType)
                 {
-                    WindowsIdentity.RunImpersonated(_userToken, () =>
-                    {
-                        var folder = SmbFileSystemHelper.FolderPathToCIFS(_userMount + node.Path.StringPath);
+                    case NodeType.File:
+                        WindowsIdentity.RunImpersonated(_userToken, () =>
+                        {
 
-                        folder.CreationTime = newTimeInfo.CreationTime;
-                        folder.LastAccessTime = newTimeInfo.LastAccessTime;
-                        folder.LastWriteTime = newTimeInfo.LastWriteTime;
-                    });
-                }
-                else if (node.NodeType == NodeType.File)
-                {
-                    WindowsIdentity.RunImpersonated(_userToken, () =>
-                    {
-                        var file = SmbFileSystemHelper.FilePathToCIFS(_userMount + node.Path.StringPath);
+                        });
+                        break;
 
-                        file.CreationTime = newTimeInfo.CreationTime;
-                        file.LastAccessTime = newTimeInfo.LastAccessTime;
-                        file.LastWriteTime = newTimeInfo.LastWriteTime;
-                    });
+                    case NodeType.Directory:
+                        WindowsIdentity.RunImpersonated(_userToken, () =>
+                        {
+
+                        });
+                        break;
+
+                    default:
+                        throw new NotImplementedException();
                 }
-                else
-                    throw new NotImplementedException();
 
                 return node;
             }

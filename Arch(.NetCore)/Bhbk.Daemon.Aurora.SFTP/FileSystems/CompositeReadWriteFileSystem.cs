@@ -78,9 +78,9 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                     uow.Commit();
 
                     Log.Information($"'{callPath}' '{_userEntity.IdentityAlias}' directory '{child.Path}'");
-                }
 
-                return child;
+                    return child;
+                }
             }
             catch (Exception ex)
             {
@@ -93,20 +93,21 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
         {
             var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
 
+            DirectoryInfo folder = null;
             FileInfo file = null;
 
             try
             {
                 using (var scope = _factory.CreateScope())
                 {
-                    var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
                     var conf = scope.ServiceProvider.GetRequiredService<IConfiguration>();
+                    var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
 
                     var folderEntity = CompositeFileSystemHelper.FolderPathToEntity(uow, _userEntity, parent.Path.StringPath);
-                    var filePath = Strings.GetDirectoryHash($"{_userEntity.ToString()}{parent.Path.StringPath}{child.Name}");
+                    var filePath = Strings.GetDirectoryHash($"{_userEntity.IdentityId}{parent.Path.StringPath}{child.Name}");
                     var fileName = Hashing.MD5.Create(Guid.NewGuid().ToString());
 
-                    var folder = new DirectoryInfo(conf["Storage:UnstructuredData"]
+                    folder = new DirectoryInfo(conf["Storage:UnstructuredData"]
                         + Path.DirectorySeparatorChar + filePath);
 
                     if (!folder.Exists)
@@ -126,6 +127,10 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                         IsReadOnly = false,
                     };
 
+                    /*
+                     * a zero size file will always be created first regardless of actual size of file. 
+                     */
+
                     using (var sha256 = new SHA256Managed())
                     using (var fs = new FileStream(file.FullName, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite))
                     {
@@ -138,10 +143,10 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                     uow.UserFiles.Create(fileEntity);
                     uow.Commit();
 
-                    Log.Information($"'{callPath}' '{_userEntity.IdentityAlias}' file '{child.Path}' to '{file.FullName}'");
-                }
+                    Log.Information($"'{callPath}' '{_userEntity.IdentityAlias}' empty file '{child.Path}' at '{file.FullName}'");
 
-                return child;
+                    return child;
+                }
             }
             catch (Exception ex) when (ex is DbUpdateException || ex is DbUpdateConcurrencyException)
             {
@@ -168,44 +173,48 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
             try
             {
                 if (node.Attributes.IsReadOnly)
-                    throw new InvalidOperationException();
+                    throw new FileSystemOperationCanceledException();
 
                 using (var scope = _factory.CreateScope())
                 {
+                    var conf = scope.ServiceProvider.GetRequiredService<IConfiguration>();
                     var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
 
-                    if (node.NodeType == NodeType.Directory)
+                    switch (node.NodeType)
                     {
-                        var folderEntity = CompositeFileSystemHelper.FolderPathToEntity(uow, _userEntity, node.Path.StringPath);
+                        case NodeType.File:
+                            {
+                                var fileEntity = CompositeFileSystemHelper.FilePathToEntity(uow, _userEntity, node.Path.StringPath);
 
-                        uow.UserFolders.Delete(folderEntity);
-                        uow.Commit();
+                                var file = new FileInfo(conf["Storage:UnstructuredData"]
+                                    + Path.DirectorySeparatorChar + fileEntity.RealPath
+                                    + Path.DirectorySeparatorChar + fileEntity.RealFileName);
 
-                        Log.Information($"'{callPath}' '{_userEntity.IdentityAlias}' folder '{node.Path}'");
+                                File.Delete(file.FullName);
 
-                        return node;
+                                uow.UserFiles.Delete(fileEntity);
+                                uow.Commit();
+
+                                Log.Information($"'{callPath}' '{_userEntity.IdentityAlias}' file '{node.Path}' from '{file.FullName}'");
+                            }
+                            break;
+
+                        case NodeType.Directory:
+                            {
+                                var folderEntity = CompositeFileSystemHelper.FolderPathToEntity(uow, _userEntity, node.Path.StringPath);
+
+                                uow.UserFolders.Delete(folderEntity);
+                                uow.Commit();
+
+                                Log.Information($"'{callPath}' '{_userEntity.IdentityAlias}' folder '{node.Path}'");
+                            }
+                            break;
+
+                        default:
+                            throw new NotImplementedException();
                     }
-                    else if (node.NodeType == NodeType.File)
-                    {
-                        var conf = scope.ServiceProvider.GetRequiredService<IConfiguration>();
 
-                        var fileEntity = CompositeFileSystemHelper.FilePathToEntity(uow, _userEntity, node.Path.StringPath);
-
-                        var file = new FileInfo(conf["Storage:UnstructuredData"]
-                            + Path.DirectorySeparatorChar + fileEntity.RealPath
-                            + Path.DirectorySeparatorChar + fileEntity.RealFileName);
-
-                        File.Delete(file.FullName);
-
-                        uow.UserFiles.Delete(fileEntity);
-                        uow.Commit();
-
-                        Log.Information($"'{callPath}' '{_userEntity.IdentityAlias}' file '{node.Path}' from '{file.FullName}'");
-
-                        return node;
-                    }
-                    else
-                        throw new NotImplementedException();
+                    return node;
                 }
             }
             catch (Exception ex)
@@ -219,30 +228,37 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
         {
             try
             {
+                bool exists = false;
+
                 using (var scope = _factory.CreateScope())
                 {
                     var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
 
-                    if (nodeType == NodeType.Directory)
+                    switch (nodeType)
                     {
-                        var folderEntity = CompositeFileSystemHelper.FolderPathToEntity(uow, _userEntity, path.StringPath);
+                        case NodeType.File:
+                            {
+                                var fileEntity = CompositeFileSystemHelper.FilePathToEntity(uow, _userEntity, path.StringPath);
 
-                        if (folderEntity != null)
-                            return true;
+                                if (fileEntity != null)
+                                    exists = true;
+                            }
+                            break;
 
-                        return false;
+                        case NodeType.Directory:
+                            {
+                                var folderEntity = CompositeFileSystemHelper.FolderPathToEntity(uow, _userEntity, path.StringPath);
+
+                                if (folderEntity != null)
+                                    exists = true;
+                            }
+                            break;
+
+                        default:
+                            throw new NotImplementedException();
                     }
-                    else if (nodeType == NodeType.File)
-                    {
-                        var fileEntity = CompositeFileSystemHelper.FilePathToEntity(uow, _userEntity, path.StringPath);
 
-                        if (fileEntity != null)
-                            return true;
-
-                        return false;
-                    }
-                    else
-                        throw new NotImplementedException();
+                    return exists;
                 }
             }
             catch (Exception ex)
@@ -263,26 +279,35 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                 {
                     var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
 
-                    if (node.NodeType == NodeType.Directory)
+                    switch (node.NodeType)
                     {
-                        var folderEntity = CompositeFileSystemHelper.FolderPathToEntity(uow, _userEntity, node.Path.StringPath);
+                        case NodeType.File:
+                            {
+                                var fileEntity = CompositeFileSystemHelper.FilePathToEntity(uow, _userEntity, node.Path.StringPath);
 
-                        if (folderEntity.IsReadOnly)
-                            return new NodeAttributes(FileAttributes.Directory | FileAttributes.ReadOnly);
+                                if (fileEntity.IsReadOnly)
+                                    node.SetAttributes(new NodeAttributes(FileAttributes.Normal | FileAttributes.ReadOnly));
 
-                        return new NodeAttributes(FileAttributes.Directory);
+                                node.SetAttributes(new NodeAttributes(FileAttributes.Normal));
+                            }
+                            break;
+
+                        case NodeType.Directory:
+                            {
+                                var folderEntity = CompositeFileSystemHelper.FolderPathToEntity(uow, _userEntity, node.Path.StringPath);
+
+                                if (folderEntity.IsReadOnly)
+                                    node.SetAttributes(new NodeAttributes(FileAttributes.Directory | FileAttributes.ReadOnly));
+
+                                node.SetAttributes(new NodeAttributes(FileAttributes.Directory));
+                            }
+                            break;
+
+                        default:
+                            throw new NotImplementedException();
                     }
-                    else if (node.NodeType == NodeType.File)
-                    {
-                        var fileEntity = CompositeFileSystemHelper.FilePathToEntity(uow, _userEntity, node.Path.StringPath);
 
-                        if (fileEntity.IsReadOnly)
-                            return new NodeAttributes(FileAttributes.Normal | FileAttributes.ReadOnly);
-
-                        return new NodeAttributes(FileAttributes.Normal);
-                    }
-                    else
-                        throw new NotImplementedException();
+                    return node.Attributes;
                 }
             }
             catch (Exception ex)
@@ -296,31 +321,35 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
         {
             try
             {
+                NodeBase child = null;
+
                 using (var scope = _factory.CreateScope())
                 {
                     var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
 
-                    var parentEntity = CompositeFileSystemHelper.FolderPathToEntity(uow, _userEntity, parent.Path.StringPath);
+                    var folderParentEntity = CompositeFileSystemHelper.FolderPathToEntity(uow, _userEntity, parent.Path.StringPath);
 
                     var folderEntity = uow.UserFolders.Get(QueryExpressionFactory.GetQueryExpression<UserFolder>()
-                        .Where(x => x.IdentityId == _userEntity.IdentityId && x.ParentId == parentEntity.Id && x.VirtualName == name).ToLambda())
+                        .Where(x => x.IdentityId == _userEntity.IdentityId && x.ParentId == folderParentEntity.Id && x.VirtualName == name).ToLambda())
                         .SingleOrDefault();
 
                     if (folderEntity != null)
-                        return new DirectoryNode(folderEntity.VirtualName, parent,
+                        child = new DirectoryNode(folderEntity.VirtualName, parent,
                             new NodeTimeInfo(folderEntity.CreatedUtc.UtcDateTime,
-                                folderEntity.LastAccessedUtc?.UtcDateTime, folderEntity.LastUpdatedUtc?.UtcDateTime));
+                                folderEntity.LastAccessedUtc.GetValueOrDefault().UtcDateTime, 
+                                folderEntity.LastUpdatedUtc.GetValueOrDefault().UtcDateTime));
 
                     var fileEntity = uow.UserFiles.Get(QueryExpressionFactory.GetQueryExpression<UserFile>()
-                        .Where(x => x.IdentityId == _userEntity.IdentityId && x.FolderId == parentEntity.Id && x.VirtualName == name).ToLambda())
+                        .Where(x => x.IdentityId == _userEntity.IdentityId && x.FolderId == folderParentEntity.Id && x.VirtualName == name).ToLambda())
                         .SingleOrDefault();
 
                     if (fileEntity != null)
-                        return new FileNode(fileEntity.VirtualName, parent,
+                        child = new FileNode(fileEntity.VirtualName, parent,
                             new NodeTimeInfo(fileEntity.CreatedUtc.UtcDateTime,
-                                fileEntity.LastAccessedUtc?.UtcDateTime, fileEntity.LastUpdatedUtc?.UtcDateTime));
+                                fileEntity.LastAccessedUtc.GetValueOrDefault().UtcDateTime, 
+                                fileEntity.LastUpdatedUtc.GetValueOrDefault().UtcDateTime));
 
-                    return parent;
+                    return child;
                 }
             }
             catch (Exception ex)
@@ -337,31 +366,33 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
 
             try
             {
+                var children = new List<NodeBase>();
+
                 using (var scope = _factory.CreateScope())
                 {
                     var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
 
-                    var folderEntity = CompositeFileSystemHelper.FolderPathToEntity(uow, _userEntity, parent.Path.StringPath);
-
-                    var children = new List<NodeBase>();
+                    var folderParentEntity = CompositeFileSystemHelper.FolderPathToEntity(uow, _userEntity, parent.Path.StringPath);
 
                     _userEntity.Folders = uow.UserFolders.Get(QueryExpressionFactory.GetQueryExpression<UserFolder>()
                         .Where(x => x.IdentityId == _userEntity.IdentityId).ToLambda())
                         .ToList();
 
+                    foreach (var folder in _userEntity.Folders.Where(x => x.IdentityId == _userEntity.IdentityId && x.ParentId == folderParentEntity.Id))
+                        children.Add(new DirectoryNode(folder.VirtualName, parent,
+                            new NodeTimeInfo(folder.CreatedUtc.UtcDateTime,
+                                folder.LastAccessedUtc.GetValueOrDefault().UtcDateTime,
+                                folder.LastUpdatedUtc.GetValueOrDefault().UtcDateTime)));
+
                     _userEntity.Files = uow.UserFiles.Get(QueryExpressionFactory.GetQueryExpression<UserFile>()
                         .Where(x => x.IdentityId == _userEntity.IdentityId).ToLambda())
                         .ToList();
 
-                    foreach (var folder in _userEntity.Folders.Where(x => x.IdentityId == _userEntity.IdentityId && x.ParentId == folderEntity.Id))
-                        children.Add(new DirectoryNode(folder.VirtualName, parent,
-                            new NodeTimeInfo(folder.CreatedUtc.UtcDateTime,
-                                folder.LastAccessedUtc?.UtcDateTime, folder.LastUpdatedUtc?.UtcDateTime)));
-
-                    foreach (var file in _userEntity.Files.Where(x => x.IdentityId == _userEntity.IdentityId && x.FolderId == folderEntity.Id))
+                    foreach (var file in _userEntity.Files.Where(x => x.IdentityId == _userEntity.IdentityId && x.FolderId == folderParentEntity.Id))
                         children.Add(new FileNode(file.VirtualName, parent,
                             new NodeTimeInfo(file.CreatedUtc.UtcDateTime,
-                                file.LastAccessedUtc?.UtcDateTime, file.LastUpdatedUtc?.UtcDateTime)));
+                                file.LastAccessedUtc.GetValueOrDefault().UtcDateTime, 
+                                file.LastUpdatedUtc.GetValueOrDefault().UtcDateTime)));
 
                     return children;
                 }
@@ -382,34 +413,38 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
 
             try
             {
+                NodeContent content = null;
+
                 using (var scope = _factory.CreateScope())
                 {
-                    if (node.NodeType == NodeType.File)
+                    switch (node.NodeType)
                     {
-                        var conf = scope.ServiceProvider.GetRequiredService<IConfiguration>();
-                        var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+                        case NodeType.File:
+                            {
+                                var conf = scope.ServiceProvider.GetRequiredService<IConfiguration>();
+                                var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
 
-                        var folderEntity = CompositeFileSystemHelper.FolderPathToEntity(uow, _userEntity, node.Parent.Path.StringPath);
+                                var fileEntity = CompositeFileSystemHelper.FilePathToEntity(uow, _userEntity, node.Path.StringPath);
 
-                        var fileEntity = uow.UserFiles.Get(QueryExpressionFactory.GetQueryExpression<UserFile>()
-                            .Where(x => x.IdentityId == _userEntity.IdentityId && x.FolderId == folderEntity.Id && x.VirtualName == node.Name).ToLambda())
-                            .Single();
+                                var file = new FileInfo(conf["Storage:UnstructuredData"]
+                                    + Path.DirectorySeparatorChar + fileEntity.RealPath
+                                    + Path.DirectorySeparatorChar + fileEntity.RealFileName);
 
-                        var file = new FileInfo(conf["Storage:UnstructuredData"]
-                            + Path.DirectorySeparatorChar + fileEntity.RealPath
-                            + Path.DirectorySeparatorChar + fileEntity.RealFileName);
+                                var stream = File.Open(file.FullName, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite);
 
-                        fileEntity.LastAccessedUtc = DateTime.UtcNow;
+                                content = contentParameters.AccessType == NodeContentAccess.Read
+                                    ? NodeContent.CreateReadOnlyContent(stream)
+                                    : NodeContent.CreateDelayedWriteContent(stream);
 
-                        uow.UserFiles.Update(fileEntity);
-                        uow.Commit();
+                                Log.Information($"'{callPath}' '{_userEntity.IdentityAlias}' file '{node.Path}' from '{file.FullName}'");
+                            }
+                            break;
 
-                        Log.Information($"'{callPath}' '{_userEntity.IdentityAlias}' file '{node.Path}' from '{file.FullName}'");
-
-                        return NodeContent.CreateDelayedWriteContent(File.Open(file.FullName, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite));
+                        default:
+                            throw new NotImplementedException();
                     }
-                    else
-                        throw new NotImplementedException();
+
+                    return content;
                 }
             }
             catch (Exception ex)
@@ -421,24 +456,38 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
 
         protected override long GetLength(NodeBase node)
         {
-            if (!node.Exists()
-                || node.NodeType == NodeType.Directory)
+            if (!node.Exists())
                 return 0L;
 
             try
             {
+                long length = 0L;
+
                 using (var scope = _factory.CreateScope())
                 {
-                    if (node.NodeType == NodeType.File)
+                    switch (node.NodeType)
                     {
-                        var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+                        case NodeType.File:
+                            {
+                                var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
 
-                        var fileEntity = CompositeFileSystemHelper.FilePathToEntity(uow, _userEntity, node.Path.StringPath);
+                                var fileEntity = CompositeFileSystemHelper.FilePathToEntity(uow, _userEntity, node.Path.StringPath);
 
-                        return fileEntity.RealFileSize;
+                                length = fileEntity.RealFileSize;
+                            }
+                            break;
+
+                        case NodeType.Directory:
+                            {
+                                length = 0L;
+                            }
+                            break;
+
+                        default:
+                            throw new NotImplementedException();
                     }
-                    else
-                        throw new NotImplementedException();
+
+                    return length;
                 }
             }
             catch (Exception ex)
@@ -456,22 +505,33 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                 {
                     var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
 
-                    if (node.NodeType == NodeType.Directory)
+                    switch (node.NodeType)
                     {
-                        var folderEntity = CompositeFileSystemHelper.FolderPathToEntity(uow, _userEntity, node.Path.StringPath);
+                        case NodeType.File:
+                            {
+                                var fileEntity = CompositeFileSystemHelper.FilePathToEntity(uow, _userEntity, node.Path.StringPath);
 
-                        return new NodeTimeInfo(folderEntity.CreatedUtc.UtcDateTime,
-                            folderEntity.LastAccessedUtc?.UtcDateTime, folderEntity.LastUpdatedUtc?.UtcDateTime);
-                    }
-                    else if (node.NodeType == NodeType.File)
-                    {
-                        var fileEntity = CompositeFileSystemHelper.FilePathToEntity(uow, _userEntity, node.Path.StringPath);
+                                node.SetTimeInfo(new NodeTimeInfo(fileEntity.CreatedUtc.UtcDateTime,
+                                    fileEntity.LastAccessedUtc.GetValueOrDefault().UtcDateTime,
+                                    fileEntity.LastUpdatedUtc.GetValueOrDefault().UtcDateTime));
+                            }
+                            break;
 
-                        return new NodeTimeInfo(fileEntity.CreatedUtc.UtcDateTime,
-                            fileEntity.LastAccessedUtc?.UtcDateTime, fileEntity.LastUpdatedUtc?.UtcDateTime);
+                        case NodeType.Directory:
+                            {
+                                var folderEntity = CompositeFileSystemHelper.FolderPathToEntity(uow, _userEntity, node.Path.StringPath);
+
+                                node.SetTimeInfo(new NodeTimeInfo(folderEntity.CreatedUtc.UtcDateTime,
+                                    folderEntity.LastAccessedUtc.GetValueOrDefault().UtcDateTime,
+                                    folderEntity.LastUpdatedUtc.GetValueOrDefault().UtcDateTime));
+                            }
+                            break;
+
+                        default:
+                            throw new NotImplementedException();
                     }
-                    else
-                        throw new NotImplementedException();
+
+                    return node.TimeInfo;
                 }
             }
             catch (Exception ex)
@@ -488,48 +548,57 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
             try
             {
                 if (toBeMovedNode.Attributes.IsReadOnly)
-                    throw new InvalidOperationException();
+                    throw new FileSystemOperationCanceledException();
 
                 using (var scope = _factory.CreateScope())
                 {
                     var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
 
-                    if (toBeMovedNode.NodeType == NodeType.Directory)
+                    switch (toBeMovedNode.NodeType)
                     {
-                        var toBeMovedEntity = CompositeFileSystemHelper.FolderPathToEntity(uow, _userEntity, toBeMovedNode.Path.StringPath);
-                        var toBeMovedPath = CompositeFileSystemHelper.FolderEntityToPath(uow, _userEntity, toBeMovedEntity);
+                        case NodeType.File:
+                            {
+                                var toBeMovedEntity = CompositeFileSystemHelper.FilePathToEntity(uow, _userEntity, toBeMovedNode.Path.StringPath);
+                                var toBeMovedPath = CompositeFileSystemHelper.FileEntityToPath(uow, _userEntity, toBeMovedEntity);
 
-                        var targetEntity = CompositeFileSystemHelper.FolderPathToEntity(uow, _userEntity, targetDirectory.Path.StringPath);
-                        var targetPath = CompositeFileSystemHelper.FolderEntityToPath(uow, _userEntity, targetEntity);
+                                var targetEntity = CompositeFileSystemHelper.FilePathToEntity(uow, _userEntity, targetDirectory.Path.StringPath);
+                                var targetPath = CompositeFileSystemHelper.FileEntityToPath(uow, _userEntity, targetEntity);
 
-                        toBeMovedEntity.ParentId = targetEntity.Id;
+                                toBeMovedEntity.FolderId = targetEntity.Id;
 
-                        uow.UserFolders.Update(toBeMovedEntity);
-                        uow.Commit();
+                                uow.UserFiles.Update(toBeMovedEntity);
+                                uow.Commit();
 
-                        Log.Information($"'{callPath}' '{_userEntity.IdentityAlias}' from '{toBeMovedPath}' to '{targetPath}'");
+                                toBeMovedNode = new FileNode(toBeMovedNode.Name, targetDirectory);
 
-                        return new DirectoryNode(toBeMovedNode.Name, targetDirectory);
+                                Log.Information($"'{callPath}' '{_userEntity.IdentityAlias}' from '{toBeMovedPath}' to '{targetPath}'");
+                            }
+                            break;
+
+                        case NodeType.Directory:
+                            {
+                                var toBeMovedEntity = CompositeFileSystemHelper.FolderPathToEntity(uow, _userEntity, toBeMovedNode.Path.StringPath);
+                                var toBeMovedPath = CompositeFileSystemHelper.FolderEntityToPath(uow, _userEntity, toBeMovedEntity);
+
+                                var targetEntity = CompositeFileSystemHelper.FolderPathToEntity(uow, _userEntity, targetDirectory.Path.StringPath);
+                                var targetPath = CompositeFileSystemHelper.FolderEntityToPath(uow, _userEntity, targetEntity);
+
+                                toBeMovedEntity.ParentId = targetEntity.Id;
+
+                                uow.UserFolders.Update(toBeMovedEntity);
+                                uow.Commit();
+
+                                toBeMovedNode = new DirectoryNode(toBeMovedNode.Name, targetDirectory);
+
+                                Log.Information($"'{callPath}' '{_userEntity.IdentityAlias}' from '{toBeMovedPath}' to '{targetPath}'");
+                            }
+                            break;
+
+                        default:
+                            throw new NotImplementedException();
                     }
-                    else if (toBeMovedNode.NodeType == NodeType.File)
-                    {
-                        var toBeMovedEntity = CompositeFileSystemHelper.FilePathToEntity(uow, _userEntity, toBeMovedNode.Path.StringPath);
-                        var toBeMovedPath = CompositeFileSystemHelper.FileEntityToPath(uow, _userEntity, toBeMovedEntity);
 
-                        var targetEntity = CompositeFileSystemHelper.FilePathToEntity(uow, _userEntity, targetDirectory.Path.StringPath);
-                        var targetPath = CompositeFileSystemHelper.FileEntityToPath(uow, _userEntity, targetEntity);
-
-                        toBeMovedEntity.FolderId = targetEntity.Id;
-
-                        uow.UserFiles.Update(toBeMovedEntity);
-                        uow.Commit();
-
-                        Log.Information($"'{callPath}' '{_userEntity.IdentityAlias}' from '{toBeMovedPath}' to '{targetPath}'");
-
-                        return new FileNode(toBeMovedNode.Name, targetDirectory);
-                    }
-                    else
-                        throw new NotImplementedException();
+                    return toBeMovedNode;
                 }
             }
             catch (Exception ex)
@@ -546,46 +615,55 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
             try
             {
                 if (node.Attributes.IsReadOnly)
-                    throw new InvalidOperationException();
+                    throw new FileSystemOperationCanceledException();
 
                 using (var scope = _factory.CreateScope())
                 {
                     var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
 
-                    if (node.NodeType == NodeType.Directory)
+                    switch (node.NodeType)
                     {
-                        var folderEntity = CompositeFileSystemHelper.FolderPathToEntity(uow, _userEntity, node.Path.StringPath);
+                        case NodeType.File:
+                            {
+                                var fileEntity = CompositeFileSystemHelper.FilePathToEntity(uow, _userEntity, node.Path.StringPath);
 
-                        folderEntity.VirtualName = newName;
-                        folderEntity.LastUpdatedUtc = DateTime.UtcNow;
+                                fileEntity.VirtualName = newName;
+                                fileEntity.LastUpdatedUtc = DateTime.UtcNow;
 
-                        uow.UserFolders.Update(folderEntity);
-                        uow.Commit();
+                                uow.UserFiles.Update(fileEntity);
+                                uow.Commit();
 
-                        var folderPath = CompositeFileSystemHelper.FolderEntityToPath(uow, _userEntity, folderEntity);
+                                var filePath = CompositeFileSystemHelper.FileEntityToPath(uow, _userEntity, fileEntity);
 
-                        Log.Information($"'{callPath}' '{_userEntity.IdentityAlias}' from '{node.Path}' to '{folderPath}'");
+                                node = new FileNode(newName, node.Parent);
 
-                        return new DirectoryNode(newName, node.Parent);
+                                Log.Information($"'{callPath}' '{_userEntity.IdentityAlias}' from '{node.Path}' to '{filePath}'");
+                            }
+                            break;
+
+                        case NodeType.Directory:
+                            {
+                                var folderEntity = CompositeFileSystemHelper.FolderPathToEntity(uow, _userEntity, node.Path.StringPath);
+
+                                folderEntity.VirtualName = newName;
+                                folderEntity.LastUpdatedUtc = DateTime.UtcNow;
+
+                                uow.UserFolders.Update(folderEntity);
+                                uow.Commit();
+
+                                var folderPath = CompositeFileSystemHelper.FolderEntityToPath(uow, _userEntity, folderEntity);
+
+                                node = new DirectoryNode(newName, node.Parent);
+
+                                Log.Information($"'{callPath}' '{_userEntity.IdentityAlias}' from '{node.Path}' to '{folderPath}'");
+                            }
+                            break;
+
+                        default:
+                            throw new NotImplementedException();
                     }
-                    else if (node.NodeType == NodeType.File)
-                    {
-                        var fileEntity = CompositeFileSystemHelper.FilePathToEntity(uow, _userEntity, node.Path.StringPath);
 
-                        fileEntity.VirtualName = newName;
-                        fileEntity.LastUpdatedUtc = DateTime.UtcNow;
-
-                        uow.UserFiles.Update(fileEntity);
-                        uow.Commit();
-
-                        var filePath = CompositeFileSystemHelper.FileEntityToPath(uow, _userEntity, fileEntity);
-
-                        Log.Information($"'{callPath}' '{_userEntity.IdentityAlias}' from '{node.Path}' to '{filePath}'");
-
-                        return new FileNode(newName, node.Parent);
-                    }
-                    else
-                        throw new NotImplementedException();
+                    return node;
                 }
             }
             catch (Exception ex)
@@ -602,42 +680,56 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
 
             var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
 
+            DirectoryInfo folder = null;
             FileInfo file = null;
 
             try
             {
                 using (var scope = _factory.CreateScope())
                 {
-                    if (node.NodeType == NodeType.File)
+                    switch (node.NodeType)
                     {
-                        var conf = scope.ServiceProvider.GetRequiredService<IConfiguration>();
-                        var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+                        case NodeType.File:
+                            {
+                                var conf = scope.ServiceProvider.GetRequiredService<IConfiguration>();
+                                var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
 
-                        var fileEntity = CompositeFileSystemHelper.FilePathToEntity(uow, _userEntity, node.Path.StringPath);
+                                var fileEntity = CompositeFileSystemHelper.FilePathToEntity(uow, _userEntity, node.Path.StringPath);
 
-                        file = new FileInfo(conf["Storage:UnstructuredData"]
-                            + Path.DirectorySeparatorChar + fileEntity.RealPath
-                            + Path.DirectorySeparatorChar + fileEntity.RealFileName);
+                                folder = new DirectoryInfo(conf["Storage:UnstructuredData"]
+                                    + Path.DirectorySeparatorChar + fileEntity.RealPath);
 
-                        fileEntity = CompositeFileSystemHelper.SaveFileStream(conf, content.GetStream(), fileEntity);
+                                if (!folder.Exists)
+                                    folder.Create();
 
-                        /*
-                         * the vendor library calls createfile and then savecontent for non-zero size files. the current band-aid
-                         * is set lastaccessed and lastupdated to null in update call after create call for same event.
-                         */
+                                file = new FileInfo(conf["Storage:UnstructuredData"]
+                                    + Path.DirectorySeparatorChar + fileEntity.RealPath
+                                    + Path.DirectorySeparatorChar + fileEntity.RealFileName);
 
-                        fileEntity.LastAccessedUtc = null;
-                        fileEntity.LastUpdatedUtc = null;
+                                using (var fs = new FileStream(file.FullName, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite))
+                                    content.GetStream().CopyTo(fs);
 
-                        uow.UserFiles.Update(fileEntity);
-                        uow.Commit();
+                                using (var sha256 = new SHA256Managed())
+                                using (var fs = new FileStream(file.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                                {
+                                    var hash = sha256.ComputeHash(fs);
 
-                        Log.Information($"'{callPath}' '{_userEntity.IdentityAlias}' file '{node.Path}' to '{file.FullName}'");
+                                    fileEntity.RealFileSize = fs.Length;
+                                    fileEntity.HashSHA256 = Strings.GetHexString(hash);
+                                }
 
-                        return node;
+                                uow.UserFiles.Update(fileEntity);
+                                uow.Commit();
+
+                                Log.Information($"'{callPath}' '{_userEntity.IdentityAlias}' file '{node.Path}' at '{file.FullName}'");
+                            }
+                            break;
+
+                        default:
+                            throw new NotImplementedException();
                     }
-                    else
-                        throw new NotImplementedException();
+
+                    return node;
                 }
             }
             catch (Exception ex) when (ex is DbUpdateException || ex is DbUpdateConcurrencyException)
@@ -657,34 +749,28 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
 
         protected override NodeBase SetAttributes(NodeBase node, NodeAttributes attributes)
         {
+            var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
+
             try
             {
                 using (var scope = _factory.CreateScope())
                 {
+                    var conf = scope.ServiceProvider.GetRequiredService<IConfiguration>();
                     var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
 
-                    if (node.NodeType == NodeType.Directory)
+                    switch (node.NodeType)
                     {
-                        var folderEntity = CompositeFileSystemHelper.FolderPathToEntity(uow, _userEntity, node.Path.StringPath);
+                        case NodeType.File:
+                            break;
 
-                        /*
-                         * undecided about need/want here
-                         */
+                        case NodeType.Directory:
+                            break;
 
-                        return node;
+                        default:
+                            throw new NotImplementedException();
                     }
-                    else if (node.NodeType == NodeType.File)
-                    {
-                        var fileEntity = CompositeFileSystemHelper.FilePathToEntity(uow, _userEntity, node.Path.StringPath);
 
-                        /*
-                         * undecided about need/want here
-                         */
-
-                        return node;
-                    }
-                    else
-                        throw new NotImplementedException();
+                    return node;
                 }
             }
             catch (Exception ex)
@@ -696,34 +782,28 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
 
         protected override NodeBase SetTimeInfo(NodeBase node, NodeTimeInfo timeInfo)
         {
+            var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
+
             try
             {
                 using (var scope = _factory.CreateScope())
                 {
+                    var conf = scope.ServiceProvider.GetRequiredService<IConfiguration>();
                     var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
 
-                    if (node.NodeType == NodeType.Directory)
+                    switch (node.NodeType)
                     {
-                        var folderEntity = CompositeFileSystemHelper.FolderPathToEntity(uow, _userEntity, node.Path.StringPath);
+                        case NodeType.File:
+                            break;
 
-                        /*
-                         * undecided about need/want here
-                         */
+                        case NodeType.Directory:
+                            break;
 
-                        return node;
+                        default:
+                            throw new NotImplementedException();
                     }
-                    else if (node.NodeType == NodeType.File)
-                    {
-                        var fileEntity = CompositeFileSystemHelper.FilePathToEntity(uow, _userEntity, node.Path.StringPath);
 
-                        /*
-                         * undecided about need/want here
-                         */
-
-                        return node;
-                    }
-                    else
-                        throw new NotImplementedException();
+                    return node;
                 }
             }
             catch (Exception ex)
