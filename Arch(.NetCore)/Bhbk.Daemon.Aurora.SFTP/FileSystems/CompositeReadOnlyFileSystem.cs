@@ -30,7 +30,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
             {
                 var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
 
-                CompositeFileSystemHelper.EnsureRootExists(uow, _userEntity);
+                var root = CompositeFileSystemHelper.EnsureRootExists(uow, _userEntity);
             }
         }
 
@@ -146,8 +146,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                     if (folderEntity != null)
                         child = new DirectoryNode(folderEntity.VirtualName, parent,
                             new NodeTimeInfo(folderEntity.CreatedUtc.UtcDateTime,
-                                folderEntity.LastAccessedUtc.GetValueOrDefault().UtcDateTime,
-                                folderEntity.LastUpdatedUtc.GetValueOrDefault().UtcDateTime));
+                                folderEntity.LastAccessedUtc.UtcDateTime, folderEntity.LastUpdatedUtc.UtcDateTime));
 
                     var fileEntity = uow.UserFiles.Get(QueryExpressionFactory.GetQueryExpression<UserFile>()
                         .Where(x => x.IdentityId == _userEntity.IdentityId && x.FolderId == folderParentEntity.Id && x.VirtualName == name).ToLambda())
@@ -156,8 +155,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                     if (fileEntity != null)
                         child = new FileNode(fileEntity.VirtualName, parent,
                             new NodeTimeInfo(fileEntity.CreatedUtc.UtcDateTime,
-                                fileEntity.LastAccessedUtc.GetValueOrDefault().UtcDateTime,
-                                fileEntity.LastUpdatedUtc.GetValueOrDefault().UtcDateTime));
+                                fileEntity.LastAccessedUtc.UtcDateTime, fileEntity.LastUpdatedUtc.UtcDateTime));
 
                     return child;
                 }
@@ -182,27 +180,25 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                 {
                     var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
 
-                    var folderEntity = CompositeFileSystemHelper.FolderPathToEntity(uow, _userEntity, parent.Path.StringPath);
+                    var folderParentEntity = CompositeFileSystemHelper.FolderPathToEntity(uow, _userEntity, parent.Path.StringPath);
 
                     _userEntity.Folders = uow.UserFolders.Get(QueryExpressionFactory.GetQueryExpression<UserFolder>()
                         .Where(x => x.IdentityId == _userEntity.IdentityId).ToLambda())
                         .ToList();
 
-                    foreach (var folder in _userEntity.Folders.Where(x => x.IdentityId == _userEntity.IdentityId && x.ParentId == folderEntity.Id))
+                    foreach (var folder in _userEntity.Folders.Where(x => x.IdentityId == _userEntity.IdentityId && x.ParentId == folderParentEntity.Id))
                         children.Add(new DirectoryNode(folder.VirtualName, parent,
                             new NodeTimeInfo(folder.CreatedUtc.UtcDateTime,
-                                folder.LastAccessedUtc.GetValueOrDefault().UtcDateTime,
-                                folder.LastUpdatedUtc.GetValueOrDefault().UtcDateTime)));
+                                folder.LastAccessedUtc.UtcDateTime, folder.LastUpdatedUtc.UtcDateTime)));
 
                     _userEntity.Files = uow.UserFiles.Get(QueryExpressionFactory.GetQueryExpression<UserFile>()
                         .Where(x => x.IdentityId == _userEntity.IdentityId).ToLambda())
                         .ToList();
 
-                    foreach (var file in _userEntity.Files.Where(x => x.IdentityId == _userEntity.IdentityId && x.FolderId == folderEntity.Id))
+                    foreach (var file in _userEntity.Files.Where(x => x.IdentityId == _userEntity.IdentityId && x.FolderId == folderParentEntity.Id))
                         children.Add(new FileNode(file.VirtualName, parent,
                             new NodeTimeInfo(file.CreatedUtc.UtcDateTime,
-                                file.LastAccessedUtc.GetValueOrDefault().UtcDateTime,
-                                file.LastUpdatedUtc.GetValueOrDefault().UtcDateTime)));
+                                file.LastAccessedUtc.UtcDateTime, file.LastUpdatedUtc.UtcDateTime)));
 
                     return children;
                 }
@@ -322,8 +318,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                                 var fileEntity = CompositeFileSystemHelper.FilePathToEntity(uow, _userEntity, node.Path.StringPath);
 
                                 node.SetTimeInfo(new NodeTimeInfo(fileEntity.CreatedUtc.UtcDateTime,
-                                    fileEntity.LastAccessedUtc.GetValueOrDefault().UtcDateTime,
-                                    fileEntity.LastUpdatedUtc.GetValueOrDefault().UtcDateTime));
+                                    fileEntity.LastAccessedUtc.UtcDateTime, fileEntity.LastUpdatedUtc.UtcDateTime));
                             }
                             break;
 
@@ -332,8 +327,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                                 var folderEntity = CompositeFileSystemHelper.FolderPathToEntity(uow, _userEntity, node.Path.StringPath);
 
                                 node.SetTimeInfo(new NodeTimeInfo(folderEntity.CreatedUtc.UtcDateTime,
-                                    folderEntity.LastAccessedUtc.GetValueOrDefault().UtcDateTime,
-                                    folderEntity.LastUpdatedUtc.GetValueOrDefault().UtcDateTime));
+                                    folderEntity.LastAccessedUtc.UtcDateTime, folderEntity.LastUpdatedUtc.UtcDateTime));
                             }
                             break;
 

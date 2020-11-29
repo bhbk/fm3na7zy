@@ -1,9 +1,4 @@
 ﻿
-
-
-
-
-
 CREATE PROCEDURE [svc].[usp_UserFile_Insert]
      @IdentityId			UNIQUEIDENTIFIER
     ,@FolderId				UNIQUEIDENTIFIER

@@ -12,14 +12,14 @@ namespace Bhbk.Daemon.Aurora.SFTP.Helpers
 {
     internal class CompositeFileSystemHelper
     {
-        internal static void EnsureRootExists(IUnitOfWork uow, User user)
+        internal static UserFolder EnsureRootExists(IUnitOfWork uow, User user)
         {
             var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
 
             var folder = uow.UserFolders.Get(QueryExpressionFactory.GetQueryExpression<UserFolder>()
                 .Where(x => x.IdentityId == user.IdentityId && x.ParentId == null).ToLambda())
                 .SingleOrDefault();
-
+            
             if (folder == null)
             {
                 folder = uow.UserFolders.Create(
@@ -35,6 +35,8 @@ namespace Bhbk.Daemon.Aurora.SFTP.Helpers
 
                 Log.Information($"'{callPath}' '{user.IdentityAlias}' folder '/'");
             }
+
+            return folder;
         }
 
         internal static UserFile FilePathToEntity(IUnitOfWork uow, User user, string path)

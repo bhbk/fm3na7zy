@@ -1,5 +1,4 @@
 ﻿
-
 CREATE   VIEW [svc].[uvw_UserFile]
 AS
 SELECT

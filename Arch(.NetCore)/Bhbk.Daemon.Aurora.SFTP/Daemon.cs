@@ -1,10 +1,8 @@
 using Bhbk.Daemon.Aurora.SFTP.Factories;
-using Bhbk.Daemon.Aurora.SFTP.Helpers;
 using Bhbk.Lib.Aurora.Data_EF6.Infrastructure;
 using Bhbk.Lib.Aurora.Data_EF6.Models;
 using Bhbk.Lib.Aurora.Domain.Helpers;
 using Bhbk.Lib.Aurora.Domain.Primitives;
-using Bhbk.Lib.Aurora.Domain.Primitives.Enums;
 using Bhbk.Lib.Aurora.Primitives.Enums;
 using Bhbk.Lib.Cryptography.Encryption;
 using Bhbk.Lib.Cryptography.Entropy;
@@ -197,18 +195,25 @@ namespace Bhbk.Daemon.Aurora.SFTP
 
         private void FsNotify_CreatePreview(object sender, PreviewSingleNodeOperationEventArgs e)
         {
+            var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
+
             try
             {
 
             }
             catch (Exception ex)
             {
+                e.CancelOperation();
+
                 Log.Error(ex.ToString());
+                throw;
             }
         }
 
         private void FsNotify_CreateCompleted(object sender, SingleNodeOperationEventArgs e)
         {
+            var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
+
             try
             {
 
@@ -221,24 +226,29 @@ namespace Bhbk.Daemon.Aurora.SFTP
 
         private void FsNotify_DeletePreview(object sender, PreviewSingleNodeOperationEventArgs e)
         {
+            var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
+
             try
             {
 
             }
             catch (Exception ex)
             {
+                e.CancelOperation();
+
                 Log.Error(ex.ToString());
+                throw;
             }
         }
 
         private void FsNotify_DeleteCompleted(object sender, SingleNodeOperationEventArgs e)
         {
+            var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
+
             try
             {
                 if (e.ResultNode.IsFile)
                 {
-                    var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
-
                     using (var scope = _factory.CreateScope())
                     {
                         var conf = scope.ServiceProvider.GetRequiredService<IConfiguration>();
@@ -292,10 +302,11 @@ namespace Bhbk.Daemon.Aurora.SFTP
             /*
              * https://www.rebex.net/file-server/features/events.aspx#pre-authentication
              */
+
+            var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
+
             try
             {
-                var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
-
                 using (var scope = _factory.CreateScope())
                 {
                     var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
@@ -380,10 +391,11 @@ namespace Bhbk.Daemon.Aurora.SFTP
             /*
              * https://www.rebex.net/file-server/features/events.aspx#authentication
              */
+
+            var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
+
             try
             {
-                var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
-
                 using (var scope = _factory.CreateScope())
                 {
                     var log = scope.ServiceProvider.GetRequiredService<ILogger>();
@@ -415,10 +427,10 @@ namespace Bhbk.Daemon.Aurora.SFTP
                                 /*
                                  * an smb mount will not succeed without a user password or ambassador credential.
                                  */
-                                if (user.FileSystemType == FileSystemTypes.SMB.ToString()
+                                if (user.FileSystemType == FileSystemProviderType.SMB.ToString()
                                     && !user.Mount.CredentialId.HasValue)
                                 {
-                                    Log.Warning($"'{callPath}' '{e.UserName}' failure no credential to create {FileSystemTypes.SMB} filesystem");
+                                    Log.Warning($"'{callPath}' '{e.UserName}' failure no credential to create {FileSystemProviderType.SMB} filesystem");
 
                                     e.Reject();
                                     return;
@@ -526,10 +538,11 @@ namespace Bhbk.Daemon.Aurora.SFTP
             /*
              * https://www.rebex.net/file-server/features/events.aspx#connecting
              */
+
+            var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
+
             try
             {
-                var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
-
                 Log.Information($"'{callPath}' from {e.ClientEndPoint}");
 
                 e.Accept = true;
@@ -542,10 +555,10 @@ namespace Bhbk.Daemon.Aurora.SFTP
 
         private void FsUser_FileDownloaded(object sender, FileTransferredEventArgs e)
         {
+            var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
+
             try
             {
-                var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
-
                 using (var scope = _factory.CreateScope())
                 {
                     var conf = scope.ServiceProvider.GetRequiredService<IConfiguration>();
@@ -595,10 +608,10 @@ namespace Bhbk.Daemon.Aurora.SFTP
 
         private void FsUser_FileUploaded(object sender, FileTransferredEventArgs e)
         {
+            var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
+
             try
             {
-                var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
-
                 using (var scope = _factory.CreateScope())
                 {
                     var conf = scope.ServiceProvider.GetRequiredService<IConfiguration>();
@@ -651,10 +664,11 @@ namespace Bhbk.Daemon.Aurora.SFTP
             /*
              * https://www.rebex.net/file-server/features/events.aspx#disconnected
              */
+
+            var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
+
             try
             {
-                var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
-
                 Log.Information($"'{callPath}' from {e.Session.ClientEndPoint} after {e.Session.Duration}");
             }
             catch (Exception ex)

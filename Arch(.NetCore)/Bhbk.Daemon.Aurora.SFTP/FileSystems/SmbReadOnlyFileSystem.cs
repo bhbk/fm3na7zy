@@ -82,31 +82,32 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
             {
                 bool exists = false;
 
-                switch (nodeType)
+                WindowsIdentity.RunImpersonated(_userToken, () =>
                 {
-                    case NodeType.File:
-                        WindowsIdentity.RunImpersonated(_userToken, () =>
-                        {
-                            var file = SmbFileSystemHelper.FilePathToCIFS(_userMount + path.StringPath);
+                    switch (nodeType)
+                    {
+                        case NodeType.File:
+                            {
+                                var file = SmbFileSystemHelper.FilePathToCIFS(_userMount + path.StringPath);
 
-                            if (file.Exists)
-                                exists = true;
-                        });
-                        break;
+                                if (file.Exists)
+                                    exists = true;
+                            }
+                            break;
 
-                    case NodeType.Directory:
-                        WindowsIdentity.RunImpersonated(_userToken, () =>
-                        {
-                            var folder = SmbFileSystemHelper.FolderPathToCIFS(_userMount + path.StringPath);
+                        case NodeType.Directory:
+                            {
+                                var folder = SmbFileSystemHelper.FolderPathToCIFS(_userMount + path.StringPath);
 
-                            if (folder.Exists)
-                                exists = true;
-                        });
-                        break;
+                                if (folder.Exists)
+                                    exists = true;
+                            }
+                            break;
 
-                    default:
-                        throw new NotImplementedException();
-                }
+                        default:
+                            throw new NotImplementedException();
+                    }
+                });
 
                 return exists;
             }
@@ -125,29 +126,30 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
 
             try
             {
-                switch (node.NodeType)
+                WindowsIdentity.RunImpersonated(_userToken, () =>
                 {
-                    case NodeType.File:
-                        WindowsIdentity.RunImpersonated(_userToken, () =>
-                        {
-                            var file = SmbFileSystemHelper.FilePathToCIFS(_userMount + node.Path.StringPath);
+                    switch (node.NodeType)
+                    {
+                        case NodeType.File:
+                            {
+                                var file = SmbFileSystemHelper.FilePathToCIFS(_userMount + node.Path.StringPath);
 
-                            node.SetAttributes(new NodeAttributes(file.Attributes));
-                        });
-                        break;
+                                node.SetAttributes(new NodeAttributes(file.Attributes));
+                            }
+                            break;
 
-                    case NodeType.Directory:
-                        WindowsIdentity.RunImpersonated(_userToken, () =>
-                        {
-                            var folder = SmbFileSystemHelper.FolderPathToCIFS(_userMount + node.Path.StringPath);
+                        case NodeType.Directory:
+                            {
+                                var folder = SmbFileSystemHelper.FolderPathToCIFS(_userMount + node.Path.StringPath);
 
-                            node.SetAttributes(new NodeAttributes(folder.Attributes));
-                        });
-                        break;
+                                node.SetAttributes(new NodeAttributes(folder.Attributes));
+                            }
+                            break;
 
-                    default:
-                        throw new NotImplementedException();
-                }
+                        default:
+                            throw new NotImplementedException();
+                    }
+                });
 
                 return node.Attributes;
             }
@@ -275,24 +277,28 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
             {
                 long length = 0L;
 
-                switch (node.NodeType)
+                WindowsIdentity.RunImpersonated(_userToken, () =>
                 {
-                    case NodeType.File:
-                        WindowsIdentity.RunImpersonated(_userToken, () =>
-                        {
-                            var file = SmbFileSystemHelper.FilePathToCIFS(_userMount + node.Path.StringPath);
+                    switch (node.NodeType)
+                    {
+                        case NodeType.File:
+                            {
+                                var file = SmbFileSystemHelper.FilePathToCIFS(_userMount + node.Path.StringPath);
 
-                            length = file.Length;
-                        });
-                        break;
+                                length = file.Length;
+                            }
+                            break;
 
-                    case NodeType.Directory:
-                        length = 0L;
-                        break;
+                        case NodeType.Directory:
+                            {
+                                length = 0L;
+                            }
+                            break;
 
-                    default:
-                        throw new NotImplementedException();
-                }
+                        default:
+                            throw new NotImplementedException();
+                    }
+                });
 
                 return length;
             }
@@ -308,29 +314,30 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
         {
             try
             {
-                switch (node.NodeType)
+                WindowsIdentity.RunImpersonated(_userToken, () =>
                 {
-                    case NodeType.File:
-                        WindowsIdentity.RunImpersonated(_userToken, () =>
-                        {
-                            var file = SmbFileSystemHelper.FilePathToCIFS(_userMount + node.Path.StringPath);
+                    switch (node.NodeType)
+                    {
+                        case NodeType.File:
+                            {
+                                var file = SmbFileSystemHelper.FilePathToCIFS(_userMount + node.Path.StringPath);
 
-                            node.SetTimeInfo(new NodeTimeInfo(file.CreationTime, file.LastAccessTime, file.LastWriteTime));
-                        });
-                        break;
+                                node.SetTimeInfo(new NodeTimeInfo(file.CreationTime, file.LastAccessTime, file.LastWriteTime));
+                            }
+                            break;
 
-                    case NodeType.Directory:
-                        WindowsIdentity.RunImpersonated(_userToken, () =>
-                        {
-                            var folder = SmbFileSystemHelper.FolderPathToCIFS(_userMount + node.Path.StringPath);
+                        case NodeType.Directory:
+                            {
+                                var folder = SmbFileSystemHelper.FolderPathToCIFS(_userMount + node.Path.StringPath);
 
-                            node.SetTimeInfo(new NodeTimeInfo(folder.CreationTime, folder.LastAccessTime, folder.LastWriteTime));
-                        });
-                        break;
+                                node.SetTimeInfo(new NodeTimeInfo(folder.CreationTime, folder.LastAccessTime, folder.LastWriteTime));
+                            }
+                            break;
 
-                    default:
-                        throw new NotImplementedException();
-                }
+                        default:
+                            throw new NotImplementedException();
+                    }
+                });
 
                 return node.TimeInfo;
             }

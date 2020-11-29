@@ -27,8 +27,8 @@ namespace Bhbk.Lib.Aurora.Data_EF6.Models
         public string VirtualName { get; set; }
         public bool IsReadOnly { get; set; }
         public System.DateTimeOffset CreatedUtc { get; set; }
-        public Nullable<System.DateTimeOffset> LastAccessedUtc { get; set; }
-        public Nullable<System.DateTimeOffset> LastUpdatedUtc { get; set; }
+        public System.DateTimeOffset LastAccessedUtc { get; set; }
+        public System.DateTimeOffset LastUpdatedUtc { get; set; }
     
         public virtual User User { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]

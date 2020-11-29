@@ -1,8 +1,4 @@
 ﻿
-
-
-
-
 CREATE PROCEDURE [svc].[usp_User_Insert]
      @IdentityId			UNIQUEIDENTIFIER
     ,@IdentityAlias			NVARCHAR (128) 
@@ -10,7 +6,7 @@ CREATE PROCEDURE [svc].[usp_User_Insert]
     ,@RequirePublicKey		BIT
     ,@FileSystemType		NVARCHAR (16) 
     ,@FileSystemReadOnly	BIT
-    ,@DebugLevel			NVARCHAR (16) 
+    ,@Debugger				NVARCHAR (16) 
     ,@IsEnabled				BIT
     ,@IsDeletable			BIT
 
@@ -30,7 +26,9 @@ BEGIN
 			,RequirePublicKey
 			,FileSystemType
 			,FileSystemReadOnly
-			,DebugLevel
+			,QuotaInBytes
+			,QuotaUsedInBytes
+			,Debugger
 			,IsEnabled
 			,IsDeletable
 			,CreatedUtc
@@ -43,7 +41,9 @@ BEGIN
 			,@RequirePublicKey
 			,@FileSystemType
 			,@FileSystemReadOnly
-			,@DebugLevel
+			,2147483647
+			,0
+			,@Debugger
 			,@IsEnabled
 			,@IsDeletable
 			,@CREATEDUTC

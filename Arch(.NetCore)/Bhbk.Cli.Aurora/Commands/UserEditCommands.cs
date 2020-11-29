@@ -18,8 +18,8 @@ namespace Bhbk.Cli.Aurora.Commands
         private readonly IConfiguration _conf;
         private readonly IUnitOfWork _uow;
         private User _user;
-        private FileSystemTypes _fileSystem;
-        private readonly string _fileSystemList = string.Join(", ", Enum.GetNames(typeof(FileSystemTypes)));
+        private FileSystemProviderType _fileSystem;
+        private readonly string _fileSystemList = string.Join(", ", Enum.GetNames(typeof(FileSystemProviderType)));
 
         public UserEditCommands()
         {

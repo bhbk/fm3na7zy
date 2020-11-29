@@ -26,13 +26,13 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
                 new SqlParameter("@AuthType", SqlDbType.NVarChar) { Value = entity.AuthType },
                 new SqlParameter("@ServerName", SqlDbType.NVarChar) { Value = entity.ServerAddress },
                 new SqlParameter("@ServerPath", SqlDbType.NVarChar) { Value = entity.ServerShare },
-                new SqlParameter("@Enabled", SqlDbType.Bit) { Value = entity.IsEnabled },
-                new SqlParameter("@Deletable", SqlDbType.Bit) { Value = entity.IsDeletable },
+                new SqlParameter("@IsEnabled", SqlDbType.Bit) { Value = entity.IsEnabled },
+                new SqlParameter("@IsDeletable", SqlDbType.Bit) { Value = entity.IsDeletable },
                 rvalue,
             };
 
-            return _context.SqlQuery<uvw_UserMount>("EXEC @ReturnValue = [svc].[usp_UserMount_Insert]"
-                + "@IdentityId, @CredentialId, @AuthType, @ServerName, @ServerPath, @Enabled, @Deletable", pvalues)
+            return _context.SqlQuery<uvw_UserMount>("EXEC @ReturnValue = [svc].[usp_UserMount_Insert] "
+                + "@IdentityId, @CredentialId, @AuthType, @ServerName, @ServerPath, @IsEnabled, @IsDeletable", pvalues)
                     .Single();
         }
 
@@ -98,13 +98,13 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
                 new SqlParameter("@AuthType", SqlDbType.NVarChar) { Value = entity.AuthType },
                 new SqlParameter("@ServerName", SqlDbType.NVarChar) { Value = entity.ServerAddress },
                 new SqlParameter("@ServerPath", SqlDbType.NVarChar) { Value = entity.ServerShare },
-                new SqlParameter("@Enabled", SqlDbType.Bit) { Value = entity.IsEnabled },
-                new SqlParameter("@Deletable", SqlDbType.Bit) { Value = entity.IsDeletable },
+                new SqlParameter("@IsEnabled", SqlDbType.Bit) { Value = entity.IsEnabled },
+                new SqlParameter("@IsDeletable", SqlDbType.Bit) { Value = entity.IsDeletable },
                 rvalue,
             };
 
-            return _context.SqlQuery<uvw_UserMount>("EXEC @ReturnValue = [svc].[usp_UserMount_Update]"
-                + "@IdentityId, @CredentialId, @AuthType, @ServerName, @ServerPath, @Enabled, @Deletable", pvalues)
+            return _context.SqlQuery<uvw_UserMount>("EXEC @ReturnValue = [svc].[usp_UserMount_Update] "
+                + "@IdentityId, @CredentialId, @AuthType, @ServerName, @ServerPath, @IsEnabled, @IsDeletable", pvalues)
                     .Single();
         }
 

@@ -1,8 +1,4 @@
 ﻿
-
-
-
-
 CREATE PROCEDURE [svc].[usp_UserAlert_Insert]
      @IdentityId			UNIQUEIDENTIFIER
     ,@OnDelete				BIT

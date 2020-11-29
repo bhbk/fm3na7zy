@@ -29,7 +29,7 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
                 rvalue,
             };
 
-            return _context.SqlQuery<uvw_Setting>("EXEC @ReturnValue = [svc].[usp_Setting_Insert]"
+            return _context.SqlQuery<uvw_Setting>("EXEC @ReturnValue = [svc].[usp_Setting_Insert] "
                 + "@IdentityId, @ConfigKey, @ConfigValue, @IdDeletable", pvalues)
                     .Single();
         }
@@ -99,7 +99,7 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
                 rvalue,
             };
 
-            return _context.SqlQuery<uvw_Setting>("EXEC @ReturnValue = [svc].[usp_Setting_Update]"
+            return _context.SqlQuery<uvw_Setting>("EXEC @ReturnValue = [svc].[usp_Setting_Update] "
                 + "@Id, @IdentityId, @ConfigKey, @ConfigValue, @IsDeletable", pvalues)
                     .Single();
         }

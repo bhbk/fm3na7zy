@@ -1,7 +1,4 @@
 ﻿
-
-
-
 CREATE PROCEDURE [svc].[usp_PublicKey_Insert]
      @IdentityId			UNIQUEIDENTIFIER
     ,@PrivateKeyId			UNIQUEIDENTIFIER

@@ -1,7 +1,4 @@
 ﻿
-
-
-
 CREATE PROCEDURE [svc].[usp_User_Update]
      @IdentityId			UNIQUEIDENTIFIER
     ,@IdentityAlias			NVARCHAR (128) 
@@ -9,7 +6,9 @@ CREATE PROCEDURE [svc].[usp_User_Update]
     ,@RequirePublicKey		BIT
     ,@FileSystemType		NVARCHAR (16) 
     ,@FileSystemReadOnly	BIT
-    ,@DebugLevel			NVARCHAR (16) 
+	,@QuotaInBytes			BIGINT
+	,@QuotaUsedInBytes		BIGINT
+    ,@Debugger				NVARCHAR (16) 
     ,@IsEnabled				BIT
     ,@IsDeletable			BIT
 
@@ -28,7 +27,9 @@ BEGIN
 			,RequirePublicKey		= @RequirePublicKey
 			,FileSystemType			= @FileSystemType
 			,FileSystemReadOnly		= @FileSystemReadOnly
-			,DebugLevel				= @DebugLevel
+			,QuotaInBytes			= @QuotaInBytes
+			,QuotaUsedInBytes		= @QuotaUsedInBytes
+			,Debugger				= @Debugger
 			,IsEnabled				= @IsEnabled
 			,IsDeletable			= @IsDeletable
             ,LastUpdatedUtc			= @LASTUPDATED

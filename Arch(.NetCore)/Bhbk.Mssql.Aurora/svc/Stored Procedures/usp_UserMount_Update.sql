@@ -1,9 +1,4 @@
 ﻿
-
-
-
-
-
 CREATE PROCEDURE [svc].[usp_UserMount_Update]
      @IdentityId			UNIQUEIDENTIFIER
     ,@CredentialId			UNIQUEIDENTIFIER

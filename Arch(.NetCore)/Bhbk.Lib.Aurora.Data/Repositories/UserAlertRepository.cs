@@ -32,7 +32,7 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
                 rvalue,
             };
 
-            return _context.SqlQuery<uvw_UserAlert>("EXEC @ReturnValue = [svc].[usp_UserAlert_Insert]"
+            return _context.SqlQuery<uvw_UserAlert>("EXEC @ReturnValue = [svc].[usp_UserAlert_Insert] "
                 + "@IdentityId, @FolderId, @VirtualName, @RealPath, @RealFileName, @RealFileSize, @HashSHA256, @IsReadOnly", pvalues)
                     .Single();
         }
@@ -106,7 +106,7 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
                 rvalue,
             };
 
-            return _context.SqlQuery<uvw_UserAlert>("EXEC @ReturnValue = [svc].[usp_UserAlert_Update]"
+            return _context.SqlQuery<uvw_UserAlert>("EXEC @ReturnValue = [svc].[usp_UserAlert_Update] "
                 + "@Id, @IdentityId, @FolderId, @VirtualName, @RealPath, @RealFileName, @RealFileSize, @FileHashSHA256, @IsReadOnly, "
                 + "@LastAccessedUtc, @LastUpdatedUtc, @LastVerifiedUtc", pvalues)
                     .Single();

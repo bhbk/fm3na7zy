@@ -24,8 +24,8 @@ namespace Bhbk.Lib.Aurora.Data_EF6.Models
         public long RealFileSize { get; set; }
         public string HashSHA256 { get; set; }
         public System.DateTimeOffset CreatedUtc { get; set; }
-        public Nullable<System.DateTimeOffset> LastAccessedUtc { get; set; }
-        public Nullable<System.DateTimeOffset> LastUpdatedUtc { get; set; }
+        public System.DateTimeOffset LastAccessedUtc { get; set; }
+        public System.DateTimeOffset LastUpdatedUtc { get; set; }
         public System.DateTimeOffset LastVerifiedUtc { get; set; }
     
         public virtual User User { get; set; }

@@ -28,7 +28,7 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
                 rvalue,
             };
 
-            return _context.SqlQuery<uvw_UserFolder>("EXEC @ReturnValue = [svc].[usp_UserFolder_Insert]"
+            return _context.SqlQuery<uvw_UserFolder>("EXEC @ReturnValue = [svc].[usp_UserFolder_Insert] "
                 + "@IdentityId, @ParentId, @VirtualName, @IsReadOnly", pvalues)
                     .Single();
         }
@@ -100,7 +100,7 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
                 rvalue,
             };
 
-            return _context.SqlQuery<uvw_UserFolder>("EXEC @ReturnValue = [svc].[usp_UserFolder_Update]"
+            return _context.SqlQuery<uvw_UserFolder>("EXEC @ReturnValue = [svc].[usp_UserFolder_Update] "
                 + "@Id, @IdentityId, @ParentId, @VirtualName, @IsReadOnly, @LastAccessedUtc, @LastUpdatedUtc", pvalues)
                     .Single();
         }

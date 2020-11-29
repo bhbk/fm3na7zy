@@ -24,12 +24,12 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
                 new SqlParameter("@IdentityId", SqlDbType.UniqueIdentifier) { Value = entity.IdentityId },
                 new SqlParameter("@Address", SqlDbType.NVarChar) { Value = entity.Address },
                 new SqlParameter("@Action", SqlDbType.NVarChar) { Value = entity.Action },
-                new SqlParameter("@Enabled", SqlDbType.Bit) { Value = entity.IsEnabled },
+                new SqlParameter("@IsEnabled", SqlDbType.Bit) { Value = entity.IsEnabled },
                 rvalue,
             };
 
-            return _context.SqlQuery<uvw_Network>("EXEC @ReturnValue = [svc].[usp_Network_Insert]"
-                + "@IdentityId, @Address, @Action, @Enabled", pvalues)
+            return _context.SqlQuery<uvw_Network>("EXEC @ReturnValue = [svc].[usp_Network_Insert] "
+                + "@IdentityId, @Address, @Action, @IsEnabled", pvalues)
                     .Single();
         }
 
@@ -94,12 +94,12 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
                 new SqlParameter("@IdentityId", SqlDbType.UniqueIdentifier) { Value = entity.IdentityId },
                 new SqlParameter("@Address", SqlDbType.NVarChar) { Value = entity.Address },
                 new SqlParameter("@Action", SqlDbType.NVarChar) { Value = entity.Action },
-                new SqlParameter("@Enabled", SqlDbType.Bit) { Value = entity.IsEnabled },
+                new SqlParameter("@IsEnabled", SqlDbType.Bit) { Value = entity.IsEnabled },
                 rvalue,
             };
 
-            return _context.SqlQuery<uvw_Network>("EXEC @ReturnValue = [svc].[usp_Network_Update]"
-                + "@Id, @IdentityId, @Address, @Action, @Enabled", pvalues)
+            return _context.SqlQuery<uvw_Network>("EXEC @ReturnValue = [svc].[usp_Network_Update] "
+                + "@Id, @IdentityId, @Address, @Action, @IsEnabled", pvalues)
                     .Single();
         }
 

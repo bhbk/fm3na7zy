@@ -32,7 +32,9 @@ namespace Bhbk.Lib.Aurora.Data_EF6.Models
         public bool RequirePublicKey { get; set; }
         public string FileSystemType { get; set; }
         public bool FileSystemReadOnly { get; set; }
-        public string DebugLevel { get; set; }
+        public long QuotaInBytes { get; set; }
+        public long QuotaUsedInBytes { get; set; }
+        public string Debugger { get; set; }
         public bool IsEnabled { get; set; }
         public bool IsDeletable { get; set; }
         public System.DateTimeOffset CreatedUtc { get; set; }

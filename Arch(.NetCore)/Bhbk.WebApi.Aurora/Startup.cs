@@ -1,8 +1,8 @@
 using AutoMapper;
 using Bhbk.Lib.Aurora.Data_EF6.Infrastructure;
 using Bhbk.Lib.Aurora.Data_EF6.Models;
-using Bhbk.Lib.Aurora.Domain.Primitives.Enums;
 using Bhbk.Lib.Aurora.Domain.Profiles;
+using Bhbk.Lib.Aurora.Primitives.Enums;
 using Bhbk.Lib.Common.Primitives.Enums;
 using Bhbk.Lib.Common.Services;
 using Bhbk.Lib.Identity.Validators;
@@ -63,7 +63,7 @@ namespace Bhbk.WebApi.Aurora
 
                 if (bool.Parse(conf["Jobs:UnstructuredData:Enable"]))
                 {
-                    var jobKey = new JobKey(JobType.UnstructuredData.ToString(), WorkerType.AdminWorker.ToString());
+                    var jobKey = new JobKey(JobType.UnstructuredData.ToString(), WorkerType.WebWorker.ToString());
                     jobs.AddJob<UnstructuredDataJob>(opt => opt
                         .StoreDurably()
                         .WithIdentity(jobKey)

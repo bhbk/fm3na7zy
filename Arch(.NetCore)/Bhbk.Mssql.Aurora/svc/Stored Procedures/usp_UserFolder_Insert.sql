@@ -1,10 +1,4 @@
 ﻿
-
-
-
-
-
-
 CREATE PROCEDURE [svc].[usp_UserFolder_Insert]
      @IdentityId			UNIQUEIDENTIFIER
     ,@ParentId				UNIQUEIDENTIFIER

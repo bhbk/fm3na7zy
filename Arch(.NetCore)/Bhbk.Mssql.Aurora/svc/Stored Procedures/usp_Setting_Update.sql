@@ -1,5 +1,4 @@
 ﻿
-
 CREATE PROCEDURE [svc].[usp_Setting_Update]
      @Id					UNIQUEIDENTIFIER 
     ,@IdentityId			UNIQUEIDENTIFIER

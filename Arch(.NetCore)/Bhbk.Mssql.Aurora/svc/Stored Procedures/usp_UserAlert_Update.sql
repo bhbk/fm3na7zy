@@ -1,7 +1,4 @@
 ﻿
-
-
-
 CREATE PROCEDURE [svc].[usp_UserAlert_Update]
 	 @Id					UNIQUEIDENTIFIER
 	,@IdentityId			UNIQUEIDENTIFIER

@@ -26,14 +26,14 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
                 new SqlParameter("@RequirePassword", SqlDbType.Bit) { Value = entity.RequirePassword },
                 new SqlParameter("@FileSystemType", SqlDbType.NVarChar) { Value = entity.FileSystemType },
                 new SqlParameter("@FileSystemReadOnly", SqlDbType.Bit) { Value = entity.FileSystemReadOnly },
-                new SqlParameter("@DebugLevel", SqlDbType.NVarChar) { Value = (object)entity.DebugLevel ?? DBNull.Value },
-                new SqlParameter("@Enabled", SqlDbType.Bit) { Value = entity.IsEnabled },
-                new SqlParameter("@Deletable", SqlDbType.Bit) { Value = entity.IsDeletable },
+                new SqlParameter("@Debugger", SqlDbType.NVarChar) { Value = (object)entity.Debugger ?? DBNull.Value },
+                new SqlParameter("@IsEnabled", SqlDbType.Bit) { Value = entity.IsEnabled },
+                new SqlParameter("@IsDeletable", SqlDbType.Bit) { Value = entity.IsDeletable },
                 rvalue,
             };
 
-            return _context.SqlQuery<uvw_User>("EXEC @ReturnValue = [svc].[usp_User_Insert]"
-                + "@IdentityAlias, @RequirePublicKey, @RequirePassword, @FileSystemType, @FileSystemReadOnly, @DebugLevel, @Enabled, @Deletable", pvalues)
+            return _context.SqlQuery<uvw_User>("EXEC @ReturnValue = [svc].[usp_User_Insert] "
+                + "@IdentityAlias, @RequirePublicKey, @RequirePassword, @FileSystemType, @FileSystemReadOnly, @Debugger, @IsEnabled, @IsDeletable", pvalues)
                     .Single();
         }
 
@@ -100,14 +100,17 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
                 new SqlParameter("@RequirePassword", SqlDbType.Bit) { Value = entity.RequirePassword },
                 new SqlParameter("@FileSystemType", SqlDbType.NVarChar) { Value = entity.FileSystemType },
                 new SqlParameter("@FileSystemReadOnly", SqlDbType.Bit) { Value = entity.FileSystemReadOnly },
-                new SqlParameter("@DebugLevel", SqlDbType.NVarChar) { Value = (object)entity.DebugLevel ?? DBNull.Value },
-                new SqlParameter("@Enabled", SqlDbType.Bit) { Value = entity.IsEnabled },
-                new SqlParameter("@Deletable", SqlDbType.Bit) { Value = entity.IsDeletable },
+                new SqlParameter("@QuotaInBytes", SqlDbType.BigInt) { Value = entity.QuotaInBytes },
+                new SqlParameter("@QuotaUsedInBytes", SqlDbType.BigInt) { Value = entity.QuotaUsedInBytes },
+                new SqlParameter("@Debugger", SqlDbType.NVarChar) { Value = (object)entity.Debugger ?? DBNull.Value },
+                new SqlParameter("@IsEnabled", SqlDbType.Bit) { Value = entity.IsEnabled },
+                new SqlParameter("@IsDeletable", SqlDbType.Bit) { Value = entity.IsDeletable },
                 rvalue,
             };
 
-            return _context.SqlQuery<uvw_User>("EXEC @ReturnValue = [svc].[usp_User_Update]"
-                + "@IdentityId, @IdentityId, @IdentityAlias, @RequirePublicKey, @RequirePassword, @FileSystemType, @FileSystemReadOnly, @DebugLevel, @Enabled, @Deletable", pvalues)
+            return _context.SqlQuery<uvw_User>("EXEC @ReturnValue = [svc].[usp_User_Update] "
+                + "@IdentityId, @IdentityId, @IdentityAlias, @RequirePublicKey, @RequirePassword, @FileSystemType, @FileSystemReadOnly, "
+                + "@QuotaInBytes, @QuotaUsedInBytes, @Debugger, @IsEnabled, @IsDeletable", pvalues)
                     .Single();
         }
 

@@ -1,7 +1,4 @@
 ﻿
-
-
-
 CREATE   PROCEDURE [svc].[usp_UserFolder_Delete]
     @ID uniqueidentifier
 

@@ -139,7 +139,7 @@ namespace Bhbk.Lib.Aurora.Data.Models
 
                 entity.ToView("uvw_User", "svc");
 
-                entity.Property(e => e.DebugLevel)
+                entity.Property(e => e.Debugger)
                     .HasMaxLength(16)
                     .IsUnicode(false);
 

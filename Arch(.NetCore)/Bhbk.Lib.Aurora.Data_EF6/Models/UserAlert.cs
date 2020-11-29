@@ -23,9 +23,9 @@ namespace Bhbk.Lib.Aurora.Data_EF6.Models
         public string ToLastName { get; set; }
         public string ToEmailAddress { get; set; }
         public string ToPhoneNumber { get; set; }
+        public bool IsEnabled { get; set; }
         public System.DateTimeOffset CreatedUtc { get; set; }
         public Nullable<System.DateTimeOffset> LastUpdatedUtc { get; set; }
-        public bool IsEnabled { get; set; }
     
         public virtual User User { get; set; }
     }

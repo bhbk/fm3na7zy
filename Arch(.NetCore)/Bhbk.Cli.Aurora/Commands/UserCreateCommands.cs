@@ -22,8 +22,8 @@ namespace Bhbk.Cli.Aurora.Commands
     {
         private readonly IConfiguration _conf;
         private readonly IUnitOfWork _uow;
-        private FileSystemTypes _fileSystem;
-        private readonly string _fileSystemList = string.Join(", ", Enum.GetNames(typeof(FileSystemTypes)));
+        private FileSystemProviderType _fileSystem;
+        private readonly string _fileSystemList = string.Join(", ", Enum.GetNames(typeof(FileSystemProviderType)));
         private string _userName;
 
         public UserCreateCommands()
@@ -93,9 +93,9 @@ namespace Bhbk.Cli.Aurora.Commands
                         RequirePassword = true,
                         RequirePublicKey = false,
                         FileSystemType = _fileSystem.ToString(),
+                        FileSystemReadOnly = true,
                         IsEnabled = true,
                         IsDeletable = false,
-                        CreatedUtc = DateTime.UtcNow,
                     });
                 _uow.Commit();
 

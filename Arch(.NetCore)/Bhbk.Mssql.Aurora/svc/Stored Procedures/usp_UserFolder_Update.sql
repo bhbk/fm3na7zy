@@ -1,8 +1,4 @@
 ﻿
-
-
-
-
 CREATE PROCEDURE [svc].[usp_UserFolder_Update]
 	 @Id					UNIQUEIDENTIFIER
     ,@IdentityId			UNIQUEIDENTIFIER

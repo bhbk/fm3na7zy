@@ -1,5 +1,4 @@
 ﻿
-
 CREATE PROCEDURE [svc].[usp_Setting_Insert]
      @IdentityId			UNIQUEIDENTIFIER
     ,@ConfigKey				NVARCHAR (MAX) 

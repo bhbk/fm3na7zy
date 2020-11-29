@@ -1,5 +1,5 @@
 ﻿using Bhbk.Lib.Aurora.Data_EF6.Models;
-using Bhbk.Lib.Aurora.Domain.Primitives.Enums;
+using Bhbk.Lib.Aurora.Primitives.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;

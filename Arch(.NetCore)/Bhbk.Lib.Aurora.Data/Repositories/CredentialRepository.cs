@@ -24,13 +24,13 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
                 new SqlParameter("@Domain", SqlDbType.NVarChar) { Value = (object)entity.Domain ?? DBNull.Value },
                 new SqlParameter("@UserName", SqlDbType.NVarChar) { Value = entity.UserName },
                 new SqlParameter("@Password", SqlDbType.NVarChar) { Value = entity.Password },
-                new SqlParameter("@Enabled", SqlDbType.Bit) { Value = entity.IsEnabled },
-                new SqlParameter("@Deletable", SqlDbType.Bit) { Value = entity.IsDeletable },
+                new SqlParameter("@IsEnabled", SqlDbType.Bit) { Value = entity.IsEnabled },
+                new SqlParameter("@IsDeletable", SqlDbType.Bit) { Value = entity.IsDeletable },
                 rvalue,
             };
 
-            return _context.SqlQuery<uvw_Credential>("EXEC @ReturnValue = [svc].[usp_Credential_Insert]"
-                + "@Domain, @UserName, @Password, @Enabled, @Deletable", pvalues)
+            return _context.SqlQuery<uvw_Credential>("EXEC @ReturnValue = [svc].[usp_Credential_Insert] "
+                + "@Domain, @UserName, @Password, @IsEnabled, @IsDeletable", pvalues)
                 .Single();
         }
 
@@ -95,13 +95,13 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
                 new SqlParameter("@Domain", SqlDbType.NVarChar) { Value = (object)entity.Domain ?? DBNull.Value },
                 new SqlParameter("@UserName", SqlDbType.NVarChar) { Value = entity.UserName },
                 new SqlParameter("@Password", SqlDbType.NVarChar) { Value = entity.Password },
-                new SqlParameter("@Enabled", SqlDbType.Bit) { Value = entity.IsEnabled },
-                new SqlParameter("@Deletable", SqlDbType.Bit) { Value = entity.IsDeletable },
+                new SqlParameter("@IsEnabled", SqlDbType.Bit) { Value = entity.IsEnabled },
+                new SqlParameter("@IsDeletable", SqlDbType.Bit) { Value = entity.IsDeletable },
                 rvalue,
             };
 
-            return _context.SqlQuery<uvw_Credential>("EXEC @ReturnValue = [svc].[usp_Credential_Update]"
-                + "@Id, @Domain, @UserName, @Password, @Enabled, @Deletable", pvalues)
+            return _context.SqlQuery<uvw_Credential>("EXEC @ReturnValue = [svc].[usp_Credential_Update] "
+                + "@Id, @Domain, @UserName, @Password, @IsEnabled, @IsDeletable", pvalues)
                 .Single();
         }
 

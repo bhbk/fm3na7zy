@@ -8,7 +8,9 @@ SELECT
 	,RequirePublicKey
 	,FileSystemType
 	,FileSystemReadOnly
-	,DebugLevel
+	,QuotaInBytes
+	,QuotaUsedInBytes
+	,Debugger
 	,IsEnabled
 	,IsDeletable
 	,CreatedUtc

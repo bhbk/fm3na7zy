@@ -13,7 +13,7 @@ namespace Bhbk.Lib.Aurora.Data.Models
         public string VirtualName { get; set; }
         public bool IsReadOnly { get; set; }
         public DateTimeOffset CreatedUtc { get; set; }
-        public DateTimeOffset? LastAccessedUtc { get; set; }
-        public DateTimeOffset? LastUpdatedUtc { get; set; }
+        public DateTimeOffset LastAccessedUtc { get; set; }
+        public DateTimeOffset LastUpdatedUtc { get; set; }
     }
 }

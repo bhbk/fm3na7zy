@@ -28,13 +28,13 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
                 new SqlParameter("@KeySig", SqlDbType.NVarChar) { Value = entity.SigValue },
                 new SqlParameter("@KeySigAlgo", SqlDbType.NVarChar) { Value = entity.SigAlgo },
                 new SqlParameter("@Comment", SqlDbType.NVarChar) { Value = entity.Comment },
-                new SqlParameter("@Enabled", SqlDbType.Bit) { Value = entity.IsEnabled },
-                new SqlParameter("@Deletable", SqlDbType.Bit) { Value = entity.IsDeletable },
+                new SqlParameter("@IsEnabled", SqlDbType.Bit) { Value = entity.IsEnabled },
+                new SqlParameter("@IsDeletable", SqlDbType.Bit) { Value = entity.IsDeletable },
                 rvalue,
             };
 
-            return _context.SqlQuery<uvw_PublicKey>("EXEC @ReturnValue = [svc].[usp_PublicKey_Insert]"
-                + "@IdentityId, @PrivateKeyId, @KeyValueBase64, @KeyValueAlgo, @KeySig, @KeySigAlgo, @Comment, @Enabled, @Deletable", pvalues)
+            return _context.SqlQuery<uvw_PublicKey>("EXEC @ReturnValue = [svc].[usp_PublicKey_Insert] "
+                + "@IdentityId, @PrivateKeyId, @KeyValueBase64, @KeyValueAlgo, @KeySig, @KeySigAlgo, @Comment, @IsEnabled, @IsDeletable", pvalues)
                 .Single();
         }
 
@@ -103,13 +103,13 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
                 new SqlParameter("@KeySig", SqlDbType.NVarChar) { Value = entity.SigValue },
                 new SqlParameter("@KeySigAlgo", SqlDbType.NVarChar) { Value = entity.SigAlgo },
                 new SqlParameter("@Comment", SqlDbType.NVarChar) { Value = entity.Comment },
-                new SqlParameter("@Enabled", SqlDbType.Bit) { Value = entity.IsEnabled },
-                new SqlParameter("@Deletable", SqlDbType.Bit) { Value = entity.IsDeletable },
+                new SqlParameter("@IsEnabled", SqlDbType.Bit) { Value = entity.IsEnabled },
+                new SqlParameter("@IsDeletable", SqlDbType.Bit) { Value = entity.IsDeletable },
                 rvalue,
             };
 
-            return _context.SqlQuery<uvw_PublicKey>("EXEC @ReturnValue = [svc].[usp_PublicKey_Update]"
-                + "@Id, @IdentityId, @PrivateKeyId, @KeyValueBase64, @KeyValueAlgo, @KeySig, @KeySigAlgo, @Comment, @Enabled, @Deletable", pvalues)
+            return _context.SqlQuery<uvw_PublicKey>("EXEC @ReturnValue = [svc].[usp_PublicKey_Update] "
+                + "@Id, @IdentityId, @PrivateKeyId, @KeyValueBase64, @KeyValueAlgo, @KeySig, @KeySigAlgo, @Comment, @IsEnabled, @IsDeletable", pvalues)
                 .Single();
         }
 

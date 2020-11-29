@@ -8,16 +8,15 @@
         <EntityTypeShape EntityType="AuroraModels.Credential" Width="1.5" PointX="0.75" PointY="9.5" IsExpanded="true" />
         <EntityTypeShape EntityType="AuroraModels.Network" Width="1.5" PointX="3" PointY="22.625" IsExpanded="true" />
         <EntityTypeShape EntityType="AuroraModels.PrivateKey" Width="1.5" PointX="3" PointY="25.875" IsExpanded="true" />
-        <EntityTypeShape EntityType="AuroraModels.PublicKey" Width="1.5" PointX="5.25" PointY="20.5" IsExpanded="true" />
-        <EntityTypeShape EntityType="AuroraModels.Setting" Width="1.5" PointX="3" PointY="10.5" IsExpanded="true" />
-        <EntityTypeShape EntityType="AuroraModels.User" Width="1.5" PointX="0.75" PointY="13.5" IsExpanded="true" />
+        <EntityTypeShape EntityType="AuroraModels.PublicKey" Width="1.5" PointX="5.25" PointY="20.375" IsExpanded="true" />
+        <EntityTypeShape EntityType="AuroraModels.Setting" Width="1.5" PointX="3" PointY="6.625" IsExpanded="true" />
+        <EntityTypeShape EntityType="AuroraModels.User" Width="1.5" PointX="0.75" PointY="13.375" IsExpanded="true" />
         <EntityTypeShape EntityType="AuroraModels.UserAlert" Width="1.5" PointX="3" PointY="30.125" IsExpanded="true" />
-        <EntityTypeShape EntityType="AuroraModels.UserFile" Width="1.5" PointX="5.25" PointY="15.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="AuroraModels.UserFile" Width="1.5" PointX="5.25" PointY="15.625" IsExpanded="true" />
         <EntityTypeShape EntityType="AuroraModels.UserFolder" Width="1.5" PointX="3" PointY="18.5" IsExpanded="true" />
         <EntityTypeShape EntityType="AuroraModels.UserMount" Width="1.5" PointX="3" PointY="14.375" IsExpanded="true" />
         <AssociationConnector Association="AuroraModels.User_UserFile" />
         <AssociationConnector Association="AuroraModels.User_UserFolder" />
-        <AssociationConnector Association="AuroraModels.User_UserMount" />
         <AssociationConnector Association="AuroraModels.User_PrivateKey" />
         <AssociationConnector Association="AuroraModels.User_PublicKey" />
         <AssociationConnector Association="AuroraModels.User_Network" />
@@ -27,6 +26,7 @@
         <AssociationConnector Association="AuroraModels.PrivateKey_PublicKey" />
         <AssociationConnector Association="AuroraModels.UserFolder_UserFile" />
         <AssociationConnector Association="AuroraModels.UserFolder_UserFolder" />
+        <AssociationConnector Association="AuroraModels.User_UserMount" />
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>
