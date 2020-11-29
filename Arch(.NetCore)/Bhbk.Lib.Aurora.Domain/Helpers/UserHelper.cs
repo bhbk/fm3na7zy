@@ -1,5 +1,4 @@
-﻿using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
-using Bhbk.Lib.Aurora.Data_EF6.Models;
+﻿using Bhbk.Lib.Aurora.Data_EF6.Models;
 using Bhbk.Lib.Cryptography.Encryption;
 using Microsoft.Win32.SafeHandles;
 using Rebex.Net;
@@ -43,11 +42,11 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
             var loginStream = new MemoryStream();
             loginKey.SavePublicKey(loginStream, SshPublicKeyFormat.Pkcs8);
 
-            var loginValue = Encoding.ASCII.GetString(loginStream.ToArray());
+            var loginValue = Encoding.UTF8.GetString(loginStream.ToArray());
 
             foreach (var userKey in userKeys)
             {
-                var pubKeyBytes = Encoding.ASCII.GetBytes(userKey.KeyValue);
+                var pubKeyBytes = Encoding.UTF8.GetBytes(userKey.KeyValue);
                 var pubKeyInfo = new PublicKeyInfo();
                 pubKeyInfo.Load(new MemoryStream(pubKeyBytes));
 
@@ -55,7 +54,7 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
                 var pubKey = new SshPublicKey(pubKeyInfo);
                 pubKey.SavePublicKey(pubStream, SshPublicKeyFormat.Pkcs8);
 
-                var pubKeyValue = Encoding.ASCII.GetString(pubStream.ToArray());
+                var pubKeyValue = Encoding.UTF8.GetString(pubStream.ToArray());
 
                 if (loginValue == pubKeyValue)
                     return true;
@@ -64,27 +63,23 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
             return false;
         }
 
-        public static ICollection<Credential> EditCredentialSecrets(IUnitOfWork uow,
-            ICollection<Credential> creds, string secretCurrent, string secretNew)
+        public static ICollection<Credential> ChangeCredentialSecrets(ICollection<Credential> creds, 
+            string secretCurrent, string secretNew)
         {
             var userCreds = new List<Credential>();
 
             foreach (var cred in creds)
             {
-                var plainText = AES.DecryptString(cred.EncryptedPassword, secretCurrent);
-                var cipherText = AES.EncryptString(plainText, secretCurrent);
+                var decryptedPass = AES.DecryptString(cred.EncryptedPassword, secretCurrent);
+                var encryptedPass = AES.EncryptString(decryptedPass, secretCurrent);
 
-                if (cred.EncryptedPassword != cipherText)
-                    throw new UnauthorizedAccessException();
+                if (cred.EncryptedPassword != encryptedPass)
+                    throw new InvalidOperationException();
 
-                cred.EncryptedPassword = AES.EncryptString(plainText, secretNew);
-
-                uow.Credentials.Update(cred);
+                cred.EncryptedPassword = AES.EncryptString(decryptedPass, secretNew);
 
                 userCreds.Add(cred);
             }
-
-            uow.Commit();
 
             return userCreds;
         }

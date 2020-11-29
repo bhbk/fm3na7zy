@@ -253,11 +253,12 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
 
                     var stream = File.Open(file.FullName, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite);
 
+                    Log.Information($"'{callPath}' '{_user.IdentityAlias}' file:'{node.Path}' at:'{file.FullName}' size:'{stream.Length}'" +
+                        $" as:'{WindowsIdentity.GetCurrent().Name}'");
+
                     content = parameters.AccessType == NodeContentAccess.Read
                         ? NodeContent.CreateReadOnlyContent(stream)
                         : NodeContent.CreateDelayedWriteContent(stream);
-
-                    Log.Information($"'{callPath}' '{_user.IdentityAlias}' file '{node.Path}' from '{file.FullName}'");
                 });
 
                 return content;

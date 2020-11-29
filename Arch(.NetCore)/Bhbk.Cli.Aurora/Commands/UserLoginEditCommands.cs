@@ -33,7 +33,7 @@ namespace Bhbk.Cli.Aurora.Commands
             var instance = new ContextService(InstanceContext.DeployedOrLocal);
             _uow = new UnitOfWork(_conf["Databases:AuroraEntities"], instance);
 
-            IsCommand("user-login-edit", "Edit user login");
+            IsCommand("user-login-edit", "Edit login for user");
 
             HasRequiredOption("i|id=", "Enter GUID of user to edit", arg =>
             {

@@ -28,6 +28,7 @@ BEGIN
 			,IsFileSystemReadOnly
 			,QuotaInBytes
 			,QuotaUsedInBytes
+			,ConcurrentSessions
 			,Debugger
 			,IsEnabled
 			,IsDeletable
@@ -43,6 +44,7 @@ BEGIN
 			,@IsFileSystemReadOnly
 			,2147483647
 			,0
+			,1
 			,@Debugger
 			,@IsEnabled
 			,@IsDeletable

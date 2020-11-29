@@ -85,7 +85,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                     });
                 _uowMem.Commit();
 
-                Log.Information($"'{callPath}' '{_userMem.IdentityAlias}' directory '{child.Path}' in memory");
+                Log.Information($"'{callPath}' '{_userMem.IdentityAlias}' folder:'{child.Path}' at:memory");
 
                 return child;
             }
@@ -104,8 +104,8 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
             {
                 if (_user.QuotaUsedInBytes >= _user.QuotaInBytes)
                 {
-                    Log.Warning($"'{callPath}' '{_userMem.IdentityAlias}' file '{child.Path}' cancelled, " +
-                        $"totoal quota '{_user.QuotaInBytes}' used quota '{_user.QuotaUsedInBytes}'");
+                    Log.Warning($"'{callPath}' '{_userMem.IdentityAlias}' file:'{child.Path}' cancelled, " +
+                        $"total-quota '{_user.QuotaInBytes}' and used-quota '{_user.QuotaUsedInBytes}'");
 
                     throw new FileSystemOperationCanceledException();
                 }
@@ -141,7 +141,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                 _uowMem.UserFiles.Create(fileEntity);
                 _uowMem.Commit();
 
-                Log.Information($"'{callPath}' '{_userMem.IdentityAlias}' empty file '{child.Path}' in memory");
+                Log.Information($"'{callPath}' '{_userMem.IdentityAlias}' empty-file:'{child.Path}' at:memory");
 
                 return child;
             }
@@ -175,7 +175,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                             _uowMem.UserFiles.Delete(fileEntity);
                             _uowMem.Commit();
 
-                            Log.Information($"'{callPath}' '{_userMem.IdentityAlias}' file '{node.Path}' from memory");
+                            Log.Information($"'{callPath}' '{_userMem.IdentityAlias}' file:'{node.Path}' at:memory");
                         }
                         break;
 
@@ -186,7 +186,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                             _uowMem.UserFolders.Delete(folderEntity);
                             _uowMem.Commit();
 
-                            Log.Information($"'{callPath}' '{_userMem.IdentityAlias}' folder '{node.Path}' from memory");
+                            Log.Information($"'{callPath}' '{_userMem.IdentityAlias}' folder:'{node.Path}' at:memory");
                         }
                         break;
 
@@ -379,7 +379,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                             else
                                 stream = new MemoryStream(fileEntity.Data);
 
-                            Log.Information($"'{callPath}' '{_userMem.IdentityAlias}' file '{node.Path}' from memory");
+                            Log.Information($"'{callPath}' '{_userMem.IdentityAlias}' file:'{node.Path}' at:memory size:'{stream.Length}'");
 
                             return parameters.AccessType == NodeContentAccess.Read
                                 ? NodeContent.CreateReadOnlyContent(stream)
@@ -493,7 +493,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                             _uowMem.UserFiles.Update(toBeMovedEntity);
                             _uowMem.Commit();
 
-                            Log.Information($"'{callPath}' '{_userMem.IdentityAlias}' from '{toBeMovedPath}' to '{targetPath}' in memory");
+                            Log.Information($"'{callPath}' '{_userMem.IdentityAlias}' from-file:'{toBeMovedPath}' to-file:'{targetPath}' at:memory");
 
                             return new FileNode(toBeMovedNode.Name, targetDirectory);
                         }
@@ -511,7 +511,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                             _uowMem.UserFolders.Update(toBeMovedEntity);
                             _uowMem.Commit();
 
-                            Log.Information($"'{callPath}' '{_userMem.IdentityAlias}' from '{toBeMovedPath}' to '{targetPath}' in memory");
+                            Log.Information($"'{callPath}' '{_userMem.IdentityAlias}' from-folder:'{toBeMovedPath}' to-folder:'{targetPath}' at:memory");
 
                             return new DirectoryNode(toBeMovedNode.Name, targetDirectory);
                         }
@@ -548,7 +548,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                             _uowMem.UserFiles.Update(fileEntity);
                             _uowMem.Commit();
 
-                            Log.Information($"'{callPath}' '{_userMem.IdentityAlias}' from '{node.Path}' to '{node.Parent.Path}/{newName}' in memory");
+                            Log.Information($"'{callPath}' '{_userMem.IdentityAlias}' from-file:'{node.Path}' to-file:'{node.Parent.Path}/{newName}' at:memory");
 
                             return new FileNode(newName, node.Parent);
                         }
@@ -563,7 +563,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                             _uowMem.UserFolders.Update(folderEntity);
                             _uowMem.Commit();
 
-                            Log.Information($"'{callPath}' '{_userMem.IdentityAlias}' from '{node.Path}' to '{node.Parent.Path}{newName}' in memory");
+                            Log.Information($"'{callPath}' '{_userMem.IdentityAlias}' from-folder:'{node.Path}' to-folder:'{node.Parent.Path}{newName}' at:memory");
 
                             return new DirectoryNode(newName, node.Parent);
                         }
@@ -613,7 +613,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                             _uowMem.UserFiles.Update(fileEntity);
                             _uowMem.Commit();
 
-                            Log.Information($"'{callPath}' '{_userMem.IdentityAlias}' file '{node.Path}' in memory");
+                            Log.Information($"'{callPath}' '{_userMem.IdentityAlias}' file:'{node.Path}' at:memory size:'{content.Length}'");
                         }
                         break;
 

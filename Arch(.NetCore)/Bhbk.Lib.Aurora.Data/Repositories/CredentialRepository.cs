@@ -21,11 +21,11 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
 
             var pvalues = new []
             {
-                new SqlParameter("@Domain", SqlDbType.NVarChar) { Value = (object)entity.Domain ?? DBNull.Value },
-                new SqlParameter("@UserName", SqlDbType.NVarChar) { Value = entity.UserName },
-                new SqlParameter("@EncryptedPassword", SqlDbType.NVarChar) { Value = entity.EncryptedPassword },
-                new SqlParameter("@IsEnabled", SqlDbType.Bit) { Value = entity.IsEnabled },
-                new SqlParameter("@IsDeletable", SqlDbType.Bit) { Value = entity.IsDeletable },
+                new SqlParameter("Domain", SqlDbType.NVarChar) { Value = (object)entity.Domain ?? DBNull.Value },
+                new SqlParameter("UserName", SqlDbType.NVarChar) { Value = entity.UserName },
+                new SqlParameter("EncryptedPassword", SqlDbType.NVarChar) { Value = entity.EncryptedPassword },
+                new SqlParameter("IsEnabled", SqlDbType.Bit) { Value = entity.IsEnabled },
+                new SqlParameter("IsDeletable", SqlDbType.Bit) { Value = entity.IsDeletable },
                 rvalue,
             };
 
@@ -54,7 +54,7 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
 
             var pvalues = new []
             {
-                new SqlParameter("@Id", SqlDbType.UniqueIdentifier) { Value = entity.Id },
+                new SqlParameter("Id", SqlDbType.UniqueIdentifier) { Value = entity.Id },
                 rvalue,
             };
 
@@ -91,12 +91,12 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
 
             var pvalues = new []
             {
-                new SqlParameter("@Id", SqlDbType.UniqueIdentifier) { Value = entity.Id },
-                new SqlParameter("@Domain", SqlDbType.NVarChar) { Value = (object)entity.Domain ?? DBNull.Value },
-                new SqlParameter("@UserName", SqlDbType.NVarChar) { Value = entity.UserName },
-                new SqlParameter("@EncryptedPassword", SqlDbType.NVarChar) { Value = entity.EncryptedPassword },
-                new SqlParameter("@IsEnabled", SqlDbType.Bit) { Value = entity.IsEnabled },
-                new SqlParameter("@IsDeletable", SqlDbType.Bit) { Value = entity.IsDeletable },
+                new SqlParameter("Id", SqlDbType.UniqueIdentifier) { Value = entity.Id },
+                new SqlParameter("Domain", SqlDbType.NVarChar) { Value = (object)entity.Domain ?? DBNull.Value },
+                new SqlParameter("UserName", SqlDbType.NVarChar) { Value = entity.UserName },
+                new SqlParameter("EncryptedPassword", SqlDbType.NVarChar) { Value = entity.EncryptedPassword },
+                new SqlParameter("IsEnabled", SqlDbType.Bit) { Value = entity.IsEnabled },
+                new SqlParameter("IsDeletable", SqlDbType.Bit) { Value = entity.IsDeletable },
                 rvalue,
             };
 

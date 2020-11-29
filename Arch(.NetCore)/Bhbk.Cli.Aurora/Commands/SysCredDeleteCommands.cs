@@ -17,7 +17,6 @@ namespace Bhbk.Cli.Aurora.Commands
     {
         private readonly IConfiguration _conf;
         private readonly IUnitOfWork _uow;
-        private bool _delete = false;
 
         public SysCredDeleteCommands()
         {
@@ -29,11 +28,6 @@ namespace Bhbk.Cli.Aurora.Commands
             _uow = new UnitOfWork(_conf["Databases:AuroraEntities"], instance);
 
             IsCommand("sys-cred-delete", "Delete system credential");
-
-            HasOption("d|delete", "Delete a network for user", arg =>
-            {
-                _delete = true;
-            });
         }
 
         public override int Run(string[] remainingArguments)
@@ -45,27 +39,24 @@ namespace Bhbk.Cli.Aurora.Commands
 
                 OutputFactory.StdOutCredentials(exists);
 
-                if (_delete)
+                Console.Out.WriteLine();
+                Console.Out.Write("  *** Enter GUID of credential to delete *** : ");
+                var input = Guid.Parse(StandardInput.GetInput());
+
+                var mounts = _uow.UserMounts.Get(QueryExpressionFactory.GetQueryExpression<UserMount>()
+                    .Where(x => x.CredentialId == input).ToLambda());
+
+                if (mounts.Any())
                 {
                     Console.Out.WriteLine();
-                    Console.Out.Write("  *** Enter GUID of credential to delete *** : ");
-                    var input = Guid.Parse(StandardInput.GetInput());
+                    Console.Out.WriteLine("  *** The credential can not be deleted while in use ***");
+                    OutputFactory.StdOutUserMounts(mounts);
 
-                    var mounts = _uow.UserMounts.Get(QueryExpressionFactory.GetQueryExpression<UserMount>()
-                        .Where(x => x.CredentialId == input).ToLambda());
-
-                    if (mounts.Any())
-                    {
-                        Console.Out.WriteLine();
-                        Console.Out.WriteLine("  *** The credential can not be deleted while in use ***");
-                        OutputFactory.StdOutUserMounts(mounts);
-
-                        return StandardOutput.FondFarewell();
-                    }
-
-                    _uow.Credentials.Delete(exists.Where(x => x.Id == input));
-                    _uow.Commit();
+                    return StandardOutput.FondFarewell();
                 }
+
+                _uow.Credentials.Delete(exists.Where(x => x.Id == input));
+                _uow.Commit();
 
                 return StandardOutput.FondFarewell();
             }

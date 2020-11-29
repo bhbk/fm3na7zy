@@ -13,9 +13,10 @@
     [CreatedUtc]     DATETIMEOFFSET (7) NOT NULL,
     [LastUpdatedUtc] DATETIMEOFFSET (7) NULL,
     CONSTRAINT [PK_tbl_PublicKey] PRIMARY KEY CLUSTERED ([Id] ASC),
-    CONSTRAINT [FK_tbl_PublicKey_IdentityID] FOREIGN KEY ([IdentityId]) REFERENCES [dbo].[tbl_User] ([IdentityId]) ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT [FK_tbl_PublicKey_PrivateKeyID] FOREIGN KEY ([PrivateKeyId]) REFERENCES [dbo].[tbl_PrivateKey] ([Id])
+    CONSTRAINT [FK_tbl_PublicKey_IdentityID] FOREIGN KEY ([IdentityId]) REFERENCES [dbo].[tbl_User] ([IdentityId]) ON DELETE CASCADE ON UPDATE CASCADE
 );
+
+
 
 
 

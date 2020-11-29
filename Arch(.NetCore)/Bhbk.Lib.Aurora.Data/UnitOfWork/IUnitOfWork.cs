@@ -9,6 +9,7 @@ namespace Bhbk.Lib.Aurora.Data.UnitOfWork
         public NetworkRepository Networks { get; }
         public PrivateKeyRepository PrivateKeys { get; }
         public PublicKeyRepository PublicKeys { get; }
+        public SessionRepository Sessions { get; }
         public SettingRepository Settings { get; }
         public UserRepository Users { get; }
         public UserAlertRepository UserAlerts { get; }

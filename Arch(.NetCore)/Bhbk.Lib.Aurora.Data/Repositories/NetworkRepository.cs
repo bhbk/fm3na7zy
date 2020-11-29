@@ -21,10 +21,10 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
 
             var pvalues = new []
             {
-                new SqlParameter("@IdentityId", SqlDbType.UniqueIdentifier) { Value = entity.IdentityId },
-                new SqlParameter("@Address", SqlDbType.NVarChar) { Value = entity.Address },
-                new SqlParameter("@Action", SqlDbType.NVarChar) { Value = entity.Action },
-                new SqlParameter("@IsEnabled", SqlDbType.Bit) { Value = entity.IsEnabled },
+                new SqlParameter("IdentityId", SqlDbType.UniqueIdentifier) { Value = entity.IdentityId.HasValue ? (object)entity.IdentityId.Value : DBNull.Value },
+                new SqlParameter("Address", SqlDbType.NVarChar) { Value = entity.Address },
+                new SqlParameter("Action", SqlDbType.NVarChar) { Value = entity.Action },
+                new SqlParameter("IsEnabled", SqlDbType.Bit) { Value = entity.IsEnabled },
                 rvalue,
             };
 
@@ -53,7 +53,7 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
 
             var pvalues = new []
             {
-                new SqlParameter("@Id", SqlDbType.UniqueIdentifier) { Value = entity.Id },
+                new SqlParameter("Id", SqlDbType.UniqueIdentifier) { Value = entity.Id },
                 rvalue,
             };
 
@@ -90,11 +90,11 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
 
             var pvalues = new []
             {
-                new SqlParameter("@Id", SqlDbType.UniqueIdentifier) { Value = entity.Id },
-                new SqlParameter("@IdentityId", SqlDbType.UniqueIdentifier) { Value = entity.IdentityId },
-                new SqlParameter("@Address", SqlDbType.NVarChar) { Value = entity.Address },
-                new SqlParameter("@Action", SqlDbType.NVarChar) { Value = entity.Action },
-                new SqlParameter("@IsEnabled", SqlDbType.Bit) { Value = entity.IsEnabled },
+                new SqlParameter("Id", SqlDbType.UniqueIdentifier) { Value = entity.Id },
+                new SqlParameter("IdentityId", SqlDbType.UniqueIdentifier) { Value = entity.IdentityId.HasValue ? (object)entity.IdentityId.Value : DBNull.Value },
+                new SqlParameter("Address", SqlDbType.NVarChar) { Value = entity.Address },
+                new SqlParameter("Action", SqlDbType.NVarChar) { Value = entity.Action },
+                new SqlParameter("IsEnabled", SqlDbType.Bit) { Value = entity.IsEnabled },
                 rvalue,
             };
 

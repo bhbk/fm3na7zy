@@ -36,6 +36,7 @@ namespace Bhbk.WebApi.Aurora
         public void ConfigureServices(IServiceCollection sc)
         {
             var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
+            var workerName = "AuroraWorker";
 
             var conf = (IConfiguration)new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
@@ -63,7 +64,7 @@ namespace Bhbk.WebApi.Aurora
 
                 if (bool.Parse(conf["Jobs:UnstructuredData:Enable"]))
                 {
-                    var jobKey = new JobKey(JobType.UnstructuredData.ToString(), WorkerType.WebWorker.ToString());
+                    var jobKey = new JobKey(typeof(UnstructuredDataJob).Name, workerName);
                     jobs.AddJob<UnstructuredDataJob>(opt => opt
                         .StoreDurably()
                         .WithIdentity(jobKey)

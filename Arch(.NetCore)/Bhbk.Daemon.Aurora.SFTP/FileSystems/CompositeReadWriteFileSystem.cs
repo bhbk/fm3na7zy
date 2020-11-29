@@ -77,7 +77,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                         });
                     uow.Commit();
 
-                    Log.Information($"'{callPath}' '{_user.IdentityAlias}' directory '{child.Path}'");
+                    Log.Information($"'{callPath}' '{_user.IdentityAlias}' folder:'{child.Path}' at:database");
 
                     return child;
                 }
@@ -109,8 +109,8 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
 
                     if (_user.QuotaUsedInBytes >= _user.QuotaInBytes)
                     {
-                        Log.Warning($"'{callPath}' '{_user.IdentityAlias}' file '{child.Path}' cancelled, " +
-                            $"totoal quota '{_user.QuotaInBytes}' used quota '{_user.QuotaUsedInBytes}'");
+                        Log.Warning($"'{callPath}' '{_user.IdentityAlias}' file:'{child.Path}' cancelled, " +
+                            $"total-quota:'{_user.QuotaInBytes}' and used-quota:'{_user.QuotaUsedInBytes}'");
 
                         throw new FileSystemOperationCanceledException();
                     }
@@ -155,7 +155,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                     uow.UserFiles.Create(fileEntity);
                     uow.Commit();
 
-                    Log.Information($"'{callPath}' '{_user.IdentityAlias}' empty file '{child.Path}' at '{file.FullName}'");
+                    Log.Information($"'{callPath}' '{_user.IdentityAlias}' empty-file:'{child.Path}' at:'{file.FullName}'");
 
                     return child;
                 }
@@ -215,7 +215,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
 
                                 File.Delete(file.FullName);
 
-                                Log.Information($"'{callPath}' '{_user.IdentityAlias}' file '{node.Path}' at '{file.FullName}'");
+                                Log.Information($"'{callPath}' '{_user.IdentityAlias}' file:'{node.Path}' at:'{file.FullName}'");
                             }
                             break;
 
@@ -226,7 +226,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                                 uow.UserFolders.Delete(folderEntity);
                                 uow.Commit();
 
-                                Log.Information($"'{callPath}' '{_user.IdentityAlias}' folder '{node.Path}'");
+                                Log.Information($"'{callPath}' '{_user.IdentityAlias}' folder:'{node.Path}' at:database");
                             }
                             break;
 
@@ -444,7 +444,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
 
                                 var stream = File.Open(file.FullName, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite);
 
-                                Log.Information($"'{callPath}' '{_user.IdentityAlias}' file '{node.Path}' from '{file.FullName}'");
+                                Log.Information($"'{callPath}' '{_user.IdentityAlias}' file:'{node.Path}' at:'{file.FullName}' size:'{stream.Length}'");
 
                                 return parameters.AccessType == NodeContentAccess.Read
                                     ? NodeContent.CreateReadOnlyContent(stream)
@@ -570,7 +570,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                                 uow.UserFiles.Update(toBeMovedEntity);
                                 uow.Commit();
 
-                                Log.Information($"'{callPath}' '{_user.IdentityAlias}' from '{toBeMovedPath}' to '{targetPath}'");
+                                Log.Information($"'{callPath}' '{_user.IdentityAlias}' from-file:'{toBeMovedPath}' to-file:'{targetPath}' at:database");
 
                                 return new FileNode(toBeMovedNode.Name, targetDirectory);
                             }
@@ -588,7 +588,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                                 uow.UserFolders.Update(toBeMovedEntity);
                                 uow.Commit();
 
-                                Log.Information($"'{callPath}' '{_user.IdentityAlias}' from '{toBeMovedPath}' to '{targetPath}'");
+                                Log.Information($"'{callPath}' '{_user.IdentityAlias}' from-folder:'{toBeMovedPath}' to-folder:'{targetPath}' at:database");
 
                                 return new DirectoryNode(toBeMovedNode.Name, targetDirectory);
                             }
@@ -630,7 +630,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                                 uow.UserFiles.Update(fileEntity);
                                 uow.Commit();
 
-                                Log.Information($"'{callPath}' '{_user.IdentityAlias}' from '{node.Path}' to '{node.Parent.Path}/{newName}' in memory");
+                                Log.Information($"'{callPath}' '{_user.IdentityAlias}' from-file:'{node.Path}' to-file:'{node.Parent.Path}/{newName}' at:database");
 
                                 return new FileNode(newName, node.Parent);
                             }
@@ -645,7 +645,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                                 uow.UserFolders.Update(folderEntity);
                                 uow.Commit();
 
-                                Log.Information($"'{callPath}' '{_user.IdentityAlias}' from '{node.Path}' to '{node.Parent.Path}{newName}' in memory");
+                                Log.Information($"'{callPath}' '{_user.IdentityAlias}' from-folder:'{node.Path}' to-folder:'{node.Parent.Path}{newName}' at:database");
 
                                 return new DirectoryNode(newName, node.Parent);
                             }
@@ -717,7 +717,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                                 uow.Users.Update(_user);
                                 uow.Commit();
 
-                                Log.Information($"'{callPath}' '{_user.IdentityAlias}' file '{node.Path}' at '{file.FullName}'");
+                                Log.Information($"'{callPath}' '{_user.IdentityAlias}' file:'{node.Path}' at:'{file.FullName}' size:'{content.Length}'");
                             }
                             break;
 

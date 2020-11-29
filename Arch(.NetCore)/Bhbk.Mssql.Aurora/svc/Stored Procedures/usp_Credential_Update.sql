@@ -1,5 +1,4 @@
 ﻿
-
 CREATE PROCEDURE [svc].[usp_Credential_Update]
      @Id					UNIQUEIDENTIFIER 
     ,@Domain				NVARCHAR (128) 

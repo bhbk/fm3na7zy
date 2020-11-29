@@ -120,6 +120,9 @@
     <Compile Include="Models\PublicKey.cs">
       <DependentUpon>AuroraEntities.tt</DependentUpon>
     </Compile>
+    <Compile Include="Models\Session.cs">
+      <DependentUpon>AuroraEntities.tt</DependentUpon>
+    </Compile>
     <Compile Include="Models\Setting.cs">
       <DependentUpon>AuroraEntities.tt</DependentUpon>
     </Compile>
@@ -172,6 +175,12 @@
       <DependentUpon>AuroraEntities.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\usp_PublicKey_Update_Result.cs">
+      <DependentUpon>AuroraEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\usp_Session_Insert_Result.cs">
+      <DependentUpon>AuroraEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\usp_Session_Update_Result.cs">
       <DependentUpon>AuroraEntities.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\usp_Setting_Delete_Result.cs">

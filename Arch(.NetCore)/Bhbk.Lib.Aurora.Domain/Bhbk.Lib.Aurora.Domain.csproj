@@ -24,6 +24,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Bhbk.Lib.Aurora.Data\Bhbk.Lib.Aurora.Data.csproj" />
     <ProjectReference Include="..\Bhbk.Lib.Aurora.Data_EF6\Bhbk.Lib.Aurora.Data_EF6.csproj" />
+    <ProjectReference Include="..\Bhbk.Lib.Aurora.Primitives\Bhbk.Lib.Aurora.Primitives.csproj" />
   </ItemGroup>
 
 </Project>

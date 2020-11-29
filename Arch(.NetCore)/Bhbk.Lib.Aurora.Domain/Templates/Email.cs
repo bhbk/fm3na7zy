@@ -1,17 +1,15 @@
 ﻿using System;
 
-namespace Bhbk.Lib.Aurora.Domain.Primitives
+namespace Bhbk.Lib.Aurora.Domain.Templates
 {
-    public class Templates
+    public class Email
     {
-        #region Templates
-
         /*
          * https://htmlformatter.com
          * https://www.freeformatter.com/java-dotnet-escape.html
          */
 
-        public static string NotifyEmailOnFileDelete(string server, string userName, string firstName, string lastName, string filePath)
+        public static string NotifyOnFileDelete(string server, string userName, string firstName, string lastName, string filePath)
         {
             /*
              * use http://rendera.herokuapp.com/ to test template before format...
@@ -56,7 +54,7 @@ namespace Bhbk.Lib.Aurora.Domain.Primitives
             "</html>";
         }
 
-        public static string NotifyEmailOnFileDownload(string server, string userName, string firstName, string lastName, string filePath, string byteSize, string client)
+        public static string NotifyOnFileGetContent(string server, string userName, string firstName, string lastName, string filePath, string byteSize, string client)
         {
             /*
              * use http://rendera.herokuapp.com/ to test template before format...
@@ -101,7 +99,7 @@ namespace Bhbk.Lib.Aurora.Domain.Primitives
             "</html>";
         }
 
-        public static string NotifyEmailOnFileUpload(string server, string userName, string firstName, string lastName, string filePath, string byteSize, string client)
+        public static string NotifyOnFileSaveContent(string server, string userName, string firstName, string lastName, string filePath, string byteSize, string client)
         {
             /*
              * use http://rendera.herokuapp.com/ to test template before format...
@@ -147,26 +145,5 @@ namespace Bhbk.Lib.Aurora.Domain.Primitives
             "  </body>" +
             "</html>";
         }
-
-        public static string NotifyTextOnFileDelete(string server, string userName, string firstName, string lastName, string filePath)
-        {
-            return $"Hi {string.Format("{0} {1}", firstName, lastName)}. The user {userName} accessed {server} via SFTP. " + Environment.NewLine
-                + Environment.NewLine + $"The file {filePath} was deleted. ";
-        }
-
-        public static string NotifyTextOnFileDownload(string server, string userName, string firstName, string lastName, string filePath, string byteSize, string client)
-        {
-            return $"Hi {string.Format("{0} {1}", firstName, lastName)}. The user {userName} accessed {server} via SFTP. " + Environment.NewLine
-                + Environment.NewLine + $"The file {filePath} downloaded to {client} is {byteSize} bytes. ";
-        }
-
-        public static string NotifyTextOnFileUpload(string server, string userName, string firstName, string lastName, string filePath, string bytesSize, string client)
-        {
-            return $"Hi {string.Format("{0} {1}", firstName, lastName)}. The user {userName} accessed {server} via SFTP. " + Environment.NewLine
-                + Environment.NewLine + $"The file {filePath} uploaded from {client} is {bytesSize} bytes. " + Environment.NewLine
-                + Environment.NewLine + $"The data within will be processed without any more humans or files involved now. ";
-        }
-
-        #endregion
     }
 }

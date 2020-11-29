@@ -1,6 +1,4 @@
 ﻿
-
-
 CREATE VIEW [svc].[uvw_Network]
 AS
 SELECT

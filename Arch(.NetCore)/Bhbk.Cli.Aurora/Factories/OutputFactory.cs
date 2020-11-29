@@ -13,9 +13,31 @@ namespace Bhbk.Cli.Aurora.Factories
             {
                 Console.Out.WriteLine();
 
-                Console.Out.WriteLine($"  Credential GUID '{cred.Id}'{(!cred.IsDeletable ? " is not deletable" : null)}'. " +
-                    $"Created {cred.CreatedUtc.LocalDateTime}.");
-                Console.Out.WriteLine($"    Login domain '{cred.Domain}' Login user '{cred.UserName}'");
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.Out.WriteLine($"  [Credential GUID] {cred.Id}{(!cred.IsDeletable ? " is not deletable and" : null)}" +
+                    $"{(cred.IsEnabled ? " is enabled" : " is disabled")} [Created] {cred.CreatedUtc.LocalDateTime}");
+
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.Out.WriteLine($"    [Login] domain:{cred.Domain} user:{cred.UserName}");
+
+                Console.ResetColor();
+            }
+        }
+
+        public static void StdOutCredentialSecrets(IEnumerable<Credential> creds)
+        {
+            foreach (var cred in creds)
+            {
+                Console.Out.WriteLine();
+
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.Out.WriteLine($"  [Credential GUID] {cred.Id}'{(!cred.IsDeletable ? " is not deletable and" : null)}" +
+                    $"{(cred.IsEnabled ? " is enabled" : " is disabled")} [Created] {cred.CreatedUtc.LocalDateTime}");
+
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.Out.WriteLine($"    Encrypted password '{cred.EncryptedPassword}'");
+
+                Console.ResetColor();
             }
         }
 
@@ -25,54 +47,56 @@ namespace Bhbk.Cli.Aurora.Factories
             {
                 Console.Out.WriteLine();
 
-                Console.Out.WriteLine($"  Public key GUID '{pubKey.Id}' of type '{pubKey.KeyAlgo}'{(!pubKey.IsDeletable ? " is not deletable" : null)}. " +
-                    $"Created {pubKey.CreatedUtc.LocalDateTime}.");
-                Console.Out.WriteLine($"    Sig '{pubKey.SigValue}'");
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.Out.WriteLine($"  [Public key GUID] {pubKey.Id} [Algo] {pubKey.KeyAlgo}{(!pubKey.IsDeletable ? " is not deletable and" : null)}" +
+                    $"{(pubKey.IsEnabled ? " is enabled" : " is disabled")} [Created] {pubKey.CreatedUtc.LocalDateTime}");
+                Console.Out.WriteLine($"    [Sig] {pubKey.SigValue}");
 
+                Console.ForegroundColor = ConsoleColor.White;
                 if (pubKey.PrivateKeyId != null)
                 {
-                    var privKey = privKeys.Where(x => x.Id == pubKey.PrivateKeyId).Single();
+                    var privKey = privKeys.Where(x => x.PublicKeyId == pubKey.Id)
+                        .Single();
 
-                    Console.Out.WriteLine($"    Private key GUID '{privKey.Id}' of type '{privKey.KeyAlgo}'{(!privKey.IsDeletable ? " is not deletable" : null)}. " +
-                        $"Created {pubKey.CreatedUtc.LocalDateTime}.");
+                    Console.Out.WriteLine($"    [Private key GUID] {privKey.Id} [Algo] {privKey.KeyAlgo}{(!privKey.IsDeletable ? " is not deletable and" : null)}" +
+                    $"{(privKey.IsEnabled ? " is enabled" : " is disabled")} [Created] {pubKey.CreatedUtc.LocalDateTime}");
                 }
                 else
-                    Console.Out.WriteLine($"    Private key not available");
+                    Console.Out.WriteLine($"    [Private key] none");
+
+                Console.ResetColor();
             };
         }
 
-        public static void StdOutNetworks(IEnumerable<Network> nets)
+        public static void StdOutKeyPairSecrets(IEnumerable<PrivateKey> privKeys)
+        {
+            foreach (var key in privKeys)
+            {
+                Console.Out.WriteLine();
+
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.Out.WriteLine($"  [Private key GUID] {key.Id} [Algo] {key.KeyAlgo}{(!key.IsDeletable ? " is not deletable and" : null)}" +
+                    $"{(key.IsEnabled ? " is enabled" : " is disabled")} [Created] {key.CreatedUtc.LocalDateTime}");
+
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.Out.WriteLine($"    Encrypted password '{key.KeyPass}'");
+
+                Console.ResetColor();
+            };
+        }
+
+        public static void StdOutNetworks(IEnumerable<Network> networks)
         {
             Console.Out.WriteLine();
 
-            foreach (var net in nets.OrderBy(x => x.SequenceId))
+            foreach (var net in networks.OrderBy(x => x.SequenceId))
             {
-                Console.Out.WriteLine($"  Network GUID '{net.Id}' sequence '{net.SequenceId}' is '{net.Action}' for '{net.Address}'.");
+                Console.ForegroundColor = ConsoleColor.Cyan;
+                Console.Out.WriteLine($"  [Network GUID] {net.Id} [Seq] {net.SequenceId} [Action] {net.Action} [CIDR] {net.Address}" +
+                    $"{(net.IsEnabled ? " is enabled" : " is disabled")}");
+
+                Console.ResetColor();
             }
-        }
-
-        public static void StdOutSecretsCredentials(IEnumerable<Credential> creds)
-        {
-            foreach (var cred in creds)
-            {
-                Console.Out.WriteLine();
-
-                Console.Out.WriteLine($"  Credential GUID '{cred.Id}'{(!cred.IsDeletable ? " is not deletable" : null)}'. " +
-                    $"Created {cred.CreatedUtc.LocalDateTime}.");
-                Console.Out.WriteLine($"    Pass ciphertext '{cred.EncryptedPassword}'");
-            }
-        }
-
-        public static void StdOutSecretsKeypairs(IEnumerable<PrivateKey> keys)
-        {
-            foreach (var key in keys)
-            {
-                Console.Out.WriteLine();
-
-                Console.Out.WriteLine($"  Private key GUID '{key.Id}' of type '{key.KeyAlgo}'{(!key.IsDeletable ? " is not deletable" : null)}. " +
-                    $"Created {key.CreatedUtc}.");
-                Console.Out.WriteLine($"    Key pass ciphertext '{key.KeyPass}'");
-            };
         }
 
         public static void StdOutSettings(IEnumerable<Setting> configs)
@@ -81,9 +105,30 @@ namespace Bhbk.Cli.Aurora.Factories
             {
                 Console.Out.WriteLine();
 
-                Console.Out.WriteLine($"  Config GUID '{config.Id}'{(!config.IsDeletable ? " is not deletable" : null)}. " +
-                    $"Created {config.CreatedUtc.LocalDateTime}.");
-                Console.Out.WriteLine($"    Config key '{config.ConfigKey}' Config value '{config.ConfigValue}'");
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.Out.WriteLine($"  [Config GUID] {config.Id}{(!config.IsDeletable ? " is not deletable" : null)}" +
+                    $" [Created] {config.CreatedUtc.LocalDateTime}");
+
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.Out.WriteLine($"    [Key] {config.ConfigKey} [Value] {config.ConfigValue}");
+
+                Console.ResetColor();
+            }
+        }
+
+        public static void StdOutSessions(IEnumerable<Session> sessions)
+        {
+            Console.Out.WriteLine();
+
+            foreach (var session in sessions)
+            {
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.Out.WriteLine($"  [Remote] {session.RemoteEndPoint}" +
+                    $" [Action] {session.CallPath} [Detail] {session.Details}" +
+                    $"{(string.IsNullOrEmpty(session.RemoteSoftwareIdentifier) ? null : " [Using] " + (session.RemoteSoftwareIdentifier) + "")}" +
+                    $" [Created] {session.CreatedUtc.LocalDateTime}");
+
+                Console.ResetColor();
             }
         }
 
@@ -93,10 +138,19 @@ namespace Bhbk.Cli.Aurora.Factories
             {
                 Console.Out.WriteLine();
 
-                Console.Out.WriteLine($"  User GUID '{user.IdentityId}' with alias '{user.IdentityAlias}'. Created {user.CreatedUtc.LocalDateTime}.");
-                Console.Out.WriteLine($"    Public key authentication is {(user.IsPublicKeyRequired ? "enabled" : "disabled")}");
-                Console.Out.WriteLine($"    Password authentication is {(user.IsPasswordRequired ? "enabled" : "disabled")}");
-                Console.Out.WriteLine($"    File system is '{user.FileSystemType}' and mounts as {(user.IsFileSystemReadOnly ? "read only" : "read write")}");
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.Out.WriteLine($"  [User GUID] {user.IdentityId} [Alias] {user.IdentityAlias}{(!user.IsDeletable ? " is not deletable and" : null)}" +
+                    $"{(user.IsEnabled ? " is enabled" : " is disabled")} [Created] {user.CreatedUtc.LocalDateTime}");
+
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.Out.WriteLine($"    File system is {user.FileSystemType} and mounts as {(user.IsFileSystemReadOnly ? "read-only" : "read-write")}" +
+                    $"{(string.IsNullOrEmpty(user.FileSystemChrootPath) ? null : " with chroot to " + (user.FileSystemChrootPath) + "")}");
+                Console.Out.WriteLine($"    Password authentication is {(user.IsPasswordRequired ? "enabled" : "disabled")} ");
+                Console.Out.WriteLine($"    Public key authentication is {(user.IsPublicKeyRequired ? "enabled" : "disabled")} ");
+                Console.Out.WriteLine($"    Concurrent session maximum {user.ConcurrentSessions} is allowed");
+                Console.Out.WriteLine($"    Quota maximum is {user.QuotaInBytes / 1024f} MB and {user.QuotaUsedInBytes / 1024f} MB is currently used");
+
+                Console.ResetColor();
             }
         }
 
@@ -106,11 +160,15 @@ namespace Bhbk.Cli.Aurora.Factories
             {
                 Console.Out.WriteLine();
 
-                Console.Out.WriteLine($"  Mount for user '{mount.User.IdentityAlias}'{(!mount.IsDeletable ? " is not deletable" : null)}");
-                Console.Out.WriteLine($"    Mount path '{mount.ServerAddress}{mount.ServerShare}' using '{mount.AuthType}' protocol");
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.Out.WriteLine($"  [Mount for] {mount.User.IdentityAlias} [Path] {mount.ServerAddress}{mount.ServerShare}" +
+                    $" [Protocl] {mount.AuthType}");
 
+                Console.ForegroundColor = ConsoleColor.White;
                 if (mount.CredentialId.HasValue)
-                    Console.Out.WriteLine($"    Mount credential '{mount.Credential.Domain}\\{mount.Credential.UserName}'");
+                    Console.Out.WriteLine($"    Mount credential [Domain] {mount.Credential.Domain} [User] {mount.Credential.UserName}");
+
+                Console.ResetColor();
             }
         }
     }

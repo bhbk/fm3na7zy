@@ -23,7 +23,7 @@ namespace Bhbk.Cli.Aurora.Commands
             var instance = new ContextService(InstanceContext.DeployedOrLocal);
             _uow = new UnitOfWork(_conf["Databases:AuroraEntities"], instance);
 
-            IsCommand("sys-cred-show", "Show system credentials");
+            IsCommand("sys-cred-show", "Show system credential(s)");
         }
 
         public override int Run(string[] remainingArguments)

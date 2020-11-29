@@ -21,13 +21,13 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
 
             var pvalues = new []
             {
-                new SqlParameter("@IdentityId", SqlDbType.UniqueIdentifier) { Value = entity.IdentityId },
-                new SqlParameter("@CredentialId", SqlDbType.UniqueIdentifier) { Value = entity.CredentialId },
-                new SqlParameter("@AuthType", SqlDbType.NVarChar) { Value = entity.AuthType },
-                new SqlParameter("@ServerName", SqlDbType.NVarChar) { Value = entity.ServerAddress },
-                new SqlParameter("@ServerPath", SqlDbType.NVarChar) { Value = entity.ServerShare },
-                new SqlParameter("@IsEnabled", SqlDbType.Bit) { Value = entity.IsEnabled },
-                new SqlParameter("@IsDeletable", SqlDbType.Bit) { Value = entity.IsDeletable },
+                new SqlParameter("IdentityId", SqlDbType.UniqueIdentifier) { Value = entity.IdentityId },
+                new SqlParameter("CredentialId", SqlDbType.UniqueIdentifier) { Value = entity.CredentialId },
+                new SqlParameter("AuthType", SqlDbType.NVarChar) { Value = entity.AuthType },
+                new SqlParameter("ServerName", SqlDbType.NVarChar) { Value = entity.ServerAddress },
+                new SqlParameter("ServerPath", SqlDbType.NVarChar) { Value = entity.ServerShare },
+                new SqlParameter("IsEnabled", SqlDbType.Bit) { Value = entity.IsEnabled },
+                new SqlParameter("IsDeletable", SqlDbType.Bit) { Value = entity.IsDeletable },
                 rvalue,
             };
 
@@ -56,7 +56,7 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
 
             var pvalues = new []
             {
-                new SqlParameter("@IdentityId", SqlDbType.UniqueIdentifier) { Value = entity.IdentityId },
+                new SqlParameter("IdentityId", SqlDbType.UniqueIdentifier) { Value = entity.IdentityId },
                 rvalue,
             };
 
@@ -93,13 +93,13 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
 
             var pvalues = new []
             {
-                new SqlParameter("@IdentityId", SqlDbType.UniqueIdentifier) { Value = entity.IdentityId },
-                new SqlParameter("@CredentialId", SqlDbType.UniqueIdentifier) { Value = entity.CredentialId },
-                new SqlParameter("@AuthType", SqlDbType.NVarChar) { Value = entity.AuthType },
-                new SqlParameter("@ServerName", SqlDbType.NVarChar) { Value = entity.ServerAddress },
-                new SqlParameter("@ServerPath", SqlDbType.NVarChar) { Value = entity.ServerShare },
-                new SqlParameter("@IsEnabled", SqlDbType.Bit) { Value = entity.IsEnabled },
-                new SqlParameter("@IsDeletable", SqlDbType.Bit) { Value = entity.IsDeletable },
+                new SqlParameter("IdentityId", SqlDbType.UniqueIdentifier) { Value = entity.IdentityId },
+                new SqlParameter("CredentialId", SqlDbType.UniqueIdentifier) { Value = entity.CredentialId },
+                new SqlParameter("AuthType", SqlDbType.NVarChar) { Value = entity.AuthType },
+                new SqlParameter("ServerName", SqlDbType.NVarChar) { Value = entity.ServerAddress },
+                new SqlParameter("ServerPath", SqlDbType.NVarChar) { Value = entity.ServerShare },
+                new SqlParameter("IsEnabled", SqlDbType.Bit) { Value = entity.IsEnabled },
+                new SqlParameter("IsDeletable", SqlDbType.Bit) { Value = entity.IsDeletable },
                 rvalue,
             };
 

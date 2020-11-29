@@ -1,13 +1,12 @@
 ﻿using Bhbk.Lib.Aurora.Data.Models;
+using Bhbk.Lib.DataAccess.EFCore.Extensions;
 using Bhbk.Lib.DataAccess.EFCore.Repositories;
 using Microsoft.Data.SqlClient;
-using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
-using Bhbk.Lib.DataAccess.EFCore.Extensions;
 
 namespace Bhbk.Lib.Aurora.Data.Repositories
 {
@@ -22,10 +21,10 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
 
             var pvalues = new []
             {
-                new SqlParameter("@IdentityId", SqlDbType.UniqueIdentifier) { Value = entity.IdentityId },
-                new SqlParameter("@ConfigKey", SqlDbType.NVarChar) { Value = entity.ConfigKey },
-                new SqlParameter("@ConfigValue", SqlDbType.NVarChar) { Value = entity.ConfigValue },
-                new SqlParameter("@IdDeletable", SqlDbType.Bit) { Value = entity.IsDeletable },
+                new SqlParameter("IdentityId", SqlDbType.UniqueIdentifier) { Value = entity.IdentityId.HasValue ? (object)entity.IdentityId.Value : DBNull.Value },
+                new SqlParameter("ConfigKey", SqlDbType.NVarChar) { Value = entity.ConfigKey },
+                new SqlParameter("ConfigValue", SqlDbType.NVarChar) { Value = entity.ConfigValue },
+                new SqlParameter("IdDeletable", SqlDbType.Bit) { Value = entity.IsDeletable },
                 rvalue,
             };
 
@@ -54,7 +53,7 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
 
             var pvalues = new []
             {
-                new SqlParameter("@Id", SqlDbType.UniqueIdentifier) { Value = entity.Id },
+                new SqlParameter("Id", SqlDbType.UniqueIdentifier) { Value = entity.Id },
                 rvalue,
             };
 
@@ -91,11 +90,11 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
 
             var pvalues = new []
             {
-                new SqlParameter("@Id", SqlDbType.UniqueIdentifier) { Value = entity.Id },
-                new SqlParameter("@IdentityId", SqlDbType.UniqueIdentifier) { Value = entity.IdentityId },
-                new SqlParameter("@ConfigKey", SqlDbType.NVarChar) { Value = entity.ConfigKey },
-                new SqlParameter("@ConfigValue", SqlDbType.NVarChar) { Value = entity.ConfigValue },
-                new SqlParameter("@IsDeletable", SqlDbType.Bit) { Value = entity.IsDeletable },
+                new SqlParameter("Id", SqlDbType.UniqueIdentifier) { Value = entity.Id },
+                new SqlParameter("IdentityId", SqlDbType.UniqueIdentifier) { Value = entity.IdentityId.HasValue ? (object)entity.IdentityId.Value : DBNull.Value },
+                new SqlParameter("ConfigKey", SqlDbType.NVarChar) { Value = entity.ConfigKey },
+                new SqlParameter("ConfigValue", SqlDbType.NVarChar) { Value = entity.ConfigValue },
+                new SqlParameter("IsDeletable", SqlDbType.Bit) { Value = entity.IsDeletable },
                 rvalue,
             };
 

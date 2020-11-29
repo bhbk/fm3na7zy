@@ -20,7 +20,7 @@ namespace Bhbk.Cli.Aurora.Commands
         private readonly IConfiguration _conf;
         private readonly IUnitOfWork _uow;
         private User _user;
-        private bool _delete = false, _deleteAll = false;
+        private bool _deleteAll = false;
 
         public UserKeyDeleteCommands()
         {
@@ -31,7 +31,7 @@ namespace Bhbk.Cli.Aurora.Commands
             var instance = new ContextService(InstanceContext.DeployedOrLocal);
             _uow = new UnitOfWork(_conf["Databases:AuroraEntities"], instance);
 
-            IsCommand("user-key-delete", "Delete private/public key for user");
+            IsCommand("user-key-delete", "Delete public/private key pair for user");
 
             HasRequiredOption("u|user=", "Enter existing user", arg =>
             {
@@ -44,18 +44,14 @@ namespace Bhbk.Cli.Aurora.Commands
                         {
                             x => x.PrivateKeys,
                             x => x.PublicKeys,
-                        }).SingleOrDefault();
+                        })
+                    .SingleOrDefault();
 
                 if (_user == null)
                     throw new ConsoleHelpAsException($"  *** Invalid user '{arg}' ***");
             });
 
-            HasOption("d|delete", "Delete a public/private key pair for user", arg =>
-            {
-                _delete = true;
-            });
-
-            HasOption("a|delete-all", "Delete all public/private key pairs for user", arg =>
+            HasOption("d|delete-all", "Delete all public/private key pair(s) for user", arg =>
             {
                 _deleteAll = true;
             });
@@ -65,17 +61,34 @@ namespace Bhbk.Cli.Aurora.Commands
         {
             try
             {
-                var pubKeys = _user.PublicKeys.Where(x => x.IsDeletable == true);
                 var privKeys = _user.PrivateKeys.Where(x => x.IsDeletable == true);
+                var pubKeys = _user.PublicKeys.Where(x => x.IsDeletable == true);
 
                 OutputFactory.StdOutKeyPairs(pubKeys.OrderBy(x => x.CreatedUtc), privKeys);
+                Console.Out.WriteLine();
 
-                if (_delete)
+                if (_deleteAll == true)
                 {
-                    Console.Out.WriteLine();
+                    Console.Out.Write("  *** Enter yes to delete all public/private key pair(s) for user *** : ");
+                    var input = StandardInput.GetInput();
+
+                    if (input.ToLower() == "yes")
+                    {
+                        _uow.PrivateKeys.Delete(QueryExpressionFactory.GetQueryExpression<PrivateKey>()
+                            .Where(x => x.IdentityId == _user.IdentityId && x.IsDeletable == true).ToLambda());
+
+                        _uow.Commit();
+
+                        _uow.PublicKeys.Delete(QueryExpressionFactory.GetQueryExpression<PublicKey>()
+                            .Where(x => x.IdentityId == _user.IdentityId && x.IsDeletable == true).ToLambda());
+
+                        _uow.Commit();
+                    }
+                }
+                else
+                {
                     Console.Out.Write("  *** Enter GUID of public key to delete *** : ");
                     var input = Guid.Parse(StandardInput.GetInput());
-                    Console.Out.WriteLine();
 
                     var pubKey = pubKeys.Where(x => x.Id == input)
                         .SingleOrDefault();
@@ -85,21 +98,13 @@ namespace Bhbk.Cli.Aurora.Commands
                         _uow.PrivateKeys.Delete(QueryExpressionFactory.GetQueryExpression<PrivateKey>()
                             .Where(x => x.IdentityId == _user.IdentityId && x.Id == pubKey.PrivateKeyId && x.IsDeletable == true).ToLambda());
 
+                        _uow.Commit();
+
                         _uow.PublicKeys.Delete(QueryExpressionFactory.GetQueryExpression<PublicKey>()
                             .Where(x => x.IdentityId == _user.IdentityId && x.Id == pubKey.Id && x.IsDeletable == true).ToLambda());
 
                         _uow.Commit();
                     }
-                }
-                else if (_deleteAll)
-                {
-                    _uow.PrivateKeys.Delete(QueryExpressionFactory.GetQueryExpression<PrivateKey>()
-                        .Where(x => x.IdentityId == _user.IdentityId && x.IsDeletable == true).ToLambda());
-
-                    _uow.PublicKeys.Delete(QueryExpressionFactory.GetQueryExpression<PublicKey>()
-                        .Where(x => x.IdentityId == _user.IdentityId && x.IsDeletable == true).ToLambda());
-
-                    _uow.Commit();
                 }
 
                 return StandardOutput.FondFarewell();

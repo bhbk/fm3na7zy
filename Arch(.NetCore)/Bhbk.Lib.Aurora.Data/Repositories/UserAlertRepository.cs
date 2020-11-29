@@ -21,14 +21,14 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
 
             var pvalues = new []
             {
-                new SqlParameter("@IdentityId", SqlDbType.UniqueIdentifier) { Value = entity.IdentityId },
-                new SqlParameter("@ToFirstName", SqlDbType.NVarChar) { Value = entity.ToFirstName },
-                new SqlParameter("@ToLastName", SqlDbType.NVarChar) { Value = entity.ToLastName },
-                new SqlParameter("@ToEmailAddress", SqlDbType.NVarChar) { Value = (object)entity.ToEmailAddress ?? DBNull.Value },
-                new SqlParameter("@ToPhoneNumber", SqlDbType.NVarChar) { Value = (object)entity.ToPhoneNumber ?? DBNull.Value },
-                new SqlParameter("@OnDelete", SqlDbType.Bit) { Value = entity.OnDelete },
-                new SqlParameter("@OnDownload", SqlDbType.Bit) { Value = entity.OnDownload },
-                new SqlParameter("@OnUpload", SqlDbType.Bit) { Value = entity.OnUpload },
+                new SqlParameter("IdentityId", SqlDbType.UniqueIdentifier) { Value = entity.IdentityId },
+                new SqlParameter("ToFirstName", SqlDbType.NVarChar) { Value = entity.ToFirstName },
+                new SqlParameter("ToLastName", SqlDbType.NVarChar) { Value = entity.ToLastName },
+                new SqlParameter("ToEmailAddress", SqlDbType.NVarChar) { Value = (object)entity.ToEmailAddress ?? DBNull.Value },
+                new SqlParameter("ToPhoneNumber", SqlDbType.NVarChar) { Value = (object)entity.ToPhoneNumber ?? DBNull.Value },
+                new SqlParameter("OnDelete", SqlDbType.Bit) { Value = entity.OnDelete },
+                new SqlParameter("OnDownload", SqlDbType.Bit) { Value = entity.OnDownload },
+                new SqlParameter("OnUpload", SqlDbType.Bit) { Value = entity.OnUpload },
                 rvalue,
             };
 
@@ -57,7 +57,7 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
 
             var pvalues = new []
             {
-                new SqlParameter("@Id", SqlDbType.UniqueIdentifier) { Value = entity.Id },
+                new SqlParameter("Id", SqlDbType.UniqueIdentifier) { Value = entity.Id },
                 rvalue,
             };
 
@@ -94,15 +94,15 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
 
             var pvalues = new []
             {
-                new SqlParameter("@Id", SqlDbType.UniqueIdentifier) { Value = entity.Id },
-                new SqlParameter("@IdentityId", SqlDbType.UniqueIdentifier) { Value = entity.IdentityId },
-                new SqlParameter("@ToFirstName", SqlDbType.NVarChar) { Value = entity.ToFirstName },
-                new SqlParameter("@ToLastName", SqlDbType.NVarChar) { Value = entity.ToLastName },
-                new SqlParameter("@ToEmailAddress", SqlDbType.NVarChar) { Value = (object)entity.ToEmailAddress ?? DBNull.Value },
-                new SqlParameter("@ToPhoneNumber", SqlDbType.NVarChar) { Value = (object)entity.ToPhoneNumber ?? DBNull.Value },
-                new SqlParameter("@OnDelete", SqlDbType.Bit) { Value = entity.OnDelete },
-                new SqlParameter("@OnDownload", SqlDbType.Bit) { Value = entity.OnDownload },
-                new SqlParameter("@OnUpload", SqlDbType.Bit) { Value = entity.OnUpload },
+                new SqlParameter("Id", SqlDbType.UniqueIdentifier) { Value = entity.Id },
+                new SqlParameter("IdentityId", SqlDbType.UniqueIdentifier) { Value = entity.IdentityId },
+                new SqlParameter("ToFirstName", SqlDbType.NVarChar) { Value = entity.ToFirstName },
+                new SqlParameter("ToLastName", SqlDbType.NVarChar) { Value = entity.ToLastName },
+                new SqlParameter("ToEmailAddress", SqlDbType.NVarChar) { Value = (object)entity.ToEmailAddress ?? DBNull.Value },
+                new SqlParameter("ToPhoneNumber", SqlDbType.NVarChar) { Value = (object)entity.ToPhoneNumber ?? DBNull.Value },
+                new SqlParameter("OnDelete", SqlDbType.Bit) { Value = entity.OnDelete },
+                new SqlParameter("OnDownload", SqlDbType.Bit) { Value = entity.OnDownload },
+                new SqlParameter("OnUpload", SqlDbType.Bit) { Value = entity.OnUpload },
                 rvalue,
             };
 

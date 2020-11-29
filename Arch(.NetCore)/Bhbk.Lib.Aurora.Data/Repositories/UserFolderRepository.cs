@@ -21,10 +21,10 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
 
             var pvalues = new []
             {
-                new SqlParameter("@IdentityId", SqlDbType.UniqueIdentifier) { Value = entity.IdentityId },
-                new SqlParameter("@ParentId", SqlDbType.UniqueIdentifier) { Value = entity.ParentId.HasValue ? (object)entity.ParentId.Value : DBNull.Value },
-                new SqlParameter("@VirtualName", SqlDbType.NVarChar) { Value = entity.VirtualName },
-                new SqlParameter("@IsReadOnly", SqlDbType.Bit) { Value = entity.IsReadOnly },
+                new SqlParameter("IdentityId", SqlDbType.UniqueIdentifier) { Value = entity.IdentityId },
+                new SqlParameter("ParentId", SqlDbType.UniqueIdentifier) { Value = entity.ParentId.HasValue ? (object)entity.ParentId.Value : DBNull.Value },
+                new SqlParameter("VirtualName", SqlDbType.NVarChar) { Value = entity.VirtualName },
+                new SqlParameter("IsReadOnly", SqlDbType.Bit) { Value = entity.IsReadOnly },
                 rvalue,
             };
 
@@ -53,7 +53,7 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
 
             var pvalues = new []
             {
-                new SqlParameter("@Id", SqlDbType.UniqueIdentifier) { Value = entity.Id },
+                new SqlParameter("Id", SqlDbType.UniqueIdentifier) { Value = entity.Id },
                 rvalue,
             };
 
@@ -90,13 +90,13 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
 
             var pvalues = new []
             {
-                new SqlParameter("@Id", SqlDbType.UniqueIdentifier) { Value = entity.Id },
-                new SqlParameter("@IdentityId", SqlDbType.UniqueIdentifier) { Value = entity.IdentityId },
-                new SqlParameter("@ParentId", SqlDbType.UniqueIdentifier) { Value = entity.ParentId.HasValue ? (object)entity.ParentId.Value : DBNull.Value },
-                new SqlParameter("@VirtualName", SqlDbType.NVarChar) { Value = entity.VirtualName },
-                new SqlParameter("@IsReadOnly", SqlDbType.Bit) { Value = entity.IsReadOnly },
-                new SqlParameter("@LastAccessedUtc", SqlDbType.DateTimeOffset) { Value = entity.LastAccessedUtc },
-                new SqlParameter("@LastUpdatedUtc", SqlDbType.DateTimeOffset) { Value = entity.LastUpdatedUtc },
+                new SqlParameter("Id", SqlDbType.UniqueIdentifier) { Value = entity.Id },
+                new SqlParameter("IdentityId", SqlDbType.UniqueIdentifier) { Value = entity.IdentityId },
+                new SqlParameter("ParentId", SqlDbType.UniqueIdentifier) { Value = entity.ParentId.HasValue ? (object)entity.ParentId.Value : DBNull.Value },
+                new SqlParameter("VirtualName", SqlDbType.NVarChar) { Value = entity.VirtualName },
+                new SqlParameter("IsReadOnly", SqlDbType.Bit) { Value = entity.IsReadOnly },
+                new SqlParameter("LastAccessedUtc", SqlDbType.DateTimeOffset) { Value = entity.LastAccessedUtc },
+                new SqlParameter("LastUpdatedUtc", SqlDbType.DateTimeOffset) { Value = entity.LastUpdatedUtc },
                 rvalue,
             };
 

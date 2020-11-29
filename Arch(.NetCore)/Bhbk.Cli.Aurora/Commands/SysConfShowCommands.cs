@@ -23,7 +23,7 @@ namespace Bhbk.Cli.Aurora.Commands
             var instance = new ContextService(InstanceContext.DeployedOrLocal);
             _uow = new UnitOfWork(_conf["Databases:AuroraEntities"], instance);
 
-            IsCommand("sys-conf-show", "Show config key/value pair");
+            IsCommand("sys-conf-show", "Show config key/value pair(s)");
         }
 
         public override int Run(string[] remainingArguments)

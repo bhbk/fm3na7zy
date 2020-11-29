@@ -30,7 +30,7 @@ namespace Bhbk.Cli.Aurora.Commands
             var instance = new ContextService(InstanceContext.DeployedOrLocal);
             _uow = new UnitOfWork(_conf["Databases:AuroraEntities"], instance);
 
-            IsCommand("user-mount-delete", "Delete user mount");
+            IsCommand("user-mount-delete", "Delete mount for user");
 
             HasRequiredOption("u|user=", "Enter user that already exists", arg =>
             {
@@ -42,7 +42,8 @@ namespace Bhbk.Cli.Aurora.Commands
                         new List<Expression<Func<User, object>>>()
                         {
                             x => x.Mount,
-                        }).SingleOrDefault();
+                        })
+                    .SingleOrDefault();
 
                 if (_user == null)
                     throw new ConsoleHelpAsException($"  *** Invalid user '{arg}' ***");

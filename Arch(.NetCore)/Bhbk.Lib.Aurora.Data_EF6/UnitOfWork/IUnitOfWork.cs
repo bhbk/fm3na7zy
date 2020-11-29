@@ -10,6 +10,7 @@ namespace Bhbk.Lib.Aurora.Data_EF6.UnitOfWork
         IGenericRepository<Network> Networks { get; }
         IGenericRepository<PrivateKey> PrivateKeys { get; }
         IGenericRepository<PublicKey> PublicKeys { get; }
+        IGenericRepository<Session> Sessions { get; }
         IGenericRepository<Setting> Settings { get; }
         IGenericRepository<User> Users { get; }
         IGenericRepository<UserAlert> UserAlerts { get; }

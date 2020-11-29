@@ -30,7 +30,7 @@ namespace Bhbk.Cli.Aurora.Commands
             var instance = new ContextService(InstanceContext.DeployedOrLocal);
             _uow = new UnitOfWork(_conf["Databases:AuroraEntities"], instance);
 
-            IsCommand("user-login-show", "Show user login");
+            IsCommand("user-login-show", "Show login for user");
 
             HasRequiredOption("u|user=", "Enter existing user", arg =>
             {
@@ -46,7 +46,9 @@ namespace Bhbk.Cli.Aurora.Commands
                             x => x.Networks,
                             x => x.PrivateKeys,
                             x => x.PublicKeys,
-                        }).SingleOrDefault();
+                            x => x.Sessions,
+                        })
+                    .SingleOrDefault();
 
                 if (_user == null)
                     throw new ConsoleHelpAsException($"  *** Invalid user '{arg}' ***");
@@ -64,6 +66,7 @@ namespace Bhbk.Cli.Aurora.Commands
 
                 OutputFactory.StdOutKeyPairs(_user.PublicKeys.OrderBy(x => x.CreatedUtc), _user.PrivateKeys);
                 OutputFactory.StdOutNetworks(_user.Networks.OrderBy(x => x.Action));
+                OutputFactory.StdOutSessions(_user.Sessions.OrderBy(x => x.RemoteEndPoint).ThenBy(x => x.CreatedUtc));
 
                 return StandardOutput.FondFarewell();
             }

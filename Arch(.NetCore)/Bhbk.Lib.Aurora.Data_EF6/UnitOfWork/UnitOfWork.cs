@@ -15,6 +15,7 @@ namespace Bhbk.Lib.Aurora.Data_EF6.UnitOfWork
         public IGenericRepository<Network> Networks { get; private set; }
         public IGenericRepository<PrivateKey> PrivateKeys { get; private set; }
         public IGenericRepository<PublicKey> PublicKeys { get; private set; }
+        public IGenericRepository<Session> Sessions { get; private set; }
         public IGenericRepository<Setting> Settings { get; private set; }
         public IGenericRepository<User> Users { get; private set; }
         public IGenericRepository<UserAlert> UserAlerts { get; private set; }
@@ -45,7 +46,6 @@ namespace Bhbk.Lib.Aurora.Data_EF6.UnitOfWork
                     {
                         throw new NotImplementedException();
                     }
-                    break;
 
                 default:
                     throw new NotImplementedException();
@@ -60,6 +60,7 @@ namespace Bhbk.Lib.Aurora.Data_EF6.UnitOfWork
             Networks = new GenericRepository<Network>(_context);
             PrivateKeys = new GenericRepository<PrivateKey>(_context);
             PublicKeys = new GenericRepository<PublicKey>(_context);
+            Sessions = new GenericRepository<Session>(_context);
             Settings = new GenericRepository<Setting>(_context);
             Users = new GenericRepository<User>(_context);
             UserAlerts = new GenericRepository<UserAlert>(_context);

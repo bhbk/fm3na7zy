@@ -11,6 +11,8 @@ nuget restore Bhbk.Lib.Aurora.Data_EF6\Bhbk.Lib.Aurora.Data_EF6.csproj -Solution
 rem build and test .net standard/core assemblies...
 dotnet restore Bhbk.Aurora.sln --verbosity quiet
 dotnet build Bhbk.Aurora.sln --configuration Release --verbosity quiet /p:platform=x64
+dotnet test Bhbk.Lib.Aurora.Data.Tests\Bhbk.Lib.Aurora.Data.Tests.csproj --configuration Release /p:CollectCoverage=true /p:CoverletOutput=bin\Release\
+dotnet test Bhbk.Lib.Aurora.Data_EF6.Tests\Bhbk.Lib.Aurora.Data_EF6.Tests.csproj --configuration Release /p:CollectCoverage=true /p:CoverletOutput=bin\Release\
 rem dotnet test Bhbk.Daemon.Aurora.FTP.Tests\Bhbk.Daemon.Aurora.FTP.Tests.csproj --configuration Release /p:CollectCoverage=true /p:CoverletOutput=bin\Release\
 rem dotnet test Bhbk.Daemon.Aurora.SFTP.Tests\Bhbk.Daemon.Aurora.SFTP.Tests.csproj --configuration Release /p:CollectCoverage=true /p:CoverletOutput=bin\Release\
 rem dotnet test Bhbk.WebApi.Aurora.Tests\Bhbk.WebApi.Aurora.Tests.csproj --configuration Release /p:CollectCoverage=true /p:CoverletOutput=bin\Release\

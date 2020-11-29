@@ -1,6 +1,7 @@
 ﻿
 CREATE PROCEDURE [svc].[usp_PublicKey_Insert]
-     @IdentityId			UNIQUEIDENTIFIER
+	 @Id					UNIQUEIDENTIFIER
+    ,@IdentityId			UNIQUEIDENTIFIER
     ,@PrivateKeyId			UNIQUEIDENTIFIER
     ,@KeyValue				NVARCHAR (MAX) 
     ,@KeyAlgo				NVARCHAR (16) 
@@ -17,7 +18,6 @@ BEGIN
 
 	BEGIN TRY
 
-		DECLARE @PUBLICKEYID UNIQUEIDENTIFIER = NEWID()
         DECLARE @CREATEDUTC DATETIMEOFFSET (7) = GETUTCDATE()
 
 		INSERT INTO [dbo].[tbl_PublicKey]
@@ -37,7 +37,7 @@ BEGIN
 			)
 		VALUES
 			(
-			 @PUBLICKEYID          
+			 @Id         
 			,@IdentityId
 			,@PrivateKeyId
 			,@KeyValue
@@ -54,7 +54,7 @@ BEGIN
 		IF @@ROWCOUNT != 1
 			THROW 51000, 'ERROR', 1;
 
-		SELECT * FROM [dbo].[tbl_PublicKey] WHERE Id = @PUBLICKEYID
+		SELECT * FROM [dbo].[tbl_PublicKey] WHERE Id = @Id
 
     END TRY
 

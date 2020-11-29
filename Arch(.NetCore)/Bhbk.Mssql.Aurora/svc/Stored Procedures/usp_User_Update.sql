@@ -3,11 +3,13 @@ CREATE PROCEDURE [svc].[usp_User_Update]
      @IdentityId			UNIQUEIDENTIFIER
     ,@IdentityAlias			NVARCHAR (128) 
     ,@FileSystemType		NVARCHAR (16) 
+	,@FileSystemChrootPath	NVARCHAR (64)
     ,@IsPasswordRequired	BIT
     ,@IsPublicKeyRequired	BIT
     ,@IsFileSystemReadOnly	BIT
 	,@QuotaInBytes			BIGINT
 	,@QuotaUsedInBytes		BIGINT
+    ,@ConcurrentSessions    SMALLINT
     ,@Debugger				NVARCHAR (16) 
     ,@IsEnabled				BIT
     ,@IsDeletable			BIT
@@ -24,11 +26,13 @@ BEGIN
         SET
 			 IdentityAlias			= @IdentityAlias
 			,FileSystemType			= @FileSystemType
+			,FileSystemChrootPath	= @FileSystemChrootPath
 			,IsPasswordRequired		= @IsPasswordRequired
 			,IsPublicKeyRequired	= @IsPublicKeyRequired
 			,IsFileSystemReadOnly	= @IsFileSystemReadOnly
 			,QuotaInBytes			= @QuotaInBytes
 			,QuotaUsedInBytes		= @QuotaUsedInBytes
+            ,ConcurrentSessions     = @ConcurrentSessions
 			,Debugger				= @Debugger
 			,IsEnabled				= @IsEnabled
 			,IsDeletable			= @IsDeletable

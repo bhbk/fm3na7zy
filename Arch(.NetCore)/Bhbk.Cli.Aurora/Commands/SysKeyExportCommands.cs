@@ -31,7 +31,7 @@ namespace Bhbk.Cli.Aurora.Commands
             var instance = new ContextService(InstanceContext.DeployedOrLocal);
             _uow = new UnitOfWork(_conf["Databases:AuroraEntities"], instance);
 
-            IsCommand("sys-key-export", "Export private/public key for system");
+            IsCommand("sys-key-export", "Export public/private key pair for system");
         }
 
         public override int Run(string[] remainingArguments)
@@ -42,7 +42,7 @@ namespace Bhbk.Cli.Aurora.Commands
                     .Where(x => x.IdentityId == null).ToLambda());
 
                 var privKeys = _uow.PrivateKeys.Get(QueryExpressionFactory.GetQueryExpression<PrivateKey>()
-                    .Where(x => x.IdentityId == null && x.IsDeletable == true).ToLambda());
+                    .Where(x => x.IdentityId == null).ToLambda());
 
                 OutputFactory.StdOutKeyPairs(pubKeys.OrderBy(x => x.CreatedUtc), privKeys);
 
@@ -86,33 +86,35 @@ namespace Bhbk.Cli.Aurora.Commands
                             .Where(x => x.IdentityId == null && x.PrivateKeyId == pubKey.PrivateKeyId).ToLambda())
                             .Single();
 
+                        var privKeyPass = AES.DecryptString(privKey.KeyPass, _conf["Databases:AuroraSecret"]);
+
                         //private newopenssh key format
                         var privNewOpenSshFile = new FileInfo(dir + "priv." + SshPrivateKeyFormat.NewOpenSsh.ToString().ToLower() + ".txt");
-                        var privNewOpenSshBytes = KeyHelper.ExportPrivKey(_conf, privKey, SshPrivateKeyFormat.NewOpenSsh, privKey.KeyPass);
+                        var privNewOpenSshBytes = KeyHelper.ExportPrivKey(privKey, SshPrivateKeyFormat.NewOpenSsh, privKeyPass);
                         File.WriteAllBytes(privNewOpenSshFile.FullName, privNewOpenSshBytes);
                         Console.Out.WriteLine("Created " + privNewOpenSshFile);
 
                         //private openssh key format
                         var privOpenSshFile = new FileInfo(dir + "priv." + SshPrivateKeyFormat.OpenSsh.ToString().ToLower() + ".txt");
-                        var privOpenSshBytes = KeyHelper.ExportPrivKey(_conf, privKey, SshPrivateKeyFormat.OpenSsh, privKey.KeyPass);
+                        var privOpenSshBytes = KeyHelper.ExportPrivKey(privKey, SshPrivateKeyFormat.OpenSsh, privKeyPass);
                         File.WriteAllBytes(privOpenSshFile.FullName, privOpenSshBytes);
                         Console.Out.WriteLine("Created " + privOpenSshFile);
 
                         //private pkcs8 key format
                         var privPcks8File = new FileInfo(dir + "priv." + SshPrivateKeyFormat.Pkcs8.ToString().ToLower() + ".txt");
-                        var privPcks8Bytes = KeyHelper.ExportPrivKey(_conf, privKey, SshPrivateKeyFormat.Pkcs8, privKey.KeyPass);
+                        var privPcks8Bytes = KeyHelper.ExportPrivKey(privKey, SshPrivateKeyFormat.Pkcs8, privKeyPass);
                         File.WriteAllBytes(privPcks8File.FullName, privPcks8Bytes);
                         Console.Out.WriteLine("Created " + privPcks8File);
 
                         //private putty key format
                         var privPuttyFile = new FileInfo(dir + "priv." + SshPrivateKeyFormat.Putty.ToString().ToLower() + ".txt");
-                        var privPuttyBytes = KeyHelper.ExportPrivKey(_conf, privKey, SshPrivateKeyFormat.Putty, privKey.KeyPass);
+                        var privPuttyBytes = KeyHelper.ExportPrivKey(privKey, SshPrivateKeyFormat.Putty, privKeyPass);
                         File.WriteAllBytes(privPuttyFile.FullName, privPuttyBytes);
                         Console.Out.WriteLine("Created " + privPuttyFile);
 
                         //private key password in cleartext
                         var privKeyPassFile = new FileInfo(dir + "priv.cleartext_passowrd.txt");
-                        File.WriteAllText(privKeyPassFile.FullName, AES.DecryptString(privKey.KeyPass, _conf["Databases:AuroraSecret"]));
+                        File.WriteAllText(privKeyPassFile.FullName, privKeyPass);
                         Console.Out.WriteLine("Created " + privKeyPassFile);
                     }
                 }

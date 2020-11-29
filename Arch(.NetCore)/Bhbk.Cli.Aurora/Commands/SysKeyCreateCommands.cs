@@ -33,7 +33,7 @@ namespace Bhbk.Cli.Aurora.Commands
             var instance = new ContextService(InstanceContext.DeployedOrLocal);
             _uow = new UnitOfWork(_conf["Databases:AuroraEntities"], instance);
 
-            IsCommand("sys-key-create", "Create private/public key for system");
+            IsCommand("sys-key-create", "Create public/private key pair for system");
 
             HasRequiredOption("a|alg=", "Enter key algorithm", arg =>
             {
@@ -59,8 +59,9 @@ namespace Bhbk.Cli.Aurora.Commands
             {
                 if (string.IsNullOrEmpty(_privKeyPass))
                 {
-                    Console.Out.WriteLine($"  *** The password for the private key *** : {_privKeyPass}");
                     _privKeyPass = AlphaNumeric.CreateString(32);
+                    Console.Out.WriteLine($"  *** The password for the private key *** : {_privKeyPass}");
+                    Console.Out.WriteLine();
                 }
                 else
                 {
@@ -69,10 +70,12 @@ namespace Bhbk.Cli.Aurora.Commands
                     Console.Out.WriteLine();
                 }
 
-                var keyPair = KeyHelper.CreateKeyPair(_conf, _uow, _keyAlgo, _privKeySize, _privKeyPass, SignatureHashAlgorithm.SHA256);
+                var keyPair = KeyHelper.CreateKeyPair(_conf, _uow, _keyAlgo, SignatureHashAlgorithm.SHA256, _privKeySize, _privKeyPass);
 
                 if (keyPair.Item1 != null)
                     _uow.PublicKeys.Create(keyPair.Item1);
+
+                _uow.Commit();
 
                 if (keyPair.Item2 != null)
                     _uow.PrivateKeys.Create(keyPair.Item2);

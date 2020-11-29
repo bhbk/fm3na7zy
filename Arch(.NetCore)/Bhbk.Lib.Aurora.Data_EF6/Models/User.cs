@@ -24,16 +24,19 @@ namespace Bhbk.Lib.Aurora.Data_EF6.Models
             this.PrivateKeys = new HashSet<PrivateKey>();
             this.PublicKeys = new HashSet<PublicKey>();
             this.Settings = new HashSet<Setting>();
+            this.Sessions = new HashSet<Session>();
         }
     
         public System.Guid IdentityId { get; set; }
         public string IdentityAlias { get; set; }
         public string FileSystemType { get; set; }
+        public string FileSystemChrootPath { get; set; }
         public bool IsPasswordRequired { get; set; }
         public bool IsPublicKeyRequired { get; set; }
         public bool IsFileSystemReadOnly { get; set; }
         public long QuotaInBytes { get; set; }
         public long QuotaUsedInBytes { get; set; }
+        public short ConcurrentSessions { get; set; }
         public string Debugger { get; set; }
         public bool IsEnabled { get; set; }
         public bool IsDeletable { get; set; }
@@ -55,5 +58,7 @@ namespace Bhbk.Lib.Aurora.Data_EF6.Models
         public virtual ICollection<PublicKey> PublicKeys { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Setting> Settings { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<Session> Sessions { get; set; }
     }
 }

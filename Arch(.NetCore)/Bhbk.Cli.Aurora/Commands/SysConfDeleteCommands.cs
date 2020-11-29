@@ -17,7 +17,6 @@ namespace Bhbk.Cli.Aurora.Commands
     {
         private readonly IConfiguration _conf;
         private readonly IUnitOfWork _uow;
-        private bool _delete = false, _deleteAll = false;
 
         public SysConfDeleteCommands()
         {
@@ -29,16 +28,6 @@ namespace Bhbk.Cli.Aurora.Commands
             _uow = new UnitOfWork(_conf["Databases:AuroraEntities"], instance);
 
             IsCommand("sys-conf-delete", "Delete config key/value pair");
-
-            HasOption("d|delete", "Delete a config key/value pair", arg =>
-            {
-                _delete = true;
-            });
-
-            HasOption("a|delete-all", "Delete all config key/value pairs", arg =>
-            {
-                _deleteAll = true;
-            });
         }
 
         public override int Run(string[] remainingArguments)
@@ -50,24 +39,16 @@ namespace Bhbk.Cli.Aurora.Commands
 
                 OutputFactory.StdOutSettings(configs);
 
-                if (_delete)
-                {
-                    Console.Out.WriteLine();
-                    Console.Out.Write("  *** Enter GUID of config key/value pair to delete *** : ");
-                    var input = Guid.Parse(StandardInput.GetInput());
+                Console.Out.WriteLine();
+                Console.Out.Write("  *** Enter GUID of config key/value pair to delete *** : ");
+                var input = Guid.Parse(StandardInput.GetInput());
 
-                    var config = configs.Where(x => x.Id == input)
-                        .SingleOrDefault();
+                var config = configs.Where(x => x.Id == input)
+                    .SingleOrDefault();
 
-                    if (config != null)
-                    {
-                        _uow.Settings.Delete(config);
-                        _uow.Commit();
-                    }
-                }
-                else if (_deleteAll)
+                if (config != null)
                 {
-                    _uow.Settings.Delete(configs);
+                    _uow.Settings.Delete(config);
                     _uow.Commit();
                 }
 

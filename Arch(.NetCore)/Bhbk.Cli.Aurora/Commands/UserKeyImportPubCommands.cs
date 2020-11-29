@@ -49,7 +49,8 @@ namespace Bhbk.Cli.Aurora.Commands
                         {
                             x => x.PrivateKeys,
                             x => x.PublicKeys
-                        }).SingleOrDefault();
+                        })
+                    .SingleOrDefault();
 
                 if (_user == null)
                     throw new ConsoleHelpAsException($"  *** Invalid user '{arg}' ***");

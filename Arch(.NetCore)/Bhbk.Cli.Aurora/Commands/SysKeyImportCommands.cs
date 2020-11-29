@@ -1,4 +1,5 @@
-﻿using Bhbk.Lib.Aurora.Data_EF6.Models;
+﻿using Bhbk.Cli.Aurora.Factories;
+using Bhbk.Lib.Aurora.Data_EF6.Models;
 using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
 using Bhbk.Lib.Aurora.Domain.Helpers;
 using Bhbk.Lib.CommandLine.IO;
@@ -11,6 +12,7 @@ using Microsoft.Extensions.Configuration;
 using Rebex.Security.Certificates;
 using Rebex.Security.Cryptography;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
@@ -32,7 +34,7 @@ namespace Bhbk.Cli.Aurora.Commands
             var instance = new ContextService(InstanceContext.DeployedOrLocal);
             _uow = new UnitOfWork(_conf["Databases:AuroraEntities"], instance);
 
-            IsCommand("sys-key-import", "Import private/public key for system");
+            IsCommand("sys-key-import", "Import public/private key for system");
 
             HasRequiredOption("f|file=", "Enter file for import", arg =>
             {
@@ -63,9 +65,9 @@ namespace Bhbk.Cli.Aurora.Commands
                 {
                     Console.Out.Write("  *** Enter password for the private key *** : ");
                     _privKeyPass = StandardInput.GetHiddenInput();
+                    Console.Out.WriteLine();
                 }
 
-                Console.Out.WriteLine();
                 Console.Out.WriteLine("Opened " + _path.FullName);
                 Console.Out.WriteLine();
 
@@ -74,15 +76,37 @@ namespace Bhbk.Cli.Aurora.Commands
                 using (FileStream fileStream = new FileStream(_path.FullName, FileMode.Open, FileAccess.Read))
                     fileStream.CopyTo(stream);
 
-                var keyPair = KeyHelper.ImportKeyPair(_conf, _uow, _privKeyPass, SignatureHashAlgorithm.SHA256, stream);
+                var keyPair = KeyHelper.ImportKeyPair(_conf, _uow, SignatureHashAlgorithm.SHA256, stream, _privKeyPass);
 
-                if (keyPair.Item1 != null)
+                var pubKey = _uow.PublicKeys.Get(QueryExpressionFactory.GetQueryExpression<PublicKey>()
+                    .Where(x => x.Id == keyPair.Item1.Id).ToLambda())
+                    .SingleOrDefault();
+
+                var privKey = _uow.PrivateKeys.Get(QueryExpressionFactory.GetQueryExpression<PrivateKey>()
+                    .Where(x => x.PublicKeyId == keyPair.Item1.Id).ToLambda())
+                    .SingleOrDefault();
+
+                if (pubKey == null)
+                {
                     _uow.PublicKeys.Create(keyPair.Item1);
+                    _uow.Commit();
+                }
 
-                if (keyPair.Item2 != null)
+                if (privKey == null)
+                {
                     _uow.PrivateKeys.Create(keyPair.Item2);
+                    _uow.Commit();
+                }
 
-                _uow.Commit();
+                pubKey = _uow.PublicKeys.Get(QueryExpressionFactory.GetQueryExpression<PublicKey>()
+                    .Where(x => x.Id == keyPair.Item1.Id).ToLambda())
+                    .Single();
+
+                privKey = _uow.PrivateKeys.Get(QueryExpressionFactory.GetQueryExpression<PrivateKey>()
+                    .Where(x => x.PublicKeyId == keyPair.Item1.Id).ToLambda())
+                    .Single();
+
+                OutputFactory.StdOutKeyPairs(new List<PublicKey> { pubKey }, new List<PrivateKey> { privKey });
 
                 return StandardOutput.FondFarewell();
             }

@@ -102,6 +102,25 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_PublicKey' does not have a prim
           <Property Name="LastUpdatedUtc" Type="datetimeoffset" Precision="7" />
         </EntityType>
         <!--Errors Found During Generation:
+warning 6002: The table/view 'BhbkAurora.svc.uvw_Session' does not have a primary key defined. The key has been inferred and the definition was created as a read-only table/view.-->
+        <EntityType Name="uvw_Session">
+          <Key>
+            <PropertyRef Name="Id" />
+            
+            
+          </Key>
+          <Property Name="Id" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="IdentityId" Type="uniqueidentifier" />
+          <Property Name="IdentityAlias" Type="varchar" MaxLength="128" />
+          <Property Name="CallPath" Type="varchar" MaxLength="256" Nullable="false" />
+          <Property Name="Details" Type="varchar(max)" />
+          <Property Name="LocalEndPoint" Type="varchar" MaxLength="128" />
+          <Property Name="LocalSoftwareIdentifier" Type="varchar" MaxLength="128" />
+          <Property Name="RemoteEndPoint" Type="varchar" MaxLength="128" />
+          <Property Name="RemoteSoftwareIdentifier" Type="varchar" MaxLength="128" />
+          <Property Name="CreatedUtc" Type="datetimeoffset" Precision="7" Nullable="false" />
+        </EntityType>
+        <!--Errors Found During Generation:
 warning 6002: The table/view 'BhbkAurora.svc.uvw_Setting' does not have a primary key defined. The key has been inferred and the definition was created as a read-only table/view.-->
         <EntityType Name="uvw_Setting">
           <Key>
@@ -134,15 +153,18 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_User' does not have a primary k
             
             
             
+            
           </Key>
           <Property Name="IdentityId" Type="uniqueidentifier" Nullable="false" />
           <Property Name="IdentityAlias" Type="varchar" MaxLength="128" Nullable="false" />
           <Property Name="FileSystemType" Type="varchar" MaxLength="16" Nullable="false" />
+          <Property Name="FileSystemChrootPath" Type="varchar" MaxLength="64" />
           <Property Name="IsPasswordRequired" Type="bit" Nullable="false" />
           <Property Name="IsPublicKeyRequired" Type="bit" Nullable="false" />
           <Property Name="IsFileSystemReadOnly" Type="bit" Nullable="false" />
           <Property Name="QuotaInBytes" Type="bigint" Nullable="false" />
           <Property Name="QuotaUsedInBytes" Type="bigint" Nullable="false" />
+          <Property Name="ConcurrentSessions" Type="smallint" Nullable="false" />
           <Property Name="Debugger" Type="varchar" MaxLength="16" />
           <Property Name="IsEnabled" Type="bit" Nullable="false" />
           <Property Name="IsDeletable" Type="bit" Nullable="false" />
@@ -293,6 +315,7 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_UserMount' does not have a prim
           <Parameter Name="Id" Type="uniqueidentifier" Mode="In" />
         </Function>
         <Function Name="usp_PrivateKey_Insert" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="svc">
+          <Parameter Name="Id" Type="uniqueidentifier" Mode="In" />
           <Parameter Name="IdentityId" Type="uniqueidentifier" Mode="In" />
           <Parameter Name="PublicKeyId" Type="uniqueidentifier" Mode="In" />
           <Parameter Name="KeyValue" Type="nvarchar(max)" Mode="In" />
@@ -317,6 +340,7 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_UserMount' does not have a prim
           <Parameter Name="Id" Type="uniqueidentifier" Mode="In" />
         </Function>
         <Function Name="usp_PublicKey_Insert" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="svc">
+          <Parameter Name="Id" Type="uniqueidentifier" Mode="In" />
           <Parameter Name="IdentityId" Type="uniqueidentifier" Mode="In" />
           <Parameter Name="PrivateKeyId" Type="uniqueidentifier" Mode="In" />
           <Parameter Name="KeyValue" Type="nvarchar(max)" Mode="In" />
@@ -340,6 +364,28 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_UserMount' does not have a prim
           <Parameter Name="Comment" Type="nvarchar" Mode="In" />
           <Parameter Name="IsEnabled" Type="bit" Mode="In" />
           <Parameter Name="IsDeletable" Type="bit" Mode="In" />
+        </Function>
+        <Function Name="usp_Session_Delete" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="svc">
+          <Parameter Name="Id" Type="uniqueidentifier" Mode="In" />
+        </Function>
+        <Function Name="usp_Session_Insert" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="svc">
+          <Parameter Name="IdentityId" Type="uniqueidentifier" Mode="In" />
+          <Parameter Name="CallPath" Type="varchar" Mode="In" />
+          <Parameter Name="Details" Type="varchar(max)" Mode="In" />
+          <Parameter Name="LocalEndPoint" Type="varchar" Mode="In" />
+          <Parameter Name="LocalSoftwareIdentifier" Type="varchar" Mode="In" />
+          <Parameter Name="RemoteEndPoint" Type="varchar" Mode="In" />
+          <Parameter Name="RemoteSoftwareIdentifier" Type="varchar" Mode="In" />
+        </Function>
+        <Function Name="usp_Session_Update" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="svc">
+          <Parameter Name="Id" Type="uniqueidentifier" Mode="In" />
+          <Parameter Name="IdentityId" Type="uniqueidentifier" Mode="In" />
+          <Parameter Name="CallPath" Type="varchar" Mode="In" />
+          <Parameter Name="Details" Type="varchar(max)" Mode="In" />
+          <Parameter Name="LocalEndPoint" Type="varchar" Mode="In" />
+          <Parameter Name="LocalSoftwareIdentifier" Type="varchar" Mode="In" />
+          <Parameter Name="RemoteEndPoint" Type="varchar" Mode="In" />
+          <Parameter Name="RemoteSoftwareIdentifier" Type="varchar" Mode="In" />
         </Function>
         <Function Name="usp_Setting_Delete" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="svc">
           <Parameter Name="Id" Type="uniqueidentifier" Mode="In" />
@@ -375,11 +421,13 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_UserMount' does not have a prim
           <Parameter Name="IdentityId" Type="uniqueidentifier" Mode="In" />
           <Parameter Name="IdentityAlias" Type="nvarchar" Mode="In" />
           <Parameter Name="FileSystemType" Type="nvarchar" Mode="In" />
+          <Parameter Name="FileSystemChrootPath" Type="nvarchar" Mode="In" />
           <Parameter Name="IsPasswordRequired" Type="bit" Mode="In" />
           <Parameter Name="IsPublicKeyRequired" Type="bit" Mode="In" />
           <Parameter Name="IsFileSystemReadOnly" Type="bit" Mode="In" />
           <Parameter Name="QuotaInBytes" Type="bigint" Mode="In" />
           <Parameter Name="QuotaUsedInBytes" Type="bigint" Mode="In" />
+          <Parameter Name="ConcurrentSessions" Type="smallint" Mode="In" />
           <Parameter Name="Debugger" Type="nvarchar" Mode="In" />
           <Parameter Name="IsEnabled" Type="bit" Mode="In" />
           <Parameter Name="IsDeletable" Type="bit" Mode="In" />
@@ -534,6 +582,20 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_UserMount' does not have a prim
     [uvw_PublicKey].[LastUpdatedUtc] AS [LastUpdatedUtc]
     FROM [svc].[uvw_PublicKey] AS [uvw_PublicKey]</DefiningQuery>
           </EntitySet>
+          <EntitySet Name="uvw_Session" EntityType="Self.uvw_Session" store:Type="Views" store:Schema="svc">
+            <DefiningQuery>SELECT 
+    [uvw_Session].[Id] AS [Id], 
+    [uvw_Session].[IdentityId] AS [IdentityId], 
+    [uvw_Session].[IdentityAlias] AS [IdentityAlias], 
+    [uvw_Session].[CallPath] AS [CallPath], 
+    [uvw_Session].[Details] AS [Details], 
+    [uvw_Session].[LocalEndPoint] AS [LocalEndPoint], 
+    [uvw_Session].[LocalSoftwareIdentifier] AS [LocalSoftwareIdentifier], 
+    [uvw_Session].[RemoteEndPoint] AS [RemoteEndPoint], 
+    [uvw_Session].[RemoteSoftwareIdentifier] AS [RemoteSoftwareIdentifier], 
+    [uvw_Session].[CreatedUtc] AS [CreatedUtc]
+    FROM [svc].[uvw_Session] AS [uvw_Session]</DefiningQuery>
+          </EntitySet>
           <EntitySet Name="uvw_Setting" EntityType="Self.uvw_Setting" store:Type="Views" store:Schema="svc">
             <DefiningQuery>SELECT 
     [uvw_Setting].[Id] AS [Id], 
@@ -550,11 +612,13 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_UserMount' does not have a prim
     [uvw_User].[IdentityId] AS [IdentityId], 
     [uvw_User].[IdentityAlias] AS [IdentityAlias], 
     [uvw_User].[FileSystemType] AS [FileSystemType], 
+    [uvw_User].[FileSystemChrootPath] AS [FileSystemChrootPath], 
     [uvw_User].[IsPasswordRequired] AS [IsPasswordRequired], 
     [uvw_User].[IsPublicKeyRequired] AS [IsPublicKeyRequired], 
     [uvw_User].[IsFileSystemReadOnly] AS [IsFileSystemReadOnly], 
     [uvw_User].[QuotaInBytes] AS [QuotaInBytes], 
     [uvw_User].[QuotaUsedInBytes] AS [QuotaUsedInBytes], 
+    [uvw_User].[ConcurrentSessions] AS [ConcurrentSessions], 
     [uvw_User].[Debugger] AS [Debugger], 
     [uvw_User].[IsEnabled] AS [IsEnabled], 
     [uvw_User].[IsDeletable] AS [IsDeletable], 
@@ -710,11 +774,13 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_UserMount' does not have a prim
           <Property Name="IdentityId" Type="Guid" Nullable="false" />
           <Property Name="IdentityAlias" Type="String" MaxLength="128" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="FileSystemType" Type="String" MaxLength="16" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="FileSystemChrootPath" Type="String" MaxLength="64" FixedLength="false" Unicode="false" />
           <Property Name="IsPasswordRequired" Type="Boolean" Nullable="false" />
           <Property Name="IsPublicKeyRequired" Type="Boolean" Nullable="false" />
           <Property Name="IsFileSystemReadOnly" Type="Boolean" Nullable="false" />
           <Property Name="QuotaInBytes" Type="Int64" Nullable="false" />
           <Property Name="QuotaUsedInBytes" Type="Int64" Nullable="false" />
+          <Property Name="ConcurrentSessions" Type="Int16" Nullable="false" />
           <Property Name="Debugger" Type="String" MaxLength="16" FixedLength="false" Unicode="false" />
           <Property Name="IsEnabled" Type="Boolean" Nullable="false" />
           <Property Name="IsDeletable" Type="Boolean" Nullable="false" />
@@ -728,6 +794,7 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_UserMount' does not have a prim
           <NavigationProperty Name="PrivateKeys" Relationship="AuroraModels.User_PrivateKey" FromRole="User" ToRole="PrivateKey" />
           <NavigationProperty Name="PublicKeys" Relationship="AuroraModels.User_PublicKey" FromRole="User" ToRole="PublicKey" />
           <NavigationProperty Name="Settings" Relationship="AuroraModels.User_Setting" FromRole="User" ToRole="Setting" />
+          <NavigationProperty Name="Sessions" Relationship="AuroraModels.User_Session" FromRole="User" ToRole="Session" />
         </EntityType>
         <EntityType Name="UserAlert">
           <Key>
@@ -853,6 +920,7 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_UserMount' does not have a prim
           <Parameter Name="Id" Mode="In" Type="Guid" />
           </FunctionImport>
           <FunctionImport Name="usp_PrivateKey_Insert" ReturnType="Collection(AuroraModels.usp_PrivateKey_Insert_Result)">
+            <Parameter Name="Id" Mode="In" Type="Guid" />
             <Parameter Name="IdentityId" Mode="In" Type="Guid" />
             <Parameter Name="PublicKeyId" Mode="In" Type="Guid" />
             <Parameter Name="KeyValue" Mode="In" Type="String" />
@@ -877,6 +945,7 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_UserMount' does not have a prim
           <Parameter Name="Id" Mode="In" Type="Guid" />
           </FunctionImport>
           <FunctionImport Name="usp_PublicKey_Insert" ReturnType="Collection(AuroraModels.usp_PublicKey_Insert_Result)">
+            <Parameter Name="Id" Mode="In" Type="Guid" />
             <Parameter Name="IdentityId" Mode="In" Type="Guid" />
             <Parameter Name="PrivateKeyId" Mode="In" Type="Guid" />
             <Parameter Name="KeyValue" Mode="In" Type="String" />
@@ -935,11 +1004,13 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_UserMount' does not have a prim
             <Parameter Name="IdentityId" Mode="In" Type="Guid" />
             <Parameter Name="IdentityAlias" Mode="In" Type="String" />
             <Parameter Name="FileSystemType" Mode="In" Type="String" />
+            <Parameter Name="FileSystemChrootPath" Mode="In" Type="String" />
             <Parameter Name="IsPasswordRequired" Mode="In" Type="Boolean" />
             <Parameter Name="IsPublicKeyRequired" Mode="In" Type="Boolean" />
             <Parameter Name="IsFileSystemReadOnly" Mode="In" Type="Boolean" />
             <Parameter Name="QuotaInBytes" Mode="In" Type="Int64" />
             <Parameter Name="QuotaUsedInBytes" Mode="In" Type="Int64" />
+            <Parameter Name="ConcurrentSessions" Mode="In" Type="Int16" />
             <Parameter Name="Debugger" Mode="In" Type="String" />
             <Parameter Name="IsEnabled" Mode="In" Type="Boolean" />
             <Parameter Name="IsDeletable" Mode="In" Type="Boolean" />
@@ -1079,6 +1150,33 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_UserMount' does not have a prim
           <AssociationSet Name="User_UserMount" Association="AuroraModels.User_UserMount">
             <End Role="User" EntitySet="Users" />
             <End Role="UserMount" EntitySet="UserMounts" />
+          </AssociationSet>
+          <EntitySet Name="Sessions" EntityType="AuroraModels.Session" />
+          <FunctionImport Name="usp_Session_Delete">
+          <Parameter Name="Id" Mode="In" Type="Guid" />
+          </FunctionImport>
+          <FunctionImport Name="usp_Session_Insert" ReturnType="Collection(AuroraModels.usp_Session_Insert_Result)">
+            <Parameter Name="IdentityId" Mode="In" Type="Guid" />
+            <Parameter Name="CallPath" Mode="In" Type="String" />
+            <Parameter Name="Details" Mode="In" Type="String" />
+            <Parameter Name="LocalEndPoint" Mode="In" Type="String" />
+            <Parameter Name="LocalSoftwareIdentifier" Mode="In" Type="String" />
+            <Parameter Name="RemoteEndPoint" Mode="In" Type="String" />
+            <Parameter Name="RemoteSoftwareIdentifier" Mode="In" Type="String" />
+          </FunctionImport>
+          <FunctionImport Name="usp_Session_Update" ReturnType="Collection(AuroraModels.usp_Session_Update_Result)">
+            <Parameter Name="Id" Mode="In" Type="Guid" />
+            <Parameter Name="IdentityId" Mode="In" Type="Guid" />
+            <Parameter Name="CallPath" Mode="In" Type="String" />
+            <Parameter Name="Details" Mode="In" Type="String" />
+            <Parameter Name="LocalEndPoint" Mode="In" Type="String" />
+            <Parameter Name="LocalSoftwareIdentifier" Mode="In" Type="String" />
+            <Parameter Name="RemoteEndPoint" Mode="In" Type="String" />
+            <Parameter Name="RemoteSoftwareIdentifier" Mode="In" Type="String" />
+          </FunctionImport>
+          <AssociationSet Name="User_Session" Association="AuroraModels.User_Session">
+            <End Role="User" EntitySet="Users" />
+            <End Role="Session" EntitySet="Sessions" />
           </AssociationSet>
         </EntityContainer>
         <ComplexType Name="usp_Credential_Delete_Result">
@@ -1570,6 +1668,56 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_UserMount' does not have a prim
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <EntityType Name="Session">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Guid" Nullable="false" />
+          <Property Name="IdentityId" Type="Guid" />
+          <Property Name="IdentityAlias" Type="String" MaxLength="128" FixedLength="false" Unicode="false" />
+          <Property Name="CallPath" Type="String" Nullable="false" MaxLength="256" FixedLength="false" Unicode="false" />
+          <Property Name="Details" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="LocalEndPoint" Type="String" MaxLength="128" FixedLength="false" Unicode="false" />
+          <Property Name="LocalSoftwareIdentifier" Type="String" MaxLength="128" FixedLength="false" Unicode="false" />
+          <Property Name="RemoteEndPoint" Type="String" MaxLength="128" FixedLength="false" Unicode="false" />
+          <Property Name="RemoteSoftwareIdentifier" Type="String" MaxLength="128" FixedLength="false" Unicode="false" />
+          <Property Name="CreatedUtc" Type="DateTimeOffset" Nullable="false" Precision="7" />
+          <NavigationProperty Name="User" Relationship="AuroraModels.User_Session" FromRole="Session" ToRole="User" />
+        </EntityType>
+        <ComplexType Name="usp_Session_Insert_Result">
+          <Property Type="Guid" Name="Id" Nullable="false" />
+          <Property Type="Guid" Name="IdentityId" Nullable="true" />
+          <Property Type="String" Name="CallPath" Nullable="false" MaxLength="256" />
+          <Property Type="String" Name="Details" Nullable="true" />
+          <Property Type="String" Name="LocalEndPoint" Nullable="true" MaxLength="128" />
+          <Property Type="String" Name="LocalSoftwareIdentifier" Nullable="true" MaxLength="128" />
+          <Property Type="String" Name="RemoteEndPoint" Nullable="true" MaxLength="128" />
+          <Property Type="String" Name="RemoteSoftwareIdentifier" Nullable="true" MaxLength="128" />
+          <Property Type="DateTimeOffset" Name="CreatedUtc" Nullable="false" />
+        </ComplexType>
+        <ComplexType Name="usp_Session_Update_Result">
+          <Property Type="Guid" Name="Id" Nullable="false" />
+          <Property Type="Guid" Name="IdentityId" Nullable="true" />
+          <Property Type="String" Name="CallPath" Nullable="false" MaxLength="256" />
+          <Property Type="String" Name="Details" Nullable="true" />
+          <Property Type="String" Name="LocalEndPoint" Nullable="true" MaxLength="128" />
+          <Property Type="String" Name="LocalSoftwareIdentifier" Nullable="true" MaxLength="128" />
+          <Property Type="String" Name="RemoteEndPoint" Nullable="true" MaxLength="128" />
+          <Property Type="String" Name="RemoteSoftwareIdentifier" Nullable="true" MaxLength="128" />
+          <Property Type="DateTimeOffset" Name="CreatedUtc" Nullable="false" />
+        </ComplexType>
+        <Association Name="User_Session">
+          <End Type="AuroraModels.User" Role="User" Multiplicity="0..1" />
+          <End Type="AuroraModels.Session" Role="Session" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="User">
+              <PropertyRef Name="IdentityId" />
+            </Principal>
+            <Dependent Role="Session">
+              <PropertyRef Name="IdentityId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
       </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
@@ -1675,9 +1823,6 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_UserMount' does not have a prim
             </EntityTypeMapping>
             <EntityTypeMapping TypeName="AuroraModels.PrivateKey">
               <ModificationFunctionMapping>
-                <DeleteFunction FunctionName="AuroraModels.Store.usp_PrivateKey_Delete">
-                  <ScalarProperty Name="Id" ParameterName="Id" />
-                </DeleteFunction>
                 <UpdateFunction FunctionName="AuroraModels.Store.usp_PrivateKey_Update">
                   <ScalarProperty Name="IsDeletable" ParameterName="IsDeletable" Version="Current" />
                   <ScalarProperty Name="IsEnabled" ParameterName="IsEnabled" Version="Current" />
@@ -1691,6 +1836,7 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_UserMount' does not have a prim
                   <ResultBinding Name="LastUpdatedUtc" ColumnName="LastUpdatedUtc" />
                 </UpdateFunction>
                 <InsertFunction FunctionName="AuroraModels.Store.usp_PrivateKey_Insert">
+                  <ScalarProperty Name="Id" ParameterName="Id" />
                   <ScalarProperty Name="IsDeletable" ParameterName="IsDeletable" />
                   <ScalarProperty Name="IsEnabled" ParameterName="IsEnabled" />
                   <ScalarProperty Name="KeyFormat" ParameterName="KeyFormat" />
@@ -1699,9 +1845,11 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_UserMount' does not have a prim
                   <ScalarProperty Name="KeyValue" ParameterName="KeyValue" />
                   <ScalarProperty Name="PublicKeyId" ParameterName="PublicKeyId" />
                   <ScalarProperty Name="IdentityId" ParameterName="IdentityId" />
-                  <ResultBinding Name="Id" ColumnName="Id" />
                   <ResultBinding Name="CreatedUtc" ColumnName="CreatedUtc" />
                 </InsertFunction>
+                <DeleteFunction FunctionName="AuroraModels.Store.usp_PrivateKey_Delete">
+                  <ScalarProperty Name="Id" ParameterName="Id" />
+                </DeleteFunction>
               </ModificationFunctionMapping>
             </EntityTypeMapping>
           </EntitySetMapping>
@@ -1725,9 +1873,6 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_UserMount' does not have a prim
             </EntityTypeMapping>
             <EntityTypeMapping TypeName="AuroraModels.PublicKey">
               <ModificationFunctionMapping>
-                <DeleteFunction FunctionName="AuroraModels.Store.usp_PublicKey_Delete">
-                  <ScalarProperty Name="Id" ParameterName="Id" />
-                </DeleteFunction>
                 <UpdateFunction FunctionName="AuroraModels.Store.usp_PublicKey_Update">
                   <ScalarProperty Name="IsDeletable" ParameterName="IsDeletable" Version="Current" />
                   <ScalarProperty Name="IsEnabled" ParameterName="IsEnabled" Version="Current" />
@@ -1740,8 +1885,10 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_UserMount' does not have a prim
                   <ScalarProperty Name="PrivateKeyId" ParameterName="PrivateKeyId" Version="Current" />
                   <ScalarProperty Name="IdentityId" ParameterName="IdentityId" Version="Current" />
                   <ScalarProperty Name="Id" ParameterName="Id" Version="Current" />
+                  <ResultBinding Name="LastUpdatedUtc" ColumnName="LastUpdatedUtc" />
                 </UpdateFunction>
                 <InsertFunction FunctionName="AuroraModels.Store.usp_PublicKey_Insert">
+                  <ScalarProperty Name="Id" ParameterName="Id" />
                   <ScalarProperty Name="IsDeletable" ParameterName="IsDeletable" />
                   <ScalarProperty Name="IsEnabled" ParameterName="IsEnabled" />
                   <ScalarProperty Name="Comment" ParameterName="Comment" />
@@ -1752,7 +1899,11 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_UserMount' does not have a prim
                   <ScalarProperty Name="KeyValue" ParameterName="KeyValue" />
                   <ScalarProperty Name="PrivateKeyId" ParameterName="PrivateKeyId" />
                   <ScalarProperty Name="IdentityId" ParameterName="IdentityId" />
+                  <ResultBinding Name="CreatedUtc" ColumnName="CreatedUtc" />
                 </InsertFunction>
+                <DeleteFunction FunctionName="AuroraModels.Store.usp_PublicKey_Delete">
+                  <ScalarProperty Name="Id" ParameterName="Id" />
+                </DeleteFunction>
               </ModificationFunctionMapping>
             </EntityTypeMapping>
           </EntitySetMapping>
@@ -1792,6 +1943,8 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_UserMount' does not have a prim
           <EntitySetMapping Name="Users">
             <EntityTypeMapping TypeName="AuroraModels.User">
               <MappingFragment StoreEntitySet="uvw_User">
+                <ScalarProperty Name="FileSystemChrootPath" ColumnName="FileSystemChrootPath" />
+                <ScalarProperty Name="ConcurrentSessions" ColumnName="ConcurrentSessions" />
                 <ScalarProperty Name="IsFileSystemReadOnly" ColumnName="IsFileSystemReadOnly" />
                 <ScalarProperty Name="IsPublicKeyRequired" ColumnName="IsPublicKeyRequired" />
                 <ScalarProperty Name="IsPasswordRequired" ColumnName="IsPasswordRequired" />
@@ -1813,6 +1966,8 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_UserMount' does not have a prim
                   <ScalarProperty Name="IdentityId" ParameterName="IdentityId" />
                 </DeleteFunction>
                 <UpdateFunction FunctionName="AuroraModels.Store.usp_User_Update">
+                  <ScalarProperty Name="FileSystemChrootPath" ParameterName="FileSystemChrootPath" Version="Current" />
+                  <ScalarProperty Name="ConcurrentSessions" ParameterName="ConcurrentSessions" Version="Current" />
                   <ScalarProperty Name="IsFileSystemReadOnly" ParameterName="IsFileSystemReadOnly" Version="Current" />
                   <ScalarProperty Name="IsPublicKeyRequired" ParameterName="IsPublicKeyRequired" Version="Current" />
                   <ScalarProperty Name="IsPasswordRequired" ParameterName="IsPasswordRequired" Version="Current" />
@@ -1824,6 +1979,7 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_UserMount' does not have a prim
                   <ScalarProperty Name="FileSystemType" ParameterName="FileSystemType" Version="Current" />
                   <ScalarProperty Name="IdentityAlias" ParameterName="IdentityAlias" Version="Current" />
                   <ScalarProperty Name="IdentityId" ParameterName="IdentityId" Version="Current" />
+                  <ResultBinding Name="LastUpdatedUtc" ColumnName="LastUpdatedUtc" />
                 </UpdateFunction>
                 <InsertFunction FunctionName="AuroraModels.Store.usp_User_Insert">
                   <ScalarProperty Name="IsFileSystemReadOnly" ParameterName="IsFileSystemReadOnly" />
@@ -1836,6 +1992,9 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_UserMount' does not have a prim
                   <ScalarProperty Name="IdentityAlias" ParameterName="IdentityAlias" />
                   <ScalarProperty Name="IdentityId" ParameterName="IdentityId" />
                   <ResultBinding Name="IdentityId" ColumnName="IdentityId" />
+                  <ResultBinding Name="ConcurrentSessions" ColumnName="ConcurrentSessions" />
+                  <ResultBinding Name="QuotaInBytes" ColumnName="QuotaInBytes" />
+                  <ResultBinding Name="QuotaUsedInBytes" ColumnName="QuotaUsedInBytes" />
                   <ResultBinding Name="CreatedUtc" ColumnName="CreatedUtc" />
                 </InsertFunction>
               </ModificationFunctionMapping>
@@ -2505,6 +2664,71 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_UserMount' does not have a prim
                 <ScalarProperty Name="IsDeletable" ColumnName="IsDeletable" />
                 <ScalarProperty Name="CreatedUtc" ColumnName="CreatedUtc" />
                 <ScalarProperty Name="LastUpdatedUtc" ColumnName="LastUpdatedUtc" />
+              </ComplexTypeMapping>
+            </ResultMapping>
+          </FunctionImportMapping>
+          <EntitySetMapping Name="Sessions">
+            <EntityTypeMapping TypeName="AuroraModels.Session">
+              <MappingFragment StoreEntitySet="uvw_Session">
+                <ScalarProperty Name="CreatedUtc" ColumnName="CreatedUtc" />
+                <ScalarProperty Name="RemoteSoftwareIdentifier" ColumnName="RemoteSoftwareIdentifier" />
+                <ScalarProperty Name="RemoteEndPoint" ColumnName="RemoteEndPoint" />
+                <ScalarProperty Name="LocalSoftwareIdentifier" ColumnName="LocalSoftwareIdentifier" />
+                <ScalarProperty Name="LocalEndPoint" ColumnName="LocalEndPoint" />
+                <ScalarProperty Name="Details" ColumnName="Details" />
+                <ScalarProperty Name="CallPath" ColumnName="CallPath" />
+                <ScalarProperty Name="IdentityAlias" ColumnName="IdentityAlias" />
+                <ScalarProperty Name="IdentityId" ColumnName="IdentityId" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+            <EntityTypeMapping TypeName="AuroraModels.Session">
+              <ModificationFunctionMapping>
+                <DeleteFunction FunctionName="AuroraModels.Store.usp_Session_Delete">
+                  <ScalarProperty Name="Id" ParameterName="Id" />
+                </DeleteFunction>
+                <InsertFunction FunctionName="AuroraModels.Store.usp_Session_Insert">
+                  <ScalarProperty Name="RemoteSoftwareIdentifier" ParameterName="RemoteSoftwareIdentifier" />
+                  <ScalarProperty Name="RemoteEndPoint" ParameterName="RemoteEndPoint" />
+                  <ScalarProperty Name="LocalSoftwareIdentifier" ParameterName="LocalSoftwareIdentifier" />
+                  <ScalarProperty Name="LocalEndPoint" ParameterName="LocalEndPoint" />
+                  <ScalarProperty Name="Details" ParameterName="Details" />
+                  <ScalarProperty Name="CallPath" ParameterName="CallPath" />
+                  <ScalarProperty Name="IdentityId" ParameterName="IdentityId" />
+                  <ResultBinding Name="Id" ColumnName="Id" />
+                  <ResultBinding Name="CreatedUtc" ColumnName="CreatedUtc" />
+                </InsertFunction>
+              </ModificationFunctionMapping>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <FunctionImportMapping FunctionImportName="usp_Session_Delete" FunctionName="AuroraModels.Store.usp_Session_Delete" />
+          <FunctionImportMapping FunctionImportName="usp_Session_Insert" FunctionName="AuroraModels.Store.usp_Session_Insert">
+            <ResultMapping>
+              <ComplexTypeMapping TypeName="AuroraModels.usp_Session_Insert_Result">
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="IdentityId" ColumnName="IdentityId" />
+                <ScalarProperty Name="CallPath" ColumnName="CallPath" />
+                <ScalarProperty Name="Details" ColumnName="Details" />
+                <ScalarProperty Name="LocalEndPoint" ColumnName="LocalEndPoint" />
+                <ScalarProperty Name="LocalSoftwareIdentifier" ColumnName="LocalSoftwareIdentifier" />
+                <ScalarProperty Name="RemoteEndPoint" ColumnName="RemoteEndPoint" />
+                <ScalarProperty Name="RemoteSoftwareIdentifier" ColumnName="RemoteSoftwareIdentifier" />
+                <ScalarProperty Name="CreatedUtc" ColumnName="CreatedUtc" />
+              </ComplexTypeMapping>
+            </ResultMapping>
+          </FunctionImportMapping>
+          <FunctionImportMapping FunctionImportName="usp_Session_Update" FunctionName="AuroraModels.Store.usp_Session_Update">
+            <ResultMapping>
+              <ComplexTypeMapping TypeName="AuroraModels.usp_Session_Update_Result">
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="IdentityId" ColumnName="IdentityId" />
+                <ScalarProperty Name="CallPath" ColumnName="CallPath" />
+                <ScalarProperty Name="Details" ColumnName="Details" />
+                <ScalarProperty Name="LocalEndPoint" ColumnName="LocalEndPoint" />
+                <ScalarProperty Name="LocalSoftwareIdentifier" ColumnName="LocalSoftwareIdentifier" />
+                <ScalarProperty Name="RemoteEndPoint" ColumnName="RemoteEndPoint" />
+                <ScalarProperty Name="RemoteSoftwareIdentifier" ColumnName="RemoteSoftwareIdentifier" />
+                <ScalarProperty Name="CreatedUtc" ColumnName="CreatedUtc" />
               </ComplexTypeMapping>
             </ResultMapping>
           </FunctionImportMapping>

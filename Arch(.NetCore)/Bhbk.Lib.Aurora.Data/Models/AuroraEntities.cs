@@ -21,6 +21,7 @@ namespace Bhbk.Lib.Aurora.Data.Models
         public virtual DbSet<uvw_Network> uvw_Networks { get; set; }
         public virtual DbSet<uvw_PrivateKey> uvw_PrivateKeys { get; set; }
         public virtual DbSet<uvw_PublicKey> uvw_PublicKeys { get; set; }
+        public virtual DbSet<uvw_Session> uvw_Sessions { get; set; }
         public virtual DbSet<uvw_Setting> uvw_Settings { get; set; }
         public virtual DbSet<uvw_User> uvw_Users { get; set; }
         public virtual DbSet<uvw_UserAlert> uvw_UserAlerts { get; set; }
@@ -116,6 +117,40 @@ namespace Bhbk.Lib.Aurora.Data.Models
                     .HasMaxLength(512);
             });
 
+            modelBuilder.Entity<uvw_Session>(entity =>
+            {
+                entity.HasNoKey();
+
+                entity.ToView("uvw_Session", "svc");
+
+                entity.Property(e => e.CallPath)
+                    .IsRequired()
+                    .HasMaxLength(256)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.Details).IsUnicode(false);
+
+                entity.Property(e => e.IdentityAlias)
+                    .HasMaxLength(128)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.LocalEndPoint)
+                    .HasMaxLength(128)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.LocalSoftwareIdentifier)
+                    .HasMaxLength(128)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.RemoteEndPoint)
+                    .HasMaxLength(128)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.RemoteSoftwareIdentifier)
+                    .HasMaxLength(128)
+                    .IsUnicode(false);
+            });
+
             modelBuilder.Entity<uvw_Setting>(entity =>
             {
                 entity.HasNoKey();
@@ -138,6 +173,10 @@ namespace Bhbk.Lib.Aurora.Data.Models
                 entity.HasNoKey();
 
                 entity.ToView("uvw_User", "svc");
+
+                entity.Property(e => e.ChrootPath)
+                    .HasMaxLength(64)
+                    .IsUnicode(false);
 
                 entity.Property(e => e.Debugger)
                     .HasMaxLength(16)

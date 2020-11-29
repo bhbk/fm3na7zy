@@ -21,13 +21,13 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
 
             var pvalues = new []
             {
-                new SqlParameter("@IdentityId", SqlDbType.UniqueIdentifier) { Value = entity.IdentityId },
-                new SqlParameter("@PublicKeyId", SqlDbType.UniqueIdentifier) { Value = entity.PublicKeyId },
-                new SqlParameter("@KeyValueBase64", SqlDbType.NVarChar) { Value = entity.KeyValue },
-                new SqlParameter("@KeyValueAlgo", SqlDbType.NVarChar) { Value = entity.KeyAlgo },
-                new SqlParameter("@KeyValuePass", SqlDbType.NVarChar) { Value = entity.KeyPass },
-                new SqlParameter("@IsEnabled", SqlDbType.Bit) { Value = entity.IsEnabled },
-                new SqlParameter("@IsDeletable", SqlDbType.Bit) { Value = entity.IsDeletable },
+                new SqlParameter("IdentityId", SqlDbType.UniqueIdentifier) { Value = entity.IdentityId.HasValue ? (object)entity.IdentityId.Value : DBNull.Value },
+                new SqlParameter("PublicKeyId", SqlDbType.UniqueIdentifier) { Value = entity.PublicKeyId },
+                new SqlParameter("KeyValueBase64", SqlDbType.NVarChar) { Value = entity.KeyValue },
+                new SqlParameter("KeyValueAlgo", SqlDbType.NVarChar) { Value = entity.KeyAlgo },
+                new SqlParameter("KeyValuePass", SqlDbType.NVarChar) { Value = entity.KeyPass },
+                new SqlParameter("IsEnabled", SqlDbType.Bit) { Value = entity.IsEnabled },
+                new SqlParameter("IsDeletable", SqlDbType.Bit) { Value = entity.IsDeletable },
                 rvalue,
             };
 
@@ -56,7 +56,7 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
 
             var pvalues = new []
             {
-                new SqlParameter("@Id", SqlDbType.UniqueIdentifier) { Value = entity.Id },
+                new SqlParameter("Id", SqlDbType.UniqueIdentifier) { Value = entity.Id },
                 rvalue,
             };
 
@@ -93,14 +93,14 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
 
             var pvalues = new []
             {
-                new SqlParameter("@Id", SqlDbType.UniqueIdentifier) { Value = entity.Id },
-                new SqlParameter("@IdentityId", SqlDbType.UniqueIdentifier) { Value = entity.IdentityId },
-                new SqlParameter("@PublicKeyId", SqlDbType.UniqueIdentifier) { Value = entity.PublicKeyId },
-                new SqlParameter("@KeyValueBase64", SqlDbType.NVarChar) { Value = entity.KeyValue },
-                new SqlParameter("@KeyValueAlgo", SqlDbType.NVarChar) { Value = entity.KeyAlgo },
-                new SqlParameter("@KeyValuePass", SqlDbType.NVarChar) { Value = entity.KeyPass },
-                new SqlParameter("@IsEnabled", SqlDbType.Bit) { Value = entity.IsEnabled },
-                new SqlParameter("@IsDeletable", SqlDbType.Bit) { Value = entity.IsDeletable },
+                new SqlParameter("Id", SqlDbType.UniqueIdentifier) { Value = entity.Id },
+                new SqlParameter("IdentityId", SqlDbType.UniqueIdentifier) { Value = entity.IdentityId.HasValue ? (object)entity.IdentityId.Value : DBNull.Value },
+                new SqlParameter("PublicKeyId", SqlDbType.UniqueIdentifier) { Value = entity.PublicKeyId },
+                new SqlParameter("KeyValueBase64", SqlDbType.NVarChar) { Value = entity.KeyValue },
+                new SqlParameter("KeyValueAlgo", SqlDbType.NVarChar) { Value = entity.KeyAlgo },
+                new SqlParameter("KeyValuePass", SqlDbType.NVarChar) { Value = entity.KeyPass },
+                new SqlParameter("IsEnabled", SqlDbType.Bit) { Value = entity.IsEnabled },
+                new SqlParameter("IsDeletable", SqlDbType.Bit) { Value = entity.IsDeletable },
                 rvalue,
             };
 

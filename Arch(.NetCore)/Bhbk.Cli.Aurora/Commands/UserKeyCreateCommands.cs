@@ -40,7 +40,7 @@ namespace Bhbk.Cli.Aurora.Commands
             var instance = new ContextService(InstanceContext.DeployedOrLocal);
             _uow = new UnitOfWork(_conf["Databases:AuroraEntities"], instance);
 
-            IsCommand("user-key-create", "Create private/public key for user");
+            IsCommand("user-key-create", "Create public/private key pair for user");
 
             HasRequiredOption("u|user=", "Enter user that already exists", arg =>
             {
@@ -53,7 +53,8 @@ namespace Bhbk.Cli.Aurora.Commands
                         {
                             x => x.PrivateKeys,
                             x => x.PublicKeys,
-                        }).SingleOrDefault();
+                        })
+                    .SingleOrDefault();
 
                 if (_user == null)
                     throw new ConsoleHelpAsException($"  *** Invalid user '{arg}' ***");
@@ -88,8 +89,9 @@ namespace Bhbk.Cli.Aurora.Commands
             {
                 if (string.IsNullOrEmpty(_privKeyPass))
                 {
-                    Console.Out.WriteLine($"  *** The password for the private key *** : {_privKeyPass}");
                     _privKeyPass = AlphaNumeric.CreateString(32);
+                    Console.Out.WriteLine($"  *** The password for the private key *** : {_privKeyPass}");
+                    Console.Out.WriteLine();
                 }
                 else
                 {
@@ -101,10 +103,12 @@ namespace Bhbk.Cli.Aurora.Commands
                 if (string.IsNullOrEmpty(_pubKeyComment))
                     _pubKeyComment = Dns.GetHostName();
 
-                var keyPair = KeyHelper.CreateKeyPair(_conf, _uow, _user, _keyAlgo, _privKeySize, _privKeyPass, SignatureHashAlgorithm.SHA256, _pubKeyComment);
+                var keyPair = KeyHelper.CreateKeyPair(_conf, _uow, _user, _keyAlgo, SignatureHashAlgorithm.SHA256, _privKeySize, _privKeyPass, _pubKeyComment);
 
                 if (keyPair.Item1 != null)
                     _uow.PublicKeys.Create(keyPair.Item1);
+
+                _uow.Commit();
 
                 if (keyPair.Item2 != null)
                     _uow.PrivateKeys.Create(keyPair.Item2);

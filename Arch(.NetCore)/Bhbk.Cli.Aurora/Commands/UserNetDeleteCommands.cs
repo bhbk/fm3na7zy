@@ -20,7 +20,7 @@ namespace Bhbk.Cli.Aurora.Commands
         private readonly IConfiguration _conf;
         private readonly IUnitOfWork _uow;
         private User _user;
-        private bool _delete = false, _deleteAll = false;
+        private bool _deleteAll = false;
 
         public UserNetDeleteCommands()
         {
@@ -43,15 +43,11 @@ namespace Bhbk.Cli.Aurora.Commands
                         new List<Expression<Func<User, object>>>()
                         {
                             x => x.Networks,
-                        }).SingleOrDefault();
+                        })
+                    .SingleOrDefault();
 
                 if (_user == null)
                     throw new ConsoleHelpAsException($"  *** Invalid user '{arg}' ***");
-            });
-
-            HasOption("d|delete", "Delete a network for user", arg =>
-            {
-                _delete = true;
             });
 
             HasOption("a|delete-all", "Delete all networks for user", arg =>
@@ -67,10 +63,22 @@ namespace Bhbk.Cli.Aurora.Commands
                 var exists = _user.Networks.Where(x => x.IsDeletable == true);
 
                 OutputFactory.StdOutNetworks(exists);
+                Console.Out.WriteLine();
 
-                if (_delete)
+                if (_deleteAll == true)
                 {
+                    Console.Out.Write("  *** Enter yes to delete all networks for user *** : ");
+                    var input = StandardInput.GetInput();
                     Console.Out.WriteLine();
+
+                    if (input.ToLower() == "yes")
+                    {
+                        _uow.Networks.Delete(exists);
+                        _uow.Commit();
+                    }
+                }
+                else
+                {
                     Console.Out.Write("  *** Enter GUID of network for user to delete *** : ");
                     var input = Guid.Parse(StandardInput.GetInput());
 
@@ -82,11 +90,6 @@ namespace Bhbk.Cli.Aurora.Commands
                         _uow.Networks.Delete(network);
                         _uow.Commit();
                     }
-                }
-                else if (_deleteAll)
-                {
-                    _uow.Networks.Delete(exists);
-                    _uow.Commit();
                 }
 
                 return StandardOutput.FondFarewell();

@@ -35,7 +35,7 @@ namespace Bhbk.Cli.Aurora.Commands
             var instance = new ContextService(InstanceContext.DeployedOrLocal);
             _uow = new UnitOfWork(_conf["Databases:AuroraEntities"], instance);
 
-            IsCommand("user-mount-create", "Create user mount");
+            IsCommand("user-mount-create", "Create mount for user");
 
             HasRequiredOption("u|user=", "Enter user that already exists", arg =>
             {
@@ -48,7 +48,8 @@ namespace Bhbk.Cli.Aurora.Commands
                         {
                             x => x.Mount,
                             x => x.Mount.Credential,
-                        }).SingleOrDefault();
+                        })
+                    .SingleOrDefault();
 
                 if (_user == null)
                     throw new ConsoleHelpAsException($"  *** Invalid user '{arg}' ***");

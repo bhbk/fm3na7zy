@@ -5,11 +5,13 @@ SELECT
 	IdentityId
 	,IdentityAlias
 	,FileSystemType
+	,FileSystemChrootPath
 	,IsPasswordRequired
 	,IsPublicKeyRequired
 	,IsFileSystemReadOnly
 	,QuotaInBytes
 	,QuotaUsedInBytes
+	,ConcurrentSessions
 	,Debugger
 	,IsEnabled
 	,IsDeletable

@@ -21,14 +21,14 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
 
             var pvalues = new []
             {
-                new SqlParameter("@IdentityAlias", SqlDbType.NVarChar) { Value = entity.IdentityAlias },
-                new SqlParameter("@FileSystemType", SqlDbType.NVarChar) { Value = entity.FileSystemType },
-                new SqlParameter("@IsPasswordRequired", SqlDbType.Bit) { Value = entity.IsPasswordRequired },
-                new SqlParameter("@IsPublicKeyRequired", SqlDbType.Bit) { Value = entity.IsPublicKeyRequired },
-                new SqlParameter("@IsFileSystemReadOnly", SqlDbType.Bit) { Value = entity.IsFileSystemReadOnly },
-                new SqlParameter("@Debugger", SqlDbType.NVarChar) { Value = (object)entity.Debugger ?? DBNull.Value },
-                new SqlParameter("@IsEnabled", SqlDbType.Bit) { Value = entity.IsEnabled },
-                new SqlParameter("@IsDeletable", SqlDbType.Bit) { Value = entity.IsDeletable },
+                new SqlParameter("IdentityAlias", SqlDbType.NVarChar) { Value = entity.IdentityAlias },
+                new SqlParameter("FileSystemType", SqlDbType.NVarChar) { Value = entity.FileSystemType },
+                new SqlParameter("IsPasswordRequired", SqlDbType.Bit) { Value = entity.IsPasswordRequired },
+                new SqlParameter("IsPublicKeyRequired", SqlDbType.Bit) { Value = entity.IsPublicKeyRequired },
+                new SqlParameter("IsFileSystemReadOnly", SqlDbType.Bit) { Value = entity.IsFileSystemReadOnly },
+                new SqlParameter("Debugger", SqlDbType.NVarChar) { Value = (object)entity.Debugger ?? DBNull.Value },
+                new SqlParameter("IsEnabled", SqlDbType.Bit) { Value = entity.IsEnabled },
+                new SqlParameter("IsDeletable", SqlDbType.Bit) { Value = entity.IsDeletable },
                 rvalue,
             };
 
@@ -58,7 +58,7 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
 
             var pvalues = new []
             {
-                new SqlParameter("@IdentityId", SqlDbType.UniqueIdentifier) { Value = entity.IdentityId },
+                new SqlParameter("IdentityId", SqlDbType.UniqueIdentifier) { Value = entity.IdentityId },
                 rvalue,
             };
 
@@ -95,23 +95,25 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
 
             var pvalues = new []
             {
-                new SqlParameter("@IdentityId", SqlDbType.UniqueIdentifier) { Value = entity.IdentityId },
-                new SqlParameter("@IdentityAlias", SqlDbType.NVarChar) { Value = entity.IdentityAlias },
-                new SqlParameter("@FileSystemType", SqlDbType.NVarChar) { Value = entity.FileSystemType },
-                new SqlParameter("@IsPublicKeyRequired", SqlDbType.Bit) { Value = entity.IsPublicKeyRequired },
-                new SqlParameter("@IsPasswordRequired", SqlDbType.Bit) { Value = entity.IsPasswordRequired },
-                new SqlParameter("@IsFileSystemReadOnly", SqlDbType.Bit) { Value = entity.IsFileSystemReadOnly },
-                new SqlParameter("@QuotaInBytes", SqlDbType.BigInt) { Value = entity.QuotaInBytes },
-                new SqlParameter("@QuotaUsedInBytes", SqlDbType.BigInt) { Value = entity.QuotaUsedInBytes },
-                new SqlParameter("@Debugger", SqlDbType.NVarChar) { Value = (object)entity.Debugger ?? DBNull.Value },
-                new SqlParameter("@IsEnabled", SqlDbType.Bit) { Value = entity.IsEnabled },
-                new SqlParameter("@IsDeletable", SqlDbType.Bit) { Value = entity.IsDeletable },
+                new SqlParameter("IdentityId", SqlDbType.UniqueIdentifier) { Value = entity.IdentityId },
+                new SqlParameter("IdentityAlias", SqlDbType.NVarChar) { Value = entity.IdentityAlias },
+                new SqlParameter("FileSystemType", SqlDbType.NVarChar) { Value = entity.FileSystemType },
+                new SqlParameter("IsPublicKeyRequired", SqlDbType.Bit) { Value = entity.IsPublicKeyRequired },
+                new SqlParameter("IsPasswordRequired", SqlDbType.Bit) { Value = entity.IsPasswordRequired },
+                new SqlParameter("IsFileSystemReadOnly", SqlDbType.Bit) { Value = entity.IsFileSystemReadOnly },
+                new SqlParameter("ChrootPath", SqlDbType.NVarChar) { Value = (object)entity.Debugger ?? DBNull.Value },
+                new SqlParameter("QuotaInBytes", SqlDbType.BigInt) { Value = entity.QuotaInBytes },
+                new SqlParameter("QuotaUsedInBytes", SqlDbType.BigInt) { Value = entity.QuotaUsedInBytes },
+                new SqlParameter("ConcurrentSessions", SqlDbType.SmallInt) { Value = entity.ConcurrentSessions },
+                new SqlParameter("Debugger", SqlDbType.NVarChar) { Value = (object)entity.Debugger ?? DBNull.Value },
+                new SqlParameter("IsEnabled", SqlDbType.Bit) { Value = entity.IsEnabled },
+                new SqlParameter("IsDeletable", SqlDbType.Bit) { Value = entity.IsDeletable },
                 rvalue,
             };
 
             return _context.SqlQuery<uvw_User>("EXEC @ReturnValue = [svc].[usp_User_Update] "
-                + "@IdentityId, @IdentityAlias, @IsPublicKeyRequired, @IsPasswordRequired, @FileSystemType, @IsFileSystemReadOnly, "
-                + "@QuotaInBytes, @QuotaUsedInBytes, @Debugger, @IsEnabled, @IsDeletable", pvalues)
+                + "@IdentityId, @IdentityAlias, @FileSystemType, @IsPublicKeyRequired, @IsPasswordRequired, @IsFileSystemReadOnly, "
+                + "@ChrootPath, @QuotaInBytes, @QuotaUsedInBytes, @ConcurrentSessions, @Debugger, @IsEnabled, @IsDeletable", pvalues)
                     .Single();
         }
 

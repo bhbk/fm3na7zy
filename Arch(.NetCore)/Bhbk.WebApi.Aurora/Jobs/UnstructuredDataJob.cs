@@ -71,13 +71,10 @@ namespace Bhbk.WebApi.Aurora.Tasks
                                         file.LastVerifiedUtc = DateTime.UtcNow;
                                 }
                             }
-                            catch (CryptographicException ex)
+                            catch (Exception ex)
+                                when (ex is CryptographicException || ex is IOException)
                             {
-                                Log.Error($"'{_callPath}' validation on {filePath} returned error {ex}");
-                            }
-                            catch (IOException ex)
-                            {
-                                Log.Error($"'{_callPath}' validation on {filePath} returned error {ex}");
+                                Log.Fatal($"'{_callPath}' validation on {filePath} returned error {ex}");
                             }
                         }
 

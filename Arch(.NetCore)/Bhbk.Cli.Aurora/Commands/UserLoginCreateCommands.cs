@@ -36,7 +36,7 @@ namespace Bhbk.Cli.Aurora.Commands
             var instance = new ContextService(InstanceContext.DeployedOrLocal);
             _uow = new UnitOfWork(_conf["Databases:AuroraEntities"], instance);
 
-            IsCommand("user-login-create", "Create user login");
+            IsCommand("user-login-create", "Create login for user");
 
             HasRequiredOption("u|user=", "Enter user that does not exist already", arg =>
             {
@@ -44,7 +44,8 @@ namespace Bhbk.Cli.Aurora.Commands
                     throw new ConsoleHelpAsException($"  *** No user given ***");
 
                 var user = _uow.Users.Get(QueryExpressionFactory.GetQueryExpression<User>()
-                    .Where(x => x.IdentityAlias == arg).ToLambda()).SingleOrDefault();
+                    .Where(x => x.IdentityAlias == arg).ToLambda())
+                    .SingleOrDefault();
 
                 if (user != null)
                     throw new ConsoleHelpAsException($"  *** The user '{arg}' alreay exists ***");

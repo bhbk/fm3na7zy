@@ -22,14 +22,14 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
 
             var pvalues = new []
             {
-                new SqlParameter("@IdentityId", SqlDbType.UniqueIdentifier) { Value = entity.IdentityId },
-                new SqlParameter("@FolderId", SqlDbType.UniqueIdentifier) { Value = entity.FolderId },
-                new SqlParameter("@VirtualName", SqlDbType.NVarChar) { Value = entity.VirtualName },
-                new SqlParameter("@RealPath", SqlDbType.NVarChar) { Value = entity.RealPath },
-                new SqlParameter("@RealFileName", SqlDbType.NVarChar) { Value = entity.RealFileName },
-                new SqlParameter("@RealFileSize", SqlDbType.BigInt) { Value = entity.RealFileSize },
-                new SqlParameter("@HashSHA256", SqlDbType.NVarChar) { Value = (object)entity.HashSHA256 ?? DBNull.Value },
-                new SqlParameter("@IsReadOnly", SqlDbType.Bit) { Value = entity.IsReadOnly },
+                new SqlParameter("IdentityId", SqlDbType.UniqueIdentifier) { Value = entity.IdentityId },
+                new SqlParameter("FolderId", SqlDbType.UniqueIdentifier) { Value = entity.FolderId },
+                new SqlParameter("VirtualName", SqlDbType.NVarChar) { Value = entity.VirtualName },
+                new SqlParameter("RealPath", SqlDbType.NVarChar) { Value = entity.RealPath },
+                new SqlParameter("RealFileName", SqlDbType.NVarChar) { Value = entity.RealFileName },
+                new SqlParameter("RealFileSize", SqlDbType.BigInt) { Value = entity.RealFileSize },
+                new SqlParameter("HashSHA256", SqlDbType.NVarChar) { Value = (object)entity.HashSHA256 ?? DBNull.Value },
+                new SqlParameter("IsReadOnly", SqlDbType.Bit) { Value = entity.IsReadOnly },
                 rvalue,
             };
 
@@ -58,7 +58,7 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
 
             var pvalues = new []
             {
-                new SqlParameter("@Id", SqlDbType.UniqueIdentifier) { Value = entity.Id },
+                new SqlParameter("Id", SqlDbType.UniqueIdentifier) { Value = entity.Id },
                 rvalue,
             };
 
@@ -95,18 +95,18 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
 
             var pvalues = new []
             {
-                new SqlParameter("@Id", SqlDbType.UniqueIdentifier) { Value = entity.Id },
-                new SqlParameter("@IdentityId", SqlDbType.UniqueIdentifier) { Value = entity.IdentityId },
-                new SqlParameter("@FolderId", SqlDbType.UniqueIdentifier) { Value = entity.FolderId },
-                new SqlParameter("@VirtualName", SqlDbType.NVarChar) { Value = entity.VirtualName },
-                new SqlParameter("@RealPath", SqlDbType.NVarChar) { Value = entity.RealPath },
-                new SqlParameter("@RealFileName", SqlDbType.NVarChar) { Value = entity.RealFileName },
-                new SqlParameter("@RealFileSize", SqlDbType.BigInt) { Value = entity.RealFileSize },
-                new SqlParameter("@HashSHA256", SqlDbType.NVarChar) { Value = (object)entity.HashSHA256 ?? DBNull.Value },
-                new SqlParameter("@IsReadOnly", SqlDbType.Bit) { Value = entity.IsReadOnly },
-                new SqlParameter("@LastAccessedUtc", SqlDbType.DateTimeOffset) { Value = entity.LastAccessedUtc },
-                new SqlParameter("@LastUpdatedUtc", SqlDbType.DateTimeOffset) { Value = entity.LastUpdatedUtc },
-                new SqlParameter("@LastVerifiedUtc", SqlDbType.DateTimeOffset) { Value = entity.LastVerifiedUtc },
+                new SqlParameter("Id", SqlDbType.UniqueIdentifier) { Value = entity.Id },
+                new SqlParameter("IdentityId", SqlDbType.UniqueIdentifier) { Value = entity.IdentityId },
+                new SqlParameter("FolderId", SqlDbType.UniqueIdentifier) { Value = entity.FolderId },
+                new SqlParameter("VirtualName", SqlDbType.NVarChar) { Value = entity.VirtualName },
+                new SqlParameter("RealPath", SqlDbType.NVarChar) { Value = entity.RealPath },
+                new SqlParameter("RealFileName", SqlDbType.NVarChar) { Value = entity.RealFileName },
+                new SqlParameter("RealFileSize", SqlDbType.BigInt) { Value = entity.RealFileSize },
+                new SqlParameter("HashSHA256", SqlDbType.NVarChar) { Value = (object)entity.HashSHA256 ?? DBNull.Value },
+                new SqlParameter("IsReadOnly", SqlDbType.Bit) { Value = entity.IsReadOnly },
+                new SqlParameter("LastAccessedUtc", SqlDbType.DateTimeOffset) { Value = entity.LastAccessedUtc },
+                new SqlParameter("LastUpdatedUtc", SqlDbType.DateTimeOffset) { Value = entity.LastUpdatedUtc },
+                new SqlParameter("LastVerifiedUtc", SqlDbType.DateTimeOffset) { Value = entity.LastVerifiedUtc },
                 rvalue,
             };
 

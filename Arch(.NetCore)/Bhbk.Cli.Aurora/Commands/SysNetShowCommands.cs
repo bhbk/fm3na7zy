@@ -27,7 +27,7 @@ namespace Bhbk.Cli.Aurora.Commands
             var instance = new ContextService(InstanceContext.DeployedOrLocal);
             _uow = new UnitOfWork(_conf["Databases:AuroraEntities"], instance);
 
-            IsCommand("sys-net-show", "Show allow/deny networks for system");
+            IsCommand("sys-net-show", "Show allow/deny network(s) for system");
         }
 
         public override int Run(string[] remainingArguments)

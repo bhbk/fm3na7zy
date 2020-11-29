@@ -27,7 +27,7 @@ namespace Bhbk.Cli.Aurora.Commands
             var instance = new ContextService(InstanceContext.DeployedOrLocal);
             _uow = new UnitOfWork(_conf["Databases:AuroraEntities"], instance);
 
-            IsCommand("sys-key-show", "Show private/public keys for system");
+            IsCommand("sys-key-show", "Show public/private key pair(s) for system");
         }
 
         public override int Run(string[] remainingArguments)

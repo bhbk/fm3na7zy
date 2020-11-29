@@ -35,7 +35,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Factories
                 fsSettings.LogWriter = new LogHelper(logger, user, fsLoggerLevel);
             }
 
-            if (!Enum.TryParse<FileSystemProviderType>(user.FileSystemType, true, out fsType))
+            if (!Enum.TryParse(user.FileSystemType, true, out fsType))
                 throw new InvalidCastException();
 
             var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
@@ -48,13 +48,29 @@ namespace Bhbk.Daemon.Aurora.SFTP.Factories
                         {
                             Log.Information($"'{callPath}' '{user.IdentityAlias}' initialize '{typeof(CompositeReadOnlyFileSystem).Name}'");
 
-                            return new CompositeReadOnlyFileSystem(fsSettings, factory, user);
+                            if (string.IsNullOrEmpty(user.FileSystemChrootPath))
+                                return new CompositeReadOnlyFileSystem(fsSettings, factory, user);
+                            else
+                            {
+                                var chroot = new MountCapableFileSystemProvider();
+                                chroot.Mount(user.FileSystemChrootPath, new CompositeReadOnlyFileSystem(fsSettings, factory, user));
+
+                                return chroot;
+                            }
                         }
                         else
                         {
                             Log.Information($"'{callPath}' '{user.IdentityAlias}' initialize '{typeof(CompositeReadWriteFileSystem).Name}'");
 
-                            return new CompositeReadWriteFileSystem(fsSettings, factory, user);
+                            if (string.IsNullOrEmpty(user.FileSystemChrootPath))
+                                return new CompositeReadWriteFileSystem(fsSettings, factory, user);
+                            else
+                            {
+                                var chroot = new MountCapableFileSystemProvider();
+                                chroot.Mount(user.FileSystemChrootPath, new CompositeReadWriteFileSystem(fsSettings, factory, user));
+
+                                return chroot;
+                            }
                         }
                     }
 
@@ -64,29 +80,61 @@ namespace Bhbk.Daemon.Aurora.SFTP.Factories
                         {
                             Log.Information($"'{callPath}' '{user.IdentityAlias}' initialize '{typeof(MemoryReadOnlyFileSystem).Name}'");
 
-                            return new MemoryReadOnlyFileSystem(fsSettings, factory, user);
+                            if (string.IsNullOrEmpty(user.FileSystemChrootPath))
+                                return new MemoryReadOnlyFileSystem(fsSettings, factory, user);
+                            else
+                            {
+                                var chroot = new MountCapableFileSystemProvider();
+                                chroot.Mount(user.FileSystemChrootPath, new MemoryReadOnlyFileSystem(fsSettings, factory, user));
+
+                                return chroot;
+                            }
                         }
                         else
                         {
                             Log.Information($"'{callPath}' '{user.IdentityAlias}' initialize '{typeof(MemoryReadWriteFileSystem).Name}'");
 
-                            return new MemoryReadWriteFileSystem(fsSettings, factory, user);
+                            if (string.IsNullOrEmpty(user.FileSystemChrootPath))
+                                return new MemoryReadWriteFileSystem(fsSettings, factory, user);
+                            else
+                            {
+                                var chroot = new MountCapableFileSystemProvider();
+                                chroot.Mount(user.FileSystemChrootPath, new MemoryReadWriteFileSystem(fsSettings, factory, user));
+
+                                return chroot;
+                            }
                         }
                     }
 
-                case FileSystemProviderType.SMB:
+                case FileSystemProviderType.Smb:
                     {
                         if (user.IsFileSystemReadOnly)
                         {
                             Log.Information($"'{callPath}' '{user.IdentityAlias}' initialize '{typeof(SmbReadOnlyFileSystem).Name}'");
 
-                            return new SmbReadOnlyFileSystem(fsSettings, factory, user, identityUser, identityPass);
+                            if (string.IsNullOrEmpty(user.FileSystemChrootPath))
+                                return new SmbReadOnlyFileSystem(fsSettings, factory, user, identityUser, identityPass);
+                            else
+                            {
+                                var chroot = new MountCapableFileSystemProvider();
+                                chroot.Mount(user.FileSystemChrootPath, new SmbReadOnlyFileSystem(fsSettings, factory, user, identityUser, identityPass));
+
+                                return chroot;
+                            }
                         }
                         else
                         {
                             Log.Information($"'{callPath}' '{user.IdentityAlias}' initialize '{typeof(SmbReadWriteFileSystem).Name}'");
 
-                            return new SmbReadWriteFileSystem(fsSettings, factory, user, identityUser, identityPass);
+                            if (string.IsNullOrEmpty(user.FileSystemChrootPath))
+                                return new SmbReadWriteFileSystem(fsSettings, factory, user, identityUser, identityPass);
+                            else
+                            {
+                                var chroot = new MountCapableFileSystemProvider();
+                                chroot.Mount(user.FileSystemChrootPath, new SmbReadWriteFileSystem(fsSettings, factory, user, identityUser, identityPass));
+
+                                return chroot;
+                            }
                         }
                     }
 

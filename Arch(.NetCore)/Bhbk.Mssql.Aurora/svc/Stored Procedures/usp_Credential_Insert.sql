@@ -1,6 +1,4 @@
 ﻿
-
-
 CREATE PROCEDURE [svc].[usp_Credential_Insert]
     @Domain					NVARCHAR (128) 
     ,@UserName				NVARCHAR (128) 
