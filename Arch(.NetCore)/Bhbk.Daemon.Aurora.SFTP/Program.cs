@@ -1,5 +1,5 @@
 using AutoMapper;
-using Bhbk.Lib.Aurora.Data_EF6.Infrastructure;
+using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
 using Bhbk.Lib.Aurora.Domain.Profiles;
 using Bhbk.Lib.Common.Primitives.Enums;
 using Bhbk.Lib.Common.Services;
@@ -51,34 +51,28 @@ namespace Bhbk.Daemon.Aurora.SFTP
                 {
                     return new UnitOfWork(_conf["Databases:AuroraEntities"], _instance);
                 });
+                sc.AddSingleton<IHostedService, Daemon>();
                 sc.AddTransient<IAlertService, AlertService>(_ =>
                 {
-                    var alert = new AlertService(_conf)
+                    return new AlertService(_conf)
                     {
                         Grant = new ResourceOwnerGrantV2(_conf)
                     };
-
-                    return alert;
                 });
                 sc.AddTransient<IAdminService, AdminService>(_ =>
                 {
-                    var admin = new AdminService(_conf)
+                    return new AdminService(_conf)
                     {
                         Grant = new ResourceOwnerGrantV2(_conf)
                     };
-
-                    return admin;
                 });
                 sc.AddTransient<IStsService, StsService>(_ =>
                 {
-                    var sts = new StsService(_conf)
+                    return new StsService(_conf)
                     {
                         Grant = new ResourceOwnerGrantV2(_conf)
                     };
-
-                    return sts;
                 });
-                sc.AddSingleton<IHostedService, Daemon>();
             });
 
         public static IHostBuilder CreateWindowsHostBuilder(string[] args) =>
@@ -105,38 +99,32 @@ namespace Bhbk.Daemon.Aurora.SFTP
                 sc.AddSingleton<IContextService>(_instance);
                 sc.AddSingleton<ILogger>(_logger);
                 sc.AddSingleton<IMapper>(_mapper);
-                sc.AddTransient<IAlertService, AlertService>(_ =>
-                {
-                    var alert = new AlertService(_conf)
-                    {
-                        Grant = new ResourceOwnerGrantV2(_conf)
-                    };
-
-                    return alert;
-                });
-                sc.AddTransient<IAdminService, AdminService>(_ =>
-                {
-                    var admin = new AdminService(_conf)
-                    {
-                        Grant = new ResourceOwnerGrantV2(_conf)
-                    };
-
-                    return admin;
-                });
-                sc.AddTransient<IStsService, StsService>(_ =>
-                {
-                    var sts = new StsService(_conf)
-                    {
-                        Grant = new ResourceOwnerGrantV2(_conf)
-                    };
-
-                    return sts;
-                });
                 sc.AddTransient<IUnitOfWork, UnitOfWork>(_ =>
                 {
                     return new UnitOfWork(_conf["Databases:AuroraEntities"], _instance);
                 });
                 sc.AddSingleton<IHostedService, Daemon>();
+                sc.AddTransient<IAlertService, AlertService>(_ =>
+                {
+                    return new AlertService(_conf)
+                    {
+                        Grant = new ResourceOwnerGrantV2(_conf)
+                    };
+                });
+                sc.AddTransient<IAdminService, AdminService>(_ =>
+                {
+                    return new AdminService(_conf)
+                    {
+                        Grant = new ResourceOwnerGrantV2(_conf)
+                    };
+                });
+                sc.AddTransient<IStsService, StsService>(_ =>
+                {
+                    return new StsService(_conf)
+                    {
+                        Grant = new ResourceOwnerGrantV2(_conf)
+                    };
+                });
             });
 
         public static void Main(string[] args = null)

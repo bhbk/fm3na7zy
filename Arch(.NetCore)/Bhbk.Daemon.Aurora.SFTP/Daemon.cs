@@ -1,6 +1,6 @@
 using Bhbk.Daemon.Aurora.SFTP.Factories;
-using Bhbk.Lib.Aurora.Data_EF6.Infrastructure;
 using Bhbk.Lib.Aurora.Data_EF6.Models;
+using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
 using Bhbk.Lib.Aurora.Domain.Helpers;
 using Bhbk.Lib.Aurora.Domain.Primitives;
 using Bhbk.Lib.Aurora.Primitives.Enums;
@@ -23,6 +23,7 @@ using Rebex.Security.Cryptography;
 using Serilog;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Net;
@@ -408,63 +409,63 @@ namespace Bhbk.Daemon.Aurora.SFTP
                         .Where(x => x.IdentityAlias == e.UserName && x.IsEnabled).ToLambda(),
                             new List<Expression<Func<User, object>>>()
                             {
-                                x => x.PublicKeys,
                                 x => x.Mount,
+                                x => x.PublicKeys,
                             }).SingleOrDefault();
 
                     if (e.Key != null)
                     {
                         Log.Information($"'{callPath}' '{e.UserName}' in-progress with public key");
 
-                        if (UserHelper.ValidatePubKey(user.PublicKeys.Where(x => x.IsEnabled).ToList(), e.Key)
-                            && admin.User_VerifyV1(user.IdentityId).AsTask().Result)
-                        {
-                            Log.Information($"'{callPath}' '{e.UserName}' success with public key");
-
-                            if (e.PartiallyAccepted
-                                || !user.RequirePassword)
-                            {
-                                /*
-                                 * an smb mount will not succeed without a user password or ambassador credential.
-                                 */
-                                if (user.FileSystemType == FileSystemProviderType.SMB.ToString()
-                                    && !user.Mount.CredentialId.HasValue)
-                                {
-                                    Log.Warning($"'{callPath}' '{e.UserName}' failure no credential to create {FileSystemProviderType.SMB} filesystem");
-
-                                    e.Reject();
-                                    return;
-                                }
-
-                                var fs = FileSystemFactory.CreateFileSystem(_factory, log, user, e.UserName, e.Password);
-                                var fsUser = new FileServerUser(e.UserName, e.Password);
-                                fsUser.SetFileSystem(fs);
-
-                                var fsNotify = fs.GetFileSystemNotifier();
-                                fsNotify.CreatePreview += FsNotify_CreatePreview;
-                                fsNotify.CreateCompleted += FsNotify_CreateCompleted;
-                                fsNotify.DeletePreview += FsNotify_DeletePreview;
-                                fsNotify.DeleteCompleted += FsNotify_DeleteCompleted;
-
-                                e.Accept(fsUser);
-                                return;
-                            }
-                            else
-                            {
-                                /*
-                                 * authenticate partially if another kind of credential has not been provided yet.
-                                 */
-                                e.AcceptPartially();
-                                return;
-                            }
-                        }
-                        else
+                        if (!UserHelper.ValidatePubKey(user.PublicKeys.Where(x => x.IsEnabled).ToList(), e.Key)
+                            || !admin.User_VerifyV1(user.IdentityId).AsTask().Result)
                         {
                             Log.Warning($"'{callPath}' '{e.UserName}' failure with public key");
 
                             e.Reject();
                             return;
                         }
+
+                        Log.Information($"'{callPath}' '{e.UserName}' success with public key");
+
+                        if (e.PartiallyAccepted
+                            || !user.RequirePassword)
+                        {
+                            /*
+                             * an smb mount will not succeed without a user password or ambassador credential.
+                             */
+
+                            if (user.FileSystemType == FileSystemProviderType.SMB.ToString()
+                                && !user.Mount.CredentialId.HasValue)
+                            {
+                                Log.Warning($"'{callPath}' '{e.UserName}' failure with no user or ambassador password" +
+                                    $" available to mount {FileSystemProviderType.SMB} filesystem");
+
+                                e.Reject();
+                                return;
+                            }
+
+                            var fs = FileSystemFactory.CreateFileSystem(_factory, log, user, e.UserName, e.Password);
+
+                            var fsNotify = fs.GetFileSystemNotifier();
+                            fsNotify.CreatePreview += FsNotify_CreatePreview;
+                            fsNotify.CreateCompleted += FsNotify_CreateCompleted;
+                            fsNotify.DeletePreview += FsNotify_DeletePreview;
+                            fsNotify.DeleteCompleted += FsNotify_DeleteCompleted;
+
+                            var fsUser = new FileServerUser(e.UserName, e.Password);
+                            fsUser.SetFileSystem(fs);
+
+                            e.Accept(fsUser);
+                            return;
+                        }
+
+                        /*
+                         * authenticate partially if another kind of credential has not been provided yet.
+                         */
+
+                        e.AcceptPartially();
+                        return;
                     }
 
                     if (e.Password != null)
@@ -484,41 +485,45 @@ namespace Bhbk.Daemon.Aurora.SFTP
                                     user = identity.UserName,
                                     password = e.Password,
                                 }).AsTask().Result;
-
-                            Log.Information($"'{callPath}' '{e.UserName}' success with password");
-
-                            if (e.PartiallyAccepted
-                                || !user.RequirePublicKey)
-                            {
-                                var fs = FileSystemFactory.CreateFileSystem(_factory, log, user, e.UserName, e.Password);
-                                var fsUser = new FileServerUser(e.UserName, e.Password);
-                                fsUser.SetFileSystem(fs);
-
-                                var fsNotify = fs.GetFileSystemNotifier();
-                                fsNotify.CreatePreview += FsNotify_CreatePreview;
-                                fsNotify.CreateCompleted += FsNotify_CreateCompleted;
-                                fsNotify.DeletePreview += FsNotify_DeletePreview;
-                                fsNotify.DeleteCompleted += FsNotify_DeleteCompleted;
-
-                                e.Accept(fsUser);
-                                return;
-                            }
-                            else
-                            {
-                                /*
-                                 * authenticate partially if another kind of credential has not been provided yet.
-                                 */
-                                e.AcceptPartially();
-                                return;
-                            }
                         }
-                        catch (HttpRequestException)
+                        catch (HttpRequestException ex)
                         {
                             Log.Warning($"'{callPath}' '{e.UserName}' failure with password");
+
+                            Log.Warning($"'{callPath}'" +
+                                $"{Environment.NewLine} {ex.Message}" +
+                                $"{Environment.NewLine} {ex.InnerException}");
 
                             e.Reject();
                             return;
                         }
+
+                        Log.Information($"'{callPath}' '{e.UserName}' success with password");
+
+                        if (e.PartiallyAccepted
+                            || !user.RequirePublicKey)
+                        {
+                            var fs = FileSystemFactory.CreateFileSystem(_factory, log, user, e.UserName, e.Password);
+
+                            var fsNotify = fs.GetFileSystemNotifier();
+                            fsNotify.CreatePreview += FsNotify_CreatePreview;
+                            fsNotify.CreateCompleted += FsNotify_CreateCompleted;
+                            fsNotify.DeletePreview += FsNotify_DeletePreview;
+                            fsNotify.DeleteCompleted += FsNotify_DeleteCompleted;
+
+                            var fsUser = new FileServerUser(e.UserName, e.Password);
+                            fsUser.SetFileSystem(fs);
+
+                            e.Accept(fsUser);
+                            return;
+                        }
+
+                        /*
+                         * authenticate partially if another kind of credential has not been provided yet.
+                         */
+
+                        e.AcceptPartially();
+                        return;
                     }
 
                     Log.Warning($"'{callPath}' '{e.UserName}' denied");

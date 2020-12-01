@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.Extensions.Logging;
 using System;
 
-namespace Bhbk.Lib.Aurora.Data.Infrastructure
+namespace Bhbk.Lib.Aurora.Data.UnitOfWork
 {
     public class UnitOfWork : IUnitOfWork, IDisposable
     {
@@ -48,7 +48,7 @@ namespace Bhbk.Lib.Aurora.Data.Infrastructure
                             .UseSqlServer(connection)
                             .UseLoggerFactory(_logger)
                             .EnableSensitiveDataLogging();
-#elif RELEASE
+#else
                         var builder = new DbContextOptionsBuilder<AuroraEntities>()
                             .UseSqlServer(connection);
 #endif
@@ -65,7 +65,7 @@ namespace Bhbk.Lib.Aurora.Data.Infrastructure
                             .UseInMemoryDatabase(":InMemory:")
                             .UseLoggerFactory(_logger)
                             .EnableSensitiveDataLogging();
-#elif RELEASE
+#else
                         var builder = new DbContextOptionsBuilder<AuroraEntities>()
                             .UseInMemoryDatabase(":InMemory:");
 #endif

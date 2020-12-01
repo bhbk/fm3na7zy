@@ -1,17 +1,17 @@
 ﻿using System.IO;
 
-namespace Bhbk.Daemon.Aurora.SFTP.Helpers
+namespace Bhbk.Daemon.Aurora.SFTP.Factories
 {
-    internal static class SmbFileSystemHelper
+    internal static class SmbPathFactory
     {
-        internal static DirectoryInfo FolderPathToCIFS(string path)
+        internal static DirectoryInfo PathToFolder(string path)
         {
             path = path.Replace("/", @"\");
 
             return new DirectoryInfo(path);
         }
 
-        internal static FileInfo FilePathToCIFS(string path)
+        internal static FileInfo PathToFile(string path)
         {
             path = path.Replace("/", @"\");
 

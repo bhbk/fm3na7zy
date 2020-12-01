@@ -11,7 +11,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Xunit;
 using Bhbk.Daemon.Aurora.SFTP.Factories;
-using Bhbk.Lib.Aurora.Data_EF6.Infrastructure;
+using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
 using Bhbk.Lib.Aurora.Data_EF6.Models;
 using Bhbk.Lib.Aurora.Domain.Helpers;
 using Bhbk.Lib.Cryptography.Entropy;

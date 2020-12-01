@@ -1,4 +1,4 @@
-﻿using Bhbk.Lib.Aurora.Data_EF6.Infrastructure;
+﻿using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
 using Bhbk.Lib.Aurora.Data_EF6.Models;
 using Bhbk.Lib.QueryExpression.Extensions;
 using Bhbk.Lib.QueryExpression.Factories;
@@ -8,11 +8,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-namespace Bhbk.Daemon.Aurora.SFTP.Helpers
+namespace Bhbk.Daemon.Aurora.SFTP.Factories
 {
-    internal class CompositeFileSystemHelper
+    internal class CompositePathFactory
     {
-        internal static UserFolder EnsureRootExists(IUnitOfWork uow, User user)
+        internal static UserFolder CheckFolderRoot(IUnitOfWork uow, User user)
         {
             var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
 
@@ -39,7 +39,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Helpers
             return folder;
         }
 
-        internal static UserFile FilePathToEntity(IUnitOfWork uow, User user, string path)
+        internal static UserFile PathToFile(IUnitOfWork uow, User user, string path)
         {
             if (path.FirstOrDefault() == '/')
                 path = path.Substring(1);
@@ -51,7 +51,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Helpers
             for (int i = 0; i <= pathBits.Count() - 2; i++)
                 folderPath += "/" + pathBits.ElementAt(i);
 
-            var folder = FolderPathToEntity(uow, user, folderPath);
+            var folder = PathToFolder(uow, user, folderPath);
 
             var file = uow.UserFiles.Get(QueryExpressionFactory.GetQueryExpression<UserFile>()
                 .Where(x => x.IdentityId == user.IdentityId && x.FolderId == folder.Id && x.VirtualName == filePath).ToLambda())
@@ -60,7 +60,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Helpers
             return file;
         }
 
-        internal static UserFolder FolderPathToEntity(IUnitOfWork uow, User user, string path)
+        internal static UserFolder PathToFolder(IUnitOfWork uow, User user, string path)
         {
             if (path.FirstOrDefault() == '/')
                 path = path.Substring(1);
@@ -82,7 +82,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Helpers
             return folder;
         }
 
-        internal static string FileEntityToPath(IUnitOfWork uow, User user, UserFile file)
+        internal static string FileToPath(IUnitOfWork uow, User user, UserFile file)
         {
             var path = string.Empty;
             var paths = new List<string> { };
@@ -105,7 +105,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Helpers
             return path;
         }
 
-        internal static string FolderEntityToPath(IUnitOfWork uow, User user, UserFolder folder)
+        internal static string FolderToPath(IUnitOfWork uow, User user, UserFolder folder)
         {
             var path = string.Empty;
             var paths = new List<string> { };

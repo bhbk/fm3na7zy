@@ -1,5 +1,5 @@
 using AutoMapper;
-using Bhbk.Lib.Aurora.Data_EF6.Infrastructure;
+using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
 using Bhbk.Lib.Aurora.Data_EF6.Models;
 using Bhbk.Lib.Aurora.Domain.Profiles;
 using Bhbk.Lib.Aurora.Primitives.Enums;

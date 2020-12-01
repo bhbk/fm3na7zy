@@ -5,7 +5,7 @@ using Bhbk.Lib.DataAccess.EF.Repositories;
 using System;
 using System.Diagnostics;
 
-namespace Bhbk.Lib.Aurora.Data_EF6.Infrastructure
+namespace Bhbk.Lib.Aurora.Data_EF6.UnitOfWork
 {
     public class UnitOfWork : IUnitOfWork, IDisposable
     {

@@ -1,4 +1,4 @@
-﻿using Bhbk.Lib.Aurora.Data_EF6.Infrastructure;
+﻿using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
 using Bhbk.Lib.Aurora.Data_EF6.Models;
 using Bhbk.Lib.Common.Primitives;
 using Bhbk.Lib.QueryExpression.Extensions;

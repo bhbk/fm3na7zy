@@ -2,7 +2,7 @@
 using Bhbk.Lib.DataAccess.EF.Repositories;
 using Bhbk.Lib.DataAccess.EF.UnitOfWorks;
 
-namespace Bhbk.Lib.Aurora.Data_EF6.Infrastructure
+namespace Bhbk.Lib.Aurora.Data_EF6.UnitOfWork
 {
     public interface IUnitOfWork : IGenericUnitOfWork
     {
