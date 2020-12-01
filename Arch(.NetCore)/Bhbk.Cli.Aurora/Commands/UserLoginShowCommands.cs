@@ -1,4 +1,4 @@
-﻿using Bhbk.Cli.Aurora.Helpers;
+﻿using Bhbk.Cli.Aurora.Factories;
 using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
 using Bhbk.Lib.Aurora.Data_EF6.Models;
 using Bhbk.Lib.CommandLine.IO;
@@ -15,13 +15,13 @@ using System.Linq.Expressions;
 
 namespace Bhbk.Cli.Aurora.Commands
 {
-    public class UserShowCommands : ConsoleCommand
+    public class UserLoginShowCommands : ConsoleCommand
     {
         private readonly IConfiguration _conf;
         private readonly IUnitOfWork _uow;
         private User _user;
 
-        public UserShowCommands()
+        public UserLoginShowCommands()
         {
             _conf = (IConfiguration)new ConfigurationBuilder()
                 .AddJsonFile("clisettings.json", optional: false, reloadOnChange: true)
@@ -30,7 +30,7 @@ namespace Bhbk.Cli.Aurora.Commands
             var instance = new ContextService(InstanceContext.DeployedOrLocal);
             _uow = new UnitOfWork(_conf["Databases:AuroraEntities"], instance);
 
-            IsCommand("user-show", "Show user details");
+            IsCommand("user-login-show", "Show user login");
 
             HasRequiredOption("u|user=", "Enter existing user", arg =>
             {
@@ -42,6 +42,8 @@ namespace Bhbk.Cli.Aurora.Commands
                         new List<Expression<Func<User, object>>>()
                         {
                             x => x.Mount,
+                            x => x.Mount.Credential,
+                            x => x.Networks,
                             x => x.PrivateKeys,
                             x => x.PublicKeys,
                         }).SingleOrDefault();
@@ -55,9 +57,13 @@ namespace Bhbk.Cli.Aurora.Commands
         {
             try
             {
-                ConsoleHelper.StdOutKeyPairs(_user.PublicKeys.OrderBy(x => x.CreatedUtc));
-                Console.Out.WriteLine();
-                ConsoleHelper.StdOutUserMounts(new List<UserMount> { _user.Mount });
+                OutputFactory.StdOutUsers(new List<User> { _user });
+
+                if (_user.Mount != null)
+                    OutputFactory.StdOutUserMounts(new List<UserMount> { _user.Mount });
+
+                OutputFactory.StdOutKeyPairs(_user.PublicKeys.OrderBy(x => x.CreatedUtc));
+                OutputFactory.StdOutNetworks(_user.Networks.OrderBy(x => x.Action));
 
                 return StandardOutput.FondFarewell();
             }

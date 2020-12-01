@@ -1,7 +1,7 @@
 ﻿using Bhbk.Daemon.Aurora.SFTP.Factories;
-using Bhbk.Lib.Aurora.Data_EF6.Models;
 using Bhbk.Lib.Aurora.Data.ModelsMem;
 using Bhbk.Lib.Aurora.Data.UnitOfWorkMem;
+using Bhbk.Lib.Aurora.Data_EF6.Models;
 using Bhbk.Lib.QueryExpression.Extensions;
 using Bhbk.Lib.QueryExpression.Factories;
 using Microsoft.Extensions.Configuration;
@@ -39,7 +39,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
             _userMem = MemoryPathFactory.CheckUser(_uowMem, _user);
             _userMem = MemoryPathFactory.CheckContent(_uowMem, _userMem);
 
-            MemoryPathFactory.CheckRoot(_uowMem, _userMem);
+            MemoryPathFactory.CheckFolder(_uowMem, _userMem);
         }
 
         protected override bool Exists(NodePath path, NodeType nodeType)

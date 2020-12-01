@@ -4,6 +4,7 @@ CREATE PROCEDURE [svc].[usp_Network_Insert]
     ,@Address				NVARCHAR (128) 
     ,@Action				NVARCHAR (8) 
     ,@IsEnabled				BIT
+    ,@IsDeletable			BIT
 
 AS
 BEGIN
@@ -21,6 +22,7 @@ BEGIN
 			,Address   
 			,Action
 			,IsEnabled
+			,IsDeletable
 			,CreatedUtc
 			)
 		VALUES
@@ -30,6 +32,7 @@ BEGIN
 			,@Address
 			,@Action
 			,@IsEnabled
+			,@IsDeletable
 			,@CREATEDUTC
 			);
 

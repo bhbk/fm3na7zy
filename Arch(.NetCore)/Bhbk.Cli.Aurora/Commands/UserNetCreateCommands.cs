@@ -1,4 +1,4 @@
-﻿using Bhbk.Cli.Aurora.Helpers;
+﻿using Bhbk.Cli.Aurora.Factories;
 using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
 using Bhbk.Lib.Aurora.Data_EF6.Models;
 using Bhbk.Lib.Aurora.Primitives.Enums;
@@ -23,8 +23,8 @@ namespace Bhbk.Cli.Aurora.Commands
         private readonly IUnitOfWork _uow;
         private User _user;
         private IPNetwork _cidr;
-        private NetworkAction _actionType;
-        private readonly string _actionTypeList = string.Join(", ", Enum.GetNames(typeof(NetworkAction)));
+        private NetworkActionType _actionType;
+        private readonly string _actionTypeList = string.Join(", ", Enum.GetNames(typeof(NetworkActionType)));
 
         public UserNetCreateCommands()
         {
@@ -35,7 +35,7 @@ namespace Bhbk.Cli.Aurora.Commands
             var instance = new ContextService(InstanceContext.DeployedOrLocal);
             _uow = new UnitOfWork(_conf["Databases:AuroraEntities"], instance);
 
-            IsCommand("user-net-create", "Create allow/deny for user network");
+            IsCommand("user-net-create", "Create allow/deny network for user");
 
             HasRequiredOption("u|user=", "Enter user that already exists", arg =>
             {
@@ -46,7 +46,7 @@ namespace Bhbk.Cli.Aurora.Commands
                     .Where(x => x.IdentityAlias == arg).ToLambda(),
                         new List<Expression<Func<User, object>>>()
                         {
-                            x => x.Mount,
+                            x => x.Networks,
                         }).SingleOrDefault();
 
                 if (_user == null)
@@ -70,19 +70,30 @@ namespace Bhbk.Cli.Aurora.Commands
         {
             try
             {
+                var exists = _user.Networks.Where(x => x.Address == _cidr.ToString())
+                    .SingleOrDefault();
+
+                if (exists != null)
+                {
+                    Console.Out.WriteLine("  *** The network entered already exists for user ***");
+                    OutputFactory.StdOutNetworks(new List<Network> { exists });
+
+                    return StandardOutput.FondFarewell();
+                }
+
                 var network = _uow.Networks.Create(
                     new Network
                     {
-                        Id = Guid.NewGuid(),
                         IdentityId = _user.IdentityId,
                         Address = _cidr.ToString(),
                         Action = _actionType.ToString(),
                         IsEnabled = true,
-                        CreatedUtc = DateTime.UtcNow,
+                        IsDeletable = true,
                     });
+
                 _uow.Commit();
 
-                ConsoleHelper.StdOutNetworks(new List<Network>() { network });
+                OutputFactory.StdOutNetworks(new List<Network> { network });
 
                 return StandardOutput.FondFarewell();
             }

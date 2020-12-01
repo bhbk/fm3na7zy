@@ -1,4 +1,4 @@
-﻿using Bhbk.Cli.Aurora.Helpers;
+﻿using Bhbk.Cli.Aurora.Factories;
 using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
 using Bhbk.Lib.Aurora.Data_EF6.Models;
 using Bhbk.Lib.Aurora.Primitives.Enums;
@@ -19,6 +19,7 @@ namespace Bhbk.Cli.Aurora.Commands
     {
         private readonly IConfiguration _conf;
         private readonly IUnitOfWork _uow;
+        private Guid _id;
         private ConfigType _configType;
         private readonly string _configTypeList = string.Join(", ", Enum.GetNames(typeof(ConfigType)));
         private string _configValue;
@@ -34,13 +35,18 @@ namespace Bhbk.Cli.Aurora.Commands
 
             IsCommand("sys-conf-edit", "Edit config key/value pair");
 
-            HasRequiredOption("k|key=", "Enter config key", arg =>
+            HasRequiredOption("i|id=", "Enter GUID of config key/value pair to edit", arg =>
+            {
+                _id = Guid.Parse(arg);
+            });
+
+            HasOption("k|key=", "Enter config key", arg =>
             {
                 if (!Enum.TryParse(arg, out _configType))
                     throw new ConsoleHelpAsException($"*** Invalid config key type. Options are '{_configTypeList}' ***");
             });
 
-            HasRequiredOption("v|value=", "Enter config value", arg =>
+            HasOption("v|value=", "Enter config value", arg =>
             {
                 _configValue = arg;
             });
@@ -51,18 +57,22 @@ namespace Bhbk.Cli.Aurora.Commands
             try
             {
                 var config = _uow.Settings.Get(QueryExpressionFactory.GetQueryExpression<Setting>()
-                    .Where(x => x.ConfigKey == _configType.ToString()).ToLambda())
+                    .Where(x => x.Id == _id).ToLambda())
                     .SingleOrDefault();
 
                 if (config == null)
                     throw new ConsoleHelpAsException($"  *** Invalid config type '{_configType}' ***");
 
-                config.ConfigValue = _configValue;
+                if (_configType.ToString() != null)
+                    config.ConfigKey = _configType.ToString();
 
-                config = _uow.Settings.Update(config);
+                if(_configValue != null)
+                    config.ConfigValue = _configValue;
+
+                _uow.Settings.Update(config);
                 _uow.Commit();
 
-                ConsoleHelper.StdOutSettings(new List<Setting>() { config });
+                OutputFactory.StdOutSettings(new List<Setting>() { config });
 
                 return StandardOutput.FondFarewell();
             }

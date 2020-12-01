@@ -1,6 +1,6 @@
 ﻿using Bhbk.Daemon.Aurora.SFTP.Factories;
-using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
 using Bhbk.Lib.Aurora.Data_EF6.Models;
+using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
 using Bhbk.Lib.QueryExpression.Extensions;
 using Bhbk.Lib.QueryExpression.Factories;
 using Microsoft.Extensions.Configuration;
@@ -30,7 +30,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
             {
                 var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
 
-                CompositePathFactory.CheckFolderRoot(uow, _user);
+                CompositePathFactory.CheckFolder(uow, _user);
             }
         }
 

@@ -1,15 +1,17 @@
-﻿using Bhbk.Cli.Aurora.Helpers;
-using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
+﻿using Bhbk.Cli.Aurora.Factories;
 using Bhbk.Lib.Aurora.Data_EF6.Models;
+using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
 using Bhbk.Lib.CommandLine.IO;
 using Bhbk.Lib.Common.Primitives.Enums;
 using Bhbk.Lib.Common.Services;
 using Bhbk.Lib.Cryptography.Encryption;
+using Bhbk.Lib.QueryExpression.Extensions;
+using Bhbk.Lib.QueryExpression.Factories;
 using ManyConsole;
 using Microsoft.Extensions.Configuration;
 using System;
-using System.Linq;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Bhbk.Cli.Aurora.Commands
 {
@@ -50,14 +52,14 @@ namespace Bhbk.Cli.Aurora.Commands
         {
             try
             {
-                var credentials = _uow.Credentials.Get();
+                var exists = _uow.Credentials.Get(QueryExpressionFactory.GetQueryExpression<Credential>()
+                    .Where(x => x.Domain == _credDomain && x.UserName == _credLogin).ToLambda())
+                    .SingleOrDefault();
 
-                if (credentials.Where(x => x.Domain == _credDomain 
-                    && x.UserName == _credLogin).Any())
+                if (exists != null)
                 {
                     Console.Out.WriteLine("  *** The credential entered already exists ***");
-                    Console.Out.WriteLine();
-                    ConsoleHelper.StdOutCredentials(credentials);
+                    OutputFactory.StdOutCredentials(new List<Credential> { exists });
 
                     return StandardOutput.FondFarewell();
                 }
@@ -66,7 +68,6 @@ namespace Bhbk.Cli.Aurora.Commands
                 {
                     Console.Out.Write("  *** Enter credential password to use *** : ");
                     _credPass = StandardInput.GetHiddenInput();
-
                     Console.Out.WriteLine();
                 }
 
@@ -80,18 +81,16 @@ namespace Bhbk.Cli.Aurora.Commands
                 var credential = _uow.Credentials.Create(
                     new Credential
                     {
-                        Id = Guid.NewGuid(),
                         Domain = _credDomain,
                         UserName = _credLogin,
                         Password = cipherText,
-                        CreatedUtc = DateTime.UtcNow,
                         IsEnabled = true,
                         IsDeletable = true,
                     });
 
                 _uow.Commit();
 
-                ConsoleHelper.StdOutCredentials(new List<Credential>() { credential });
+                OutputFactory.StdOutCredentials(new List<Credential>() { credential });
 
                 return StandardOutput.FondFarewell();
             }

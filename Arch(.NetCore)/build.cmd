@@ -5,6 +5,9 @@ powershell -command "& { write-output 2020.11.21.2300 | out-file -filepath .\ver
 rem powershell -command "& { get-date -format yyyy.M.d.HHmm | out-file -filepath .\version.tmp -nonewline -encoding ascii }"
 set /p VERSION=< .\version.tmp
 
+rem build and test .net framework assemblies...
+nuget restore Bhbk.Lib.Aurora.Data_EF6\Bhbk.Lib.Aurora.Data_EF6.csproj -SolutionDirectory . -Verbosity quiet
+
 rem build and test .net standard/core assemblies...
 dotnet restore Bhbk.Aurora.sln --verbosity quiet
 dotnet build Bhbk.Aurora.sln --configuration Release --verbosity quiet /p:platform=x64

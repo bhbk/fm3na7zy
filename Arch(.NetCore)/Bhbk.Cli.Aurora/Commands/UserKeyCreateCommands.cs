@@ -1,6 +1,6 @@
-﻿using Bhbk.Cli.Aurora.Helpers;
-using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
+﻿using Bhbk.Cli.Aurora.Factories;
 using Bhbk.Lib.Aurora.Data_EF6.Models;
+using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
 using Bhbk.Lib.Aurora.Domain.Helpers;
 using Bhbk.Lib.CommandLine.IO;
 using Bhbk.Lib.Common.Primitives.Enums;
@@ -86,18 +86,17 @@ namespace Bhbk.Cli.Aurora.Commands
         {
             try
             {
-                if (!string.IsNullOrEmpty(_privKeyPass))
+                if (string.IsNullOrEmpty(_privKeyPass))
                 {
-                    Console.Out.Write("  *** Enter password for the private key *** : ");
-                    _privKeyPass = StandardInput.GetHiddenInput();
+                    Console.Out.WriteLine($"  *** The password for the private key *** : {_privKeyPass}");
+                    _privKeyPass = AlphaNumeric.CreateString(32);
                 }
                 else
                 {
-                    _privKeyPass = AlphaNumeric.CreateString(32);
-                    Console.Out.WriteLine($"  *** The password for the private key *** : {_privKeyPass}");
+                    Console.Out.Write("  *** Enter password for the private key *** : ");
+                    _privKeyPass = StandardInput.GetHiddenInput();
+                    Console.Out.WriteLine();
                 }
-
-                Console.Out.WriteLine();
 
                 if (string.IsNullOrEmpty(_pubKeyComment))
                     _pubKeyComment = Dns.GetHostName();
@@ -112,7 +111,7 @@ namespace Bhbk.Cli.Aurora.Commands
                         })
                     .Single();
 
-                ConsoleHelper.StdOutKeyPairs(new List<PublicKey>() { pubKey });
+                OutputFactory.StdOutKeyPairs(new List<PublicKey>() { pubKey });
 
                 return StandardOutput.FondFarewell();
             }

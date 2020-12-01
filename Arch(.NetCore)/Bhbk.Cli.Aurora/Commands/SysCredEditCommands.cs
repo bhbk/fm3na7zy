@@ -1,6 +1,6 @@
-﻿using Bhbk.Cli.Aurora.Helpers;
-using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
+﻿using Bhbk.Cli.Aurora.Factories;
 using Bhbk.Lib.Aurora.Data_EF6.Models;
+using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
 using Bhbk.Lib.CommandLine.IO;
 using Bhbk.Lib.Common.Primitives.Enums;
 using Bhbk.Lib.Common.Services;
@@ -19,8 +19,9 @@ namespace Bhbk.Cli.Aurora.Commands
     {
         private readonly IConfiguration _conf;
         private readonly IUnitOfWork _uow;
+        private Guid _id;
         private string _credDomain, _credLogin, _credPass;
-        
+
         public SysCredEditCommands()
         {
             _conf = (IConfiguration)new ConfigurationBuilder()
@@ -32,12 +33,17 @@ namespace Bhbk.Cli.Aurora.Commands
 
             IsCommand("sys-cred-edit", "Edit system credential");
 
-            HasRequiredOption("d|domain=", "Enter credential domain", arg =>
+            HasRequiredOption("i|id=", "Enter GUID of credential to edit", arg =>
+            {
+                _id = Guid.Parse(arg);
+            });
+
+            HasOption("d|domain=", "Enter credential domain", arg =>
             {
                 _credDomain = arg;
             });
 
-            HasRequiredOption("l|login=", "Enter credential login", arg =>
+            HasOption("l|login=", "Enter credential login", arg =>
             {
                 _credLogin = arg;
             });
@@ -57,7 +63,7 @@ namespace Bhbk.Cli.Aurora.Commands
                     .SingleOrDefault();
 
                 if (credential == null)
-                    throw new ConsoleHelpAsException($"  *** Invalid credential '{_credDomain}\\{_credLogin}' ***");
+                    throw new ConsoleHelpAsException($"  *** Invalid credential GUID '{_id}' ***");
 
                 if (string.IsNullOrEmpty(_credPass))
                 {
@@ -74,13 +80,19 @@ namespace Bhbk.Cli.Aurora.Commands
                 if (_credPass != plainText)
                     throw new ArithmeticException();
 
-                credential.Password = cipherText;
-                credential.LastUpdatedUtc = DateTime.UtcNow;
+                if (_credDomain != null)
+                    credential.Domain = _credDomain;
+
+                if (_credLogin != null)
+                    credential.UserName = _credLogin;
+
+                if (_credPass != null)
+                    credential.Password = cipherText;
 
                 credential = _uow.Credentials.Update(credential);
                 _uow.Commit();
 
-                ConsoleHelper.StdOutCredentials(new List<Credential>() { credential });
+                OutputFactory.StdOutCredentials(new List<Credential>() { credential });
 
                 return StandardOutput.FondFarewell();
             }

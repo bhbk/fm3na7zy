@@ -1,6 +1,6 @@
-﻿using Bhbk.Lib.Aurora.Data_EF6.Models;
-using Bhbk.Lib.Aurora.Data.ModelsMem;
+﻿using Bhbk.Lib.Aurora.Data.ModelsMem;
 using Bhbk.Lib.Aurora.Data.UnitOfWorkMem;
+using Bhbk.Lib.Aurora.Data_EF6.Models;
 using Bhbk.Lib.QueryExpression.Extensions;
 using Bhbk.Lib.QueryExpression.Factories;
 using Serilog;
@@ -14,6 +14,51 @@ namespace Bhbk.Daemon.Aurora.SFTP.Factories
 {
     internal class MemoryPathFactory
     {
+        internal static UserMem CheckContent(IUnitOfWorkMem uow, UserMem user)
+        {
+            /*
+             * only neeed if in-memory sqlite instance is backed by entity framework 6. not needed if backed by ef core.
+             */
+
+            uow.UserFiles.Delete(QueryExpressionFactory.GetQueryExpression<UserFileMem>()
+                .Where(x => x.IdentityId == user.IdentityId).ToLambda());
+
+            uow.UserFolders.Delete(QueryExpressionFactory.GetQueryExpression<UserFolderMem>()
+                .Where(x => x.IdentityId == user.IdentityId).ToLambda());
+
+            uow.Commit();
+
+            return user;
+        }
+
+        internal static UserFolderMem CheckFolder(IUnitOfWorkMem uow, UserMem user)
+        {
+            var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
+
+            var folderMem = uow.UserFolders.Get(QueryExpressionFactory.GetQueryExpression<UserFolderMem>()
+                .Where(x => x.IdentityId == user.IdentityId && x.ParentId == null).ToLambda())
+                .SingleOrDefault();
+
+            if (folderMem == null)
+            {
+                folderMem = uow.UserFolders.Create(
+                    new UserFolderMem
+                    {
+                        Id = Guid.NewGuid(),
+                        IdentityId = user.IdentityId,
+                        ParentId = null,
+                        VirtualName = string.Empty,
+                        CreatedUtc = DateTime.UtcNow,
+                        IsReadOnly = true,
+                    });
+                uow.Commit();
+
+                Log.Information($"'{callPath}' '{user.IdentityAlias}' folder '/' in memory");
+            }
+
+            return folderMem;
+        }
+
         internal static UserMem CheckUser(IUnitOfWorkMem uow, User user)
         {
             var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
@@ -36,51 +81,6 @@ namespace Bhbk.Daemon.Aurora.SFTP.Factories
             }
 
             return userMem;
-        }
-
-        internal static UserMem CheckContent(IUnitOfWorkMem uow, UserMem user)
-        {
-            uow.UserFiles.Delete(QueryExpressionFactory.GetQueryExpression<UserFileMem>()
-                .Where(x => x.IdentityId == user.IdentityId).ToLambda());
-
-            uow.UserFolders.Delete(QueryExpressionFactory.GetQueryExpression<UserFolderMem>()
-                .Where(x => x.IdentityId == user.IdentityId).ToLambda());
-
-            uow.Commit();
-
-            var userMem = uow.Users.Get(QueryExpressionFactory.GetQueryExpression<UserMem>()
-                .Where(x => x.IdentityId == user.IdentityId).ToLambda())
-                .Single();
-
-            return userMem;
-        }
-
-        internal static UserFolderMem CheckRoot(IUnitOfWorkMem uow, UserMem userMem)
-        {
-            var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
-
-            var folderMem = uow.UserFolders.Get(QueryExpressionFactory.GetQueryExpression<UserFolderMem>()
-                .Where(x => x.IdentityId == userMem.IdentityId && x.ParentId == null).ToLambda())
-                .SingleOrDefault();
-
-            if (folderMem == null)
-            {
-                folderMem = uow.UserFolders.Create(
-                    new UserFolderMem
-                    {
-                        Id = Guid.NewGuid(),
-                        IdentityId = userMem.IdentityId,
-                        ParentId = null,
-                        VirtualName = string.Empty,
-                        CreatedUtc = DateTime.UtcNow,
-                        IsReadOnly = true,
-                    });
-                uow.Commit();
-
-                Log.Information($"'{callPath}' '{userMem.IdentityAlias}' folder '/' in memory");
-            }
-
-            return folderMem;
         }
 
         internal static UserFileMem PathToFile(IUnitOfWorkMem uow, UserMem user, string path)

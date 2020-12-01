@@ -31,16 +31,13 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Network' does not have a primar
           <Key>
             <PropertyRef Name="Id" />
             
-            
-            
-            
-            
           </Key>
           <Property Name="Id" Type="uniqueidentifier" Nullable="false" />
           <Property Name="IdentityId" Type="uniqueidentifier" Nullable="false" />
           <Property Name="Address" Type="nvarchar" MaxLength="128" Nullable="false" />
           <Property Name="Action" Type="nvarchar" MaxLength="8" Nullable="false" />
           <Property Name="IsEnabled" Type="bit" Nullable="false" />
+          <Property Name="IsDeletable" Type="bit" Nullable="false" />
           <Property Name="CreatedUtc" Type="datetimeoffset" Precision="7" Nullable="false" />
           <Property Name="LastUpdatedUtc" Type="datetimeoffset" Precision="7" />
         </EntityType>
@@ -121,6 +118,13 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_User' does not have a primary k
         <EntityType Name="uvw_User">
           <Key>
             <PropertyRef Name="IdentityId" />
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -267,6 +271,7 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_UserMount' does not have a prim
           <Parameter Name="Address" Type="nvarchar" Mode="In" />
           <Parameter Name="Action" Type="nvarchar" Mode="In" />
           <Parameter Name="IsEnabled" Type="bit" Mode="In" />
+          <Parameter Name="IsDeletable" Type="bit" Mode="In" />
         </Function>
         <Function Name="usp_Network_Update" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="svc">
           <Parameter Name="Id" Type="uniqueidentifier" Mode="In" />
@@ -274,6 +279,7 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_UserMount' does not have a prim
           <Parameter Name="Address" Type="nvarchar" Mode="In" />
           <Parameter Name="Action" Type="nvarchar" Mode="In" />
           <Parameter Name="IsEnabled" Type="bit" Mode="In" />
+          <Parameter Name="IsDeletable" Type="bit" Mode="In" />
         </Function>
         <Function Name="usp_PrivateKey_Delete" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="svc">
           <Parameter Name="Id" Type="uniqueidentifier" Mode="In" />
@@ -482,6 +488,7 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_UserMount' does not have a prim
     [uvw_Network].[Address] AS [Address], 
     [uvw_Network].[Action] AS [Action], 
     [uvw_Network].[IsEnabled] AS [IsEnabled], 
+    [uvw_Network].[IsDeletable] AS [IsDeletable], 
     [uvw_Network].[CreatedUtc] AS [CreatedUtc], 
     [uvw_Network].[LastUpdatedUtc] AS [LastUpdatedUtc]
     FROM [svc].[uvw_Network] AS [uvw_Network]</DefiningQuery>
@@ -632,6 +639,7 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_UserMount' does not have a prim
           <Property Name="Address" Type="String" MaxLength="128" FixedLength="false" Unicode="true" Nullable="false" />
           <Property Name="Action" Type="String" MaxLength="8" FixedLength="false" Unicode="true" Nullable="false" />
           <Property Name="IsEnabled" Type="Boolean" Nullable="false" />
+          <Property Name="IsDeletable" Type="Boolean" Nullable="false" />
           <Property Name="CreatedUtc" Type="DateTimeOffset" Nullable="false" Precision="7" />
           <Property Name="LastUpdatedUtc" Type="DateTimeOffset" Precision="7" />
           <NavigationProperty Name="User" Relationship="AuroraModels.User_Network" FromRole="Network" ToRole="User" />
@@ -821,6 +829,7 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_UserMount' does not have a prim
             <Parameter Name="Address" Mode="In" Type="String" />
             <Parameter Name="Action" Mode="In" Type="String" />
             <Parameter Name="IsEnabled" Mode="In" Type="Boolean" />
+            <Parameter Name="IsDeletable" Mode="In" Type="Boolean" />
           </FunctionImport>
           <FunctionImport Name="usp_Network_Update" ReturnType="Collection(AuroraModels.usp_Network_Update_Result)">
             <Parameter Name="Id" Mode="In" Type="Guid" />
@@ -828,6 +837,7 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_UserMount' does not have a prim
             <Parameter Name="Address" Mode="In" Type="String" />
             <Parameter Name="Action" Mode="In" Type="String" />
             <Parameter Name="IsEnabled" Mode="In" Type="Boolean" />
+            <Parameter Name="IsDeletable" Mode="In" Type="Boolean" />
           </FunctionImport>
           <FunctionImport Name="usp_PrivateKey_Delete" ReturnType="Collection(AuroraModels.usp_PrivateKey_Delete_Result)">
           <Parameter Name="Id" Mode="In" Type="Guid" />
@@ -1614,6 +1624,7 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_UserMount' does not have a prim
           <EntitySetMapping Name="Networks">
             <EntityTypeMapping TypeName="AuroraModels.Network">
               <MappingFragment StoreEntitySet="uvw_Network">
+                <ScalarProperty Name="IsDeletable" ColumnName="IsDeletable" />
                 <ScalarProperty Name="Id" ColumnName="Id" />
                 <ScalarProperty Name="IdentityId" ColumnName="IdentityId" />
                 <ScalarProperty Name="Address" ColumnName="Address" />
@@ -1629,6 +1640,7 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_UserMount' does not have a prim
                   <ScalarProperty Name="Id" ParameterName="Id" />
                 </DeleteFunction>
                 <UpdateFunction FunctionName="AuroraModels.Store.usp_Network_Update">
+                  <ScalarProperty Name="IsDeletable" ParameterName="IsDeletable" Version="Current" />
                   <ScalarProperty Name="IsEnabled" ParameterName="IsEnabled" Version="Current" />
                   <ScalarProperty Name="Action" ParameterName="Action" Version="Current" />
                   <ScalarProperty Name="Address" ParameterName="Address" Version="Current" />
@@ -1637,6 +1649,7 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_UserMount' does not have a prim
                   <ResultBinding Name="LastUpdatedUtc" ColumnName="LastUpdatedUtc" />
                 </UpdateFunction>
                 <InsertFunction FunctionName="AuroraModels.Store.usp_Network_Insert">
+                  <ScalarProperty Name="IsDeletable" ParameterName="IsDeletable" />
                   <ScalarProperty Name="IsEnabled" ParameterName="IsEnabled" />
                   <ScalarProperty Name="Action" ParameterName="Action" />
                   <ScalarProperty Name="Address" ParameterName="Address" />

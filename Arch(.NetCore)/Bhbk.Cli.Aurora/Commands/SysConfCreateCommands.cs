@@ -1,14 +1,17 @@
-﻿using Bhbk.Cli.Aurora.Helpers;
-using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
+﻿using Bhbk.Cli.Aurora.Factories;
 using Bhbk.Lib.Aurora.Data_EF6.Models;
+using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
 using Bhbk.Lib.Aurora.Primitives.Enums;
 using Bhbk.Lib.CommandLine.IO;
 using Bhbk.Lib.Common.Primitives.Enums;
 using Bhbk.Lib.Common.Services;
+using Bhbk.Lib.QueryExpression.Extensions;
+using Bhbk.Lib.QueryExpression.Factories;
 using ManyConsole;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Bhbk.Cli.Aurora.Commands
 {
@@ -47,18 +50,29 @@ namespace Bhbk.Cli.Aurora.Commands
         {
             try
             {
+                var exists = _uow.Settings.Get(QueryExpressionFactory.GetQueryExpression<Setting>()
+                    .Where(x => x.ConfigKey == _configType.ToString() && x.ConfigValue == _configValue).ToLambda())
+                    .LastOrDefault();
+
+                if (exists != null)
+                {
+                    Console.Out.WriteLine("  *** The config key/value pair entered already exists ***");
+                    OutputFactory.StdOutSettings(new List<Setting> { exists });
+
+                    return StandardOutput.FondFarewell();
+                }
+
                 var config = _uow.Settings.Create(
                     new Setting
                     {
-                        Id = Guid.NewGuid(),
                         ConfigKey = _configType.ToString(),
                         ConfigValue = _configValue,
                         IsDeletable = true,
-                        CreatedUtc = DateTime.UtcNow,
                     });
+
                 _uow.Commit();
 
-                ConsoleHelper.StdOutSettings(new List<Setting>() { config });
+                OutputFactory.StdOutSettings(new List<Setting>() { config });
 
                 return StandardOutput.FondFarewell();
             }

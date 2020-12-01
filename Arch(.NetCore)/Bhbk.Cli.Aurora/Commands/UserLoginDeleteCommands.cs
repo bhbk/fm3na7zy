@@ -1,6 +1,6 @@
-﻿using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
+﻿using Bhbk.Cli.Aurora.Factories;
 using Bhbk.Lib.Aurora.Data_EF6.Models;
-using Bhbk.Lib.Aurora.Primitives.Enums;
+using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
 using Bhbk.Lib.CommandLine.IO;
 using Bhbk.Lib.Common.Primitives.Enums;
 using Bhbk.Lib.Common.Services;
@@ -9,19 +9,19 @@ using Bhbk.Lib.QueryExpression.Factories;
 using ManyConsole;
 using Microsoft.Extensions.Configuration;
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 
 namespace Bhbk.Cli.Aurora.Commands
 {
-    public class UserEditCommands : ConsoleCommand
+    public class UserLoginDeleteCommands : ConsoleCommand
     {
         private readonly IConfiguration _conf;
         private readonly IUnitOfWork _uow;
         private User _user;
-        private FileSystemProviderType _fileSystem;
-        private readonly string _fileSystemList = string.Join(", ", Enum.GetNames(typeof(FileSystemProviderType)));
 
-        public UserEditCommands()
+        public UserLoginDeleteCommands()
         {
             _conf = (IConfiguration)new ConfigurationBuilder()
                 .AddJsonFile("clisettings.json", optional: false, reloadOnChange: true)
@@ -30,38 +30,23 @@ namespace Bhbk.Cli.Aurora.Commands
             var instance = new ContextService(InstanceContext.DeployedOrLocal);
             _uow = new UnitOfWork(_conf["Databases:AuroraEntities"], instance);
 
-            IsCommand("user-edit", "Edit user");
+            IsCommand("user-login-delete", "Delete user login");
 
             HasRequiredOption("u|user=", "Enter user that exists already", arg =>
             {
                 if (string.IsNullOrEmpty(arg))
-                    throw new ConsoleHelpAsException($"  *** No user given ***");
+                    throw new ConsoleHelpAsException($"  *** No user name given ***");
 
                 _user = _uow.Users.Get(QueryExpressionFactory.GetQueryExpression<User>()
-                    .Where(x => x.IdentityAlias == arg && x.IsDeletable == true).ToLambda())
-                    .SingleOrDefault();
+                    .Where(x => x.IdentityAlias == arg && x.IsDeletable == true).ToLambda(),
+                        new List<Expression<Func<User, object>>>()
+                        {
+                            x => x.Files,
+                            x => x.Folders,
+                        }).SingleOrDefault();
 
                 if (_user == null)
                     throw new ConsoleHelpAsException($"  *** Invalid user '{arg}' or immutable ***");
-            });
-
-            HasOption("f|filesystem=", "Enter type of filesystem for user", arg =>
-            {
-                if (!Enum.TryParse(arg, out _fileSystem))
-                    throw new ConsoleHelpAsException($"*** Invalid filesystem type. Options are '{_fileSystemList}' ***");
-
-                if (_user != null)
-                    _user.FileSystemType = _fileSystem.ToString();
-            });
-
-            HasOption("k|public-key=", "Require public key for user", arg =>
-            {
-                _user.RequirePublicKey = bool.Parse(arg);
-            });
-
-            HasOption("p|pass=", "Require password for user", arg =>
-            {
-                _user.RequirePassword = bool.Parse(arg);
             });
         }
 
@@ -69,7 +54,18 @@ namespace Bhbk.Cli.Aurora.Commands
         {
             try
             {
-                _uow.Users.Update(_user);
+                OutputFactory.StdOutUsers(new List<User> { _user });
+
+                var files = _user.Files.Count;
+                var folders = _user.Folders.Count;
+
+                if (files > 0)
+                    throw new ConsoleHelpAsException($"  *** The user can not be deleted. There are {files} files owned ***");
+
+                if (folders > 0)
+                    throw new ConsoleHelpAsException($"  *** The user can not be deleted. There are {folders} folders owned ***");
+
+                _uow.Users.Delete(_user);
                 _uow.Commit();
 
                 return StandardOutput.FondFarewell();

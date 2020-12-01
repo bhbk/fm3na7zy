@@ -5,6 +5,7 @@ CREATE PROCEDURE [svc].[usp_Network_Update]
     ,@Address				NVARCHAR (128) 
     ,@Action				NVARCHAR (8) 
     ,@IsEnabled				BIT
+    ,@IsDeletable			BIT
 
 AS
 BEGIN
@@ -19,6 +20,7 @@ BEGIN
 			 Address				= @Address
 			,Action					= @Action
 			,IsEnabled				= @IsEnabled
+            ,IsDeletable            = @IsDeletable
             ,LastUpdatedUtc			= @LASTUPDATED
         WHERE Id = @Id AND IdentityId = @IdentityId
 

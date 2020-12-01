@@ -1,5 +1,6 @@
-﻿using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
+﻿using Bhbk.Cli.Aurora.Factories;
 using Bhbk.Lib.Aurora.Data_EF6.Models;
+using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
 using Bhbk.Lib.Aurora.Primitives.Enums;
 using Bhbk.Lib.CommandLine.IO;
 using Bhbk.Lib.Common.Primitives.Enums;
@@ -18,7 +19,7 @@ using System.Linq;
 
 namespace Bhbk.Cli.Aurora.Commands
 {
-    public class UserCreateCommands : ConsoleCommand
+    public class UserLoginCreateCommands : ConsoleCommand
     {
         private readonly IConfiguration _conf;
         private readonly IUnitOfWork _uow;
@@ -26,7 +27,7 @@ namespace Bhbk.Cli.Aurora.Commands
         private readonly string _fileSystemList = string.Join(", ", Enum.GetNames(typeof(FileSystemProviderType)));
         private string _userName;
 
-        public UserCreateCommands()
+        public UserLoginCreateCommands()
         {
             _conf = (IConfiguration)new ConfigurationBuilder()
                 .AddJsonFile("clisettings.json", optional: false, reloadOnChange: true)
@@ -35,7 +36,7 @@ namespace Bhbk.Cli.Aurora.Commands
             var instance = new ContextService(InstanceContext.DeployedOrLocal);
             _uow = new UnitOfWork(_conf["Databases:AuroraEntities"], instance);
 
-            IsCommand("user-create", "Create user");
+            IsCommand("user-login-create", "Create user login");
 
             HasRequiredOption("u|user=", "Enter user that does not exist already", arg =>
             {
@@ -98,6 +99,8 @@ namespace Bhbk.Cli.Aurora.Commands
                         IsDeletable = false,
                     });
                 _uow.Commit();
+
+                OutputFactory.StdOutUsers(new List<User> { user });
 
                 return StandardOutput.FondFarewell();
             }

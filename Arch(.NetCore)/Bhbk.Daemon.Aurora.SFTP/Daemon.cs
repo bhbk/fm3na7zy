@@ -328,7 +328,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                         return;
                     }
 
-                    var action = NetworkAction.Deny.ToString();
+                    var action = NetworkActionType.Deny.ToString();
                     if (NetworkHelper.ValidateAddress(user.Networks.Where(x => x.Action == action && x.IsEnabled), e.ClientAddress))
                     {
                         Log.Warning($"'{callPath}' '{e.UserName}' is denied from '{e.ClientEndPoint}' running '{e.ClientSoftwareIdentifier}'");
@@ -337,7 +337,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                         return;
                     }
 
-                    action = NetworkAction.Allow.ToString();
+                    action = NetworkActionType.Allow.ToString();
                     if (!NetworkHelper.ValidateAddress(user.Networks.Where(x => x.Action == action && x.IsEnabled), e.ClientAddress))
                     {
                         Log.Warning($"'{callPath}' '{e.UserName}' is not allowed from '{e.ClientEndPoint}' running '{e.ClientSoftwareIdentifier}'");

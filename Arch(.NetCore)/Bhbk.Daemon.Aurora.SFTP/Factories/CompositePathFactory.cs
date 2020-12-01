@@ -1,5 +1,5 @@
-﻿using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
-using Bhbk.Lib.Aurora.Data_EF6.Models;
+﻿using Bhbk.Lib.Aurora.Data_EF6.Models;
+using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
 using Bhbk.Lib.QueryExpression.Extensions;
 using Bhbk.Lib.QueryExpression.Factories;
 using Serilog;
@@ -12,7 +12,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Factories
 {
     internal class CompositePathFactory
     {
-        internal static UserFolder CheckFolderRoot(IUnitOfWork uow, User user)
+        internal static UserFolder CheckFolder(IUnitOfWork uow, User user)
         {
             var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
 

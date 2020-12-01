@@ -1,4 +1,4 @@
-﻿using Bhbk.Cli.Aurora.Helpers;
+﻿using Bhbk.Cli.Aurora.Factories;
 using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
 using Bhbk.Lib.Aurora.Data_EF6.Models;
 using Bhbk.Lib.Aurora.Domain.Helpers;
@@ -66,7 +66,7 @@ namespace Bhbk.Cli.Aurora.Commands
                             x => x.PrivateKey,
                         });
 
-                ConsoleHelper.StdOutKeyPairs(keys.OrderBy(x => x.CreatedUtc));
+                OutputFactory.StdOutKeyPairs(keys.OrderBy(x => x.CreatedUtc));
 
                 Console.Out.Write("  *** Enter GUID of public key to export *** : ");
                 var input = Guid.Parse(StandardInput.GetInput());

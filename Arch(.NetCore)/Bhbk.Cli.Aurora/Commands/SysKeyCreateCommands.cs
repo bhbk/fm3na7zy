@@ -1,4 +1,4 @@
-﻿using Bhbk.Cli.Aurora.Helpers;
+﻿using Bhbk.Cli.Aurora.Factories;
 using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
 using Bhbk.Lib.Aurora.Data_EF6.Models;
 using Bhbk.Lib.Aurora.Domain.Helpers;
@@ -82,7 +82,7 @@ namespace Bhbk.Cli.Aurora.Commands
                         })
                     .Single();
 
-                ConsoleHelper.StdOutKeyPairs(new List<PublicKey>() { pubKey });
+                OutputFactory.StdOutKeyPairs(new List<PublicKey>() { pubKey });
 
                 return StandardOutput.FondFarewell();
             }

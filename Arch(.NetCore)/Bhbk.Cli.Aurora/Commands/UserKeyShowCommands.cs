@@ -15,14 +15,13 @@ using System.Linq.Expressions;
 
 namespace Bhbk.Cli.Aurora.Commands
 {
-    public class UserNetDeleteCommands : ConsoleCommand
+    public class UserKeyShowCommands : ConsoleCommand
     {
         private readonly IConfiguration _conf;
         private readonly IUnitOfWork _uow;
         private User _user;
-        private bool _delete = false, _deleteAll = false;
 
-        public UserNetDeleteCommands()
+        public UserKeyShowCommands()
         {
             _conf = (IConfiguration)new ConfigurationBuilder()
                 .AddJsonFile("clisettings.json", optional: false, reloadOnChange: true)
@@ -31,7 +30,7 @@ namespace Bhbk.Cli.Aurora.Commands
             var instance = new ContextService(InstanceContext.DeployedOrLocal);
             _uow = new UnitOfWork(_conf["Databases:AuroraEntities"], instance);
 
-            IsCommand("user-net-delete", "Delete allow/deny network for user");
+            IsCommand("user-key-show", "Show private/public keys for user");
 
             HasRequiredOption("u|user=", "Enter existing user", arg =>
             {
@@ -42,21 +41,12 @@ namespace Bhbk.Cli.Aurora.Commands
                     .Where(x => x.IdentityAlias == arg).ToLambda(),
                         new List<Expression<Func<User, object>>>()
                         {
-                            x => x.Networks,
+                            x => x.PrivateKeys,
+                            x => x.PublicKeys,
                         }).SingleOrDefault();
 
                 if (_user == null)
                     throw new ConsoleHelpAsException($"  *** Invalid user '{arg}' ***");
-            });
-
-            HasOption("d|delete", "Delete a network for user", arg =>
-            {
-                _delete = true;
-            });
-
-            HasOption("a|delete-all", "Delete all networks for user", arg =>
-            {
-                _deleteAll = true;
             });
         }
 
@@ -64,30 +54,7 @@ namespace Bhbk.Cli.Aurora.Commands
         {
             try
             {
-                var exists = _user.Networks.Where(x => x.IsDeletable == true);
-
-                OutputFactory.StdOutNetworks(exists);
-
-                if (_delete)
-                {
-                    Console.Out.WriteLine();
-                    Console.Out.Write("  *** Enter GUID of network for user to delete *** : ");
-                    var input = Guid.Parse(StandardInput.GetInput());
-
-                    var network = exists.Where(x => x.Id == input)
-                        .SingleOrDefault();
-
-                    if(network != null)
-                    {
-                        _uow.Networks.Delete(network);
-                        _uow.Commit();
-                    }
-                }
-                else if (_deleteAll)
-                {
-                    _uow.Networks.Delete(exists);
-                    _uow.Commit();
-                }
+                OutputFactory.StdOutKeyPairs(_user.PublicKeys.OrderBy(x => x.CreatedUtc));
 
                 return StandardOutput.FondFarewell();
             }

@@ -1,4 +1,4 @@
-﻿using Bhbk.Cli.Aurora.Helpers;
+﻿using Bhbk.Cli.Aurora.Factories;
 using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
 using Bhbk.Lib.Aurora.Data_EF6.Models;
 using Bhbk.Lib.Aurora.Domain.Helpers;
@@ -80,22 +80,22 @@ namespace Bhbk.Cli.Aurora.Commands
 
                 Console.Out.WriteLine();
                 Console.Out.WriteLine("  *** Current private key pass ciphertexts *** ");
-                ConsoleHelper.StdOutKeyPairSecrets(keys);
+                OutputFactory.StdOutKeyPairSecrets(keys);
 
                 Console.Out.WriteLine();
                 Console.Out.WriteLine("  *** Current credential password ciphertexts *** ");
-                ConsoleHelper.StdOutCredentialSecrets(creds);
+                OutputFactory.StdOutCredentialSecrets(creds);
 
                 keys = KeyHelper.EditPrivKeySecrets(_uow, keys, _secretCurrent, _secretNew).ToList();
                 creds = UserHelper.EditCredentialSecrets(_uow, creds, _secretCurrent, _secretNew).ToList();
 
                 Console.Out.WriteLine();
                 Console.Out.WriteLine("  *** New private key pass ciphertexts *** ");
-                ConsoleHelper.StdOutKeyPairSecrets(keys);
+                OutputFactory.StdOutKeyPairSecrets(keys);
 
                 Console.Out.WriteLine();
                 Console.Out.WriteLine("  *** New credential password ciphertexts *** ");
-                ConsoleHelper.StdOutCredentialSecrets(creds);
+                OutputFactory.StdOutCredentialSecrets(creds);
 
                 return StandardOutput.FondFarewell();
             }

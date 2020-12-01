@@ -1,4 +1,4 @@
-﻿using Bhbk.Cli.Aurora.Helpers;
+﻿using Bhbk.Cli.Aurora.Factories;
 using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
 using Bhbk.Lib.Aurora.Data_EF6.Models;
 using Bhbk.Lib.CommandLine.IO;
@@ -53,11 +53,9 @@ namespace Bhbk.Cli.Aurora.Commands
         {
             try
             {
-                var mount = _user.Mount;
+                OutputFactory.StdOutUserMounts(new List<UserMount> { _user.Mount });
 
-                ConsoleHelper.StdOutUserMounts(new List<UserMount> { mount });
-
-                _uow.UserMounts.Delete(mount);
+                _uow.UserMounts.Delete(_user.Mount);
                 _uow.Commit();
 
                 return StandardOutput.FondFarewell();

@@ -1,6 +1,6 @@
-﻿using Bhbk.Cli.Aurora.Helpers;
-using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
+﻿using Bhbk.Cli.Aurora.Factories;
 using Bhbk.Lib.Aurora.Data_EF6.Models;
+using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
 using Bhbk.Lib.CommandLine.IO;
 using Bhbk.Lib.Common.Primitives.Enums;
 using Bhbk.Lib.Common.Services;
@@ -17,7 +17,7 @@ namespace Bhbk.Cli.Aurora.Commands
     {
         private readonly IConfiguration _conf;
         private readonly IUnitOfWork _uow;
-        private Guid _credID;
+        private bool _delete = false;
 
         public SysCredDeleteCommands()
         {
@@ -30,9 +30,9 @@ namespace Bhbk.Cli.Aurora.Commands
 
             IsCommand("sys-cred-delete", "Delete system credential");
 
-            HasOption("i|id=", "Enter GUID of credential to delete", arg =>
+            HasOption("d|delete", "Delete a network for user", arg =>
             {
-                _credID = Guid.Parse(arg);
+                _delete = true;
             });
         }
 
@@ -40,35 +40,32 @@ namespace Bhbk.Cli.Aurora.Commands
         {
             try
             {
-                var credentials = _uow.Credentials.Get(QueryExpressionFactory.GetQueryExpression<Credential>()
+                var exists = _uow.Credentials.Get(QueryExpressionFactory.GetQueryExpression<Credential>()
                     .Where(x => x.IsDeletable == true).ToLambda());
 
-                ConsoleHelper.StdOutCredentials(credentials);
+                OutputFactory.StdOutCredentials(exists);
 
-                if (_credID == Guid.Empty)
+                if (_delete)
                 {
                     Console.Out.WriteLine();
                     Console.Out.Write("  *** Enter GUID of credential to delete *** : ");
-                    _credID = Guid.Parse(StandardInput.GetInput());
+                    var input = Guid.Parse(StandardInput.GetInput());
+
+                    var mounts = _uow.UserMounts.Get(QueryExpressionFactory.GetQueryExpression<UserMount>()
+                        .Where(x => x.CredentialId == input).ToLambda());
+
+                    if (mounts.Any())
+                    {
+                        Console.Out.WriteLine();
+                        Console.Out.WriteLine("  *** The credential can not be deleted while in use ***");
+                        OutputFactory.StdOutUserMounts(mounts);
+
+                        return StandardOutput.FondFarewell();
+                    }
+
+                    _uow.Credentials.Delete(exists.Where(x => x.Id == input));
+                    _uow.Commit();
                 }
-
-                var mounts = _uow.UserMounts.Get(QueryExpressionFactory.GetQueryExpression<UserMount>()
-                    .Where(x => x.CredentialId == _credID).ToLambda());
-
-                if (mounts.Any())
-                {
-                    Console.Out.WriteLine();
-                    Console.Out.WriteLine("  *** The credential can not be deleted while in use ***");
-                    Console.Out.WriteLine();
-                    ConsoleHelper.StdOutUserMounts(mounts);
-
-                    return StandardOutput.FondFarewell();
-                }
-
-                _uow.Credentials.Delete(QueryExpressionFactory.GetQueryExpression<Credential>()
-                    .Where(x => x.Id == _credID && x.IsDeletable == true).ToLambda());
-
-                _uow.Commit();
 
                 return StandardOutput.FondFarewell();
             }

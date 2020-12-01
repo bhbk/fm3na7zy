@@ -17,7 +17,9 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.Versioning;
 using System.Security.Principal;
+#if !RELEASE
 using System.Text;
+#endif
 
 namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
 {
@@ -65,7 +67,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                     _userToken = UserHelper.GetSafeAccessTokenHandle(null, identityUser, identityPass);
                 }
             }
-
+#if !RELEASE
             var folderKeysNode = new DirectoryNode(".ssh", Root);
             var fileKeysNode = new FileNode("authorized_users", folderKeysNode);
 
@@ -80,6 +82,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
             CreateFile(folderKeysNode, fileKeysNode);
             SaveContent(fileKeysNode, NodeContent.CreateDelayedWriteContent(
                 new MemoryStream(Encoding.UTF8.GetBytes(pubKeysContent.ToString()))));
+#endif
         }
 
         [SupportedOSPlatform("windows")]

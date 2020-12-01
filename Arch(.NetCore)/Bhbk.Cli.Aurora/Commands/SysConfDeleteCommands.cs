@@ -1,6 +1,6 @@
-﻿using Bhbk.Cli.Aurora.Helpers;
-using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
+﻿using Bhbk.Cli.Aurora.Factories;
 using Bhbk.Lib.Aurora.Data_EF6.Models;
+using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
 using Bhbk.Lib.CommandLine.IO;
 using Bhbk.Lib.Common.Primitives.Enums;
 using Bhbk.Lib.Common.Services;
@@ -17,7 +17,7 @@ namespace Bhbk.Cli.Aurora.Commands
     {
         private readonly IConfiguration _conf;
         private readonly IUnitOfWork _uow;
-        private Guid _configID;
+        private bool _delete = false, _deleteAll = false;
 
         public SysConfDeleteCommands()
         {
@@ -30,9 +30,14 @@ namespace Bhbk.Cli.Aurora.Commands
 
             IsCommand("sys-conf-delete", "Delete config key/value pair");
 
-            HasOption("i|id=", "Enter GUID of config to delete", arg =>
+            HasOption("d|delete", "Delete a config key/value pair", arg =>
             {
-                _configID = Guid.Parse(arg);
+                _delete = true;
+            });
+
+            HasOption("a|delete-all", "Delete all config key/value pairs", arg =>
+            {
+                _deleteAll = true;
             });
         }
 
@@ -41,21 +46,30 @@ namespace Bhbk.Cli.Aurora.Commands
             try
             {
                 var configs = _uow.Settings.Get(QueryExpressionFactory.GetQueryExpression<Setting>()
-                    .Where(x => x.IsDeletable == true).ToLambda());
+                    .Where(x => x.IdentityId == null && x.IsDeletable == true).ToLambda());
 
-                ConsoleHelper.StdOutSettings(configs);
+                OutputFactory.StdOutSettings(configs);
 
-                if (_configID == Guid.Empty)
+                if (_delete)
                 {
                     Console.Out.WriteLine();
-                    Console.Out.Write("  *** Enter GUID of config to delete *** : ");
-                    _configID = Guid.Parse(StandardInput.GetInput());
+                    Console.Out.Write("  *** Enter GUID of config key/value pair to delete *** : ");
+                    var input = Guid.Parse(StandardInput.GetInput());
+
+                    var config = configs.Where(x => x.Id == input)
+                        .SingleOrDefault();
+
+                    if (config != null)
+                    {
+                        _uow.Settings.Delete(config);
+                        _uow.Commit();
+                    }
                 }
-
-                _uow.Settings.Delete(QueryExpressionFactory.GetQueryExpression<Setting>()
-                    .Where(x => x.Id == _configID && x.IsDeletable == true).ToLambda());
-
-                _uow.Commit();
+                else if (_deleteAll)
+                {
+                    _uow.Settings.Delete(configs);
+                    _uow.Commit();
+                }
 
                 return StandardOutput.FondFarewell();
             }

@@ -19,6 +19,7 @@ namespace Bhbk.Lib.Aurora.Data_EF6.Models
         public string Address { get; set; }
         public string Action { get; set; }
         public bool IsEnabled { get; set; }
+        public bool IsDeletable { get; set; }
         public System.DateTimeOffset CreatedUtc { get; set; }
         public Nullable<System.DateTimeOffset> LastUpdatedUtc { get; set; }
     

@@ -1,4 +1,4 @@
-﻿using Bhbk.Cli.Aurora.Helpers;
+﻿using Bhbk.Cli.Aurora.Factories;
 using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
 using Bhbk.Lib.Aurora.Data_EF6.Models;
 using Bhbk.Lib.CommandLine.IO;
@@ -46,7 +46,8 @@ namespace Bhbk.Cli.Aurora.Commands
                     .Where(x => x.IdentityAlias == arg).ToLambda(),
                         new List<Expression<Func<User, object>>>()
                         {
-                            x => x.Mount
+                            x => x.Mount,
+                            x => x.Mount.Credential,
                         }).SingleOrDefault();
 
                 if (_user == null)
@@ -69,7 +70,7 @@ namespace Bhbk.Cli.Aurora.Commands
                     throw new ConsoleHelpAsException($"*** Invalid auth type. Options are '{_authTypeList}' ***");
             });
 
-            HasOption("c|credential=", "Enter to use alternate credential for mount", arg =>
+            HasOption("c|credential", "Enter to use alternate credential for mount", arg =>
             {
                 _alternateCredential = true;
             });
@@ -79,10 +80,12 @@ namespace Bhbk.Cli.Aurora.Commands
         {
             try
             {
-                if (_user.Mount != null)
+                var exists = _user.Mount;
+
+                if (exists != null)
                 {
                     Console.Out.WriteLine("  *** The user already has a mount ***");
-                    ConsoleHelper.StdOutUserMounts(new List<UserMount> { _user.Mount });
+                    OutputFactory.StdOutUserMounts(new List<UserMount> { exists });
 
                     return StandardOutput.FondFarewell();
                 }
@@ -93,8 +96,7 @@ namespace Bhbk.Cli.Aurora.Commands
                 {
                     var credentials = _uow.Credentials.Get();
 
-                    ConsoleHelper.StdOutCredentials(credentials);
-                    Console.Out.WriteLine();
+                    OutputFactory.StdOutCredentials(credentials);
 
                     Console.Out.Write("  *** Enter GUID of credential to use for mount *** : ");
                     var input = StandardInput.GetInput();
@@ -109,9 +111,9 @@ namespace Bhbk.Cli.Aurora.Commands
                             ServerAddress = _serverAddress,
                             ServerShare = _serverShare,
                             IsEnabled = true,
-                            IsDeletable = false,
-                            CreatedUtc = DateTime.UtcNow,
+                            IsDeletable = true,
                         });
+
                     _uow.Commit();
                 }
                 else
@@ -120,18 +122,17 @@ namespace Bhbk.Cli.Aurora.Commands
                         new UserMount
                         {
                             IdentityId = _user.IdentityId,
-                            CredentialId = null,
                             AuthType = _authType.ToString(),
                             ServerAddress = _serverAddress,
                             ServerShare = _serverShare,
                             IsEnabled = true,
-                            IsDeletable = false,
-                            CreatedUtc = DateTime.UtcNow,
+                            IsDeletable = true,
                         });
+
                     _uow.Commit();
                 }
 
-                ConsoleHelper.StdOutUserMounts(new List<UserMount>() { mount });
+                OutputFactory.StdOutUserMounts(new List<UserMount>() { mount });
 
                 return StandardOutput.FondFarewell();
             }

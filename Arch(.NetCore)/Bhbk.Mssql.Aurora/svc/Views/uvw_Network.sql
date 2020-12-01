@@ -7,6 +7,7 @@ SELECT
 	,Address
 	,Action
 	,IsEnabled
+	,IsDeletable
 	,CreatedUtc
 	,LastUpdatedUtc
 

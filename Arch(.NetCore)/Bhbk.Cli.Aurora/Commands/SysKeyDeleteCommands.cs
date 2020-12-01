@@ -1,4 +1,4 @@
-﻿using Bhbk.Cli.Aurora.Helpers;
+﻿using Bhbk.Cli.Aurora.Factories;
 using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
 using Bhbk.Lib.Aurora.Data_EF6.Models;
 using Bhbk.Lib.CommandLine.IO;
@@ -54,7 +54,7 @@ namespace Bhbk.Cli.Aurora.Commands
                             x => x.PrivateKey,
                         });
 
-                ConsoleHelper.StdOutKeyPairs(keys.OrderBy(x => x.CreatedUtc));
+                OutputFactory.StdOutKeyPairs(keys.OrderBy(x => x.CreatedUtc));
 
                 if (_delete)
                 {

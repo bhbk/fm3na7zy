@@ -110,7 +110,7 @@ namespace Bhbk.Lib.Aurora.Data_EF6.Models
             return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<usp_Network_Delete_Result>("usp_Network_Delete", idParameter);
         }
     
-        public virtual ObjectResult<usp_Network_Insert_Result> usp_Network_Insert(Nullable<System.Guid> identityId, string address, string action, Nullable<bool> isEnabled)
+        public virtual ObjectResult<usp_Network_Insert_Result> usp_Network_Insert(Nullable<System.Guid> identityId, string address, string action, Nullable<bool> isEnabled, Nullable<bool> isDeletable)
         {
             var identityIdParameter = identityId.HasValue ?
                 new ObjectParameter("IdentityId", identityId) :
@@ -128,10 +128,14 @@ namespace Bhbk.Lib.Aurora.Data_EF6.Models
                 new ObjectParameter("IsEnabled", isEnabled) :
                 new ObjectParameter("IsEnabled", typeof(bool));
     
-            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<usp_Network_Insert_Result>("usp_Network_Insert", identityIdParameter, addressParameter, actionParameter, isEnabledParameter);
+            var isDeletableParameter = isDeletable.HasValue ?
+                new ObjectParameter("IsDeletable", isDeletable) :
+                new ObjectParameter("IsDeletable", typeof(bool));
+    
+            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<usp_Network_Insert_Result>("usp_Network_Insert", identityIdParameter, addressParameter, actionParameter, isEnabledParameter, isDeletableParameter);
         }
     
-        public virtual ObjectResult<usp_Network_Update_Result> usp_Network_Update(Nullable<System.Guid> id, Nullable<System.Guid> identityId, string address, string action, Nullable<bool> isEnabled)
+        public virtual ObjectResult<usp_Network_Update_Result> usp_Network_Update(Nullable<System.Guid> id, Nullable<System.Guid> identityId, string address, string action, Nullable<bool> isEnabled, Nullable<bool> isDeletable)
         {
             var idParameter = id.HasValue ?
                 new ObjectParameter("Id", id) :
@@ -153,7 +157,11 @@ namespace Bhbk.Lib.Aurora.Data_EF6.Models
                 new ObjectParameter("IsEnabled", isEnabled) :
                 new ObjectParameter("IsEnabled", typeof(bool));
     
-            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<usp_Network_Update_Result>("usp_Network_Update", idParameter, identityIdParameter, addressParameter, actionParameter, isEnabledParameter);
+            var isDeletableParameter = isDeletable.HasValue ?
+                new ObjectParameter("IsDeletable", isDeletable) :
+                new ObjectParameter("IsDeletable", typeof(bool));
+    
+            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<usp_Network_Update_Result>("usp_Network_Update", idParameter, identityIdParameter, addressParameter, actionParameter, isEnabledParameter, isDeletableParameter);
         }
     
         public virtual ObjectResult<usp_PrivateKey_Delete_Result> usp_PrivateKey_Delete(Nullable<System.Guid> id)

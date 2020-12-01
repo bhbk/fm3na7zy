@@ -1,5 +1,6 @@
-﻿using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
+﻿using Bhbk.Cli.Aurora.Factories;
 using Bhbk.Lib.Aurora.Data_EF6.Models;
+using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
 using Bhbk.Lib.CommandLine.IO;
 using Bhbk.Lib.Common.Primitives.Enums;
 using Bhbk.Lib.Common.Services;
@@ -14,13 +15,13 @@ using System.Linq.Expressions;
 
 namespace Bhbk.Cli.Aurora.Commands
 {
-    public class UserDeleteCommands : ConsoleCommand
+    public class UserNetShowCommands : ConsoleCommand
     {
         private readonly IConfiguration _conf;
         private readonly IUnitOfWork _uow;
         private User _user;
 
-        public UserDeleteCommands()
+        public UserNetShowCommands()
         {
             _conf = (IConfiguration)new ConfigurationBuilder()
                 .AddJsonFile("clisettings.json", optional: false, reloadOnChange: true)
@@ -29,7 +30,7 @@ namespace Bhbk.Cli.Aurora.Commands
             var instance = new ContextService(InstanceContext.DeployedOrLocal);
             _uow = new UnitOfWork(_conf["Databases:AuroraEntities"], instance);
 
-            IsCommand("user-delete", "Delete user");
+            IsCommand("user-net-show", "Show allow/deny networks for user");
 
             HasRequiredOption("u|user=", "Enter user that exists already", arg =>
             {
@@ -37,15 +38,14 @@ namespace Bhbk.Cli.Aurora.Commands
                     throw new ConsoleHelpAsException($"  *** No user name given ***");
 
                 _user = _uow.Users.Get(QueryExpressionFactory.GetQueryExpression<User>()
-                    .Where(x => x.IdentityAlias == arg && x.IsDeletable == true).ToLambda(),
+                    .Where(x => x.IdentityAlias == arg).ToLambda(),
                         new List<Expression<Func<User, object>>>()
                         {
-                            x => x.Files,
-                            x => x.Folders,
+                            x => x.Networks,
                         }).SingleOrDefault();
 
                 if (_user == null)
-                    throw new ConsoleHelpAsException($"  *** Invalid user '{arg}' or immutable ***");
+                    throw new ConsoleHelpAsException($"  *** Invalid user '{arg}' ***");
             });
         }
 
@@ -53,17 +53,7 @@ namespace Bhbk.Cli.Aurora.Commands
         {
             try
             {
-                var files = _user.Files.Count;
-                var folders = _user.Folders.Count;
-
-                if (files > 0)
-                    throw new ConsoleHelpAsException($"  *** The user can not be deleted. There are {files} files owned ***");
-
-                if (folders > 0)
-                    throw new ConsoleHelpAsException($"  *** The user can not be deleted. There are {folders} folders owned ***");
-
-                _uow.Users.Delete(_user);
-                _uow.Commit();
+                OutputFactory.StdOutNetworks(_user.Networks);
 
                 return StandardOutput.FondFarewell();
             }

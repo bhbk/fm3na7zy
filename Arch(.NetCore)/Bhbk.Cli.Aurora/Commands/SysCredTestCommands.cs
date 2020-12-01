@@ -38,10 +38,9 @@ namespace Bhbk.Cli.Aurora.Commands
             {
                 if (string.IsNullOrEmpty(_credPass))
                 {
+                    Console.Out.WriteLine();
                     Console.Out.Write("  *** Enter credential password to use *** : ");
                     _credPass = StandardInput.GetHiddenInput();
-
-                    Console.Out.WriteLine();
                 }
 
                 /*
@@ -50,20 +49,20 @@ namespace Bhbk.Cli.Aurora.Commands
                  */
                 var safeAccessTokenHandle = UserHelper.GetSafeAccessTokenHandle(_credDomain, _credLogin, _credPass);
 
-                Console.Out.WriteLine("Beginning user is " + WindowsIdentity.GetCurrent().Name);
                 Console.Out.WriteLine();
+                Console.Out.WriteLine("Beginning user is " + WindowsIdentity.GetCurrent().Name);
 
                 /*
                  * to run as unimpersonated, pass 'SafeAccessTokenHandle.InvalidHandle' instead of variable 'safeAccessTokenHandle'
                  */
                 WindowsIdentity.RunImpersonated(safeAccessTokenHandle, () =>
                 {
-                    Console.Out.WriteLine("Impersonated user is " + WindowsIdentity.GetCurrent().Name);
                     Console.Out.WriteLine();
+                    Console.Out.WriteLine("Impersonated user is " + WindowsIdentity.GetCurrent().Name);
                 });
 
-                Console.Out.WriteLine("Ending user is " + WindowsIdentity.GetCurrent().Name);
                 Console.Out.WriteLine();
+                Console.Out.WriteLine("Ending user is " + WindowsIdentity.GetCurrent().Name);
 
                 return StandardOutput.FondFarewell();
             }

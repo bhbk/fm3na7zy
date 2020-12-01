@@ -171,6 +171,5 @@
     <Build Include="svc\Stored Procedures\usp_UserFile_Update.sql" />
     <Build Include="svc\Stored Procedures\usp_UserAlert_Update.sql" />
     <Build Include="svc\Stored Procedures\usp_User_Update.sql" />
-    <Build Include="dbo\Tables\tbl_UserQuota.sql" />
   </ItemGroup>
 </Project>

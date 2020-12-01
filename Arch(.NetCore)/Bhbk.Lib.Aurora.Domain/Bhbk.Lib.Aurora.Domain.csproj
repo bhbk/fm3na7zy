@@ -10,6 +10,7 @@
     <PackageReference Include="Bhbk.Lib.Common" Version="2020.11.21.2300" />
     <PackageReference Include="Bhbk.Lib.Cryptography" Version="2020.11.21.2300" />
     <PackageReference Include="Bhbk.Lib.DataAccess.EF" Version="2020.11.21.2300" />
+    <PackageReference Include="Bhbk.Lib.DataAccess.EFCore" Version="2020.11.21.2300" />
     <PackageReference Include="Bhbk.Lib.DataState" Version="2020.11.21.2300" />
     <PackageReference Include="IPNetwork2" Version="2.5.240" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />

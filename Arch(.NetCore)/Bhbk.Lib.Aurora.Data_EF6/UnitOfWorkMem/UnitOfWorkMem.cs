@@ -21,6 +21,10 @@ namespace Bhbk.Lib.Aurora.Data_EF6.UnitOfWorkMem
 
         public UnitOfWorkMem(string connection, IContextService instance)
         {
+            /*
+             * dependency on localdb for sqlite backed by entity framework 6 will only run windows platforms.
+             */
+
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 throw new NotSupportedException();
 

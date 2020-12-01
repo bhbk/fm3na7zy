@@ -276,7 +276,12 @@
   <ItemGroup>
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\Bhbk.Lib.Aurora\Bhbk.Lib.Aurora.csproj">
+      <Project>{4c03c157-fc79-407a-a0eb-713e0844573d}</Project>
+      <Name>Bhbk.Lib.Aurora</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>

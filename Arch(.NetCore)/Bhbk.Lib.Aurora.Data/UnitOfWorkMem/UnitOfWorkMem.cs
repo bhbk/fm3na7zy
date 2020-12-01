@@ -69,12 +69,12 @@ namespace Bhbk.Lib.Aurora.Data.UnitOfWorkMem
 
             /*
              * observed persistence of sqlite databases seems to vary depending on the .net architecture that is
-             * consuming it as well as parameters defined in configuration files. with entity framework core it looks like must
-             * open connection and the delete and create are pre-flight checks to guard against errors if schema has changed.
+             * consuming it as well as parameters defined in configuration files. with entity framework core it appears must
+             * open connection. the delete and create are pre-flight checks to guard against errors if schema has changed.
              */
 
-            _context.Database.EnsureDeleted();
             _context.Database.OpenConnection();
+            _context.Database.EnsureDeleted();
             _context.Database.EnsureCreated();
 
             InstanceType = instance.InstanceType;

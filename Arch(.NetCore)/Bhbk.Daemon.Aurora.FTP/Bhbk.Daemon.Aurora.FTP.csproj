@@ -2,7 +2,6 @@
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
-    <UserSecretsId>dotnet-Bhbk.Daemon.Aurora.FTP-48875A4B-ED02-4ACD-8217-C54E7A2D7C32</UserSecretsId>
     <Platforms>AnyCPU;x64;x86</Platforms>
   </PropertyGroup>
 

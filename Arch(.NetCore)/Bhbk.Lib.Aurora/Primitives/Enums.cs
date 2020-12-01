@@ -18,7 +18,7 @@ namespace Bhbk.Lib.Aurora.Primitives.Enums
         UnstructuredData,
     }
 
-    public enum NetworkAction
+    public enum NetworkActionType
     {
         Allow,
         Deny,

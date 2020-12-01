@@ -2,7 +2,6 @@
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
-    <UserSecretsId>dotnet-Bhbk.Daemon.Aurora-9CE2E886-D943-4175-BC63-93EA471BA3BF</UserSecretsId>
     <OutputType>Exe</OutputType>
     <Platforms>AnyCPU;x64;x86</Platforms>
   </PropertyGroup>
@@ -10,7 +9,6 @@
   <ItemGroup>
     <PackageReference Include="AutoMapper" Version="10.1.1" />
     <PackageReference Include="Bhbk.Lib.Common" Version="2020.11.21.2300" />
-    <PackageReference Include="Bhbk.Lib.DataAccess.EF" Version="2020.11.21.2300" />
     <PackageReference Include="Bhbk.Lib.Identity" Version="2020.11.21.2300" />
     <PackageReference Include="CronExpressionDescriptor" Version="2.16.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.CommandLine" Version="5.0.0" />
