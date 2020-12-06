@@ -1,6 +1,8 @@
 ﻿using Bhbk.Lib.Aurora.Data_EF6.Models;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
+using System.Net.Sockets;
 
 namespace Bhbk.Lib.Aurora.Domain.Helpers
 {
@@ -34,6 +36,17 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
             }
 
             return found;
+        }
+
+        public static List<IPAddress> GetIPAddresses(string hostname)
+        {
+            var addresses = Dns.GetHostAddresses(hostname);
+
+            var filteredAddresses = addresses
+                .Where(x => x.AddressFamily == AddressFamily.InterNetwork
+                    && !x.ToString().StartsWith("127."));
+
+            return filteredAddresses.ToList();
         }
     }
 }

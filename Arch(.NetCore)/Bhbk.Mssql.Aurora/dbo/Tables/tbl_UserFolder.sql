@@ -3,7 +3,7 @@
     [IdentityId]      UNIQUEIDENTIFIER   NOT NULL,
     [ParentId]        UNIQUEIDENTIFIER   NULL,
     [VirtualName]     VARCHAR (MAX)      NOT NULL,
-    [IsReadOnly]      BIT                CONSTRAINT [DF_tbl_UserFolders_IsReadOnly] DEFAULT ((0)) NOT NULL,
+    [IsReadOnly]      BIT                CONSTRAINT [DF_tbl_UserFolder_IsReadOnly] DEFAULT ((0)) NOT NULL,
     [CreatedUtc]      DATETIMEOFFSET (7) NOT NULL,
     [LastAccessedUtc] DATETIMEOFFSET (7) NOT NULL,
     [LastUpdatedUtc]  DATETIMEOFFSET (7) NOT NULL,

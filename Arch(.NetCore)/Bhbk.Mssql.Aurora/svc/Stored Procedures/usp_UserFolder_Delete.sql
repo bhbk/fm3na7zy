@@ -1,6 +1,6 @@
 ﻿
-CREATE   PROCEDURE [svc].[usp_UserFolder_Delete]
-    @ID uniqueidentifier
+CREATE PROCEDURE [svc].[usp_UserFolder_Delete]
+    @Id UNIQUEIDENTIFIER
 
 AS
 BEGIN
@@ -8,10 +8,10 @@ BEGIN
 
 	BEGIN TRY
 
-        SELECT * FROM [dbo].[tbl_UserFolder] WHERE Id = @ID
+        SELECT * FROM [dbo].[tbl_UserFolder] WHERE Id = @Id
 
         DELETE [dbo].[tbl_UserFolder]
-        WHERE Id = @ID
+        WHERE Id = @Id
 
     END TRY
 

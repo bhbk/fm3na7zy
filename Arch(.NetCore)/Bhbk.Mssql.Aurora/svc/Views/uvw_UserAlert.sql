@@ -7,8 +7,7 @@ SELECT
 	,OnDelete
 	,OnDownload
 	,OnUpload
-	,ToFirstName
-	,ToLastName
+	,ToDisplayName
 	,ToEmailAddress
 	,ToPhoneNumber
 	,IsEnabled

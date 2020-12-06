@@ -1,6 +1,6 @@
 ﻿
 CREATE PROCEDURE [svc].[usp_Credential_Delete]
-    @ID uniqueidentifier
+    @Id UNIQUEIDENTIFIER
 
 AS
 BEGIN
@@ -8,10 +8,10 @@ BEGIN
 
 	BEGIN TRY
 
-        SELECT * FROM [dbo].[tbl_Credential] WHERE Id = @ID
+        SELECT * FROM [dbo].[tbl_Credential] WHERE Id = @Id
 
         DELETE [dbo].[tbl_Credential]
-        WHERE Id = @ID
+        WHERE Id = @Id
 
     END TRY
 

@@ -7,7 +7,7 @@
     [IsDeletable]       BIT                NOT NULL,
     [CreatedUtc]        DATETIMEOFFSET (7) NOT NULL,
     [LastUpdatedUtc]    DATETIMEOFFSET (7) NULL,
-    CONSTRAINT [PK_tbl_SysCredential] PRIMARY KEY CLUSTERED ([Id] ASC)
+    CONSTRAINT [PK_tbl_Credential] PRIMARY KEY CLUSTERED ([Id] ASC)
 );
 
 

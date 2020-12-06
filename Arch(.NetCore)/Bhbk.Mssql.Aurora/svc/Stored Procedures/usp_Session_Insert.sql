@@ -1,12 +1,13 @@
 ﻿
 CREATE PROCEDURE [svc].[usp_Session_Insert]
-    @IdentityId					uniqueidentifier
-   ,@CallPath					varchar(256)
-   ,@Details					varchar(MAX)
-   ,@LocalEndPoint				varchar(128)
-   ,@LocalSoftwareIdentifier	varchar(128)
-   ,@RemoteEndPoint				varchar(128)
-   ,@RemoteSoftwareIdentifier	varchar(128)
+    @IdentityId					UNIQUEIDENTIFIER
+   ,@CallPath					VARCHAR(256)
+   ,@Details					VARCHAR(MAX)
+   ,@LocalEndPoint				VARCHAR(128)
+   ,@LocalSoftwareIdentifier	VARCHAR(128)
+   ,@RemoteEndPoint				VARCHAR(128)
+   ,@RemoteSoftwareIdentifier	VARCHAR(128)
+   ,@IsActive					BIT
 
 AS
 
@@ -24,6 +25,7 @@ INSERT INTO [dbo].[tbl_Session]
 	,LocalSoftwareIdentifier
 	,RemoteEndPoint
 	,RemoteSoftwareIdentifier
+	,IsActive
 	,CreatedUtc
 	)
 VALUES 
@@ -35,6 +37,7 @@ VALUES
 	,@LocalSoftwareIdentifier
     ,@RemoteEndPoint
 	,@RemoteSoftwareIdentifier
+	,@IsActive
 	,@CREATED
     );
 

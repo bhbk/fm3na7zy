@@ -1,5 +1,5 @@
-﻿using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
-using Bhbk.Lib.Aurora.Data_EF6.Models;
+﻿using Bhbk.Lib.Aurora.Data_EF6.Models;
+using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
 using Bhbk.Lib.Common.Primitives;
 using Bhbk.Lib.QueryExpression.Extensions;
 using Bhbk.Lib.QueryExpression.Factories;
@@ -11,6 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
 
@@ -20,87 +21,88 @@ namespace Bhbk.WebApi.Aurora.Tasks
     public class UnstructuredDataJob : IJob
     {
         private readonly IServiceScopeFactory _factory;
-        private const string _callPath = "UnstructuredDataJob.Execute";
 
         public UnstructuredDataJob(IServiceScopeFactory factory) => _factory = factory;
 
-        public async Task Execute(IJobExecutionContext context)
+        public Task Execute(IJobExecutionContext context)
         {
-            await Task.Run(() =>
+            var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
+
+            try
             {
-                Log.Information($"'{_callPath}' running");
+                Log.Information($"'{callPath}' running");
 
-                try
+                using (var scope = _factory.CreateScope())
                 {
-                    using (var scope = _factory.CreateScope())
+                    var conf = scope.ServiceProvider.GetRequiredService<IConfiguration>();
+                    var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+
+                    var staggerVerify = int.Parse(conf["Jobs:UnstructuredData:StaggerVerify"]);
+                    var verifyAfterDate = DateTime.UtcNow.AddSeconds(-staggerVerify);
+
+                    var files = uow.UserFiles.Get(QueryExpressionFactory.GetQueryExpression<UserFile>()
+                        .Where(x => x.LastVerifiedUtc < verifyAfterDate).ToLambda());
+
+                    var problems = new List<UserFile>();
+
+                    foreach (var file in files)
                     {
-                        var conf = scope.ServiceProvider.GetRequiredService<IConfiguration>();
-                        var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+                        var filePath = new FileInfo(conf["Storage:UnstructuredData"]
+                            + Path.DirectorySeparatorChar + file.RealPath
+                            + Path.DirectorySeparatorChar + file.RealFileName);
 
-                        var staggerVerify = int.Parse(conf["Jobs:UnstructuredData:StaggerVerify"]);
-
-                        var files = uow.UserFiles.Get(QueryExpressionFactory.GetQueryExpression<UserFile>()
-                            .Where(x => x.LastVerifiedUtc < DateTime.UtcNow.AddSeconds(-staggerVerify)).ToLambda());
-
-                        var problems = new List<UserFile>();
-
-                        foreach (var file in files)
+                        try
                         {
-                            var filePath = new FileInfo(conf["Storage:UnstructuredData"]
-                                + Path.DirectorySeparatorChar + file.RealPath
-                                + Path.DirectorySeparatorChar + file.RealFileName);
-
-                            try
+                            using (var sha256 = new SHA256Managed())
+                            using (var fs = new FileStream(filePath.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
                             {
-                                using (var sha256 = new SHA256Managed())
-                                using (var fs = new FileStream(filePath.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                                var hash = sha256.ComputeHash(fs);
+                                var hashCheck = Strings.GetHexString(hash);
+
+                                if (file.HashSHA256 != hashCheck)
                                 {
-                                    var hash = sha256.ComputeHash(fs);
-                                    var hashCheck = Strings.GetHexString(hash);
+                                    problems.Add(file);
 
-                                    if (file.HashSHA256 != hashCheck)
-                                    {
-                                        problems.Add(file);
+                                    Log.Error($"'{callPath}' validation on {filePath} returned hash of '{hashCheck}' that does not" +
+                                        $" match recorded hash of '{file.HashSHA256}'");
 
-                                        Log.Error($"'{_callPath}' validation on {filePath} returned hash of '{hashCheck}' that does not" +
-                                            $" match recorded hash of '{file.HashSHA256}'");
-
-                                        continue;
-                                    }
-                                    else
-                                        file.LastVerifiedUtc = DateTime.UtcNow;
+                                    continue;
                                 }
-                            }
-                            catch (Exception ex)
-                                when (ex is CryptographicException || ex is IOException)
-                            {
-                                Log.Fatal($"'{_callPath}' validation on {filePath} returned error {ex}");
+                                else
+                                    file.LastVerifiedUtc = DateTime.UtcNow;
                             }
                         }
-
-                        uow.Commit();
-
-                        if (files.Any())
+                        catch (Exception ex)
+                            when (ex is CryptographicException || ex is IOException)
                         {
-                            var msg = $"'{_callPath}' completed. Performed validation on {files.Count()} files" +
-                                $" and found {problems.Count} problems.";
-
-                            Log.Information(msg);
+                            Log.Fatal($"'{callPath}' validation on {filePath} returned error {ex}");
                         }
                     }
-                }
-                catch (Exception ex)
-                {
-                    Log.Error(ex.ToString());
-                }
-                finally
-                {
-                    GC.Collect();
+
+                    uow.Commit();
+
+                    if (files.Any())
+                    {
+                        var msg = $"'{callPath}' completed. Performed validation on {files.Count()} files" +
+                            $" and found {problems.Count} problems.";
+
+                        Log.Information(msg);
+                    }
                 }
 
-                Log.Information($"'{_callPath}' completed");
-                Log.Information($"'{_callPath}' will run again at {context.NextFireTimeUtc.Value.LocalDateTime}");
-            });
+                Log.Information($"'{callPath}' completed");
+                Log.Information($"'{callPath}' will run again at {context.NextFireTimeUtc.Value.LocalDateTime}");
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex.ToString());
+            }
+            finally
+            {
+                GC.Collect();
+            }
+
+            return Task.CompletedTask;
         }
     }
 }

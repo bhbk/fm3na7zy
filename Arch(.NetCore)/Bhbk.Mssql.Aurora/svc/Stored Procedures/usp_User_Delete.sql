@@ -1,6 +1,6 @@
 ﻿
-CREATE   PROCEDURE [svc].[usp_User_Delete]
-    @IdentityID uniqueidentifier
+CREATE PROCEDURE [svc].[usp_User_Delete]
+    @IdentityID UNIQUEIDENTIFIER
 
 AS
 BEGIN

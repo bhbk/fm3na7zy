@@ -4,8 +4,7 @@ CREATE PROCEDURE [svc].[usp_UserAlert_Insert]
     ,@OnDelete				BIT
     ,@OnDownload			BIT
     ,@OnUpload				BIT
-    ,@ToFirstName			NVARCHAR (128) 
-    ,@ToLastName			NVARCHAR (128) 
+    ,@ToDisplayName			NVARCHAR (256) 
     ,@ToEmailAddress		NVARCHAR (320) 
     ,@ToPhoneNumber			NVARCHAR (15) 
     ,@IsEnabled				BIT
@@ -26,8 +25,7 @@ BEGIN
 			,OnDelete
 			,OnDownload  
 			,OnUpload
-			,ToFirstName
-			,ToLastName
+			,ToDisplayName
 			,ToEmailAddress
 			,ToPhoneNumber
 			,IsEnabled
@@ -40,8 +38,7 @@ BEGIN
 			,@OnDelete
 			,@OnDownload
 			,@OnUpload
-			,@ToFirstName
-			,@ToLastName
+			,@ToDisplayName
 			,@ToEmailAddress
 			,@ToPhoneNumber
 			,@IsEnabled

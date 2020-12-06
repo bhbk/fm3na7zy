@@ -1,13 +1,14 @@
 ﻿
 CREATE PROCEDURE [svc].[usp_Session_Update]
-    @Id						    uniqueidentifier
-   ,@IdentityId					uniqueidentifier
-   ,@CallPath					varchar(256)
-   ,@Details					varchar(MAX)
-   ,@LocalEndPoint				varchar(128)
-   ,@LocalSoftwareIdentifier	varchar(128)
-   ,@RemoteEndPoint				varchar(128)
-   ,@RemoteSoftwareIdentifier	varchar(128)
+    @Id						    UNIQUEIDENTIFIER
+   ,@IdentityId					UNIQUEIDENTIFIER
+   ,@CallPath					VARCHAR(256)
+   ,@Details					VARCHAR(MAX)
+   ,@LocalEndPoint				VARCHAR(128)
+   ,@LocalSoftwareIdentifier	VARCHAR(128)
+   ,@RemoteEndPoint				VARCHAR(128)
+   ,@RemoteSoftwareIdentifier	VARCHAR(128)
+   ,@IsActive					BIT
 
 AS
 
@@ -23,6 +24,7 @@ SET  IdentityId					=	@IdentityId
     ,LocalSoftwareIdentifier    =   @LocalSoftwareIdentifier
     ,RemoteEndPoint				=   @RemoteEndPoint
     ,RemoteSoftwareIdentifier	=   @RemoteSoftwareIdentifier
+    ,IsActive                   =   @IsActive
 WHERE Id = @Id;
 
     /*  Select all entity values to return

@@ -218,7 +218,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                             else
                                 stream = new MemoryStream(fileEntity.Data);
 
-                            Log.Information($"'{callPath}' '{_userMem.IdentityAlias}' file:'{node.Path}' at:memory size:'{stream.Length}'");
+                            Log.Information($"'{callPath}' '{_userMem.IdentityAlias}' file:'{node.Path}' size:'{stream.Length / 1048576f}MB' at:memory");
 
                             return parameters.AccessType == NodeContentAccess.Read
                                 ? NodeContent.CreateReadOnlyContent(stream)

@@ -476,7 +476,7 @@ namespace Bhbk.Lib.Aurora.Data_EF6.Models
             return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<usp_User_Insert_Result>("usp_User_Insert", identityIdParameter, identityAliasParameter, fileSystemTypeParameter, isPasswordRequiredParameter, isPublicKeyRequiredParameter, isFileSystemReadOnlyParameter, debuggerParameter, isEnabledParameter, isDeletableParameter);
         }
     
-        public virtual ObjectResult<usp_User_Update_Result> usp_User_Update(Nullable<System.Guid> identityId, string identityAlias, string fileSystemType, string fileSystemChrootPath, Nullable<bool> isPasswordRequired, Nullable<bool> isPublicKeyRequired, Nullable<bool> isFileSystemReadOnly, Nullable<long> quotaInBytes, Nullable<long> quotaUsedInBytes, Nullable<short> concurrentSessions, string debugger, Nullable<bool> isEnabled, Nullable<bool> isDeletable)
+        public virtual ObjectResult<usp_User_Update_Result> usp_User_Update(Nullable<System.Guid> identityId, string identityAlias, string fileSystemType, string fileSystemChrootPath, Nullable<bool> isPasswordRequired, Nullable<bool> isPublicKeyRequired, Nullable<bool> isFileSystemReadOnly, Nullable<long> quotaInBytes, Nullable<long> quotaUsedInBytes, Nullable<short> sessionMax, Nullable<short> sessionsInUse, string debugger, Nullable<bool> isEnabled, Nullable<bool> isDeletable)
         {
             var identityIdParameter = identityId.HasValue ?
                 new ObjectParameter("IdentityId", identityId) :
@@ -514,9 +514,13 @@ namespace Bhbk.Lib.Aurora.Data_EF6.Models
                 new ObjectParameter("QuotaUsedInBytes", quotaUsedInBytes) :
                 new ObjectParameter("QuotaUsedInBytes", typeof(long));
     
-            var concurrentSessionsParameter = concurrentSessions.HasValue ?
-                new ObjectParameter("ConcurrentSessions", concurrentSessions) :
-                new ObjectParameter("ConcurrentSessions", typeof(short));
+            var sessionMaxParameter = sessionMax.HasValue ?
+                new ObjectParameter("SessionMax", sessionMax) :
+                new ObjectParameter("SessionMax", typeof(short));
+    
+            var sessionsInUseParameter = sessionsInUse.HasValue ?
+                new ObjectParameter("SessionsInUse", sessionsInUse) :
+                new ObjectParameter("SessionsInUse", typeof(short));
     
             var debuggerParameter = debugger != null ?
                 new ObjectParameter("Debugger", debugger) :
@@ -530,7 +534,7 @@ namespace Bhbk.Lib.Aurora.Data_EF6.Models
                 new ObjectParameter("IsDeletable", isDeletable) :
                 new ObjectParameter("IsDeletable", typeof(bool));
     
-            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<usp_User_Update_Result>("usp_User_Update", identityIdParameter, identityAliasParameter, fileSystemTypeParameter, fileSystemChrootPathParameter, isPasswordRequiredParameter, isPublicKeyRequiredParameter, isFileSystemReadOnlyParameter, quotaInBytesParameter, quotaUsedInBytesParameter, concurrentSessionsParameter, debuggerParameter, isEnabledParameter, isDeletableParameter);
+            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<usp_User_Update_Result>("usp_User_Update", identityIdParameter, identityAliasParameter, fileSystemTypeParameter, fileSystemChrootPathParameter, isPasswordRequiredParameter, isPublicKeyRequiredParameter, isFileSystemReadOnlyParameter, quotaInBytesParameter, quotaUsedInBytesParameter, sessionMaxParameter, sessionsInUseParameter, debuggerParameter, isEnabledParameter, isDeletableParameter);
         }
     
         public virtual ObjectResult<usp_UserAlert_Delete_Result> usp_UserAlert_Delete(Nullable<System.Guid> id)
@@ -542,7 +546,7 @@ namespace Bhbk.Lib.Aurora.Data_EF6.Models
             return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<usp_UserAlert_Delete_Result>("usp_UserAlert_Delete", idParameter);
         }
     
-        public virtual ObjectResult<usp_UserAlert_Insert_Result> usp_UserAlert_Insert(Nullable<System.Guid> identityId, Nullable<bool> onDelete, Nullable<bool> onDownload, Nullable<bool> onUpload, string toFirstName, string toLastName, string toEmailAddress, string toPhoneNumber, Nullable<bool> isEnabled)
+        public virtual ObjectResult<usp_UserAlert_Insert_Result> usp_UserAlert_Insert(Nullable<System.Guid> identityId, Nullable<bool> onDelete, Nullable<bool> onDownload, Nullable<bool> onUpload, string toDisplayName, string toEmailAddress, string toPhoneNumber, Nullable<bool> isEnabled)
         {
             var identityIdParameter = identityId.HasValue ?
                 new ObjectParameter("IdentityId", identityId) :
@@ -560,13 +564,9 @@ namespace Bhbk.Lib.Aurora.Data_EF6.Models
                 new ObjectParameter("OnUpload", onUpload) :
                 new ObjectParameter("OnUpload", typeof(bool));
     
-            var toFirstNameParameter = toFirstName != null ?
-                new ObjectParameter("ToFirstName", toFirstName) :
-                new ObjectParameter("ToFirstName", typeof(string));
-    
-            var toLastNameParameter = toLastName != null ?
-                new ObjectParameter("ToLastName", toLastName) :
-                new ObjectParameter("ToLastName", typeof(string));
+            var toDisplayNameParameter = toDisplayName != null ?
+                new ObjectParameter("ToDisplayName", toDisplayName) :
+                new ObjectParameter("ToDisplayName", typeof(string));
     
             var toEmailAddressParameter = toEmailAddress != null ?
                 new ObjectParameter("ToEmailAddress", toEmailAddress) :
@@ -580,10 +580,10 @@ namespace Bhbk.Lib.Aurora.Data_EF6.Models
                 new ObjectParameter("IsEnabled", isEnabled) :
                 new ObjectParameter("IsEnabled", typeof(bool));
     
-            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<usp_UserAlert_Insert_Result>("usp_UserAlert_Insert", identityIdParameter, onDeleteParameter, onDownloadParameter, onUploadParameter, toFirstNameParameter, toLastNameParameter, toEmailAddressParameter, toPhoneNumberParameter, isEnabledParameter);
+            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<usp_UserAlert_Insert_Result>("usp_UserAlert_Insert", identityIdParameter, onDeleteParameter, onDownloadParameter, onUploadParameter, toDisplayNameParameter, toEmailAddressParameter, toPhoneNumberParameter, isEnabledParameter);
         }
     
-        public virtual ObjectResult<usp_UserAlert_Update_Result> usp_UserAlert_Update(Nullable<System.Guid> id, Nullable<System.Guid> identityId, Nullable<bool> onDelete, Nullable<bool> onDownload, Nullable<bool> onUpload, string toFirstName, string toLastName, string toEmailAddress, string toPhoneNumber, Nullable<bool> isEnabled)
+        public virtual ObjectResult<usp_UserAlert_Update_Result> usp_UserAlert_Update(Nullable<System.Guid> id, Nullable<System.Guid> identityId, Nullable<bool> onDelete, Nullable<bool> onDownload, Nullable<bool> onUpload, string toDisplayName, string toEmailAddress, string toPhoneNumber, Nullable<bool> isEnabled)
         {
             var idParameter = id.HasValue ?
                 new ObjectParameter("Id", id) :
@@ -605,13 +605,9 @@ namespace Bhbk.Lib.Aurora.Data_EF6.Models
                 new ObjectParameter("OnUpload", onUpload) :
                 new ObjectParameter("OnUpload", typeof(bool));
     
-            var toFirstNameParameter = toFirstName != null ?
-                new ObjectParameter("ToFirstName", toFirstName) :
-                new ObjectParameter("ToFirstName", typeof(string));
-    
-            var toLastNameParameter = toLastName != null ?
-                new ObjectParameter("ToLastName", toLastName) :
-                new ObjectParameter("ToLastName", typeof(string));
+            var toDisplayNameParameter = toDisplayName != null ?
+                new ObjectParameter("ToDisplayName", toDisplayName) :
+                new ObjectParameter("ToDisplayName", typeof(string));
     
             var toEmailAddressParameter = toEmailAddress != null ?
                 new ObjectParameter("ToEmailAddress", toEmailAddress) :
@@ -625,7 +621,7 @@ namespace Bhbk.Lib.Aurora.Data_EF6.Models
                 new ObjectParameter("IsEnabled", isEnabled) :
                 new ObjectParameter("IsEnabled", typeof(bool));
     
-            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<usp_UserAlert_Update_Result>("usp_UserAlert_Update", idParameter, identityIdParameter, onDeleteParameter, onDownloadParameter, onUploadParameter, toFirstNameParameter, toLastNameParameter, toEmailAddressParameter, toPhoneNumberParameter, isEnabledParameter);
+            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<usp_UserAlert_Update_Result>("usp_UserAlert_Update", idParameter, identityIdParameter, onDeleteParameter, onDownloadParameter, onUploadParameter, toDisplayNameParameter, toEmailAddressParameter, toPhoneNumberParameter, isEnabledParameter);
         }
     
         public virtual ObjectResult<usp_UserFile_Delete_Result> usp_UserFile_Delete(Nullable<System.Guid> id)
@@ -874,7 +870,7 @@ namespace Bhbk.Lib.Aurora.Data_EF6.Models
             return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction("usp_Session_Delete", idParameter);
         }
     
-        public virtual ObjectResult<usp_Session_Insert_Result> usp_Session_Insert(Nullable<System.Guid> identityId, string callPath, string details, string localEndPoint, string localSoftwareIdentifier, string remoteEndPoint, string remoteSoftwareIdentifier)
+        public virtual ObjectResult<usp_Session_Insert_Result> usp_Session_Insert(Nullable<System.Guid> identityId, string callPath, string details, string localEndPoint, string localSoftwareIdentifier, string remoteEndPoint, string remoteSoftwareIdentifier, Nullable<bool> isActive)
         {
             var identityIdParameter = identityId.HasValue ?
                 new ObjectParameter("IdentityId", identityId) :
@@ -904,10 +900,14 @@ namespace Bhbk.Lib.Aurora.Data_EF6.Models
                 new ObjectParameter("RemoteSoftwareIdentifier", remoteSoftwareIdentifier) :
                 new ObjectParameter("RemoteSoftwareIdentifier", typeof(string));
     
-            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<usp_Session_Insert_Result>("usp_Session_Insert", identityIdParameter, callPathParameter, detailsParameter, localEndPointParameter, localSoftwareIdentifierParameter, remoteEndPointParameter, remoteSoftwareIdentifierParameter);
+            var isActiveParameter = isActive.HasValue ?
+                new ObjectParameter("IsActive", isActive) :
+                new ObjectParameter("IsActive", typeof(bool));
+    
+            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<usp_Session_Insert_Result>("usp_Session_Insert", identityIdParameter, callPathParameter, detailsParameter, localEndPointParameter, localSoftwareIdentifierParameter, remoteEndPointParameter, remoteSoftwareIdentifierParameter, isActiveParameter);
         }
     
-        public virtual ObjectResult<usp_Session_Update_Result> usp_Session_Update(Nullable<System.Guid> id, Nullable<System.Guid> identityId, string callPath, string details, string localEndPoint, string localSoftwareIdentifier, string remoteEndPoint, string remoteSoftwareIdentifier)
+        public virtual ObjectResult<usp_Session_Update_Result> usp_Session_Update(Nullable<System.Guid> id, Nullable<System.Guid> identityId, string callPath, string details, string localEndPoint, string localSoftwareIdentifier, string remoteEndPoint, string remoteSoftwareIdentifier, Nullable<bool> isActive)
         {
             var idParameter = id.HasValue ?
                 new ObjectParameter("Id", id) :
@@ -941,7 +941,11 @@ namespace Bhbk.Lib.Aurora.Data_EF6.Models
                 new ObjectParameter("RemoteSoftwareIdentifier", remoteSoftwareIdentifier) :
                 new ObjectParameter("RemoteSoftwareIdentifier", typeof(string));
     
-            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<usp_Session_Update_Result>("usp_Session_Update", idParameter, identityIdParameter, callPathParameter, detailsParameter, localEndPointParameter, localSoftwareIdentifierParameter, remoteEndPointParameter, remoteSoftwareIdentifierParameter);
+            var isActiveParameter = isActive.HasValue ?
+                new ObjectParameter("IsActive", isActive) :
+                new ObjectParameter("IsActive", typeof(bool));
+    
+            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<usp_Session_Update_Result>("usp_Session_Update", idParameter, identityIdParameter, callPathParameter, detailsParameter, localEndPointParameter, localSoftwareIdentifierParameter, remoteEndPointParameter, remoteSoftwareIdentifierParameter, isActiveParameter);
         }
     }
 }

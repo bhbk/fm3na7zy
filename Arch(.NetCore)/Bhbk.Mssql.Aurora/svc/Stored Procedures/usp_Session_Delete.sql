@@ -1,6 +1,6 @@
 ﻿
 CREATE PROCEDURE [svc].[usp_Session_Delete]
-	@Id uniqueidentifier
+	@Id UNIQUEIDENTIFIER
 
 AS
 

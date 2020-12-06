@@ -44,15 +44,21 @@ namespace Bhbk.Daemon.Aurora.SFTP
 {
     public class Daemon : IHostedService, IDisposable
     {
+        private LogLevel _level;
         private readonly IServiceScopeFactory _factory;
         private readonly FileServer _server;
-        private LogLevel _level;
-        private IEnumerable<string> _binding;
+        private readonly IPAddress _ip;
+        private readonly string _host;
+        private IEnumerable<string> _bindingAddresses;
+        private int _bindingPort;
 
         public Daemon(IServiceScopeFactory factory)
         {
             _factory = factory;
             _server = new FileServer();
+            _ip = NetworkHelper.GetIPAddresses(Dns.GetHostName())
+                .First();
+            _host = Dns.GetHostName();
         }
 
         public async Task StartAsync(CancellationToken cancellationToken)
@@ -75,19 +81,28 @@ namespace Bhbk.Daemon.Aurora.SFTP
                         if (!Enum.TryParse<LogLevel>(conf["Rebex:LogLevel"], true, out _level))
                             throw new InvalidCastException();
 
+                        var keyType = ConfigType.RebexLicense.ToString();
+
                         var license = uow.Settings.Get(QueryExpressionFactory.GetQueryExpression<Setting>()
-                            .Where(x => x.ConfigKey == "RebexLicense").ToLambda()).OrderBy(x => x.CreatedUtc)
+                            .Where(x => x.ConfigKey == keyType).ToLambda())
+                            .OrderBy(x => x.CreatedUtc)
                             .Last();
 
                         Rebex.Licensing.Key = license.ConfigValue;
 
                         /*
-                         * clear out possibly orphan state from un-graceful shutdown of daemon...
+                         * clear out possibly orphan session entries from un-graceful shutdown of daemon...
                          */
 
-                        uow.Sessions.Delete(QueryExpressionFactory.GetQueryExpression<Session>()
-                            .Where(x => x.RemoteEndPoint != null).ToLambda());
+                        var daemon = $"{_ip}:{_bindingPort}";
 
+                        var entries = uow.Sessions.Get(QueryExpressionFactory.GetQueryExpression<Session>()
+                            .Where(x => x.LocalEndPoint == daemon && x.IsActive == true).ToLambda());
+
+                        foreach (var entry in entries)
+                            entry.IsActive = false;
+
+                        uow.Sessions.Update(entries);
                         uow.Commit();
 
                         /*
@@ -103,7 +118,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
 
                         var secret = conf["Databases:AuroraSecret"];
 
-                        var hostKeyAlgos = conf["Daemons:SftpService:HostKeyAlgorithms"].Split(',')
+                        var hostKeyAlgos = conf["Daemons:Sftp:HostKeyAlgorithms"].Split(',')
                             .Select(x => x.Trim());
 
                         foreach (var hostKeyAlgo in hostKeyAlgos)
@@ -134,22 +149,38 @@ namespace Bhbk.Daemon.Aurora.SFTP
                                 Log.Error($"'{callPath}' 'system' public/private key pair created using '{hostKeyAlgo}' not supported");
                         }
 
-                        _binding = conf.GetSection("Daemons:SftpService:Bindings").GetChildren().Select(x => x.Value);
+                        var hostAddresses = new StringBuilder();
+                        hostAddresses.Append($"'{callPath}' 'system' [hostname] '{_host.ToUpper()}' has address(es) ");
+
+                        foreach (var ip in NetworkHelper.GetIPAddresses(_host))
+                            hostAddresses.Append($"{ip} ");
+
+                        Log.Information($"{hostAddresses}");
+
+                        _bindingAddresses = conf.GetSection("Daemons:Sftp:BindingAddresses").GetChildren()
+                            .Select(x => x.Value);
+
+                        _bindingPort = Int32.Parse(conf.GetSection("Daemons:Sftp:BindingPorts").GetChildren()
+                            .Select(x => x.Value).First());
 
                         /*
                          * daemon can bind to multiple ip addresses and ports...
                          */
 
-                        foreach (var binding in _binding)
+                        foreach (var bindingAddress in _bindingAddresses)
                         {
-                            var pair = binding.Split("|");
+                            _server.Bind(new IPEndPoint(IPAddress.Parse(bindingAddress), _bindingPort), FileServerProtocol.Sftp);
+                            _server.Bind(new IPEndPoint(IPAddress.Parse(bindingAddress), _bindingPort), FileServerProtocol.Shell);
 
-                            _server.Bind(new IPEndPoint(IPAddress.Parse(pair[0]), int.Parse(pair[1])), FileServerProtocol.Sftp);
-                            _server.Bind(new IPEndPoint(IPAddress.Parse(pair[0]), int.Parse(pair[1])), FileServerProtocol.Shell);
+                            Log.Information($"'{callPath}' 'system' [ip-binding] {bindingAddress} [port-binding] {_bindingPort}");
                         }
 
+                        /*
+                         * daemon needs to have attitude adjusted to needs/wants...
+                         */
+
                         _server.LogWriter = new ConsoleLogWriter(_level);
-                        _server.Settings.MaxAuthenticationAttempts = Int32.Parse(conf["Daemons:SftpService:MaxAuthAttempts"]);
+                        _server.Settings.MaxAuthenticationAttempts = Int32.Parse(conf["Daemons:Sftp:MaxAuthAttempts"]);
                         _server.Settings.AllowedAuthenticationMethods = AuthenticationMethods.PublicKey | AuthenticationMethods.Password;
                         _server.Settings.SshParameters.EncryptionAlgorithms = SshEncryptionAlgorithm.Any;
                         _server.Settings.SshParameters.EncryptionModes = SshEncryptionMode.Any;
@@ -165,6 +196,8 @@ namespace Bhbk.Daemon.Aurora.SFTP
                         _server.PreAuthentication += System_PreAuthentication;
                         _server.Authentication += System_Authentication;
                         _server.Disconnected += System_Disconnect;
+                        _server.FileDownloaded += System_FileDownloaded;
+                        _server.FileUploaded += System_FileUploaded;
                         _server.Start();
                     }
                 }
@@ -178,7 +211,8 @@ namespace Bhbk.Daemon.Aurora.SFTP
         public async Task StopAsync(CancellationToken cancellationToken)
         {
             /*
-             * method only called when running as os service that is sent shutdown signal...
+             * method only called when polite shutdown request sent...
+             * examples are ctrl-c at console or "shutdown" from services mmc.
              */
 
             var callPath = "Daemon.StopAsync"; //reflection does not resolve callpath in async...
@@ -195,17 +229,22 @@ namespace Bhbk.Daemon.Aurora.SFTP
 
                             foreach (var session in _server.Sessions)
                             {
-                                var client = session.ClientEndPoint.ToString();
+                                var daemon = $"{_ip}:{_bindingPort}";
+                                var remote = session.ClientEndPoint.ToString();
 
-                                uow.Sessions.Delete(QueryExpressionFactory.GetQueryExpression<Session>()
-                                    .Where(x => x.RemoteEndPoint == client).ToLambda());
+                                var entries = uow.Sessions.Get(QueryExpressionFactory.GetQueryExpression<Session>()
+                                    .Where(x => x.LocalEndPoint == daemon && x.IsActive == true).ToLambda());
 
+                                foreach (var entry in entries)
+                                    entry.IsActive = false;
+
+                                uow.Sessions.Update(entries);
                                 uow.Commit();
 
-                                Log.Warning($"'{callPath}' '{session.UserName}' remote:'{session.ClientEndPoint}' " +
+                                Log.Warning($"'{callPath}' '{session.UserName}' local:'{daemon}' remote:'{session.ClientEndPoint}' " +
                                     $"duration:'{session.Duration}' force disconnect, server restart");
 
-                                session.SendMessage($"'{session.UserName}' remote:'{session.ClientEndPoint}' " +
+                                session.SendMessage($"'{session.UserName}' local:'{daemon}' remote:'{session.ClientEndPoint}' " +
                                     $"duration:'{session.Duration}' force disconnect, server restart");
                             }
                         }
@@ -284,7 +323,9 @@ namespace Bhbk.Daemon.Aurora.SFTP
                                 {
                                     CallPath = callPath,
                                     Details = "allowed",
+                                    LocalEndPoint = $"{_ip}:{_bindingPort}",
                                     RemoteEndPoint = e.ClientEndPoint.ToString(),
+                                    IsActive = true,
                                 });
 
                             uow.Commit();
@@ -356,15 +397,15 @@ namespace Bhbk.Daemon.Aurora.SFTP
                         .Where(x => x.UserName == e.UserName)
                         .Count();
 
-                    if (sessions >= user.ConcurrentSessions)
+                    if (sessions >= user.SessionMax)
                     {
-                        Log.Warning($"'{callPath}' '{e.UserName}' {sessions} session(s) active and {user.ConcurrentSessions} sessions allowed");
+                        Log.Warning($"'{callPath}' '{e.UserName}' session maximum {user.SessionMax} and session(s) in use {sessions}");
 
                         e.Reject();
                         return;
                     }
 
-                    Log.Information($"'{callPath}' '{e.UserName}' {sessions} session(s) active and {user.ConcurrentSessions} sessions allowed");
+                    Log.Information($"'{callPath}' '{e.UserName}' session maximum {user.SessionMax} and session(s) in use {sessions}");
 
                     /*
                      * does user have network filtering rule to allow session...
@@ -400,8 +441,10 @@ namespace Bhbk.Daemon.Aurora.SFTP
                                     IdentityId = user.IdentityId,
                                     CallPath = callPath,
                                     Details = "allowed",
+                                    LocalEndPoint = $"{_ip}:{_bindingPort}",
                                     RemoteEndPoint = e.ClientEndPoint.ToString(),
                                     RemoteSoftwareIdentifier = e.ClientSoftwareIdentifier,
+                                    IsActive = true,
                                 });
 
                             uow.Commit();
@@ -434,8 +477,10 @@ namespace Bhbk.Daemon.Aurora.SFTP
                                 IdentityId = user.IdentityId,
                                 CallPath = callPath,
                                 Details = "public key and password required",
+                                LocalEndPoint = $"{_ip}:{_bindingPort}",
                                 RemoteEndPoint = e.ClientEndPoint.ToString(),
                                 RemoteSoftwareIdentifier = e.ClientSoftwareIdentifier,
+                                IsActive = true,
                             });
 
                         uow.Commit();
@@ -459,8 +504,10 @@ namespace Bhbk.Daemon.Aurora.SFTP
                                 IdentityId = user.IdentityId,
                                 CallPath = callPath,
                                 Details = "public key required",
+                                LocalEndPoint = $"{_ip}:{_bindingPort}",
                                 RemoteEndPoint = e.ClientEndPoint.ToString(),
                                 RemoteSoftwareIdentifier = e.ClientSoftwareIdentifier,
+                                IsActive = true,
                             });
 
                         uow.Commit();
@@ -484,8 +531,10 @@ namespace Bhbk.Daemon.Aurora.SFTP
                                 IdentityId = user.IdentityId,
                                 CallPath = callPath,
                                 Details = "password required",
+                                LocalEndPoint = $"{_ip}:{_bindingPort}",
                                 RemoteEndPoint = e.ClientEndPoint.ToString(),
                                 RemoteSoftwareIdentifier = e.ClientSoftwareIdentifier,
+                                IsActive = true,
                             });
 
                         uow.Commit();
@@ -601,8 +650,10 @@ namespace Bhbk.Daemon.Aurora.SFTP
                                 IdentityId = user.IdentityId,
                                 CallPath = callPath,
                                 Details = "public key accepted",
+                                LocalEndPoint = $"{_ip}:{_bindingPort}",
                                 RemoteEndPoint = e.ClientEndPoint.ToString(),
                                 RemoteSoftwareIdentifier = e.ClientSoftwareIdentifier,
+                                IsActive = true,
                             });
 
                         uow.Commit();
@@ -614,10 +665,10 @@ namespace Bhbk.Daemon.Aurora.SFTP
                              * an smb mount will not succeed without a user password or ambassador credential.
                              */
 
-                            if (user.FileSystemType.ToLower() == FileSystemProviderType.Smb.ToString().ToLower()
+                            if (user.FileSystemType.ToLower() == FileSystemProviderType.SMB.ToString().ToLower()
                                 && !user.Mount.CredentialId.HasValue)
                             {
-                                Log.Warning($"'{callPath}' '{e.UserName}' no credential to mount {FileSystemProviderType.Smb} filesystem");
+                                Log.Warning($"'{callPath}' '{e.UserName}' no credential to mount {FileSystemProviderType.SMB} filesystem");
 
                                 e.Reject();
                                 return;
@@ -709,8 +760,10 @@ namespace Bhbk.Daemon.Aurora.SFTP
                                 IdentityId = user.IdentityId,
                                 CallPath = callPath,
                                 Details = "password accepted",
+                                LocalEndPoint = $"{_ip}:{_bindingPort}",
                                 RemoteEndPoint = e.ClientEndPoint.ToString(),
                                 RemoteSoftwareIdentifier = e.ClientSoftwareIdentifier,
+                                IsActive = true,
                             });
 
                         uow.Commit();
@@ -761,19 +814,217 @@ namespace Bhbk.Daemon.Aurora.SFTP
 
             try
             {
+                var daemon = $"{_ip}:{_bindingPort}";
+                var remote = e.Session.ClientEndPoint.ToString();
+
                 using (var scope = _factory.CreateScope())
                 {
                     var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
 
-                    var client = e.Session.ClientEndPoint.ToString();
+                    var user = uow.Users.Get(QueryExpressionFactory.GetQueryExpression<User>()
+                        .Where(x => x.IdentityAlias == ServerSession.Current.UserName).ToLambda())
+                        .SingleOrDefault();
 
-                    uow.Sessions.Delete(QueryExpressionFactory.GetQueryExpression<Session>()
-                        .Where(x => x.RemoteEndPoint == client).ToLambda());
+                    /*
+                     * if connection attempt did not succeed in connect phase, pre-authentication phase and authentication phase 
+                     * there would be no need to decrement sessions in use for a user.
+                     */
+
+                    if (user != null)
+                    {
+                        user.SessionsInUse--;
+                        uow.Users.Update(user);
+                    }
+
+                    uow.Sessions.Create(
+                        new Session
+                        {
+                            IdentityId = user?.IdentityId ?? null,
+                            CallPath = callPath,
+                            LocalEndPoint = $"{_ip}:{_bindingPort}",
+                            RemoteEndPoint = ServerSession.Current.ClientEndPoint.ToString(),
+                            IsActive = true,
+                        });
+                    uow.Commit();
+
+                    var entries = uow.Sessions.Get(QueryExpressionFactory.GetQueryExpression<Session>()
+                        .Where(x => x.LocalEndPoint == daemon && x.RemoteEndPoint == remote && x.IsActive == true).ToLambda());
+
+                    foreach (var entry in entries)
+                        entry.IsActive = false;
+
+                    uow.Sessions.Update(entries);
+                    uow.Commit();
+
+                    Log.Information($"'{callPath}'{(string.IsNullOrEmpty(user?.IdentityAlias) ? null : "'" + user.IdentityAlias) + "'"} " +
+                        $"local:'{_ip}:{_bindingPort}' remote:'{e.Session.ClientEndPoint}' duration:'{e.Session.Duration}'");
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex.ToString());
+            }
+        }
+
+        private void System_FileDownloaded(object sender, FileTransferredEventArgs e)
+        {
+            var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
+
+            try
+            {
+                using (var scope = _factory.CreateScope())
+                {
+                    var conf = scope.ServiceProvider.GetRequiredService<IConfiguration>();
+                    var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+                    var admin = scope.ServiceProvider.GetRequiredService<IAdminService>();
+                    var alert = scope.ServiceProvider.GetRequiredService<IAlertService>();
+
+                    var user = uow.Users.Get(QueryExpressionFactory.GetQueryExpression<User>()
+                        .Where(x => x.IdentityAlias == ServerSession.Current.UserName).ToLambda(),
+                            new List<Expression<Func<User, object>>>()
+                            {
+                                    x => x.Alerts,
+                            })
+                        .Single();
+
+                    /*
+                     * add event to state...
+                     */
+
+                    uow.Sessions.Create(
+                        new Session
+                        {
+                            IdentityId = user.IdentityId,
+                            CallPath = callPath,
+                            Details = $"file:'/{e.FullPath}' size:'{e.BytesTransferred / 1048576f}MB'",
+                            LocalEndPoint = $"{_ip}:{_bindingPort}",
+                            RemoteEndPoint = ServerSession.Current.ClientEndPoint.ToString(),
+                            IsActive = true,
+                        });
 
                     uow.Commit();
-                }
 
-                Log.Information($"'{callPath}' {e.Session.ClientEndPoint} disconnect after {e.Session.Duration}");
+                    /*
+                     * send notifications...
+                     */
+
+                    foreach (var email in user.Alerts
+                        .Where(x => x.ToEmailAddress != null && x.IsEnabled == true && x.OnDownload == true))
+                    {
+                        _ = alert.Enqueue_EmailV1(
+                            new EmailV1()
+                            {
+                                FromEmail = conf["Notifications:EmailFromAddress"],
+                                FromDisplay = conf["Notifications:EmailFromDisplayName"],
+                                ToEmail = email.ToEmailAddress,
+                                ToDisplay = $"{email.ToDisplayName}",
+                                Subject = "File Download Alert",
+                                Body = EmailTemplate.NotifyOnFileDownload(conf["Daemons:Sftp:Dns"], ServerSession.Current.UserName,
+                                    email.ToDisplayName, "/" + e.FullPath, e.BytesTransferred.ToString(),
+                                    ServerSession.Current.ClientEndPoint.ToString()),
+                            }).AsTask().Result;
+                    }
+
+                    foreach (var text in user.Alerts
+                        .Where(x => x.ToPhoneNumber != null && x.IsEnabled == true && x.OnDownload == true))
+                    {
+                        _ = alert.Enqueue_TextV1(
+                            new TextV1()
+                            {
+                                FromPhoneNumber = conf["Notifications:TextFromPhoneNumber"],
+                                ToPhoneNumber = text.ToPhoneNumber,
+                                Body = TextTemplate.NotifyOnFileDownload(conf["Daemons:Sftp:Dns"], ServerSession.Current.UserName,
+                                    text.ToDisplayName, "/" + e.FullPath, e.BytesTransferred.ToString(),
+                                    ServerSession.Current.ClientEndPoint.ToString()),
+                            }).AsTask().Result;
+                    }
+
+                    Log.Information($"'{callPath}' '{ServerSession.Current.UserName}' file:'/{e.FullPath}' size:'{e.BytesTransferred / 1048576f}MB' " +
+                        $"remote:'{ServerSession.Current.ClientEndPoint}'");
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex.ToString());
+            }
+        }
+
+        private void System_FileUploaded(object sender, FileTransferredEventArgs e)
+        {
+            var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
+
+            try
+            {
+                using (var scope = _factory.CreateScope())
+                {
+                    var conf = scope.ServiceProvider.GetRequiredService<IConfiguration>();
+                    var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+                    var admin = scope.ServiceProvider.GetRequiredService<IAdminService>();
+                    var alert = scope.ServiceProvider.GetRequiredService<IAlertService>();
+
+                    var user = uow.Users.Get(QueryExpressionFactory.GetQueryExpression<User>()
+                        .Where(x => x.IdentityAlias == ServerSession.Current.UserName).ToLambda(),
+                            new List<Expression<Func<User, object>>>()
+                            {
+                                    x => x.Alerts,
+                            })
+                        .Single();
+
+                    /*
+                     * add event to state...
+                     */
+
+                    uow.Sessions.Create(
+                        new Session
+                        {
+                            IdentityId = user.IdentityId,
+                            CallPath = callPath,
+                            Details = $"file:'/{e.FullPath}' size:'{e.BytesTransferred / 1048576f}MB'",
+                            LocalEndPoint = $"{_ip}:{_bindingPort}",
+                            RemoteEndPoint = ServerSession.Current.ClientEndPoint.ToString(),
+                            IsActive = true,
+                        });
+
+                    uow.Commit();
+
+                    /*
+                     * send notifications...
+                     */
+
+                    foreach (var email in user.Alerts
+                        .Where(x => x.ToEmailAddress != null && x.IsEnabled == true && x.OnUpload == true))
+                    {
+                        _ = alert.Enqueue_EmailV1(
+                            new EmailV1()
+                            {
+                                FromEmail = conf["Notifications:EmailFromAddress"],
+                                FromDisplay = conf["Notifications:EmailFromDisplayName"],
+                                ToEmail = email.ToEmailAddress,
+                                ToDisplay = $"{email.ToDisplayName}",
+                                Subject = "File Upload Alert",
+                                Body = EmailTemplate.NotifyOnFileUpload(conf["Daemons:Sftp:Dns"], ServerSession.Current.UserName,
+                                    email.ToDisplayName, "/" + e.FullPath, e.BytesTransferred.ToString(),
+                                    ServerSession.Current.ClientEndPoint.ToString())
+                            }).AsTask().Result;
+                    }
+
+                    foreach (var text in user.Alerts
+                            .Where(x => x.ToPhoneNumber != null && x.IsEnabled == true && x.OnUpload == true))
+                    {
+                        _ = alert.Enqueue_TextV1(
+                            new TextV1()
+                            {
+                                FromPhoneNumber = conf["Notifications:TextFromPhoneNumber"],
+                                ToPhoneNumber = text.ToPhoneNumber,
+                                Body = TextTemplate.NotifyOnFileUpload(conf["Daemons:Sftp:Dns"], ServerSession.Current.UserName,
+                                    text.ToDisplayName, "/" + e.FullPath, e.BytesTransferred.ToString(),
+                                    ServerSession.Current.ClientEndPoint.ToString())
+                            }).AsTask().Result;
+                    }
+
+                    Log.Information($"'{callPath}' '{ServerSession.Current.UserName}' file:'/{e.FullPath}' size:'{e.BytesTransferred / 1048576f}MB' " +
+                        $"remote:'{ServerSession.Current.ClientEndPoint}'");
+                }
             }
             catch (Exception ex)
             {
@@ -805,15 +1056,17 @@ namespace Bhbk.Daemon.Aurora.SFTP
                             {
                                 IdentityId = user.IdentityId,
                                 CallPath = callPath,
-                                Details = $"file:'{e.Node.Path.StringPath}' size:'{e.Node.Length}'",
+                                Details = $"file:'{e.Node.Path.StringPath}' size:'{e.Node.Length / 1048576f}MB'",
+                                LocalEndPoint = $"{_ip}:{_bindingPort}",
                                 RemoteEndPoint = ServerSession.Current.ClientEndPoint.ToString(),
+                                IsActive = true,
                             });
 
                         uow.Commit();
-                    }
 
-                    Log.Information($"'{callPath}' '{ServerSession.Current.UserName}' file:'{e.Node.Path.StringPath}' size:'{e.Node.Length}' " +
-                        $"remote:'{ServerSession.Current.ClientEndPoint}'");
+                        Log.Information($"'{callPath}' '{ServerSession.Current.UserName}' file:'{e.Node.Path.StringPath}' size:'{e.Node.Length / 1048576f}MB' " +
+                            $"remote:'{ServerSession.Current.ClientEndPoint}'");
+                    }
                 }
             }
             catch (Exception ex)
@@ -856,8 +1109,10 @@ namespace Bhbk.Daemon.Aurora.SFTP
                             {
                                 IdentityId = user.IdentityId,
                                 CallPath = callPath,
-                                Details = $"file:'{e.ResultNode.Path.StringPath}' size:'{e.ResultNode.Length}'",
+                                Details = $"file:'{e.ResultNode.Path.StringPath}' size:'{e.ResultNode.Length / 1048576f}MB'",
+                                LocalEndPoint = $"{_ip}:{_bindingPort}",
                                 RemoteEndPoint = ServerSession.Current.ClientEndPoint.ToString(),
+                                IsActive = true,
                             });
 
                         uow.Commit();
@@ -875,10 +1130,10 @@ namespace Bhbk.Daemon.Aurora.SFTP
                                     FromEmail = conf["Notifications:EmailFromAddress"],
                                     FromDisplay = conf["Notifications:EmailFromDisplayName"],
                                     ToEmail = email.ToEmailAddress,
-                                    ToDisplay = $"{email.ToFirstName} {email.ToLastName}",
+                                    ToDisplay = $"{email.ToDisplayName}",
                                     Subject = "File Delete Alert",
-                                    Body = Email.NotifyOnFileDelete(conf["Daemons:SftpService:Dns"], ServerSession.Current.UserName,
-                                        email.ToFirstName, email.ToLastName, e.ResultNode.Path.StringPath)
+                                    Body = EmailTemplate.NotifyOnFileDelete(conf["Daemons:Sftp:Dns"], ServerSession.Current.UserName,
+                                        email.ToDisplayName, e.ResultNode.Path.StringPath)
                                 }).AsTask().Result;
                         }
 
@@ -890,14 +1145,14 @@ namespace Bhbk.Daemon.Aurora.SFTP
                                 {
                                     FromPhoneNumber = conf["Notifications:TextFromPhoneNumber"],
                                     ToPhoneNumber = text.ToPhoneNumber,
-                                    Body = Text.NotifyOnFileDelete(conf["Daemons:SftpService:Dns"], ServerSession.Current.UserName,
-                                        text.ToFirstName, text.ToLastName, e.ResultNode.Path.StringPath)
+                                    Body = TextTemplate.NotifyOnFileDelete(conf["Daemons:Sftp:Dns"], ServerSession.Current.UserName,
+                                        text.ToDisplayName, e.ResultNode.Path.StringPath)
                                 }).AsTask().Result;
                         }
-                    }
 
-                    Log.Information($"'{callPath}' '{ServerSession.Current.UserName}' file:'{e.ResultNode.Path.StringPath}' size:'{e.ResultNode.Length}' " +
-                        $"remote:'{ServerSession.Current.ClientEndPoint}'");
+                        Log.Information($"'{callPath}' '{ServerSession.Current.UserName}' file:'{e.ResultNode.Path.StringPath}' size:'{e.ResultNode.Length / 1048576f}MB' " +
+                            $"remote:'{ServerSession.Current.ClientEndPoint}'");
+                    }
                 }
             }
             catch (Exception ex)
@@ -931,13 +1186,15 @@ namespace Bhbk.Daemon.Aurora.SFTP
                             {
                                 IdentityId = user.IdentityId,
                                 CallPath = callPath,
-                                Details = $"file:'{e.Node.Path.StringPath}' size:'{e.Node.Length}'",
+                                Details = $"file:'{e.Node.Path.StringPath}' size:'{e.Node.Length / 1048576f}MB'",
+                                LocalEndPoint = $"{_ip}:{_bindingPort}",
                                 RemoteEndPoint = ServerSession.Current.ClientEndPoint.ToString(),
+                                IsActive = true,
                             });
 
                         uow.Commit();
 
-                        Log.Information($"'{callPath}' '{ServerSession.Current.UserName}' file:'{e.Node.Path.StringPath}' size:'{e.Node.Length}' " +
+                        Log.Information($"'{callPath}' '{ServerSession.Current.UserName}' file:'{e.Node.Path.StringPath}' size:'{e.Node.Length / 1048576f}MB' " +
                             $"remote:'{ServerSession.Current.ClientEndPoint}'");
                     }
                 }
@@ -963,8 +1220,6 @@ namespace Bhbk.Daemon.Aurora.SFTP
                     {
                         var conf = scope.ServiceProvider.GetRequiredService<IConfiguration>();
                         var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
-                        var admin = scope.ServiceProvider.GetRequiredService<IAdminService>();
-                        var alert = scope.ServiceProvider.GetRequiredService<IAlertService>();
 
                         var user = uow.Users.Get(QueryExpressionFactory.GetQueryExpression<User>()
                             .Where(x => x.IdentityAlias == ServerSession.Current.UserName).ToLambda(),
@@ -983,48 +1238,15 @@ namespace Bhbk.Daemon.Aurora.SFTP
                             {
                                 IdentityId = user.IdentityId,
                                 CallPath = callPath,
-                                Details = $"file:'{e.Node.Path.StringPath}' size:'{e.Node.Length}'",
+                                Details = $"file:'{e.Node.Path.StringPath}' size:'{e.Node.Length / 1048576f}MB'",
+                                LocalEndPoint = $"{_ip}:{_bindingPort}",
                                 RemoteEndPoint = ServerSession.Current.ClientEndPoint.ToString(),
+                                IsActive = true,
                             });
 
                         uow.Commit();
 
-                        /*
-                         * send notifications...
-                         */
-
-                        foreach (var email in user.Alerts
-                            .Where(x => x.ToEmailAddress != null && x.IsEnabled == true && x.OnDownload == true))
-                        {
-                            _ = alert.Enqueue_EmailV1(
-                                new EmailV1()
-                                {
-                                    FromEmail = conf["Notifications:EmailFromAddress"],
-                                    FromDisplay = conf["Notifications:EmailFromDisplayName"],
-                                    ToEmail = email.ToEmailAddress,
-                                    ToDisplay = $"{email.ToFirstName} {email.ToLastName}",
-                                    Subject = "File Download Alert",
-                                    Body = Email.NotifyOnFileGetContent(conf["Daemons:SftpService:Dns"], ServerSession.Current.UserName,
-                                        email.ToFirstName, email.ToLastName, e.Node.Path.StringPath, e.Node.Length.ToString(),
-                                        ServerSession.Current.ClientEndPoint.ToString())
-                                }).AsTask().Result;
-                        }
-
-                        foreach (var text in user.Alerts
-                            .Where(x => x.ToPhoneNumber != null && x.IsEnabled == true && x.OnDownload == true))
-                        {
-                            _ = alert.Enqueue_TextV1(
-                                new TextV1()
-                                {
-                                    FromPhoneNumber = conf["Notifications:TextFromPhoneNumber"],
-                                    ToPhoneNumber = text.ToPhoneNumber,
-                                    Body = Text.NotifyOnFileGetContent(conf["Daemons:SftpService:Dns"], ServerSession.Current.UserName,
-                                        text.ToFirstName, text.ToLastName, e.Node.Path.StringPath, e.Node.Length.ToString(),
-                                        ServerSession.Current.ClientEndPoint.ToString())
-                                }).AsTask().Result;
-                        }
-
-                        Log.Information($"'{callPath}' '{ServerSession.Current.UserName}' file:'{e.Node.Path.StringPath}' size:'{e.Node.Length}' " +
+                        Log.Information($"'{callPath}' '{ServerSession.Current.UserName}' file:'{e.Node.Path.StringPath}' size:'{e.Node.Length / 1048576f}MB' " +
                             $"remote:'{ServerSession.Current.ClientEndPoint}'");
                     }
                 }
@@ -1060,13 +1282,15 @@ namespace Bhbk.Daemon.Aurora.SFTP
                             {
                                 IdentityId = user.IdentityId,
                                 CallPath = callPath,
-                                Details = $"file:'{e.Node.Path.StringPath}' size:'{e.Node.Length}'",
+                                Details = $"file:'{e.Node.Path.StringPath}' size:'{e.Node.Length / 1048576f}MB'",
+                                LocalEndPoint = $"{_ip}:{_bindingPort}",
                                 RemoteEndPoint = ServerSession.Current.ClientEndPoint.ToString(),
+                                IsActive = true,
                             });
 
                         uow.Commit();
 
-                        Log.Information($"'{callPath}' '{ServerSession.Current.UserName}' file:'{e.Node.Path.StringPath}' size:'{e.Node.Length}' " +
+                        Log.Information($"'{callPath}' '{ServerSession.Current.UserName}' file:'{e.Node.Path.StringPath}' size:'{e.Node.Length / 1048576f}MB' " +
                             $"remote:'{ServerSession.Current.ClientEndPoint}'");
                     }
                 }
@@ -1091,8 +1315,6 @@ namespace Bhbk.Daemon.Aurora.SFTP
                     {
                         var conf = scope.ServiceProvider.GetRequiredService<IConfiguration>();
                         var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
-                        var admin = scope.ServiceProvider.GetRequiredService<IAdminService>();
-                        var alert = scope.ServiceProvider.GetRequiredService<IAlertService>();
 
                         var user = uow.Users.Get(QueryExpressionFactory.GetQueryExpression<User>()
                             .Where(x => x.IdentityAlias == ServerSession.Current.UserName).ToLambda(),
@@ -1111,50 +1333,17 @@ namespace Bhbk.Daemon.Aurora.SFTP
                             {
                                 IdentityId = user.IdentityId,
                                 CallPath = callPath,
-                                Details = $"file:'{e.ResultNode.Path.StringPath}' size:'{e.ResultNode.Length}'",
+                                Details = $"file:'{e.ResultNode.Path.StringPath}' size:'{e.ResultNode.Length / 1048576f}MB'",
+                                LocalEndPoint = $"{_ip}:{_bindingPort}",
                                 RemoteEndPoint = ServerSession.Current.ClientEndPoint.ToString(),
+                                IsActive = true,
                             });
 
                         uow.Commit();
 
-                        /*
-                         * send notifications...
-                         */
-
-                        foreach (var email in user.Alerts
-                            .Where(x => x.ToEmailAddress != null && x.IsEnabled == true && x.OnUpload == true))
-                        {
-                            _ = alert.Enqueue_EmailV1(
-                                new EmailV1()
-                                {
-                                    FromEmail = conf["Notifications:EmailFromAddress"],
-                                    FromDisplay = conf["Notifications:EmailFromDisplayName"],
-                                    ToEmail = email.ToEmailAddress,
-                                    ToDisplay = $"{email.ToFirstName} {email.ToLastName}",
-                                    Subject = "File Upload Alert",
-                                    Body = Email.NotifyOnFileSaveContent(conf["Daemons:SftpService:Dns"], ServerSession.Current.UserName,
-                                        email.ToFirstName, email.ToLastName, e.ResultNode.Path.StringPath, e.ResultNode.Length.ToString(),
-                                        ServerSession.Current.ClientEndPoint.ToString())
-                                }).AsTask().Result;
-                        }
-
-                        foreach (var text in user.Alerts
-                                .Where(x => x.ToPhoneNumber != null && x.IsEnabled == true && x.OnUpload == true))
-                        {
-                            _ = alert.Enqueue_TextV1(
-                                new TextV1()
-                                {
-                                    FromPhoneNumber = conf["Notifications:TextFromPhoneNumber"],
-                                    ToPhoneNumber = text.ToPhoneNumber,
-                                    Body = Text.NotifyOnFileSaveContent(conf["Daemons:SftpService:Dns"], ServerSession.Current.UserName,
-                                        text.ToFirstName, text.ToLastName, e.ResultNode.Path.StringPath, e.ResultNode.Length.ToString(),
-                                        ServerSession.Current.ClientEndPoint.ToString())
-                                }).AsTask().Result;
-                        }
+                        Log.Information($"'{callPath}' '{ServerSession.Current.UserName}' file:'{e.ResultNode.Path.StringPath}' size:'{e.ResultNode.Length / 1048576f}MB' " +
+                            $"remote:'{ServerSession.Current.ClientEndPoint}'");
                     }
-
-                    Log.Information($"'{callPath}' '{ServerSession.Current.UserName}' file:'{e.ResultNode.Path.StringPath}' size:'{e.ResultNode.Length}' " +
-                        $"remote:'{ServerSession.Current.ClientEndPoint}'");
                 }
             }
             catch (Exception ex)

@@ -173,8 +173,8 @@
     <Build Include="svc\Stored Procedures\usp_User_Update.sql" />
     <Build Include="dbo\Tables\tbl_Session.sql" />
     <Build Include="svc\Views\uvw_Session.sql" />
-    <Build Include="svc\Stored Procedures\usp_Session_Update_1.sql" />
-    <Build Include="svc\Stored Procedures\usp_Session_Insert_1.sql" />
-    <Build Include="svc\Stored Procedures\usp_Session_Delete_1.sql" />
+    <Build Include="svc\Stored Procedures\usp_Session_Update.sql" />
+    <Build Include="svc\Stored Procedures\usp_Session_Insert.sql" />
+    <Build Include="svc\Stored Procedures\usp_Session_Delete.sql" />
   </ItemGroup>
 </Project>

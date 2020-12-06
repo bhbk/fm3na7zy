@@ -8,13 +8,14 @@
     [IsFileSystemReadOnly] BIT                CONSTRAINT [DF_tbl_User_IsFileSystemReadOnly] DEFAULT ((0)) NOT NULL,
     [QuotaInBytes]         BIGINT             NOT NULL,
     [QuotaUsedInBytes]     BIGINT             NOT NULL,
-    [ConcurrentSessions]   SMALLINT           NOT NULL,
+    [SessionMax]           SMALLINT           CONSTRAINT [DF_tbl_User_SessionMax] DEFAULT ((1)) NOT NULL,
+    [SessionsInUse]        SMALLINT           CONSTRAINT [DF_tbl_User_SessionsInUse] DEFAULT ((0)) NOT NULL,
     [Debugger]             VARCHAR (16)       NULL,
     [IsEnabled]            BIT                NOT NULL,
     [IsDeletable]          BIT                NOT NULL,
     [CreatedUtc]           DATETIMEOFFSET (7) NOT NULL,
     [LastUpdatedUtc]       DATETIMEOFFSET (7) NULL,
-    CONSTRAINT [PK_tbl_Users] PRIMARY KEY CLUSTERED ([IdentityId] ASC)
+    CONSTRAINT [PK_tbl_User] PRIMARY KEY CLUSTERED ([IdentityId] ASC)
 );
 
 

@@ -1,6 +1,6 @@
 ﻿
 CREATE PROCEDURE [svc].[usp_Setting_Delete]
-    @ID uniqueidentifier
+    @Id UNIQUEIDENTIFIER
 
 AS
 BEGIN
@@ -8,10 +8,10 @@ BEGIN
 
 	BEGIN TRY
 
-        SELECT * FROM [svc].[uvw_Setting] WHERE [svc].[uvw_Setting].Id = @ID
+        SELECT * FROM [svc].[uvw_Setting] WHERE [svc].[uvw_Setting].Id = @Id
 
         DELETE [dbo].[tbl_Setting]
-        WHERE Id = @ID
+        WHERE Id = @Id
 
     END TRY
 

@@ -9,7 +9,8 @@ CREATE PROCEDURE [svc].[usp_User_Update]
     ,@IsFileSystemReadOnly	BIT
 	,@QuotaInBytes			BIGINT
 	,@QuotaUsedInBytes		BIGINT
-    ,@ConcurrentSessions    SMALLINT
+    ,@SessionMax            SMALLINT
+    ,@SessionsInUse         SMALLINT
     ,@Debugger				NVARCHAR (16) 
     ,@IsEnabled				BIT
     ,@IsDeletable			BIT
@@ -32,7 +33,8 @@ BEGIN
 			,IsFileSystemReadOnly	= @IsFileSystemReadOnly
 			,QuotaInBytes			= @QuotaInBytes
 			,QuotaUsedInBytes		= @QuotaUsedInBytes
-            ,ConcurrentSessions     = @ConcurrentSessions
+            ,SessionMax             = @SessionMax
+            ,SessionsInUse          = @SessionsInUse
 			,Debugger				= @Debugger
 			,IsEnabled				= @IsEnabled
 			,IsDeletable			= @IsDeletable

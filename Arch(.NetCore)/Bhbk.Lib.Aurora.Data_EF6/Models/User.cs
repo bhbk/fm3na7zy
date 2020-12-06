@@ -36,7 +36,8 @@ namespace Bhbk.Lib.Aurora.Data_EF6.Models
         public bool IsFileSystemReadOnly { get; set; }
         public long QuotaInBytes { get; set; }
         public long QuotaUsedInBytes { get; set; }
-        public short ConcurrentSessions { get; set; }
+        public short SessionMax { get; set; }
+        public short SessionsInUse { get; set; }
         public string Debugger { get; set; }
         public bool IsEnabled { get; set; }
         public bool IsDeletable { get; set; }

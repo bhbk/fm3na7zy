@@ -4,8 +4,8 @@ namespace Bhbk.Lib.Aurora.Primitives.Enums
 {
     public enum FileSystemProviderType
     {
-        Composite = 1,
+        Database = 1,
         Memory = 2,
-        Smb = 3,
+        SMB = 3,
     }
 }

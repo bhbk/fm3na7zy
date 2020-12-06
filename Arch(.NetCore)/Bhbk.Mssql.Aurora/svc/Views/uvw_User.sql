@@ -11,7 +11,8 @@ SELECT
 	,IsFileSystemReadOnly
 	,QuotaInBytes
 	,QuotaUsedInBytes
-	,ConcurrentSessions
+	,SessionMax
+	,SessionsInUse
 	,Debugger
 	,IsEnabled
 	,IsDeletable

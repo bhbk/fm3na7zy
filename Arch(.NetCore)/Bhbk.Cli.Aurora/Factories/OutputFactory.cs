@@ -1,4 +1,6 @@
 ﻿using Bhbk.Lib.Aurora.Data_EF6.Models;
+using Bhbk.Lib.Aurora.Primitives.Enums;
+using ManyConsole;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,11 +16,11 @@ namespace Bhbk.Cli.Aurora.Factories
                 Console.Out.WriteLine();
 
                 Console.ForegroundColor = ConsoleColor.Green;
-                Console.Out.WriteLine($"  [Credential GUID] {cred.Id}{(!cred.IsDeletable ? " is not deletable and" : null)}" +
-                    $"{(cred.IsEnabled ? " is enabled" : " is disabled")} [Created] {cred.CreatedUtc.LocalDateTime}");
+                Console.Out.WriteLine($"  [credential GUID] {cred.Id}{(!cred.IsDeletable ? " is not deletable and" : null)}" +
+                    $"{(cred.IsEnabled ? " is enabled" : " is disabled")} [created] {cred.CreatedUtc.LocalDateTime}");
 
                 Console.ForegroundColor = ConsoleColor.White;
-                Console.Out.WriteLine($"    [Login] domain:{cred.Domain} user:{cred.UserName}");
+                Console.Out.WriteLine($"    login [domain] {cred.Domain} [user] {cred.UserName}");
 
                 Console.ResetColor();
             }
@@ -31,11 +33,11 @@ namespace Bhbk.Cli.Aurora.Factories
                 Console.Out.WriteLine();
 
                 Console.ForegroundColor = ConsoleColor.Green;
-                Console.Out.WriteLine($"  [Credential GUID] {cred.Id}'{(!cred.IsDeletable ? " is not deletable and" : null)}" +
-                    $"{(cred.IsEnabled ? " is enabled" : " is disabled")} [Created] {cred.CreatedUtc.LocalDateTime}");
+                Console.Out.WriteLine($"  [credential GUID] {cred.Id}'{(!cred.IsDeletable ? " is not deletable and" : null)}" +
+                    $"{(cred.IsEnabled ? " is enabled" : " is disabled")} [created] {cred.CreatedUtc.LocalDateTime}");
 
                 Console.ForegroundColor = ConsoleColor.White;
-                Console.Out.WriteLine($"    Encrypted password '{cred.EncryptedPassword}'");
+                Console.Out.WriteLine($"    [encrypted password] '{cred.EncryptedPassword}'");
 
                 Console.ResetColor();
             }
@@ -48,8 +50,8 @@ namespace Bhbk.Cli.Aurora.Factories
                 Console.Out.WriteLine();
 
                 Console.ForegroundColor = ConsoleColor.Green;
-                Console.Out.WriteLine($"  [Public key GUID] {pubKey.Id} [Algo] {pubKey.KeyAlgo}{(!pubKey.IsDeletable ? " is not deletable and" : null)}" +
-                    $"{(pubKey.IsEnabled ? " is enabled" : " is disabled")} [Created] {pubKey.CreatedUtc.LocalDateTime}");
+                Console.Out.WriteLine($"  [public key GUID] {pubKey.Id} [algo] {pubKey.KeyAlgo}{(!pubKey.IsDeletable ? " is not deletable and" : null)}" +
+                    $"{(pubKey.IsEnabled ? " is enabled" : " is disabled")} [created] {pubKey.CreatedUtc.LocalDateTime}");
                 Console.Out.WriteLine($"    [Sig] {pubKey.SigValue}");
 
                 Console.ForegroundColor = ConsoleColor.White;
@@ -58,11 +60,11 @@ namespace Bhbk.Cli.Aurora.Factories
                     var privKey = privKeys.Where(x => x.PublicKeyId == pubKey.Id)
                         .Single();
 
-                    Console.Out.WriteLine($"    [Private key GUID] {privKey.Id} [Algo] {privKey.KeyAlgo}{(!privKey.IsDeletable ? " is not deletable and" : null)}" +
-                    $"{(privKey.IsEnabled ? " is enabled" : " is disabled")} [Created] {pubKey.CreatedUtc.LocalDateTime}");
+                    Console.Out.WriteLine($"    [private key GUID] {privKey.Id} [algo] {privKey.KeyAlgo}{(!privKey.IsDeletable ? " is not deletable and" : null)}" +
+                    $"{(privKey.IsEnabled ? " is enabled" : " is disabled")} [created] {pubKey.CreatedUtc.LocalDateTime}");
                 }
                 else
-                    Console.Out.WriteLine($"    [Private key] none");
+                    Console.Out.WriteLine($"    [private key] none");
 
                 Console.ResetColor();
             };
@@ -75,11 +77,11 @@ namespace Bhbk.Cli.Aurora.Factories
                 Console.Out.WriteLine();
 
                 Console.ForegroundColor = ConsoleColor.Green;
-                Console.Out.WriteLine($"  [Private key GUID] {key.Id} [Algo] {key.KeyAlgo}{(!key.IsDeletable ? " is not deletable and" : null)}" +
-                    $"{(key.IsEnabled ? " is enabled" : " is disabled")} [Created] {key.CreatedUtc.LocalDateTime}");
+                Console.Out.WriteLine($"  [private key GUID] {key.Id} [algo] {key.KeyAlgo}{(!key.IsDeletable ? " is not deletable and" : null)}" +
+                    $"{(key.IsEnabled ? " is enabled" : " is disabled")} [created] {key.CreatedUtc.LocalDateTime}");
 
                 Console.ForegroundColor = ConsoleColor.White;
-                Console.Out.WriteLine($"    Encrypted password '{key.KeyPass}'");
+                Console.Out.WriteLine($"    [encrypted password] {key.KeyPass}");
 
                 Console.ResetColor();
             };
@@ -92,7 +94,7 @@ namespace Bhbk.Cli.Aurora.Factories
             foreach (var net in networks.OrderBy(x => x.SequenceId))
             {
                 Console.ForegroundColor = ConsoleColor.Cyan;
-                Console.Out.WriteLine($"  [Network GUID] {net.Id} [Seq] {net.SequenceId} [Action] {net.Action} [CIDR] {net.Address}" +
+                Console.Out.WriteLine($"  [network GUID] {net.Id} [seq] {net.SequenceId} [action] {net.Action} [cidr] {net.Address}" +
                     $"{(net.IsEnabled ? " is enabled" : " is disabled")}");
 
                 Console.ResetColor();
@@ -106,11 +108,11 @@ namespace Bhbk.Cli.Aurora.Factories
                 Console.Out.WriteLine();
 
                 Console.ForegroundColor = ConsoleColor.Green;
-                Console.Out.WriteLine($"  [Config GUID] {config.Id}{(!config.IsDeletable ? " is not deletable" : null)}" +
-                    $" [Created] {config.CreatedUtc.LocalDateTime}");
+                Console.Out.WriteLine($"  [config GUID] {config.Id}{(!config.IsDeletable ? " is not deletable" : null)}" +
+                    $" [created] {config.CreatedUtc.LocalDateTime}");
 
                 Console.ForegroundColor = ConsoleColor.White;
-                Console.Out.WriteLine($"    [Key] {config.ConfigKey} [Value] {config.ConfigValue}");
+                Console.Out.WriteLine($"    [key] {config.ConfigKey} [value] {config.ConfigValue}");
 
                 Console.ResetColor();
             }
@@ -123,10 +125,10 @@ namespace Bhbk.Cli.Aurora.Factories
             foreach (var session in sessions)
             {
                 Console.ForegroundColor = ConsoleColor.White;
-                Console.Out.WriteLine($"  [Remote] {session.RemoteEndPoint}" +
-                    $" [Action] {session.CallPath} [Detail] {session.Details}" +
-                    $"{(string.IsNullOrEmpty(session.RemoteSoftwareIdentifier) ? null : " [Using] " + (session.RemoteSoftwareIdentifier) + "")}" +
-                    $" [Created] {session.CreatedUtc.LocalDateTime}");
+                Console.Out.WriteLine($"  [local] {session.LocalEndPoint} [remote] {session.RemoteEndPoint}" +
+                    $" [action] {session.CallPath} [detail] {session.Details}" +
+                    $"{(string.IsNullOrEmpty(session.RemoteSoftwareIdentifier) ? null : " [software] " + (session.RemoteSoftwareIdentifier) + "")}" +
+                    $" [created] {session.CreatedUtc.LocalDateTime}");
 
                 Console.ResetColor();
             }
@@ -139,16 +141,55 @@ namespace Bhbk.Cli.Aurora.Factories
                 Console.Out.WriteLine();
 
                 Console.ForegroundColor = ConsoleColor.Green;
-                Console.Out.WriteLine($"  [User GUID] {user.IdentityId} [Alias] {user.IdentityAlias}{(!user.IsDeletable ? " is not deletable and" : null)}" +
-                    $"{(user.IsEnabled ? " is enabled" : " is disabled")} [Created] {user.CreatedUtc.LocalDateTime}");
+                Console.Out.WriteLine($"  [user GUID] {user.IdentityId} [alias] {user.IdentityAlias}{(!user.IsDeletable ? " is not deletable and" : null)}" +
+                    $"{(user.IsEnabled ? " is enabled" : " is disabled")} [created] {user.CreatedUtc.LocalDateTime}");
 
                 Console.ForegroundColor = ConsoleColor.White;
-                Console.Out.WriteLine($"    File system is {user.FileSystemType} and mounts as {(user.IsFileSystemReadOnly ? "read-only" : "read-write")}" +
-                    $"{(string.IsNullOrEmpty(user.FileSystemChrootPath) ? null : " with chroot to " + (user.FileSystemChrootPath) + "")}");
-                Console.Out.WriteLine($"    Password authentication is {(user.IsPasswordRequired ? "enabled" : "disabled")} ");
-                Console.Out.WriteLine($"    Public key authentication is {(user.IsPublicKeyRequired ? "enabled" : "disabled")} ");
-                Console.Out.WriteLine($"    Concurrent session maximum {user.ConcurrentSessions} is allowed");
-                Console.Out.WriteLine($"    Quota maximum is {user.QuotaInBytes / 1024f} MB and {user.QuotaUsedInBytes / 1024f} MB is currently used");
+                Console.Out.WriteLine($"    file system type is '{user.FileSystemType}' and mounts as {(user.IsFileSystemReadOnly ? "read-only" : "read-write")}" +
+                    $"{(string.IsNullOrEmpty(user.FileSystemChrootPath) ? null : " with chroot to " + (user.FileSystemChrootPath) + "")}" +
+                    $"{Environment.NewLine}    password authentication is {(user.IsPasswordRequired ? "enabled" : "disabled")} " +
+                    $"{Environment.NewLine}    public key authentication is {(user.IsPublicKeyRequired ? "enabled" : "disabled")} " +
+                    $"{Environment.NewLine}    session maximum is {user.SessionMax} and {user.SessionsInUse} currently used");
+
+                FileSystemProviderType userFileSystem;
+                Enum.TryParse(user.FileSystemType, out userFileSystem);
+
+                switch (userFileSystem)
+                {
+                    case FileSystemProviderType.Database:
+                        Console.Out.WriteLine($"    quota maximum is {user.QuotaInBytes / 1048576f}MB and quota used {user.QuotaUsedInBytes / 1048576f}MB");
+                        break;
+                    case FileSystemProviderType.Memory:
+                        Console.Out.WriteLine($"    quota maximum is 100MB and quota used is N/A... all deleted at session end");
+                        break;
+                    case FileSystemProviderType.SMB:
+                        Console.Out.WriteLine($"    quota maximum is N/A... dependant on storage backing the mount");
+                        break;
+                    default:
+                        var validFileSystemtypes = string.Join(", ", Enum.GetNames(typeof(FileSystemProviderType)));
+                        throw new ConsoleHelpAsException($"  *** Invalid filesystem type. Options are '{validFileSystemtypes}' ***");
+                }
+
+                Console.ResetColor();
+            }
+        }
+
+        public static void StdOutUserAlerts(IEnumerable<UserAlert> alerts)
+        {
+            foreach (var alert in alerts.OrderBy(x => x.ToDisplayName))
+            {
+                Console.Out.WriteLine();
+
+                Console.ForegroundColor = ConsoleColor.Cyan;
+                Console.Out.WriteLine($"  [alert GUID] {alert.Id} [display-name] '{alert.ToDisplayName}'" +
+                    $" [email] {(string.IsNullOrEmpty(alert.ToEmailAddress) ? " none " : alert.ToEmailAddress)}" +
+                    $" [text] {(string.IsNullOrEmpty(alert.ToPhoneNumber) ? " none " : alert.ToPhoneNumber)}" +
+                    $"{(alert.IsEnabled ? " is enabled" : " is disabled")}");
+
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.Out.WriteLine($"    [on-delete] {(alert.OnDelete ? "enabled" : "disabled")}" +
+                    $" [on-download] {(alert.OnDownload ? "enabled" : "disabled")}" +
+                    $" [on-upload] {(alert.OnUpload ? "enabled" : "disabled")}");
 
                 Console.ResetColor();
             }
@@ -161,12 +202,12 @@ namespace Bhbk.Cli.Aurora.Factories
                 Console.Out.WriteLine();
 
                 Console.ForegroundColor = ConsoleColor.Green;
-                Console.Out.WriteLine($"  [Mount for] {mount.User.IdentityAlias} [Path] {mount.ServerAddress}{mount.ServerShare}" +
-                    $" [Protocl] {mount.AuthType}");
+                Console.Out.WriteLine($"  [mount for] {mount.User.IdentityAlias} [path] {mount.ServerAddress}{mount.ServerShare}" +
+                    $" [protocol] {mount.AuthType}");
 
                 Console.ForegroundColor = ConsoleColor.White;
                 if (mount.CredentialId.HasValue)
-                    Console.Out.WriteLine($"    Mount credential [Domain] {mount.Credential.Domain} [User] {mount.Credential.UserName}");
+                    Console.Out.WriteLine($"    mount credential [domain] {mount.Credential.Domain} [user] {mount.Credential.UserName}");
 
                 Console.ResetColor();
             }

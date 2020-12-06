@@ -28,7 +28,8 @@ BEGIN
 			,IsFileSystemReadOnly
 			,QuotaInBytes
 			,QuotaUsedInBytes
-			,ConcurrentSessions
+			,SessionMax
+			,SessionsInUse
 			,Debugger
 			,IsEnabled
 			,IsDeletable
@@ -42,9 +43,10 @@ BEGIN
 			,@IsPasswordRequired
 			,@IsPublicKeyRequired
 			,@IsFileSystemReadOnly
-			,2147483647
+			,1073741824
 			,0
 			,1
+			,0
 			,@Debugger
 			,@IsEnabled
 			,@IsDeletable

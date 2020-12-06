@@ -42,32 +42,32 @@ namespace Bhbk.Daemon.Aurora.SFTP.Factories
 
             switch (fsType)
             {
-                case FileSystemProviderType.Composite:
+                case FileSystemProviderType.Database:
                     {
                         if (user.IsFileSystemReadOnly)
                         {
-                            Log.Information($"'{callPath}' '{user.IdentityAlias}' initialize '{typeof(CompositeReadOnlyFileSystem).Name}'");
+                            Log.Information($"'{callPath}' '{user.IdentityAlias}' initialize '{typeof(DatabaseReadOnlyFileSystem).Name}'");
 
                             if (string.IsNullOrEmpty(user.FileSystemChrootPath))
-                                return new CompositeReadOnlyFileSystem(fsSettings, factory, user);
+                                return new DatabaseReadOnlyFileSystem(fsSettings, factory, user);
                             else
                             {
                                 var chroot = new MountCapableFileSystemProvider();
-                                chroot.Mount(user.FileSystemChrootPath, new CompositeReadOnlyFileSystem(fsSettings, factory, user));
+                                chroot.Mount(user.FileSystemChrootPath, new DatabaseReadOnlyFileSystem(fsSettings, factory, user));
 
                                 return chroot;
                             }
                         }
                         else
                         {
-                            Log.Information($"'{callPath}' '{user.IdentityAlias}' initialize '{typeof(CompositeReadWriteFileSystem).Name}'");
+                            Log.Information($"'{callPath}' '{user.IdentityAlias}' initialize '{typeof(DatabaseReadWriteFileSystem).Name}'");
 
                             if (string.IsNullOrEmpty(user.FileSystemChrootPath))
-                                return new CompositeReadWriteFileSystem(fsSettings, factory, user);
+                                return new DatabaseReadWriteFileSystem(fsSettings, factory, user);
                             else
                             {
                                 var chroot = new MountCapableFileSystemProvider();
-                                chroot.Mount(user.FileSystemChrootPath, new CompositeReadWriteFileSystem(fsSettings, factory, user));
+                                chroot.Mount(user.FileSystemChrootPath, new DatabaseReadWriteFileSystem(fsSettings, factory, user));
 
                                 return chroot;
                             }
@@ -106,7 +106,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Factories
                         }
                     }
 
-                case FileSystemProviderType.Smb:
+                case FileSystemProviderType.SMB:
                     {
                         if (user.IsFileSystemReadOnly)
                         {

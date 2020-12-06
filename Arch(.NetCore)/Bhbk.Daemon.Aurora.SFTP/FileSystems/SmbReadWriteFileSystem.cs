@@ -362,7 +362,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
 
                     var stream = File.Open(file.FullName, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite);
 
-                    Log.Information($"'{callPath}' '{_user.IdentityAlias}' file:'{node.Path}' at:'{file.FullName}' size:'{stream.Length}'" +
+                    Log.Information($"'{callPath}' '{_user.IdentityAlias}' file:'{node.Path}' size:'{stream.Length / 1048576f}MB' at:'{file.FullName}'" +
                         $" as:'{WindowsIdentity.GetCurrent().Name}'");
 
                     content = parameters.AccessType == NodeContentAccess.Read
@@ -599,7 +599,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                                 using (var fs = new FileStream(file.FullName, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite))
                                     content.GetStream().CopyTo(fs);
 
-                                Log.Information($"'{callPath}' '{_user.IdentityAlias}' file:'{node.Path}' at:'{file.FullName}' size:'{content.Length}'" +
+                                Log.Information($"'{callPath}' '{_user.IdentityAlias}' file:'{node.Path}' size:'{content.Length / 1048576f}MB' at:'{file.FullName}'" +
                                     $" as:'{WindowsIdentity.GetCurrent().Name}'");
                             }
                             break;

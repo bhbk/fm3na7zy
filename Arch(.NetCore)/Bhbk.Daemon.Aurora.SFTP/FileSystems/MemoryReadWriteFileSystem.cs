@@ -25,14 +25,12 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
     {
         private readonly IServiceScopeFactory _factory;
         private readonly IUnitOfWorkMem _uowMem;
-        private User _user;
         private UserMem _userMem;
 
         internal MemoryReadWriteFileSystem(FileSystemProviderSettings settings, IServiceScopeFactory factory, User user)
             : base(settings)
         {
             _factory = factory;
-            _user = user;
 
             using (var scope = _factory.CreateScope())
             {
@@ -41,8 +39,10 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                 _uowMem = new UnitOfWorkMem(conf["Databases:AuroraEntitiesMem"]);
             }
 
-            _userMem = MemoryPathFactory.CheckUser(_uowMem, _user);
+            _userMem = MemoryPathFactory.CheckUser(_uowMem, user);
             _userMem = MemoryPathFactory.CheckContent(_uowMem, _userMem);
+            _userMem.QuotaInBytes = 104857600;
+            _userMem.QuotaUsedInBytes = 0;
 
             MemoryPathFactory.CheckFolder(_uowMem, _userMem);
 
@@ -55,7 +55,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
             if (Exists(fileKeysNode.Path, NodeType.File))
                 Delete(fileKeysNode);
 
-            var pubKeysContent = KeyHelper.ExportPubKeyBase64(_user, _user.PublicKeys);
+            var pubKeysContent = KeyHelper.ExportPubKeyBase64(user, user.PublicKeys);
 
             CreateFile(folderKeysNode, fileKeysNode);
             SaveContent(fileKeysNode, NodeContent.CreateDelayedWriteContent(
@@ -75,7 +75,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                     new UserFolderMem
                     {
                         Id = Guid.NewGuid(),
-                        IdentityId = _user.IdentityId,
+                        IdentityId = _userMem.IdentityId,
                         ParentId = folderEntity.Id,
                         VirtualName = child.Name,
                         IsReadOnly = false,
@@ -102,13 +102,14 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
 
             try
             {
-                if (_user.QuotaUsedInBytes >= _user.QuotaInBytes)
-                {
-                    Log.Warning($"'{callPath}' '{_userMem.IdentityAlias}' file:'{child.Path}' cancelled, " +
-                        $"total-quota '{_user.QuotaInBytes}' and used-quota '{_user.QuotaUsedInBytes}'");
+                /*
+                 * enforce quota if user is already over. we do not know size of incoming strea until has
+                 * all been received. quota enforcement not possible until after exceeded.
+                 */
 
-                    throw new FileSystemOperationCanceledException();
-                }
+                if (_userMem.QuotaUsedInBytes >= _userMem.QuotaInBytes)
+                    throw new FileSystemOperationCanceledException($"'{callPath}' '{_userMem.IdentityAlias}' file:'{child.Path}' size:'{child.Length / 1048576f}MB' " +
+                        $"at:memory quota-maximum:'{_userMem.QuotaInBytes / 1048576f}MB' quota-used:'{_userMem.QuotaUsedInBytes / 1048576f}MB'");
 
                 var folderEntity = MemoryPathFactory.PathToFolder(_uowMem, _userMem, parent.Path.StringPath);
                 var fileName = Hashing.MD5.Create(Guid.NewGuid().ToString());
@@ -146,8 +147,14 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                 return child;
             }
             catch (Exception ex)
+                when (ex is FileSystemOperationCanceledException)
             {
-                Log.Error(ex.ToString());
+                Log.Warning(ex.ToString());
+                throw;
+            }
+            catch (Exception ex)
+            {
+                Log.Fatal(ex.ToString());
                 throw;
             }
         }
@@ -170,7 +177,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                         {
                             var fileEntity = MemoryPathFactory.PathToFile(_uowMem, _userMem, node.Path.StringPath);
 
-                            _user.QuotaUsedInBytes -= fileEntity.Data.Length;
+                            _userMem.QuotaUsedInBytes -= fileEntity.Data.Length;
 
                             _uowMem.UserFiles.Delete(fileEntity);
                             _uowMem.Commit();
@@ -379,7 +386,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                             else
                                 stream = new MemoryStream(fileEntity.Data);
 
-                            Log.Information($"'{callPath}' '{_userMem.IdentityAlias}' file:'{node.Path}' at:memory size:'{stream.Length}'");
+                            Log.Information($"'{callPath}' '{_userMem.IdentityAlias}' file:'{node.Path}' size:'{stream.Length / 1048576f}MB' at:memory");
 
                             return parameters.AccessType == NodeContentAccess.Read
                                 ? NodeContent.CreateReadOnlyContent(stream)
@@ -608,12 +615,12 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                                 fileEntity.HashSHA256 = Strings.GetHexString(hash);
                             }
 
-                            _user.QuotaUsedInBytes += content.Length;
+                            _userMem.QuotaUsedInBytes += content.Length;
 
                             _uowMem.UserFiles.Update(fileEntity);
                             _uowMem.Commit();
 
-                            Log.Information($"'{callPath}' '{_userMem.IdentityAlias}' file:'{node.Path}' at:memory size:'{content.Length}'");
+                            Log.Information($"'{callPath}' '{_userMem.IdentityAlias}' file:'{node.Path}' size:'{content.Length / 1048576f}MB' at:memory");
                         }
                         break;
 

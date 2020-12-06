@@ -1,6 +1,6 @@
 ﻿
-CREATE   PROCEDURE [svc].[usp_PrivateKey_Delete]
-    @ID uniqueidentifier
+CREATE PROCEDURE [svc].[usp_PrivateKey_Delete]
+    @Id UNIQUEIDENTIFIER
 
 AS
 BEGIN
@@ -8,10 +8,10 @@ BEGIN
 
 	BEGIN TRY
 
-        SELECT * FROM [dbo].[tbl_PrivateKey] WHERE Id = @ID
+        SELECT * FROM [dbo].[tbl_PrivateKey] WHERE Id = @Id
 
         DELETE [dbo].[tbl_PrivateKey]
-        WHERE Id = @ID
+        WHERE Id = @Id
 
     END TRY
 

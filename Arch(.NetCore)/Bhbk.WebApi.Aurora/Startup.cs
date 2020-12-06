@@ -1,6 +1,6 @@
 using AutoMapper;
-using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
 using Bhbk.Lib.Aurora.Data_EF6.Models;
+using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
 using Bhbk.Lib.Aurora.Domain.Profiles;
 using Bhbk.Lib.Aurora.Primitives.Enums;
 using Bhbk.Lib.Common.Primitives.Enums;
@@ -62,6 +62,27 @@ namespace Bhbk.WebApi.Aurora
                 jobs.UseInMemoryStore();
                 jobs.UseDefaultThreadPool();
 
+                if (bool.Parse(conf["Jobs:SessionCleanup:Enable"]))
+                {
+                    var jobKey = new JobKey(typeof(SessionCleanupJob).Name, workerName);
+                    jobs.AddJob<SessionCleanupJob>(opt => opt
+                        .StoreDurably()
+                        .WithIdentity(jobKey)
+                    );
+
+                    foreach (var cron in conf.GetSection("Jobs:SessionCleanup:Schedules").GetChildren()
+                        .Select(x => x.Value).ToList())
+                    {
+                        jobs.AddTrigger(opt => opt
+                            .ForJob(jobKey)
+                            .StartNow()
+                            .WithCronSchedule(cron)
+                        );
+
+                        Log.Information($"'{callPath}' {jobKey.Name} job has schedule '{ExpressionDescriptor.GetDescription(cron)}'");
+                    }
+                }
+
                 if (bool.Parse(conf["Jobs:UnstructuredData:Enable"]))
                 {
                     var jobKey = new JobKey(typeof(UnstructuredDataJob).Name, workerName);
@@ -98,8 +119,11 @@ namespace Bhbk.WebApi.Aurora
 
             var uow = new UnitOfWork(conf["Databases:AuroraEntities"], instance);
 
+            var keyType = ConfigType.RebexLicense.ToString();
+
             var license = uow.Settings.Get(QueryExpressionFactory.GetQueryExpression<Setting>()
-                .Where(x => x.ConfigKey == "RebexLicense").ToLambda()).OrderBy(x => x.CreatedUtc)
+                .Where(x => x.ConfigKey == keyType).ToLambda())
+                .OrderBy(x => x.CreatedUtc)
                 .Last();
 
             Rebex.Licensing.Key = license.ConfigValue;
