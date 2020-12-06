@@ -89,7 +89,8 @@ namespace Bhbk.Cli.Aurora.Factories
 
         public static void StdOutNetworks(IEnumerable<Network> networks)
         {
-            Console.Out.WriteLine();
+            if (networks.Count() > 0)
+                Console.Out.WriteLine();
 
             foreach (var net in networks.OrderBy(x => x.SequenceId))
             {
@@ -120,15 +121,24 @@ namespace Bhbk.Cli.Aurora.Factories
 
         public static void StdOutSessions(IEnumerable<Session> sessions)
         {
-            Console.Out.WriteLine();
-
             foreach (var session in sessions)
             {
+                if (string.IsNullOrEmpty(session?.IdentityAlias))
+                {
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                    Console.Out.Write($"  [user] unknown");
+                }
+                else
+                {
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.Out.Write($"  [user] {session.IdentityAlias}");
+                }
+
                 Console.ForegroundColor = ConsoleColor.White;
-                Console.Out.WriteLine($"  [local] {session.LocalEndPoint} [remote] {session.RemoteEndPoint}" +
-                    $" [action] {session.CallPath} [detail] {session.Details}" +
-                    $"{(string.IsNullOrEmpty(session.RemoteSoftwareIdentifier) ? null : " [software] " + (session.RemoteSoftwareIdentifier) + "")}" +
-                    $" [created] {session.CreatedUtc.LocalDateTime}");
+                Console.Out.Write($" [client] {session.RemoteEndPoint} [server] {session.LocalEndPoint} [action] {session.CallPath} [detail] {session.Details}" +
+                    $"{(string.IsNullOrEmpty(session.RemoteSoftwareIdentifier) ? null : " [software] " + session.RemoteSoftwareIdentifier + "")}" +
+                    $" [created] {session.CreatedUtc.LocalDateTime}" +
+                    $"{Environment.NewLine}");
 
                 Console.ResetColor();
             }
@@ -208,6 +218,21 @@ namespace Bhbk.Cli.Aurora.Factories
                 Console.ForegroundColor = ConsoleColor.White;
                 if (mount.CredentialId.HasValue)
                     Console.Out.WriteLine($"    mount credential [domain] {mount.Credential.Domain} [user] {mount.Credential.UserName}");
+
+                Console.ResetColor();
+            }
+        }
+
+        public static void StdOutUserSessions(IEnumerable<Session> sessions)
+        {
+            if(sessions.Count() > 0)
+                Console.Out.WriteLine();
+
+            foreach (var session in sessions)
+            {
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.Out.WriteLine($"  [client] {session.RemoteEndPoint} [server] {session.LocalEndPoint} [action] {session.CallPath} [detail] {session.Details}" +
+                    $"{(string.IsNullOrEmpty(session.RemoteSoftwareIdentifier) ? null : " [software] " + session.RemoteSoftwareIdentifier + "")}");
 
                 Console.ResetColor();
             }

@@ -62,15 +62,15 @@ namespace Bhbk.WebApi.Aurora
                 jobs.UseInMemoryStore();
                 jobs.UseDefaultThreadPool();
 
-                if (bool.Parse(conf["Jobs:SessionCleanup:Enable"]))
+                if (bool.Parse(conf["Jobs:SessionActivity:Enable"]))
                 {
-                    var jobKey = new JobKey(typeof(SessionCleanupJob).Name, workerName);
-                    jobs.AddJob<SessionCleanupJob>(opt => opt
+                    var jobKey = new JobKey(typeof(SessionActivityJob).Name, workerName);
+                    jobs.AddJob<SessionActivityJob>(opt => opt
                         .StoreDurably()
                         .WithIdentity(jobKey)
                     );
 
-                    foreach (var cron in conf.GetSection("Jobs:SessionCleanup:Schedules").GetChildren()
+                    foreach (var cron in conf.GetSection("Jobs:SessionActivity:Schedules").GetChildren()
                         .Select(x => x.Value).ToList())
                     {
                         jobs.AddTrigger(opt => opt

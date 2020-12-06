@@ -49,6 +49,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
         private readonly FileServer _server;
         private readonly IPAddress _ip;
         private readonly string _host;
+        private string _localEndPoint;
         private IEnumerable<string> _bindingAddresses;
         private int _bindingPort;
 
@@ -91,21 +92,6 @@ namespace Bhbk.Daemon.Aurora.SFTP
                         Rebex.Licensing.Key = license.ConfigValue;
 
                         /*
-                         * clear out possibly orphan session entries from un-graceful shutdown of daemon...
-                         */
-
-                        var daemon = $"{_ip}:{_bindingPort}";
-
-                        var entries = uow.Sessions.Get(QueryExpressionFactory.GetQueryExpression<Session>()
-                            .Where(x => x.LocalEndPoint == daemon && x.IsActive == true).ToLambda());
-
-                        foreach (var entry in entries)
-                            entry.IsActive = false;
-
-                        uow.Sessions.Update(entries);
-                        uow.Commit();
-
-                        /*
                          * does daemon have public/private key pair(s) needed for clients to connect... create them if not...
                          */
 
@@ -137,16 +123,15 @@ namespace Bhbk.Daemon.Aurora.SFTP
                                     var keyBytes = Encoding.UTF8.GetBytes(privKey.KeyValue);
                                     _server.Keys.Add(new SshPrivateKey(keyBytes, AES.DecryptString(privKey.KeyPass, secret)));
 
-                                    Log.Information($"'{callPath}' 'system' public/private key pair loading... " +
-                                        $"{Environment.NewLine} private key GUID:'{privKey.Id}' algo:'{privKey.KeyAlgo}' format:'{privKey.KeyFormat}' " +
-                                        $"{Environment.NewLine} public key GUID:'{privKey.PublicKeyId}' " +
+                                    Log.Information($"'{callPath}' 'system' loading public/private key pair [algo] {privKey.KeyAlgo} [format] {privKey.KeyFormat}" +
+                                        $"{Environment.NewLine} [public key GUID]{privKey.PublicKeyId} [private key GUID] {privKey.Id}" +
                                         $"{Environment.NewLine}");
                                 }
                                 else
-                                    Log.Error($"'{callPath}' 'system' public/private key pair created using '{hostKeyAlgo}' not found");
+                                    Log.Error($"'{callPath}' 'system' public/private key pair [algo] {hostKeyAlgo} not found");
                             }
                             else
-                                Log.Error($"'{callPath}' 'system' public/private key pair created using '{hostKeyAlgo}' not supported");
+                                Log.Error($"'{callPath}' 'system' public/private key pair [algo] {hostKeyAlgo} not supported");
                         }
 
                         var hostAddresses = new StringBuilder();
@@ -162,6 +147,21 @@ namespace Bhbk.Daemon.Aurora.SFTP
 
                         _bindingPort = Int32.Parse(conf.GetSection("Daemons:Sftp:BindingPorts").GetChildren()
                             .Select(x => x.Value).First());
+
+                        _localEndPoint = $"{_ip}:{_bindingPort}";
+
+                        /*
+                         * clear out orphan session entries from un-graceful shutdown of daemon...
+                         */
+
+                        var entries = uow.Sessions.Get(QueryExpressionFactory.GetQueryExpression<Session>()
+                            .Where(x => x.LocalEndPoint == _localEndPoint && x.IsActive == true).ToLambda());
+
+                        foreach (var entry in entries)
+                            entry.IsActive = false;
+
+                        uow.Sessions.Update(entries);
+                        uow.Commit();
 
                         /*
                          * daemon can bind to multiple ip addresses and ports...
@@ -229,11 +229,10 @@ namespace Bhbk.Daemon.Aurora.SFTP
 
                             foreach (var session in _server.Sessions)
                             {
-                                var daemon = $"{_ip}:{_bindingPort}";
                                 var remote = session.ClientEndPoint.ToString();
 
                                 var entries = uow.Sessions.Get(QueryExpressionFactory.GetQueryExpression<Session>()
-                                    .Where(x => x.LocalEndPoint == daemon && x.IsActive == true).ToLambda());
+                                    .Where(x => x.LocalEndPoint == _localEndPoint && x.IsActive == true).ToLambda());
 
                                 foreach (var entry in entries)
                                     entry.IsActive = false;
@@ -241,10 +240,10 @@ namespace Bhbk.Daemon.Aurora.SFTP
                                 uow.Sessions.Update(entries);
                                 uow.Commit();
 
-                                Log.Warning($"'{callPath}' '{session.UserName}' local:'{daemon}' remote:'{session.ClientEndPoint}' " +
+                                Log.Warning($"'{callPath}' '{session.UserName}' client:'{session.ClientEndPoint}' " +
                                     $"duration:'{session.Duration}' force disconnect, server restart");
 
-                                session.SendMessage($"'{session.UserName}' local:'{daemon}' remote:'{session.ClientEndPoint}' " +
+                                session.SendMessage($"'{session.UserName}' client:'{session.ClientEndPoint}' " +
                                     $"duration:'{session.Duration}' force disconnect, server restart");
                             }
                         }
@@ -316,19 +315,19 @@ namespace Bhbk.Daemon.Aurora.SFTP
                         if (network.Action == NetworkActionType.Allow.ToString()
                             && found == true)
                         {
-                            Log.Information($"'{callPath}' '{e.ClientEndPoint}' allowed");
-
                             uow.Sessions.Create(
                                 new Session
                                 {
                                     CallPath = callPath,
                                     Details = "allowed",
-                                    LocalEndPoint = $"{_ip}:{_bindingPort}",
+                                    LocalEndPoint = _localEndPoint,
                                     RemoteEndPoint = e.ClientEndPoint.ToString(),
                                     IsActive = true,
                                 });
 
                             uow.Commit();
+
+                            Log.Information($"'{callPath}' client:'{e.ClientEndPoint}' allowed");
 
                             e.Accept = true;
                             return;
@@ -337,18 +336,18 @@ namespace Bhbk.Daemon.Aurora.SFTP
                         if (network.Action == NetworkActionType.Deny.ToString()
                             && found == true)
                         {
-                            Log.Warning($"'{callPath}' '{e.ClientEndPoint}' denied");
+                            Log.Warning($"'{callPath}' client:'{e.ClientEndPoint}' denied");
 
                             e.Accept = false;
                             return;
                         }
                     }
+
+                    Log.Warning($"'{callPath}' client:'{e.ClientEndPoint}' denied");
+
+                    e.Accept = false;
+                    return;
                 }
-
-                Log.Warning($"'{callPath}' '{e.ClientEndPoint}' denied");
-
-                e.Accept = false;
-                return;
             }
             catch (Exception ex)
             {
@@ -383,7 +382,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
 
                     if (user == null)
                     {
-                        Log.Warning($"'{callPath}' '{e.UserName}' '{e.ClientEndPoint}' '{e.ClientSoftwareIdentifier}' denied");
+                        Log.Warning($"'{callPath}' '{e.UserName}' client:'{e.ClientEndPoint}' software:'{e.ClientSoftwareIdentifier}' denied");
 
                         e.Reject();
                         return;
@@ -424,7 +423,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                         if (network.Action == NetworkActionType.Deny.ToString()
                             && found == true)
                         {
-                            Log.Warning($"'{callPath}' '{e.UserName}' '{e.ClientEndPoint}' '{e.ClientSoftwareIdentifier}' denied");
+                            Log.Warning($"'{callPath}' '{e.UserName}' client:'{e.ClientEndPoint}' software:'{e.ClientSoftwareIdentifier}' denied");
 
                             e.Reject();
                             return;
@@ -433,7 +432,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                         if (network.Action == NetworkActionType.Allow.ToString()
                             && found == true)
                         {
-                            Log.Information($"'{callPath}' '{e.UserName}' '{e.ClientEndPoint}' '{e.ClientSoftwareIdentifier}' allowed");
+                            Log.Information($"'{callPath}' '{e.UserName}' client:'{e.ClientEndPoint}' software:'{e.ClientSoftwareIdentifier}' allowed");
 
                             uow.Sessions.Create(
                                 new Session
@@ -441,7 +440,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                                     IdentityId = user.IdentityId,
                                     CallPath = callPath,
                                     Details = "allowed",
-                                    LocalEndPoint = $"{_ip}:{_bindingPort}",
+                                    LocalEndPoint = _localEndPoint,
                                     RemoteEndPoint = e.ClientEndPoint.ToString(),
                                     RemoteSoftwareIdentifier = e.ClientSoftwareIdentifier,
                                     IsActive = true,
@@ -456,7 +455,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
 
                     if (allowed == false)
                     {
-                        Log.Warning($"'{callPath}' '{e.UserName}' '{e.ClientEndPoint}' '{e.ClientSoftwareIdentifier}' denied");
+                        Log.Warning($"'{callPath}' '{e.UserName}' client:'{e.ClientEndPoint}' software:'{e.ClientSoftwareIdentifier}' denied");
 
                         e.Reject();
                         return;
@@ -477,7 +476,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                                 IdentityId = user.IdentityId,
                                 CallPath = callPath,
                                 Details = "public key and password required",
-                                LocalEndPoint = $"{_ip}:{_bindingPort}",
+                                LocalEndPoint = _localEndPoint,
                                 RemoteEndPoint = e.ClientEndPoint.ToString(),
                                 RemoteSoftwareIdentifier = e.ClientSoftwareIdentifier,
                                 IsActive = true,
@@ -504,7 +503,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                                 IdentityId = user.IdentityId,
                                 CallPath = callPath,
                                 Details = "public key required",
-                                LocalEndPoint = $"{_ip}:{_bindingPort}",
+                                LocalEndPoint = _localEndPoint,
                                 RemoteEndPoint = e.ClientEndPoint.ToString(),
                                 RemoteSoftwareIdentifier = e.ClientSoftwareIdentifier,
                                 IsActive = true,
@@ -531,7 +530,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                                 IdentityId = user.IdentityId,
                                 CallPath = callPath,
                                 Details = "password required",
-                                LocalEndPoint = $"{_ip}:{_bindingPort}",
+                                LocalEndPoint = _localEndPoint,
                                 RemoteEndPoint = e.ClientEndPoint.ToString(),
                                 RemoteSoftwareIdentifier = e.ClientSoftwareIdentifier,
                                 IsActive = true,
@@ -650,7 +649,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                                 IdentityId = user.IdentityId,
                                 CallPath = callPath,
                                 Details = "public key accepted",
-                                LocalEndPoint = $"{_ip}:{_bindingPort}",
+                                LocalEndPoint = _localEndPoint,
                                 RemoteEndPoint = e.ClientEndPoint.ToString(),
                                 RemoteSoftwareIdentifier = e.ClientSoftwareIdentifier,
                                 IsActive = true,
@@ -760,7 +759,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                                 IdentityId = user.IdentityId,
                                 CallPath = callPath,
                                 Details = "password accepted",
-                                LocalEndPoint = $"{_ip}:{_bindingPort}",
+                                LocalEndPoint = _localEndPoint,
                                 RemoteEndPoint = e.ClientEndPoint.ToString(),
                                 RemoteSoftwareIdentifier = e.ClientSoftwareIdentifier,
                                 IsActive = true,
@@ -814,7 +813,6 @@ namespace Bhbk.Daemon.Aurora.SFTP
 
             try
             {
-                var daemon = $"{_ip}:{_bindingPort}";
                 var remote = e.Session.ClientEndPoint.ToString();
 
                 using (var scope = _factory.CreateScope())
@@ -841,14 +839,15 @@ namespace Bhbk.Daemon.Aurora.SFTP
                         {
                             IdentityId = user?.IdentityId ?? null,
                             CallPath = callPath,
-                            LocalEndPoint = $"{_ip}:{_bindingPort}",
+                            Details = $"duration:'{e.Session.Duration}'",
+                            LocalEndPoint = _localEndPoint,
                             RemoteEndPoint = ServerSession.Current.ClientEndPoint.ToString(),
                             IsActive = true,
                         });
                     uow.Commit();
 
                     var entries = uow.Sessions.Get(QueryExpressionFactory.GetQueryExpression<Session>()
-                        .Where(x => x.LocalEndPoint == daemon && x.RemoteEndPoint == remote && x.IsActive == true).ToLambda());
+                        .Where(x => x.LocalEndPoint == _localEndPoint && x.RemoteEndPoint == remote && x.IsActive == true).ToLambda());
 
                     foreach (var entry in entries)
                         entry.IsActive = false;
@@ -856,8 +855,8 @@ namespace Bhbk.Daemon.Aurora.SFTP
                     uow.Sessions.Update(entries);
                     uow.Commit();
 
-                    Log.Information($"'{callPath}'{(string.IsNullOrEmpty(user?.IdentityAlias) ? null : "'" + user.IdentityAlias) + "'"} " +
-                        $"local:'{_ip}:{_bindingPort}' remote:'{e.Session.ClientEndPoint}' duration:'{e.Session.Duration}'");
+                    Log.Information($"'{callPath}'{(string.IsNullOrEmpty(user?.IdentityAlias) ? null : " '" + user.IdentityAlias + "'")}" +
+                        $" client:'{e.Session.ClientEndPoint}' duration:'{e.Session.Duration}'");
                 }
             }
             catch (Exception ex)
@@ -897,7 +896,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                             IdentityId = user.IdentityId,
                             CallPath = callPath,
                             Details = $"file:'/{e.FullPath}' size:'{e.BytesTransferred / 1048576f}MB'",
-                            LocalEndPoint = $"{_ip}:{_bindingPort}",
+                            LocalEndPoint = _localEndPoint,
                             RemoteEndPoint = ServerSession.Current.ClientEndPoint.ToString(),
                             IsActive = true,
                         });
@@ -940,7 +939,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                     }
 
                     Log.Information($"'{callPath}' '{ServerSession.Current.UserName}' file:'/{e.FullPath}' size:'{e.BytesTransferred / 1048576f}MB' " +
-                        $"remote:'{ServerSession.Current.ClientEndPoint}'");
+                        $"client:'{ServerSession.Current.ClientEndPoint}'");
                 }
             }
             catch (Exception ex)
@@ -980,7 +979,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                             IdentityId = user.IdentityId,
                             CallPath = callPath,
                             Details = $"file:'/{e.FullPath}' size:'{e.BytesTransferred / 1048576f}MB'",
-                            LocalEndPoint = $"{_ip}:{_bindingPort}",
+                            LocalEndPoint = _localEndPoint,
                             RemoteEndPoint = ServerSession.Current.ClientEndPoint.ToString(),
                             IsActive = true,
                         });
@@ -1023,7 +1022,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                     }
 
                     Log.Information($"'{callPath}' '{ServerSession.Current.UserName}' file:'/{e.FullPath}' size:'{e.BytesTransferred / 1048576f}MB' " +
-                        $"remote:'{ServerSession.Current.ClientEndPoint}'");
+                        $"client:'{ServerSession.Current.ClientEndPoint}'");
                 }
             }
             catch (Exception ex)
@@ -1057,7 +1056,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                                 IdentityId = user.IdentityId,
                                 CallPath = callPath,
                                 Details = $"file:'{e.Node.Path.StringPath}' size:'{e.Node.Length / 1048576f}MB'",
-                                LocalEndPoint = $"{_ip}:{_bindingPort}",
+                                LocalEndPoint = _localEndPoint,
                                 RemoteEndPoint = ServerSession.Current.ClientEndPoint.ToString(),
                                 IsActive = true,
                             });
@@ -1065,7 +1064,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                         uow.Commit();
 
                         Log.Information($"'{callPath}' '{ServerSession.Current.UserName}' file:'{e.Node.Path.StringPath}' size:'{e.Node.Length / 1048576f}MB' " +
-                            $"remote:'{ServerSession.Current.ClientEndPoint}'");
+                            $"client:'{ServerSession.Current.ClientEndPoint}'");
                     }
                 }
             }
@@ -1110,7 +1109,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                                 IdentityId = user.IdentityId,
                                 CallPath = callPath,
                                 Details = $"file:'{e.ResultNode.Path.StringPath}' size:'{e.ResultNode.Length / 1048576f}MB'",
-                                LocalEndPoint = $"{_ip}:{_bindingPort}",
+                                LocalEndPoint = _localEndPoint,
                                 RemoteEndPoint = ServerSession.Current.ClientEndPoint.ToString(),
                                 IsActive = true,
                             });
@@ -1151,7 +1150,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                         }
 
                         Log.Information($"'{callPath}' '{ServerSession.Current.UserName}' file:'{e.ResultNode.Path.StringPath}' size:'{e.ResultNode.Length / 1048576f}MB' " +
-                            $"remote:'{ServerSession.Current.ClientEndPoint}'");
+                            $"client:'{ServerSession.Current.ClientEndPoint}'");
                     }
                 }
             }
@@ -1187,7 +1186,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                                 IdentityId = user.IdentityId,
                                 CallPath = callPath,
                                 Details = $"file:'{e.Node.Path.StringPath}' size:'{e.Node.Length / 1048576f}MB'",
-                                LocalEndPoint = $"{_ip}:{_bindingPort}",
+                                LocalEndPoint = _localEndPoint,
                                 RemoteEndPoint = ServerSession.Current.ClientEndPoint.ToString(),
                                 IsActive = true,
                             });
@@ -1195,7 +1194,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                         uow.Commit();
 
                         Log.Information($"'{callPath}' '{ServerSession.Current.UserName}' file:'{e.Node.Path.StringPath}' size:'{e.Node.Length / 1048576f}MB' " +
-                            $"remote:'{ServerSession.Current.ClientEndPoint}'");
+                            $"client:'{ServerSession.Current.ClientEndPoint}'");
                     }
                 }
             }
@@ -1239,7 +1238,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                                 IdentityId = user.IdentityId,
                                 CallPath = callPath,
                                 Details = $"file:'{e.Node.Path.StringPath}' size:'{e.Node.Length / 1048576f}MB'",
-                                LocalEndPoint = $"{_ip}:{_bindingPort}",
+                                LocalEndPoint = _localEndPoint,
                                 RemoteEndPoint = ServerSession.Current.ClientEndPoint.ToString(),
                                 IsActive = true,
                             });
@@ -1247,7 +1246,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                         uow.Commit();
 
                         Log.Information($"'{callPath}' '{ServerSession.Current.UserName}' file:'{e.Node.Path.StringPath}' size:'{e.Node.Length / 1048576f}MB' " +
-                            $"remote:'{ServerSession.Current.ClientEndPoint}'");
+                            $"client:'{ServerSession.Current.ClientEndPoint}'");
                     }
                 }
 
@@ -1283,7 +1282,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                                 IdentityId = user.IdentityId,
                                 CallPath = callPath,
                                 Details = $"file:'{e.Node.Path.StringPath}' size:'{e.Node.Length / 1048576f}MB'",
-                                LocalEndPoint = $"{_ip}:{_bindingPort}",
+                                LocalEndPoint = _localEndPoint,
                                 RemoteEndPoint = ServerSession.Current.ClientEndPoint.ToString(),
                                 IsActive = true,
                             });
@@ -1291,7 +1290,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                         uow.Commit();
 
                         Log.Information($"'{callPath}' '{ServerSession.Current.UserName}' file:'{e.Node.Path.StringPath}' size:'{e.Node.Length / 1048576f}MB' " +
-                            $"remote:'{ServerSession.Current.ClientEndPoint}'");
+                            $"client:'{ServerSession.Current.ClientEndPoint}'");
                     }
                 }
             }
@@ -1334,7 +1333,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                                 IdentityId = user.IdentityId,
                                 CallPath = callPath,
                                 Details = $"file:'{e.ResultNode.Path.StringPath}' size:'{e.ResultNode.Length / 1048576f}MB'",
-                                LocalEndPoint = $"{_ip}:{_bindingPort}",
+                                LocalEndPoint = _localEndPoint,
                                 RemoteEndPoint = ServerSession.Current.ClientEndPoint.ToString(),
                                 IsActive = true,
                             });
@@ -1342,7 +1341,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                         uow.Commit();
 
                         Log.Information($"'{callPath}' '{ServerSession.Current.UserName}' file:'{e.ResultNode.Path.StringPath}' size:'{e.ResultNode.Length / 1048576f}MB' " +
-                            $"remote:'{ServerSession.Current.ClientEndPoint}'");
+                            $"client:'{ServerSession.Current.ClientEndPoint}'");
                     }
                 }
             }

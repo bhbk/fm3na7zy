@@ -76,15 +76,7 @@ namespace Bhbk.Cli.Aurora.Commands
                     var session = sessions.Where(x => x.IdentityAlias != null)
                         .FirstOrDefault();
 
-                    Console.WriteLine();
-
-                    if(session != null)
-                    {
-                        Console.ForegroundColor = ConsoleColor.Green;
-                        Console.WriteLine($"  [user] {session.IdentityAlias} from {session.RemoteEndPoint}");
-                        Console.ResetColor();
-                    }
-
+                    Console.Out.WriteLine();
                     OutputFactory.StdOutSessions(sessions.OrderBy(x => x.CreatedUtc));
                 }
 

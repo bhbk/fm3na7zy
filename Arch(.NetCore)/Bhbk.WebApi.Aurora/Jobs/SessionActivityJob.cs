@@ -14,35 +14,38 @@ using System.Threading.Tasks;
 namespace Bhbk.WebApi.Aurora.Tasks
 {
     [DisallowConcurrentExecution]
-    public class SessionCleanupJob : IJob
+    public class SessionActivityJob : IJob
     {
         private readonly IServiceScopeFactory _factory;
 
-        public SessionCleanupJob(IServiceScopeFactory factory) => _factory = factory;
+        public SessionActivityJob(IServiceScopeFactory factory) => _factory = factory;
 
         public Task Execute(IJobExecutionContext context)
         {
             var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
+            Log.Information($"'{callPath}' running");
 
             try
             {
-                Log.Information($"'{callPath}' running");
-
                 using (var scope = _factory.CreateScope())
                 {
                     var conf = scope.ServiceProvider.GetRequiredService<IConfiguration>();
                     var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
 
-                    var keepDuration = int.Parse(conf["Jobs:SessionCleanup:KeepDuration"]);
-                    var deleteBeforeDate = DateTime.Now.AddSeconds(-keepDuration);
+                    var keepDuration = int.Parse(conf["Jobs:SessionActivity:KeepDuration"]);
+                    var deleteBeforeDate = DateTime.UtcNow.AddSeconds(-keepDuration);
 
-                    uow.Sessions.Delete(QueryExpressionFactory.GetQueryExpression<Session>()
+                    var entries = uow.Sessions.Get(QueryExpressionFactory.GetQueryExpression<Session>()
                         .Where(x => x.CreatedUtc < deleteBeforeDate).ToLambda());
-                    uow.Commit();
-                }
 
-                Log.Information($"'{callPath}' completed");
-                Log.Information($"'{callPath}' will run again at {context.NextFireTimeUtc.Value.LocalDateTime}");
+                    if (entries.Any())
+                    {
+                        uow.Sessions.Delete(entries);
+                        uow.Commit();
+
+                        Log.Information($"'{callPath}' deleted {entries.Count()} session entries.");
+                    }
+                }
             }
             catch (Exception ex)
             {
@@ -52,6 +55,9 @@ namespace Bhbk.WebApi.Aurora.Tasks
             {
                 GC.Collect();
             }
+
+            Log.Information($"'{callPath}' completed");
+            Log.Information($"'{callPath}' will run again at {context.NextFireTimeUtc.Value.LocalDateTime}");
 
             return Task.CompletedTask;
         }

@@ -53,7 +53,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Factories
                     });
                 uow.Commit();
 
-                Log.Information($"'{callPath}' '{user.IdentityAlias}' folder '/' in memory");
+                Log.Information($"'{callPath}' '{user.IdentityAlias}' folder:'/' at:memory");
             }
 
             return folderMem;
@@ -77,7 +77,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Factories
                     });
                 uow.Commit();
 
-                Log.Information($"'{callPath}' '{user.IdentityAlias}' exists in memory");
+                Log.Information($"'{callPath}' '{user.IdentityAlias}' exists at:memory");
             }
 
             return userMem;

@@ -27,11 +27,10 @@ namespace Bhbk.WebApi.Aurora.Tasks
         public Task Execute(IJobExecutionContext context)
         {
             var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
+            Log.Information($"'{callPath}' running");
 
             try
             {
-                Log.Information($"'{callPath}' running");
-
                 using (var scope = _factory.CreateScope())
                 {
                     var conf = scope.ServiceProvider.GetRequiredService<IConfiguration>();
@@ -82,16 +81,8 @@ namespace Bhbk.WebApi.Aurora.Tasks
                     uow.Commit();
 
                     if (files.Any())
-                    {
-                        var msg = $"'{callPath}' completed. Performed validation on {files.Count()} files" +
-                            $" and found {problems.Count} problems.";
-
-                        Log.Information(msg);
-                    }
+                        Log.Information($"'{callPath}' validation on {files.Count()} files found {problems.Count} problems");
                 }
-
-                Log.Information($"'{callPath}' completed");
-                Log.Information($"'{callPath}' will run again at {context.NextFireTimeUtc.Value.LocalDateTime}");
             }
             catch (Exception ex)
             {
@@ -101,6 +92,9 @@ namespace Bhbk.WebApi.Aurora.Tasks
             {
                 GC.Collect();
             }
+
+            Log.Information($"'{callPath}' completed");
+            Log.Information($"'{callPath}' will run again at {context.NextFireTimeUtc.Value.LocalDateTime}");
 
             return Task.CompletedTask;
         }

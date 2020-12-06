@@ -19,7 +19,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Factories
             var folder = uow.UserFolders.Get(QueryExpressionFactory.GetQueryExpression<UserFolder>()
                 .Where(x => x.IdentityId == user.IdentityId && x.ParentId == null).ToLambda())
                 .SingleOrDefault();
-            
+
             if (folder == null)
             {
                 folder = uow.UserFolders.Create(
@@ -33,7 +33,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Factories
                     });
                 uow.Commit();
 
-                Log.Information($"'{callPath}' '{user.IdentityAlias}' folder '/'");
+                Log.Information($"'{callPath}' '{user.IdentityAlias}' folder:'/' at:database");
             }
 
             return folder;

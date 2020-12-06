@@ -70,7 +70,9 @@ namespace Bhbk.Cli.Aurora.Commands
                 OutputFactory.StdOutKeyPairs(_user.PublicKeys.OrderBy(x => x.CreatedUtc), _user.PrivateKeys);
                 OutputFactory.StdOutNetworks(_user.Networks.OrderBy(x => x.Action));
                 OutputFactory.StdOutUserAlerts(_user.Alerts.OrderBy(x => x.ToDisplayName));
-                OutputFactory.StdOutSessions(_user.Sessions.OrderBy(x => x.RemoteEndPoint).ThenBy(x => x.CreatedUtc));
+                OutputFactory.StdOutUserSessions(_user.Sessions
+                    .Where(x => x.IsActive == true)
+                    .OrderBy(x => x.RemoteEndPoint).ThenBy(x => x.CreatedUtc));
 
                 return StandardOutput.FondFarewell();
             }
