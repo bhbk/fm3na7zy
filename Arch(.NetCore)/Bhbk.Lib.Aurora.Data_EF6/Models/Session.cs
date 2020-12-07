@@ -26,6 +26,6 @@ namespace Bhbk.Lib.Aurora.Data_EF6.Models
         public bool IsActive { get; set; }
         public System.DateTimeOffset CreatedUtc { get; set; }
     
-        public virtual User User { get; set; }
+        public virtual UserLogin UserLogin { get; set; }
     }
 }

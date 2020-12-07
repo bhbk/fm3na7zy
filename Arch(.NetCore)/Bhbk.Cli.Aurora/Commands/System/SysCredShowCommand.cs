@@ -32,7 +32,7 @@ namespace Bhbk.Cli.Aurora.Commands
             {
                 var exists = _uow.Credentials.Get();
 
-                OutputFactory.StdOutCredentials(exists);
+                StandardOutputFactory.Credentials(exists);
 
                 return StandardOutput.FondFarewell();
             }

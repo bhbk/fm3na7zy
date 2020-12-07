@@ -20,7 +20,7 @@ namespace Bhbk.Cli.Aurora.Commands
     {
         private readonly IConfiguration _conf;
         private readonly IUnitOfWork _uow;
-        private User _user;
+        private UserLogin _user;
         private bool _alternateCredential;
         private AuthType _authType;
         private string _authTypeList = string.Join(", ", Enum.GetNames(typeof(AuthType)));
@@ -41,9 +41,9 @@ namespace Bhbk.Cli.Aurora.Commands
                 if (string.IsNullOrEmpty(arg))
                     throw new ConsoleHelpAsException($"  *** No user name given ***");
 
-                _user = _uow.Users.Get(QueryExpressionFactory.GetQueryExpression<User>()
+                _user = _uow.UserLogins.Get(QueryExpressionFactory.GetQueryExpression<UserLogin>()
                     .Where(x => x.IdentityAlias == arg).ToLambda(),
-                        new List<Expression<Func<User, object>>>()
+                        new List<Expression<Func<UserLogin, object>>>()
                         {
                             x => x.Mount,
                             x => x.Mount.Credential,
@@ -86,7 +86,7 @@ namespace Bhbk.Cli.Aurora.Commands
                 {
                     var credentials = _uow.Credentials.Get();
 
-                    OutputFactory.StdOutCredentials(credentials);
+                    StandardOutputFactory.Credentials(credentials);
 
                     Console.Out.WriteLine();
                     Console.Out.Write("  *** Enter GUID of credential to use for mount *** : ");
@@ -96,10 +96,10 @@ namespace Bhbk.Cli.Aurora.Commands
                     _user.Mount.CredentialId = Guid.Parse(input);
                 }
 
-                _uow.Users.Update(_user);
+                _uow.UserLogins.Update(_user);
                 _uow.Commit();
 
-                OutputFactory.StdOutUserMounts(new List<UserMount> { _user.Mount });
+                StandardOutputFactory.Mounts(new List<UserMount> { _user.Mount });
 
                 return StandardOutput.FondFarewell();
             }

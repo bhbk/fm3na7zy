@@ -69,7 +69,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ModelsMem\AuroraEntitiesMem.cs" />
-    <Compile Include="ModelsMem\UserMem.cs" />
+    <Compile Include="ModelsMem\UserLoginMem.cs" />
     <Compile Include="ModelsMem\UserFileMem.cs" />
     <Compile Include="ModelsMem\UserFolderMem.cs" />
     <Compile Include="Models\Credential.cs">
@@ -90,9 +90,6 @@
     <Compile Include="Models\Setting.cs">
       <DependentUpon>AuroraEntities.tt</DependentUpon>
     </Compile>
-    <Compile Include="Models\User.cs">
-      <DependentUpon>AuroraEntities.tt</DependentUpon>
-    </Compile>
     <Compile Include="Models\UserAlert.cs">
       <DependentUpon>AuroraEntities.tt</DependentUpon>
     </Compile>
@@ -100,6 +97,9 @@
       <DependentUpon>AuroraEntities.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\UserFolder.cs">
+      <DependentUpon>AuroraEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\UserLogin.cs">
       <DependentUpon>AuroraEntities.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\UserMount.cs">
@@ -192,13 +192,13 @@
     <Compile Include="Models\usp_UserMount_Update_Result.cs">
       <DependentUpon>AuroraEntities.tt</DependentUpon>
     </Compile>
-    <Compile Include="Models\usp_User_Delete_Result.cs">
+    <Compile Include="Models\usp_UserLogin_Delete_Result.cs">
       <DependentUpon>AuroraEntities.tt</DependentUpon>
     </Compile>
-    <Compile Include="Models\usp_User_Insert_Result.cs">
+    <Compile Include="Models\usp_UserLogin_Insert_Result.cs">
       <DependentUpon>AuroraEntities.tt</DependentUpon>
     </Compile>
-    <Compile Include="Models\usp_User_Update_Result.cs">
+    <Compile Include="Models\usp_UserLogin_Update_Result.cs">
       <DependentUpon>AuroraEntities.tt</DependentUpon>
     </Compile>
     <Compile Include="UnitOfWork\IUnitOfWork.cs" />

@@ -25,6 +25,6 @@ namespace Bhbk.Lib.Aurora.Data_EF6.Models
         public Nullable<System.DateTimeOffset> LastUpdatedUtc { get; set; }
     
         public virtual Credential Credential { get; set; }
-        public virtual User User { get; set; }
+        public virtual UserLogin UserLogin { get; set; }
     }
 }

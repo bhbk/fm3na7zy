@@ -19,7 +19,7 @@ namespace Bhbk.Cli.Aurora.Commands
     {
         private readonly IConfiguration _conf;
         private readonly IUnitOfWork _uow;
-        private User _user;
+        private UserLogin _user;
 
         public UserLoginDeleteCommand()
         {
@@ -37,16 +37,12 @@ namespace Bhbk.Cli.Aurora.Commands
                 if (string.IsNullOrEmpty(arg))
                     throw new ConsoleHelpAsException($"  *** No user name given ***");
 
-                _user = _uow.Users.Get(QueryExpressionFactory.GetQueryExpression<User>()
+                _user = _uow.UserLogins.Get(QueryExpressionFactory.GetQueryExpression<UserLogin>()
                     .Where(x => x.IdentityAlias == arg && x.IsDeletable == true).ToLambda(),
-                        new List<Expression<Func<User, object>>>()
+                        new List<Expression<Func<UserLogin, object>>>()
                         {
                             x => x.Files,
                             x => x.Folders,
-                            x => x.Mount,
-                            x => x.Networks,
-                            x => x.PrivateKeys,
-                            x => x.PublicKeys,
                         })
                     .SingleOrDefault();
 
@@ -59,7 +55,7 @@ namespace Bhbk.Cli.Aurora.Commands
         {
             try
             {
-                OutputFactory.StdOutUsers(new List<User> { _user });
+                StandardOutputFactory.Logins(new List<UserLogin> { _user }, "extras");
                 Console.Out.WriteLine();
 
                 Console.Out.Write("  *** Enter 'yes' to delete user *** : ");
@@ -73,7 +69,7 @@ namespace Bhbk.Cli.Aurora.Commands
                     if (files > 0)
                         throw new ConsoleHelpAsException($"  *** The user can not be deleted. There are {files} files owned ***");
 
-                    _uow.Users.Delete(_user);
+                    _uow.UserLogins.Delete(_user);
                     _uow.Commit();
                 }
 

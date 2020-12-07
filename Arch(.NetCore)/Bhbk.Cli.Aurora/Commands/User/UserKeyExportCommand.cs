@@ -23,7 +23,7 @@ namespace Bhbk.Cli.Aurora.Commands
     {
         private readonly IConfiguration _conf;
         private readonly IUnitOfWork _uow;
-        private User _user;
+        private UserLogin _user;
 
         public UserKeyExportCommand()
         {
@@ -41,9 +41,9 @@ namespace Bhbk.Cli.Aurora.Commands
                 if (string.IsNullOrEmpty(arg))
                     throw new ConsoleHelpAsException($"  *** No user name given ***");
 
-                _user = _uow.Users.Get(QueryExpressionFactory.GetQueryExpression<User>()
+                _user = _uow.UserLogins.Get(QueryExpressionFactory.GetQueryExpression<UserLogin>()
                     .Where(x => x.IdentityAlias == arg).ToLambda(),
-                        new List<Expression<Func<User, object>>>()
+                        new List<Expression<Func<UserLogin, object>>>()
                         {
                             x => x.PrivateKeys,
                             x => x.PublicKeys,
@@ -62,7 +62,7 @@ namespace Bhbk.Cli.Aurora.Commands
                 var pubKeys = _user.PublicKeys;
                 var privKeys = _user.PrivateKeys;
 
-                OutputFactory.StdOutKeyPairs(pubKeys.OrderBy(x => x.CreatedUtc), privKeys);
+                StandardOutputFactory.KeyPairs(pubKeys.OrderBy(x => x.CreatedUtc), privKeys);
 
                 Console.Out.WriteLine();
                 Console.Out.Write("  *** Enter GUID of public key to export *** : ");
@@ -109,7 +109,7 @@ namespace Bhbk.Cli.Aurora.Commands
                         var privKey = _user.PrivateKeys.Where(x => x.Id == pubKey.PrivateKeyId)
                             .Single();
 
-                        var privKeyPass = AES.DecryptString(privKey.KeyPass, _conf["Databases:StathamSecret"]);
+                        var privKeyPass = AES.DecryptString(privKey.EncryptedPass, _conf["Databases:AuroraSecret"]);
 
                         //private newopenssh key format
                         var privNewOpenSshFile = new FileInfo(dir + "priv." + SshPrivateKeyFormat.NewOpenSsh.ToString().ToLower() + ".txt");

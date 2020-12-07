@@ -19,7 +19,7 @@ namespace Bhbk.Cli.Aurora.Commands
     {
         private IConfiguration _conf;
         private IUnitOfWork _uow;
-        private User _user;
+        private UserLogin _user;
         private Guid _id;
         private bool? _isEnabled, _isDeletable;
 
@@ -39,9 +39,9 @@ namespace Bhbk.Cli.Aurora.Commands
                 if (string.IsNullOrEmpty(arg))
                     throw new ConsoleHelpAsException($"  *** No user name given ***");
 
-                _user = _uow.Users.Get(QueryExpressionFactory.GetQueryExpression<User>()
+                _user = _uow.UserLogins.Get(QueryExpressionFactory.GetQueryExpression<UserLogin>()
                     .Where(x => x.IdentityAlias == arg).ToLambda(),
-                        new List<Expression<Func<User, object>>>()
+                        new List<Expression<Func<UserLogin, object>>>()
                         {
                             x => x.PrivateKeys,
                             x => x.PublicKeys,
@@ -106,7 +106,7 @@ namespace Bhbk.Cli.Aurora.Commands
                     _uow.PublicKeys.Update(pubKey);
                     _uow.Commit();
 
-                    OutputFactory.StdOutKeyPairs(new List<PublicKey> { pubKey }, new List<PrivateKey> { privKey });
+                    StandardOutputFactory.KeyPairs(new List<PublicKey> { pubKey }, new List<PrivateKey> { privKey });
                 }
 
                 return StandardOutput.FondFarewell();

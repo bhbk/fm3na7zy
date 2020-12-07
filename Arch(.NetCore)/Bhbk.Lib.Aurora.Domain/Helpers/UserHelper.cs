@@ -70,13 +70,13 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 
             foreach (var cred in creds)
             {
-                var decryptedPass = AES.DecryptString(cred.EncryptedPassword, secretCurrent);
+                var decryptedPass = AES.DecryptString(cred.EncryptedPass, secretCurrent);
                 var encryptedPass = AES.EncryptString(decryptedPass, secretCurrent);
 
-                if (cred.EncryptedPassword != encryptedPass)
+                if (cred.EncryptedPass != encryptedPass)
                     throw new InvalidOperationException();
 
-                cred.EncryptedPassword = AES.EncryptString(decryptedPass, secretNew);
+                cred.EncryptedPass = AES.EncryptString(decryptedPass, secretNew);
 
                 userCreds.Add(cred);
             }

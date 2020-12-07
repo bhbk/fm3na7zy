@@ -1,5 +1,5 @@
 ﻿
-CREATE VIEW [svc].[uvw_User]
+CREATE VIEW [svc].[uvw_UserLogin]
 AS
 SELECT
 	IdentityId
@@ -20,4 +20,4 @@ SELECT
 	,LastUpdatedUtc
 
 FROM
-	[dbo].[tbl_User]
+	[dbo].[tbl_UserLogin]

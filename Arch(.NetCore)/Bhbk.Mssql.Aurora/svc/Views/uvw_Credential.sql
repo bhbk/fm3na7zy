@@ -5,7 +5,7 @@ SELECT
 	Id
 	,Domain
 	,UserName
-	,EncryptedPassword
+	,EncryptedPass
 	,IsEnabled
 	,IsDeletable
 	,CreatedUtc

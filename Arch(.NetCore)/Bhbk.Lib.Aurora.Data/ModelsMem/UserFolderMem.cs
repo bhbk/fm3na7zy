@@ -22,7 +22,7 @@ namespace Bhbk.Lib.Aurora.Data.ModelsMem
         public DateTimeOffset LastAccessedUtc { get; set; }
         public DateTimeOffset LastUpdatedUtc { get; set; }
 
-        public virtual UserMem User { get; set; }
+        public virtual UserLoginMem User { get; set; }
         public virtual UserFolderMem Parent { get; set; }
         public virtual ICollection<UserFolderMem> Folders { get; set; }
         public virtual ICollection<UserFileMem> Files { get; set; }

@@ -12,10 +12,10 @@ namespace Bhbk.Lib.Aurora.Data_EF6.Models
     using System;
     using System.Collections.Generic;
     
-    public partial class User
+    public partial class UserLogin
     {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
-        public User()
+        public UserLogin()
         {
             this.Alerts = new HashSet<UserAlert>();
             this.Files = new HashSet<UserFile>();

@@ -8,6 +8,7 @@ using Quartz;
 using Serilog;
 using System;
 using System.Linq;
+using System.Net;
 using System.Reflection;
 using System.Threading.Tasks;
 
@@ -43,13 +44,13 @@ namespace Bhbk.WebApi.Aurora.Tasks
                         uow.Sessions.Delete(entries);
                         uow.Commit();
 
-                        Log.Information($"'{callPath}' deleted {entries.Count()} session entries.");
+                        Log.Information($"'{callPath}' deleted {entries.Count()} session entries");
                     }
                 }
             }
             catch (Exception ex)
             {
-                Log.Error(ex.ToString());
+                Log.Fatal(ex, $"'{callPath}' failed on {Dns.GetHostName().ToUpper()}");
             }
             finally
             {

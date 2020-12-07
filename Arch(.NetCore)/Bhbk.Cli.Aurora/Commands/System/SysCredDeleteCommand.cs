@@ -37,7 +37,7 @@ namespace Bhbk.Cli.Aurora.Commands
                 var exists = _uow.Credentials.Get(QueryExpressionFactory.GetQueryExpression<Credential>()
                     .Where(x => x.IsDeletable == true).ToLambda());
 
-                OutputFactory.StdOutCredentials(exists);
+                StandardOutputFactory.Credentials(exists);
 
                 Console.Out.WriteLine();
                 Console.Out.Write("  *** Enter GUID of credential to delete *** : ");
@@ -50,7 +50,7 @@ namespace Bhbk.Cli.Aurora.Commands
                 {
                     Console.Out.WriteLine();
                     Console.Out.WriteLine("  *** The credential can not be deleted while in use ***");
-                    OutputFactory.StdOutUserMounts(mounts);
+                    StandardOutputFactory.Mounts(mounts);
 
                     return StandardOutput.FondFarewell();
                 }

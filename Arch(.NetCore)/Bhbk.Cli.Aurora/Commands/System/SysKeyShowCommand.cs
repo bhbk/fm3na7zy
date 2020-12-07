@@ -40,7 +40,7 @@ namespace Bhbk.Cli.Aurora.Commands
                 var privKeys = _uow.PrivateKeys.Get(QueryExpressionFactory.GetQueryExpression<PrivateKey>()
                     .Where(x => x.IdentityId == null).ToLambda());
 
-                OutputFactory.StdOutKeyPairs(pubKeys.OrderBy(x => x.CreatedUtc), privKeys);
+                StandardOutputFactory.KeyPairs(pubKeys.OrderBy(x => x.CreatedUtc), privKeys);
 
                 return StandardOutput.FondFarewell();
             }

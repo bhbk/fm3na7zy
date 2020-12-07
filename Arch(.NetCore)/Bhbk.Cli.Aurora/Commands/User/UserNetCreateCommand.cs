@@ -21,7 +21,7 @@ namespace Bhbk.Cli.Aurora.Commands
     {
         private readonly IConfiguration _conf;
         private readonly IUnitOfWork _uow;
-        private User _user;
+        private UserLogin _user;
         private Int32 _sequence;
         private IPNetwork _cidr;
         private NetworkActionType _actionType;
@@ -43,9 +43,9 @@ namespace Bhbk.Cli.Aurora.Commands
                 if (string.IsNullOrEmpty(arg))
                     throw new ConsoleHelpAsException($"  *** No user name given ***");
 
-                _user = _uow.Users.Get(QueryExpressionFactory.GetQueryExpression<User>()
+                _user = _uow.UserLogins.Get(QueryExpressionFactory.GetQueryExpression<UserLogin>()
                     .Where(x => x.IdentityAlias == arg).ToLambda(),
-                        new List<Expression<Func<User, object>>>()
+                        new List<Expression<Func<UserLogin, object>>>()
                         {
                             x => x.Networks,
                         })
@@ -84,7 +84,7 @@ namespace Bhbk.Cli.Aurora.Commands
                 if (exists != null)
                 {
                     Console.Out.WriteLine("  *** The network entered already exists for user ***");
-                    OutputFactory.StdOutNetworks(new List<Network> { exists });
+                    StandardOutputFactory.Networks(new List<Network> { exists });
 
                     return StandardOutput.FondFarewell();
                 }
@@ -101,7 +101,7 @@ namespace Bhbk.Cli.Aurora.Commands
 
                 _uow.Commit();
 
-                OutputFactory.StdOutNetworks(new List<Network> { network });
+                StandardOutputFactory.Networks(new List<Network> { network });
 
                 return StandardOutput.FondFarewell();
             }

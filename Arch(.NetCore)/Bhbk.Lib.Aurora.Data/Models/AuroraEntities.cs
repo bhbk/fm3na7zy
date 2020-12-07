@@ -23,10 +23,10 @@ namespace Bhbk.Lib.Aurora.Data.Models
         public virtual DbSet<uvw_PublicKey> uvw_PublicKeys { get; set; }
         public virtual DbSet<uvw_Session> uvw_Sessions { get; set; }
         public virtual DbSet<uvw_Setting> uvw_Settings { get; set; }
-        public virtual DbSet<uvw_User> uvw_Users { get; set; }
         public virtual DbSet<uvw_UserAlert> uvw_UserAlerts { get; set; }
         public virtual DbSet<uvw_UserFile> uvw_UserFiles { get; set; }
         public virtual DbSet<uvw_UserFolder> uvw_UserFolders { get; set; }
+        public virtual DbSet<uvw_UserLogin> uvw_UserLogins { get; set; }
         public virtual DbSet<uvw_UserMount> uvw_UserMounts { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -43,7 +43,7 @@ namespace Bhbk.Lib.Aurora.Data.Models
                     .HasMaxLength(128)
                     .IsUnicode(false);
 
-                entity.Property(e => e.EncryptedPassword)
+                entity.Property(e => e.EncryptedPass)
                     .IsRequired()
                     .HasMaxLength(128)
                     .IsUnicode(false);
@@ -75,6 +75,10 @@ namespace Bhbk.Lib.Aurora.Data.Models
 
                 entity.ToView("uvw_PrivateKey", "svc");
 
+                entity.Property(e => e.EncryptedPass)
+                    .IsRequired()
+                    .HasMaxLength(1024);
+
                 entity.Property(e => e.KeyAlgo)
                     .IsRequired()
                     .HasMaxLength(16);
@@ -82,10 +86,6 @@ namespace Bhbk.Lib.Aurora.Data.Models
                 entity.Property(e => e.KeyFormat)
                     .IsRequired()
                     .HasMaxLength(16);
-
-                entity.Property(e => e.KeyPass)
-                    .IsRequired()
-                    .HasMaxLength(1024);
 
                 entity.Property(e => e.KeyValue).IsRequired();
             });
@@ -135,6 +135,7 @@ namespace Bhbk.Lib.Aurora.Data.Models
                     .IsUnicode(false);
 
                 entity.Property(e => e.LocalEndPoint)
+                    .IsRequired()
                     .HasMaxLength(128)
                     .IsUnicode(false);
 
@@ -143,6 +144,7 @@ namespace Bhbk.Lib.Aurora.Data.Models
                     .IsUnicode(false);
 
                 entity.Property(e => e.RemoteEndPoint)
+                    .IsRequired()
                     .HasMaxLength(128)
                     .IsUnicode(false);
 
@@ -168,49 +170,19 @@ namespace Bhbk.Lib.Aurora.Data.Models
                     .IsUnicode(false);
             });
 
-            modelBuilder.Entity<uvw_User>(entity =>
-            {
-                entity.HasNoKey();
-
-                entity.ToView("uvw_User", "svc");
-
-                entity.Property(e => e.ChrootPath)
-                    .HasMaxLength(64)
-                    .IsUnicode(false);
-
-                entity.Property(e => e.Debugger)
-                    .HasMaxLength(16)
-                    .IsUnicode(false);
-
-                entity.Property(e => e.FileSystemType)
-                    .IsRequired()
-                    .HasMaxLength(16)
-                    .IsUnicode(false);
-
-                entity.Property(e => e.IdentityAlias)
-                    .IsRequired()
-                    .HasMaxLength(128)
-                    .IsUnicode(false);
-            });
-
             modelBuilder.Entity<uvw_UserAlert>(entity =>
             {
                 entity.HasNoKey();
 
                 entity.ToView("uvw_UserAlert", "svc");
 
+                entity.Property(e => e.ToDisplayName)
+                    .IsRequired()
+                    .HasMaxLength(128)
+                    .IsUnicode(false);
+
                 entity.Property(e => e.ToEmailAddress)
                     .HasMaxLength(320)
-                    .IsUnicode(false);
-
-                entity.Property(e => e.ToFirstName)
-                    .IsRequired()
-                    .HasMaxLength(128)
-                    .IsUnicode(false);
-
-                entity.Property(e => e.ToLastName)
-                    .IsRequired()
-                    .HasMaxLength(128)
                     .IsUnicode(false);
 
                 entity.Property(e => e.ToPhoneNumber)
@@ -247,6 +219,31 @@ namespace Bhbk.Lib.Aurora.Data.Models
 
                 entity.Property(e => e.VirtualName)
                     .IsRequired()
+                    .IsUnicode(false);
+            });
+
+            modelBuilder.Entity<uvw_UserLogin>(entity =>
+            {
+                entity.HasNoKey();
+
+                entity.ToView("uvw_UserLogin", "svc");
+
+                entity.Property(e => e.Debugger)
+                    .HasMaxLength(16)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.FileSystemChrootPath)
+                    .HasMaxLength(64)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.FileSystemType)
+                    .IsRequired()
+                    .HasMaxLength(16)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.IdentityAlias)
+                    .IsRequired()
+                    .HasMaxLength(128)
                     .IsUnicode(false);
             });
 

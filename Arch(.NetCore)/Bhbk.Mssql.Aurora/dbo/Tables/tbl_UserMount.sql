@@ -9,19 +9,9 @@
     [CreatedUtc]     DATETIMEOFFSET (7) NOT NULL,
     [LastUpdatedUtc] DATETIMEOFFSET (7) NULL,
     CONSTRAINT [PK_tbl_UserMount] PRIMARY KEY CLUSTERED ([IdentityId] ASC),
-    CONSTRAINT [FK_tbl_UserMount_CredentialID] FOREIGN KEY ([CredentialId]) REFERENCES [dbo].[tbl_Credential] ([Id]) ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT [FK_tbl_UserMount_IdentityID] FOREIGN KEY ([IdentityId]) REFERENCES [dbo].[tbl_User] ([IdentityId]) ON DELETE CASCADE ON UPDATE CASCADE
+    CONSTRAINT [FK_tbl_UserMount_CredentialID] FOREIGN KEY ([CredentialId]) REFERENCES [dbo].[tbl_Credential] ([Id]) ON UPDATE CASCADE,
+    CONSTRAINT [FK_tbl_UserMount_IdentityID] FOREIGN KEY ([IdentityId]) REFERENCES [dbo].[tbl_UserLogin] ([IdentityId]) ON UPDATE CASCADE
 );
-
-
-
-
-
-
-
-
-
-
 
 
 GO

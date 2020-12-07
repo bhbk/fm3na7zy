@@ -68,7 +68,7 @@ namespace Bhbk.Cli.Aurora.Commands
                 if (exists != null)
                 {
                     Console.Out.WriteLine("  *** The network entered already exists for user ***");
-                    OutputFactory.StdOutNetworks(new List<Network> { exists });
+                    StandardOutputFactory.Networks(new List<Network> { exists });
 
                     return StandardOutput.FondFarewell();
                 }
@@ -85,7 +85,7 @@ namespace Bhbk.Cli.Aurora.Commands
 
                 _uow.Commit();
 
-                OutputFactory.StdOutNetworks(new List<Network> { network });
+                StandardOutputFactory.Networks(new List<Network> { network });
 
                 return StandardOutput.FondFarewell();
             }

@@ -1,4 +1,4 @@
-﻿CREATE TABLE [dbo].[tbl_User] (
+﻿CREATE TABLE [dbo].[tbl_UserLogin] (
     [IdentityId]           UNIQUEIDENTIFIER   NOT NULL,
     [IdentityAlias]        VARCHAR (128)      NOT NULL,
     [FileSystemType]       VARCHAR (16)       NOT NULL,
@@ -15,33 +15,11 @@
     [IsDeletable]          BIT                NOT NULL,
     [CreatedUtc]           DATETIMEOFFSET (7) NOT NULL,
     [LastUpdatedUtc]       DATETIMEOFFSET (7) NULL,
-    CONSTRAINT [PK_tbl_User] PRIMARY KEY CLUSTERED ([IdentityId] ASC)
+    CONSTRAINT [PK_tbl_UserLogin] PRIMARY KEY CLUSTERED ([IdentityId] ASC)
 );
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 GO
-CREATE UNIQUE NONCLUSTERED INDEX [IX_tbl_Users]
-    ON [dbo].[tbl_User]([IdentityId] ASC);
+CREATE UNIQUE NONCLUSTERED INDEX [IX_tbl_UserLogin]
+    ON [dbo].[tbl_UserLogin]([IdentityId] ASC);
 

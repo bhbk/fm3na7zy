@@ -72,7 +72,7 @@ namespace Bhbk.Cli.Aurora.Commands
                 _uow.Settings.Update(config);
                 _uow.Commit();
 
-                OutputFactory.StdOutSettings(new List<Setting> { config });
+                StandardOutputFactory.Settings(new List<Setting> { config });
 
                 return StandardOutput.FondFarewell();
             }

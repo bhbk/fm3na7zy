@@ -9,16 +9,18 @@ using Bhbk.Lib.QueryExpression.Factories;
 using ManyConsole;
 using Microsoft.Extensions.Configuration;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Bhbk.Cli.Aurora.Commands
 {
-    public class SysConfDeleteCommand : ConsoleCommand
+    public class SysLoginShowCommand : ConsoleCommand
     {
-        private readonly IConfiguration _conf;
-        private readonly IUnitOfWork _uow;
+        private IConfiguration _conf;
+        private IUnitOfWork _uow;
+        private string _user;
 
-        public SysConfDeleteCommand()
+        public SysLoginShowCommand()
         {
             _conf = (IConfiguration)new ConfigurationBuilder()
                 .AddJsonFile("clisettings.json", optional: false, reloadOnChange: true)
@@ -27,30 +29,31 @@ namespace Bhbk.Cli.Aurora.Commands
             var instance = new ContextService(InstanceContext.DeployedOrLocal);
             _uow = new UnitOfWork(_conf["Databases:AuroraEntities"], instance);
 
-            IsCommand("sys-conf-delete", "Delete config key/value pair for system");
+            IsCommand("sys-login-show", "Show login(s) on system");
+
+            HasOption("u|user=", "Enter user to search for", arg =>
+            {
+                if (!string.IsNullOrEmpty(arg))
+                    _user = arg;
+            });
         }
 
         public override int Run(string[] remainingArguments)
         {
             try
             {
-                var configs = _uow.Settings.Get(QueryExpressionFactory.GetQueryExpression<Setting>()
-                    .Where(x => x.IdentityId == null && x.IsDeletable == true).ToLambda());
+                IEnumerable<UserLogin> users;
 
-                StandardOutputFactory.Settings(configs);
+                if (!string.IsNullOrEmpty(_user))
+                    users = _uow.UserLogins.Get(QueryExpressionFactory.GetQueryExpression<Session>()
+                        .Where(x => x.IdentityAlias.Contains(_user)).ToLambda())
+                        .OrderBy(x => x.IdentityAlias).TakeLast(100);
 
-                Console.Out.WriteLine();
-                Console.Out.Write("  *** Enter GUID of config key/value pair to delete *** : ");
-                var input = Guid.Parse(StandardInput.GetInput());
+                else
+                    users = _uow.UserLogins.Get()
+                        .OrderBy(x => x.IdentityAlias).TakeLast(100);
 
-                var config = configs.Where(x => x.Id == input)
-                    .SingleOrDefault();
-
-                if (config != null)
-                {
-                    _uow.Settings.Delete(config);
-                    _uow.Commit();
-                }
+                StandardOutputFactory.Logins(users);
 
                 return StandardOutput.FondFarewell();
             }

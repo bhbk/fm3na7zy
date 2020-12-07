@@ -18,7 +18,7 @@ namespace Bhbk.Lib.Aurora.Data_EF6.ModelsMem
         public DateTimeOffset LastAccessedUtc { get; set; }
         public DateTimeOffset LastUpdatedUtc { get; set; }
     
-        public virtual UserMem User { get; set; }
+        public virtual UserLoginMem User { get; set; }
         public virtual UserFolderMem Parent { get; set; }
     }
 }

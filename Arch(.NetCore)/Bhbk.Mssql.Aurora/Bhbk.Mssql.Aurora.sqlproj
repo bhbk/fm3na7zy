@@ -108,11 +108,11 @@
     <Folder Include="Properties" />
     <Folder Include="Maintenance" />
     <Folder Include="dbo\" />
-    <Folder Include="dbo\Tables\" />
     <Folder Include="svc\" />
     <Folder Include="svc\Views\" />
     <Folder Include="Security\" />
     <Folder Include="svc\Stored Procedures" />
+    <Folder Include="dbo\Tables\" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Maintenance\DbCompare-Debug.scmp" />
@@ -123,32 +123,20 @@
     <Build Include="svc\Views\uvw_UserMount.sql" />
     <Build Include="svc\Views\uvw_UserFolder.sql" />
     <Build Include="svc\Views\uvw_UserFile.sql" />
-    <Build Include="svc\Views\uvw_User.sql" />
     <Build Include="svc\Views\uvw_PublicKey.sql" />
     <Build Include="svc\Views\uvw_PrivateKey.sql" />
     <Build Include="Security\svc.sql" />
     <Build Include="svc\Views\uvw_Setting.sql" />
     <Build Include="svc\Views\uvw_Credential.sql" />
     <Build Include="svc\Views\uvw_Network.sql" />
-    <Build Include="dbo\Tables\tbl_UserMount.sql" />
-    <Build Include="dbo\Tables\tbl_UserFolder.sql" />
-    <Build Include="dbo\Tables\tbl_UserFile.sql" />
-    <Build Include="dbo\Tables\tbl_User.sql" />
-    <Build Include="dbo\Tables\tbl_Setting.sql" />
-    <Build Include="dbo\Tables\tbl_PublicKey.sql" />
-    <Build Include="dbo\Tables\tbl_PrivateKey.sql" />
-    <Build Include="dbo\Tables\tbl_Network.sql" />
-    <Build Include="dbo\Tables\tbl_Credential.sql" />
     <Build Include="svc\Stored Procedures\usp_Setting_Delete.sql" />
     <Build Include="svc\Stored Procedures\usp_Setting_Insert.sql" />
     <Build Include="svc\Stored Procedures\usp_Setting_Update.sql" />
-    <Build Include="dbo\Tables\tbl_UserAlert.sql" />
     <Build Include="svc\Views\uvw_UserAlert.sql" />
     <Build Include="svc\Stored Procedures\usp_UserMount_Delete.sql" />
     <Build Include="svc\Stored Procedures\usp_UserFolder_Delete.sql" />
     <Build Include="svc\Stored Procedures\usp_UserFile_Delete.sql" />
     <Build Include="svc\Stored Procedures\usp_UserAlert_Delete.sql" />
-    <Build Include="svc\Stored Procedures\usp_User_Delete.sql" />
     <Build Include="svc\Stored Procedures\usp_PublicKey_Delete.sql" />
     <Build Include="svc\Stored Procedures\usp_PrivateKey_Delete.sql" />
     <Build Include="svc\Stored Procedures\usp_Network_Delete.sql" />
@@ -161,7 +149,6 @@
     <Build Include="svc\Stored Procedures\usp_PrivateKey_Update.sql" />
     <Build Include="svc\Stored Procedures\usp_PublicKey_Insert.sql" />
     <Build Include="svc\Stored Procedures\usp_PublicKey_Update.sql" />
-    <Build Include="svc\Stored Procedures\usp_User_Insert.sql" />
     <Build Include="svc\Stored Procedures\usp_UserAlert_Insert.sql" />
     <Build Include="svc\Stored Procedures\usp_UserFile_Insert.sql" />
     <Build Include="svc\Stored Procedures\usp_UserFolder_Insert.sql" />
@@ -170,11 +157,24 @@
     <Build Include="svc\Stored Procedures\usp_UserFolder_Update.sql" />
     <Build Include="svc\Stored Procedures\usp_UserFile_Update.sql" />
     <Build Include="svc\Stored Procedures\usp_UserAlert_Update.sql" />
-    <Build Include="svc\Stored Procedures\usp_User_Update.sql" />
-    <Build Include="dbo\Tables\tbl_Session.sql" />
     <Build Include="svc\Views\uvw_Session.sql" />
     <Build Include="svc\Stored Procedures\usp_Session_Update.sql" />
     <Build Include="svc\Stored Procedures\usp_Session_Insert.sql" />
     <Build Include="svc\Stored Procedures\usp_Session_Delete.sql" />
+    <Build Include="svc\Stored Procedures\usp_UserLogin_Delete.sql" />
+    <Build Include="svc\Stored Procedures\usp_UserLogin_Insert.sql" />
+    <Build Include="svc\Stored Procedures\usp_UserLogin_Update.sql" />
+    <Build Include="svc\Views\uvw_UserLogin.sql" />
+    <Build Include="dbo\Tables\tbl_UserMount.sql" />
+    <Build Include="dbo\Tables\tbl_UserLogin.sql" />
+    <Build Include="dbo\Tables\tbl_UserFolder.sql" />
+    <Build Include="dbo\Tables\tbl_UserFile.sql" />
+    <Build Include="dbo\Tables\tbl_UserAlert.sql" />
+    <Build Include="dbo\Tables\tbl_Setting.sql" />
+    <Build Include="dbo\Tables\tbl_Session.sql" />
+    <Build Include="dbo\Tables\tbl_PublicKey.sql" />
+    <Build Include="dbo\Tables\tbl_PrivateKey.sql" />
+    <Build Include="dbo\Tables\tbl_Network.sql" />
+    <Build Include="dbo\Tables\tbl_Credential.sql" />
   </ItemGroup>
 </Project>

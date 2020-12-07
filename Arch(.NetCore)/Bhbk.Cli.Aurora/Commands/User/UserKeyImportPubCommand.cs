@@ -23,7 +23,7 @@ namespace Bhbk.Cli.Aurora.Commands
         private readonly IConfiguration _conf;
         private readonly IUnitOfWork _uow;
         private FileInfo _path;
-        private User _user;
+        private UserLogin _user;
         private bool _base64;
         private string _pubKeyComment;
 
@@ -43,9 +43,9 @@ namespace Bhbk.Cli.Aurora.Commands
                 if (string.IsNullOrEmpty(arg))
                     throw new ConsoleHelpAsException($"  *** No user name given ***");
 
-                _user = _uow.Users.Get(QueryExpressionFactory.GetQueryExpression<User>()
+                _user = _uow.UserLogins.Get(QueryExpressionFactory.GetQueryExpression<UserLogin>()
                     .Where(x => x.IdentityAlias == arg).ToLambda(),
-                        new List<Expression<Func<User, object>>>()
+                        new List<Expression<Func<UserLogin, object>>>()
                         {
                             x => x.PrivateKeys,
                             x => x.PublicKeys
@@ -108,7 +108,7 @@ namespace Bhbk.Cli.Aurora.Commands
                     _uow.PublicKeys.Create(pubKeys);
                     _uow.Commit();
 
-                    OutputFactory.StdOutKeyPairs(pubKeys.OrderBy(x => x.CreatedUtc), _user.PrivateKeys);
+                    StandardOutputFactory.KeyPairs(pubKeys.OrderBy(x => x.CreatedUtc), _user.PrivateKeys);
                 }
 
                 return StandardOutput.FondFarewell();

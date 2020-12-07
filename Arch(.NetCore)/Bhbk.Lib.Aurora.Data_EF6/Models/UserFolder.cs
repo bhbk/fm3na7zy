@@ -30,7 +30,7 @@ namespace Bhbk.Lib.Aurora.Data_EF6.Models
         public System.DateTimeOffset LastAccessedUtc { get; set; }
         public System.DateTimeOffset LastUpdatedUtc { get; set; }
     
-        public virtual User User { get; set; }
+        public virtual UserLogin UserLogin { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<UserFile> Files { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]

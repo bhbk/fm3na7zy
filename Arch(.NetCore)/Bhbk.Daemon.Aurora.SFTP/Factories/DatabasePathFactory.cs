@@ -12,7 +12,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Factories
 {
     internal class DatabasePathFactory
     {
-        internal static UserFolder CheckFolder(IUnitOfWork uow, User user)
+        internal static UserFolder CheckFolder(IUnitOfWork uow, UserLogin user)
         {
             var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
 
@@ -39,7 +39,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Factories
             return folder;
         }
 
-        internal static UserFile PathToFile(IUnitOfWork uow, User user, string path)
+        internal static UserFile PathToFile(IUnitOfWork uow, UserLogin user, string path)
         {
             if (path.FirstOrDefault() == '/')
                 path = path.Substring(1);
@@ -60,7 +60,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Factories
             return file;
         }
 
-        internal static UserFolder PathToFolder(IUnitOfWork uow, User user, string path)
+        internal static UserFolder PathToFolder(IUnitOfWork uow, UserLogin user, string path)
         {
             if (path.FirstOrDefault() == '/')
                 path = path.Substring(1);
@@ -82,7 +82,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Factories
             return folder;
         }
 
-        internal static string FileToPath(IUnitOfWork uow, User user, UserFile file)
+        internal static string FileToPath(IUnitOfWork uow, UserLogin user, UserFile file)
         {
             var path = string.Empty;
             var paths = new List<string> { };
@@ -105,7 +105,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Factories
             return path;
         }
 
-        internal static string FolderToPath(IUnitOfWork uow, User user, UserFolder folder)
+        internal static string FolderToPath(IUnitOfWork uow, UserLogin user, UserFolder folder)
         {
             var path = string.Empty;
             var paths = new List<string> { };

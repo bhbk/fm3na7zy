@@ -20,7 +20,7 @@ namespace Bhbk.Cli.Aurora.Commands
     {
         private readonly IConfiguration _conf;
         private readonly IUnitOfWork _uow;
-        private User _user;
+        private UserLogin _user;
         private AuthType _authType;
         private bool _alternateCredential;
         private string _serverAddress, _serverShare;
@@ -42,9 +42,9 @@ namespace Bhbk.Cli.Aurora.Commands
                 if (string.IsNullOrEmpty(arg))
                     throw new ConsoleHelpAsException($"  *** No user name given ***");
 
-                _user = _uow.Users.Get(QueryExpressionFactory.GetQueryExpression<User>()
+                _user = _uow.UserLogins.Get(QueryExpressionFactory.GetQueryExpression<UserLogin>()
                     .Where(x => x.IdentityAlias == arg).ToLambda(),
-                        new List<Expression<Func<User, object>>>()
+                        new List<Expression<Func<UserLogin, object>>>()
                         {
                             x => x.Mount,
                             x => x.Mount.Credential,
@@ -86,7 +86,7 @@ namespace Bhbk.Cli.Aurora.Commands
                 if (exists != null)
                 {
                     Console.Out.WriteLine("  *** The user already has a mount ***");
-                    OutputFactory.StdOutUserMounts(new List<UserMount> { exists });
+                    StandardOutputFactory.Mounts(new List<UserMount> { exists });
 
                     return StandardOutput.FondFarewell();
                 }
@@ -97,7 +97,7 @@ namespace Bhbk.Cli.Aurora.Commands
                 {
                     var credentials = _uow.Credentials.Get();
 
-                    OutputFactory.StdOutCredentials(credentials);
+                    StandardOutputFactory.Credentials(credentials);
 
                     Console.Out.WriteLine();
                     Console.Out.Write("  *** Enter GUID of credential to use for mount *** : ");
@@ -130,7 +130,7 @@ namespace Bhbk.Cli.Aurora.Commands
                     _uow.Commit();
                 }
 
-                OutputFactory.StdOutUserMounts(new List<UserMount> { mount });
+                StandardOutputFactory.Mounts(new List<UserMount> { mount });
 
                 return StandardOutput.FondFarewell();
             }

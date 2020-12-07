@@ -79,12 +79,12 @@ namespace Bhbk.Cli.Aurora.Commands
                     credential.UserName = _credLogin;
 
                 if (credPass != null)
-                    credential.EncryptedPassword = encryptedPass;
+                    credential.EncryptedPass = encryptedPass;
 
                 _uow.Credentials.Update(credential);
                 _uow.Commit();
 
-                OutputFactory.StdOutCredentials(new List<Credential> { credential });
+                StandardOutputFactory.Credentials(new List<Credential> { credential });
 
                 return StandardOutput.FondFarewell();
             }

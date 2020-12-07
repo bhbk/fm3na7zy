@@ -14,20 +14,8 @@
     [LastVerifiedUtc] DATETIMEOFFSET (7) NOT NULL,
     CONSTRAINT [PK_tbl_UserFile] PRIMARY KEY CLUSTERED ([Id] ASC),
     CONSTRAINT [FK_tbl_UserFile_FolderID] FOREIGN KEY ([FolderId]) REFERENCES [dbo].[tbl_UserFolder] ([Id]),
-    CONSTRAINT [FK_tbl_UserFile_IdentityID] FOREIGN KEY ([IdentityId]) REFERENCES [dbo].[tbl_User] ([IdentityId]) ON DELETE CASCADE ON UPDATE CASCADE
+    CONSTRAINT [FK_tbl_UserFile_IdentityID] FOREIGN KEY ([IdentityId]) REFERENCES [dbo].[tbl_UserLogin] ([IdentityId]) ON UPDATE CASCADE
 );
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 GO

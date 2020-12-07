@@ -14,9 +14,9 @@ namespace Bhbk.Lib.Aurora.Data.UnitOfWorkMem
         private readonly AuroraEntitiesMem _context;
         private readonly ILoggerFactory _logger;
         public InstanceContext InstanceType { get; private set; }
-        public IGenericRepository<UserMem> Users { get; private set; }
         public IGenericRepository<UserFileMem> UserFiles { get; private set; }
         public IGenericRepository<UserFolderMem> UserFolders { get; private set; }
+        public IGenericRepository<UserLoginMem> UserLogins { get; private set; }
 
         public UnitOfWorkMem(string connection)
             : this(connection, new ContextService(InstanceContext.DeployedOrLocal)) { }
@@ -79,9 +79,9 @@ namespace Bhbk.Lib.Aurora.Data.UnitOfWorkMem
 
             InstanceType = instance.InstanceType;
 
-            Users = new GenericRepository<UserMem>(_context);
             UserFiles = new GenericRepository<UserFileMem>(_context);
             UserFolders = new GenericRepository<UserFolderMem>(_context);
+            UserLogins = new GenericRepository<UserLoginMem>(_context);
         }
 
         public void Commit()

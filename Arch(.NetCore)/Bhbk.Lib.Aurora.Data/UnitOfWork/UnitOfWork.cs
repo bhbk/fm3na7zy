@@ -21,10 +21,10 @@ namespace Bhbk.Lib.Aurora.Data.UnitOfWork
         public PublicKeyRepository PublicKeys { get; private set; }
         public SessionRepository Sessions { get; private set; }
         public SettingRepository Settings { get; private set; }
-        public UserRepository Users { get; private set; }
         public UserAlertRepository UserAlerts { get; private set; }
         public UserFileRepository UserFiles { get; private set; }
         public UserFolderRepository UserFolders { get; private set; }
+        public UserLoginRepository UserLogins { get; private set; }
         public UserMountRepository UserMounts { get; private set; }
 
         public UnitOfWork(string connection)
@@ -90,10 +90,10 @@ namespace Bhbk.Lib.Aurora.Data.UnitOfWork
             PublicKeys = new PublicKeyRepository(_context);
             Sessions = new SessionRepository(_context);
             Settings = new SettingRepository(_context);
-            Users = new UserRepository(_context);
             UserAlerts = new UserAlertRepository(_context);
             UserFiles = new UserFileRepository(_context);
             UserFolders = new UserFolderRepository(_context);
+            UserLogins = new UserLoginRepository(_context);
             UserMounts = new UserMountRepository(_context);
         }
 

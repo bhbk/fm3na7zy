@@ -43,7 +43,7 @@ namespace Bhbk.Cli.Aurora.Commands
                 if (string.IsNullOrEmpty(arg))
                     throw new ConsoleHelpAsException($"  *** No user given ***");
 
-                var user = _uow.Users.Get(QueryExpressionFactory.GetQueryExpression<User>()
+                var user = _uow.UserLogins.Get(QueryExpressionFactory.GetQueryExpression<UserLogin>()
                     .Where(x => x.IdentityAlias == arg).ToLambda())
                     .SingleOrDefault();
 
@@ -66,31 +66,43 @@ namespace Bhbk.Cli.Aurora.Commands
             {
                 var admin = new AdminService(_conf)
                 {
-                    Grant = new ResourceOwnerGrantV2(_conf)
+                    Grant = new ClientCredentialGrantV2(_conf)
                 };
 
-                var users = admin.User_GetV1(new DataStateV1()
-                {
-                    Sort = new List<IDataStateSort>()
+                Console.Out.Write("  *** Enter email (full or partial) of (Identity) user to look for *** : ");
+                var emailSearch = StandardInput.GetInput();
+                Console.Out.WriteLine();
+
+                var identityUsers = admin.User_GetV1(
+                    new DataStateV1()
+                    {
+                        Filter = new DataStateV1Filter()
+                        {
+                            Filters = new List<IDataStateFilter>()
+                            {
+                                new DataStateV1Filter { Field = "userName", Operator = "contains", Value = emailSearch },
+                            }
+                        },
+                        Sort = new List<IDataStateSort>()
                         {
                             new DataStateV1Sort() { Field = "userName", Dir = "asc" }
                         },
-                    Skip = 0,
-                    Take = 100,
-                }).Result;
+                        Skip = 0,
+                        Take = 100,
+                    })
+                    .AsTask().Result;
 
-                foreach(var entry in users.Data)
-                    Console.Out.WriteLine($"  User '{entry.UserName}' with GUID '{entry.Id}'");
+                foreach (var identityUser in identityUsers.Data)
+                    Console.Out.WriteLine($"  [identity GUID] {identityUser.Id} [email] {identityUser.UserName}");
+
                 Console.Out.WriteLine();
+                Console.Out.Write("  *** Enter GUID of (Identity) user to use *** : ");
+                var identityGuid = Guid.Parse(StandardInput.GetInput());
 
-                Console.Out.Write("  *** Enter GUID of (identity) user to use *** : ");
-                var input = StandardInput.GetInput();
-                Console.Out.WriteLine();
-
-                var user = _uow.Users.Create(
-                    new User
+                var user = _uow.UserLogins.Create(
+                    new UserLogin
                     {
-                        IdentityId = Guid.Parse(input),
+                        IdentityId = identityGuid,
                         IdentityAlias = _userName,
                         FileSystemType = _fileSystem.ToString(),
                         IsPasswordRequired = true,
@@ -102,31 +114,8 @@ namespace Bhbk.Cli.Aurora.Commands
 
                 _uow.Commit();
 
-                _uow.Networks.Create(
-                    new Network
-                    {
-                        IdentityId = user.IdentityId,
-                        SequenceId = 0,
-                        Address = "::1",
-                        Action = NetworkActionType.Allow.ToString(),
-                        IsEnabled = true,
-                        IsDeletable = true,
-                    });
-
-                _uow.Networks.Create(
-                    new Network
-                    {
-                        IdentityId = user.IdentityId,
-                        SequenceId = 100,
-                        Address = "0.0.0.0/0",
-                        Action = NetworkActionType.Allow.ToString(),
-                        IsEnabled = true,
-                        IsDeletable = true,
-                    });
-
-                _uow.Commit();
-
-                OutputFactory.StdOutUsers(new List<User> { user });
+                Console.Out.WriteLine();
+                StandardOutputFactory.Logins(new List<UserLogin> { user }, "extras");
 
                 return StandardOutput.FondFarewell();
             }

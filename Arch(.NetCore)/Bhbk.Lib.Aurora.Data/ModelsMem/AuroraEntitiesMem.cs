@@ -17,31 +17,13 @@ namespace Bhbk.Lib.Aurora.Data.ModelsMem
         {
         }
 
-        public virtual DbSet<UserMem> UserMem { get; set; }
+        public virtual DbSet<UserLoginMem> UserLoginMem { get; set; }
         public virtual DbSet<UserFileMem> UserFileMem { get; set; }
         public virtual DbSet<UserFolderMem> UserFolderMem { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.HasAnnotation("Relational:Collation", "SQL_Latin1_General_CP1_CI_AS");
-
-            modelBuilder.Entity<UserMem>(entity =>
-            {
-                entity.HasKey(e => e.IdentityId)
-                    .HasName("PK_UserMem");
-
-                entity.ToTable("UserMem");
-
-                entity.HasIndex(e => e.IdentityId, "IX_UserMem")
-                    .IsUnique();
-
-                entity.Property(e => e.IdentityId).ValueGeneratedNever();
-
-                entity.Property(e => e.IdentityAlias)
-                    .IsRequired()
-                    .HasMaxLength(128)
-                    .IsUnicode(false);
-            });
 
             modelBuilder.Entity<UserFileMem>(entity =>
             {
@@ -94,6 +76,24 @@ namespace Bhbk.Lib.Aurora.Data.ModelsMem
                     .WithMany(p => p.Folders)
                     .HasForeignKey(d => d.ParentId)
                     .HasConstraintName("FK_UserFolderMem_ParentID");
+            });
+
+            modelBuilder.Entity<UserLoginMem>(entity =>
+            {
+                entity.HasKey(e => e.IdentityId)
+                    .HasName("PK_UserLoginMem");
+
+                entity.ToTable("UserLoginMem");
+
+                entity.HasIndex(e => e.IdentityId, "IX_UserLoginMem")
+                    .IsUnique();
+
+                entity.Property(e => e.IdentityId).ValueGeneratedNever();
+
+                entity.Property(e => e.IdentityAlias)
+                    .IsRequired()
+                    .HasMaxLength(128)
+                    .IsUnicode(false);
             });
 
             OnModelCreatingPartial(modelBuilder);

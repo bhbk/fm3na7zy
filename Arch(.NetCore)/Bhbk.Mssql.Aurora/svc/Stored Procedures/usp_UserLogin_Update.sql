@@ -1,5 +1,5 @@
 ﻿
-CREATE PROCEDURE [svc].[usp_User_Update]
+CREATE PROCEDURE [svc].[usp_UserLogin_Update]
      @IdentityId			UNIQUEIDENTIFIER
     ,@IdentityAlias			NVARCHAR (128) 
     ,@FileSystemType		NVARCHAR (16) 
@@ -23,7 +23,7 @@ BEGIN
 
         DECLARE @LASTUPDATED DATETIMEOFFSET (7) = GETUTCDATE()
 
-        UPDATE [dbo].[tbl_User]
+        UPDATE [dbo].[tbl_UserLogin]
         SET
 			 IdentityAlias			= @IdentityAlias
 			,FileSystemType			= @FileSystemType
@@ -44,7 +44,7 @@ BEGIN
 		IF @@ROWCOUNT != 1
 			THROW 51000, 'ERROR', 1;
 
-        SELECT * FROM [dbo].[tbl_User] WHERE IdentityId = @IdentityId
+        SELECT * FROM [dbo].[tbl_UserLogin] WHERE IdentityId = @IdentityId
 
     END TRY
 

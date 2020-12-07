@@ -12,6 +12,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Reflection;
 
 namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
@@ -20,14 +21,12 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
     {
         private readonly IServiceScopeFactory _factory;
         private readonly IUnitOfWorkMem _uowMem;
-        private User _user;
-        private UserMem _userMem;
+        private UserLoginMem _userMem;
 
-        internal MemoryReadOnlyFileSystem(FileSystemProviderSettings settings, IServiceScopeFactory factory, User user)
+        internal MemoryReadOnlyFileSystem(FileSystemProviderSettings settings, IServiceScopeFactory factory, UserLogin user)
             : base(settings)
         {
             _factory = factory;
-            _user = user;
 
             using (var scope = _factory.CreateScope())
             {
@@ -36,7 +35,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                 _uowMem = new UnitOfWorkMem(conf["Databases:AuroraEntitiesMem"]);
             }
 
-            _userMem = MemoryPathFactory.CheckUser(_uowMem, _user);
+            _userMem = MemoryPathFactory.CheckUser(_uowMem, user);
             _userMem = MemoryPathFactory.CheckContent(_uowMem, _userMem);
 
             MemoryPathFactory.CheckFolder(_uowMem, _userMem);
@@ -44,6 +43,8 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
 
         protected override bool Exists(NodePath path, NodeType nodeType)
         {
+            var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
+
             try
             {
                 switch (nodeType)
@@ -74,7 +75,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
             }
             catch (Exception ex)
             {
-                Log.Error(ex.ToString());
+                Log.Fatal(ex, $"'{callPath}' failed on {Dns.GetHostName().ToUpper()}");
                 throw;
             }
         }
@@ -83,6 +84,8 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
         {
             if (!node.Exists())
                 return node.Attributes;
+
+            var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
 
             try
             {
@@ -118,13 +121,15 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
             }
             catch (Exception ex)
             {
-                Log.Error(ex.ToString());
+                Log.Fatal(ex, $"'{callPath}' failed on {Dns.GetHostName().ToUpper()}");
                 throw;
             }
         }
 
         protected override NodeBase GetChild(string name, DirectoryNode parent)
         {
+            var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
+
             try
             {
                 NodeBase child = null;
@@ -153,7 +158,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
             }
             catch (Exception ex)
             {
-                Log.Error(ex.ToString());
+                Log.Fatal(ex, $"'{callPath}' failed on {Dns.GetHostName().ToUpper()}");
                 throw;
             }
         }
@@ -162,6 +167,8 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
         {
             if (!parent.Exists())
                 return Enumerable.Empty<NodeBase>();
+
+            var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
 
             try
             {
@@ -191,7 +198,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
             }
             catch (Exception ex)
             {
-                Log.Error(ex.ToString());
+                Log.Fatal(ex, $"'{callPath}' failed on {Dns.GetHostName().ToUpper()}");
                 throw;
             }
         }
@@ -231,7 +238,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
             }
             catch (Exception ex)
             {
-                Log.Error(ex.ToString());
+                Log.Fatal(ex, $"'{callPath}' failed on {Dns.GetHostName().ToUpper()}");
                 throw;
             }
         }
@@ -240,6 +247,8 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
         {
             if (!node.Exists())
                 return 0L;
+
+            var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
 
             try
             {
@@ -266,13 +275,15 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
             }
             catch (Exception ex)
             {
-                Log.Error(ex.ToString());
+                Log.Fatal(ex, $"'{callPath}' failed on {Dns.GetHostName().ToUpper()}");
                 throw;
             }
         }
 
         protected override NodeTimeInfo GetTimeInfo(NodeBase node)
         {
+            var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
+
             try
             {
                 switch (node.NodeType)
@@ -303,7 +314,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
             }
             catch (Exception ex)
             {
-                Log.Error(ex.ToString());
+                Log.Fatal(ex, $"'{callPath}' failed on {Dns.GetHostName().ToUpper()}");
                 throw;
             }
         }

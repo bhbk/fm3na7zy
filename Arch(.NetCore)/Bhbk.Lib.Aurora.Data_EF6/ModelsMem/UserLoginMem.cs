@@ -4,9 +4,9 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Bhbk.Lib.Aurora.Data_EF6.ModelsMem
 {
-    public partial class UserMem
+    public partial class UserLoginMem
     {
-        public UserMem()
+        public UserLoginMem()
         {
             this.Files = new HashSet<UserFileMem>();
             this.Folders = new HashSet<UserFolderMem>();

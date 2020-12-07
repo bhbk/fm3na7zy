@@ -40,7 +40,7 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 				PublicKeyId = pubId,
 				KeyValue = Encoding.UTF8.GetString(privStream.ToArray()),
 				KeyAlgo = keyPair.KeyAlgorithm.ToString(),
-				KeyPass = AES.EncryptString(keyPass, conf["Databases:AuroraSecret"]),
+				EncryptedPass = AES.EncryptString(keyPass, conf["Databases:AuroraSecret"]),
 				KeyFormat = SshPrivateKeyFormat.Pkcs8.ToString(),
 				IsEnabled = true,
 				IsDeletable = true,
@@ -71,7 +71,7 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 			return (pubKey, privKey);
 		}
 
-		public static (PublicKey, PrivateKey) CreateKeyPair(IConfiguration conf, IUnitOfWork uow, User user,
+		public static (PublicKey, PrivateKey) CreateKeyPair(IConfiguration conf, IUnitOfWork uow, UserLogin user,
 			SshHostKeyAlgorithm keyAlgo, SignatureHashAlgorithm sigAlgo, int keySize, string keyPass, string comment)
 		{
 			var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
@@ -91,7 +91,7 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 				PublicKeyId = pubId,
 				KeyValue = Encoding.UTF8.GetString(privStream.ToArray()),
 				KeyAlgo = keyPair.KeyAlgorithm.ToString(),
-				KeyPass = AES.EncryptString(keyPass, conf["Databases:AuroraSecret"]),
+				EncryptedPass = AES.EncryptString(keyPass, conf["Databases:AuroraSecret"]),
 				KeyFormat = SshPrivateKeyFormat.Pkcs8.ToString(),
 				IsEnabled = true,
 				IsDeletable = true,
@@ -131,10 +131,10 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 
 			foreach (var key in keys)
 			{
-				var plainText = AES.DecryptString(key.KeyPass, secretCurrent);
+				var plainText = AES.DecryptString(key.EncryptedPass, secretCurrent);
 				var cipherText = AES.EncryptString(plainText, secretCurrent);
 
-				if (key.KeyPass != cipherText)
+				if (key.EncryptedPass != cipherText)
 					throw new UnauthorizedAccessException();
 
 				var privBytes = Encoding.UTF8.GetBytes(key.KeyValue);
@@ -148,7 +148,7 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 
 				privKey.Save(privStream, plainText, keyFormat);
 
-				key.KeyPass = AES.EncryptString(plainText, secretNew);
+				key.EncryptedPass = AES.EncryptString(plainText, secretNew);
 
 				privKeys.Add(key);
 			}
@@ -183,7 +183,7 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 		 * openssh uses base64 and special formatting for public keys like with "authorized_keys"
 		 * https://man.openbsd.org/ssh-keygen
 		 */
-		public static StringBuilder ExportPubKeyBase64(User user, ICollection<PublicKey> keys)
+		public static StringBuilder ExportPubKeyBase64(UserLogin user, ICollection<PublicKey> keys)
 		{
 			var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
 			var sb = new StringBuilder();
@@ -288,7 +288,7 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 					PublicKeyId = pubId,
 					KeyValue = privKeyValue,
 					KeyAlgo = keyPair.KeyAlgorithm.ToString(),
-					KeyPass = AES.EncryptString(keyPass, conf["Databases:AuroraSecret"]),
+					EncryptedPass = AES.EncryptString(keyPass, conf["Databases:AuroraSecret"]),
 					KeyFormat = SshPrivateKeyFormat.Pkcs8.ToString(),
 					IsEnabled = false,
 					IsDeletable = true,
@@ -362,7 +362,7 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 					PublicKeyId = pubKeyFound.Id,
 					KeyValue = privKeyValue,
 					KeyAlgo = keyPair.KeyAlgorithm.ToString(),
-					KeyPass = AES.EncryptString(keyPass, conf["Databases:AuroraSecret"]),
+					EncryptedPass = AES.EncryptString(keyPass, conf["Databases:AuroraSecret"]),
 					KeyFormat = SshPrivateKeyFormat.Pkcs8.ToString(),
 					IsEnabled = false,
 					IsDeletable = true,
@@ -393,7 +393,7 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 			return (pubKey, privKey);
 		}
 
-		public static (PublicKey, PrivateKey) ImportKeyPair(IConfiguration conf, IUnitOfWork uow, User user,
+		public static (PublicKey, PrivateKey) ImportKeyPair(IConfiguration conf, IUnitOfWork uow, UserLogin user,
 			SignatureHashAlgorithm sigAlgo, MemoryStream stream, string keyPass, string comment)
 		{
 			var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
@@ -447,7 +447,7 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 					IdentityId = user.IdentityId,
 					KeyValue = privKeyValue,
 					KeyAlgo = keyPair.KeyAlgorithm.ToString(),
-					KeyPass = AES.EncryptString(keyPass, conf["Databases:AuroraSecret"]),
+					EncryptedPass = AES.EncryptString(keyPass, conf["Databases:AuroraSecret"]),
 					KeyFormat = SshPrivateKeyFormat.Pkcs8.ToString(),
 					IsEnabled = false,
 					IsDeletable = true,
@@ -526,7 +526,7 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 					IdentityId = user.IdentityId,
 					KeyValue = privKeyValue,
 					KeyAlgo = keyPair.Fingerprint.ToString(sigAlgo, false).ToString(),
-					KeyPass = AES.EncryptString(keyPass, conf["Databases:AuroraSecret"]),
+					EncryptedPass = AES.EncryptString(keyPass, conf["Databases:AuroraSecret"]),
 					IsEnabled = false,
 					IsDeletable = true,
 				};
@@ -556,7 +556,7 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 			return (pubKey, privKey);
 		}
 
-		public static PublicKey ImportPubKey(IUnitOfWork uow, User user,
+		public static PublicKey ImportPubKey(IUnitOfWork uow, UserLogin user,
 			SignatureHashAlgorithm sigAlgo, string comment, MemoryStream stream)
 		{
 			var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
@@ -615,7 +615,7 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 		 * openssh uses base64 and special formatting for public keys like with "authorized_keys"
 		 * https://man.openbsd.org/ssh-keygen
 		 */
-		public static ICollection<PublicKey> ImportPubKeyBase64(IUnitOfWork uow, User user,
+		public static ICollection<PublicKey> ImportPubKeyBase64(IUnitOfWork uow, UserLogin user,
 			SignatureHashAlgorithm sigAlgo, MemoryStream stream)
 		{
 			var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";

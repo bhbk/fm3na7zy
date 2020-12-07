@@ -16,6 +16,7 @@ namespace Bhbk.Lib.Aurora.Data.Models
         public string LocalSoftwareIdentifier { get; set; }
         public string RemoteEndPoint { get; set; }
         public string RemoteSoftwareIdentifier { get; set; }
+        public bool IsActive { get; set; }
         public DateTimeOffset CreatedUtc { get; set; }
     }
 }

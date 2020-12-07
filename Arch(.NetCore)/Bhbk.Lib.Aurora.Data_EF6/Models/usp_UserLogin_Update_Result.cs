@@ -10,20 +10,19 @@
 namespace Bhbk.Lib.Aurora.Data_EF6.Models
 {
     using System;
-    using System.Collections.Generic;
     
-    public partial class Network
+    public partial class usp_UserLogin_Update_Result
     {
-        public System.Guid Id { get; set; }
-        public Nullable<System.Guid> IdentityId { get; set; }
-        public int SequenceId { get; set; }
-        public string Address { get; set; }
-        public string Action { get; set; }
+        public System.Guid IdentityId { get; set; }
+        public string IdentityAlias { get; set; }
+        public string FileSystemType { get; set; }
+        public bool IsPasswordRequired { get; set; }
+        public bool IsPublicKeyRequired { get; set; }
+        public bool IsFileSystemReadOnly { get; set; }
+        public string DebugLevel { get; set; }
         public bool IsEnabled { get; set; }
         public bool IsDeletable { get; set; }
         public System.DateTimeOffset CreatedUtc { get; set; }
         public Nullable<System.DateTimeOffset> LastUpdatedUtc { get; set; }
-    
-        public virtual UserLogin UserLogin { get; set; }
     }
 }

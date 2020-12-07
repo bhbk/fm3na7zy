@@ -19,13 +19,13 @@ namespace Bhbk.Lib.Aurora.Data_EF6.Models
         public System.Guid PublicKeyId { get; set; }
         public string KeyValue { get; set; }
         public string KeyAlgo { get; set; }
-        public string KeyPass { get; set; }
         public string KeyFormat { get; set; }
+        public string EncryptedPass { get; set; }
         public bool IsEnabled { get; set; }
         public bool IsDeletable { get; set; }
         public System.DateTimeOffset CreatedUtc { get; set; }
         public Nullable<System.DateTimeOffset> LastUpdatedUtc { get; set; }
     
-        public virtual User User { get; set; }
+        public virtual UserLogin UserLogin { get; set; }
     }
 }

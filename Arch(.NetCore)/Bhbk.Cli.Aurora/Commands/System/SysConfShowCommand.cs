@@ -32,7 +32,7 @@ namespace Bhbk.Cli.Aurora.Commands
             {
                 var configs = _uow.Settings.Get();
 
-                OutputFactory.StdOutSettings(configs);
+                StandardOutputFactory.Settings(configs);
 
                 return StandardOutput.FondFarewell();
             }

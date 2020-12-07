@@ -2,7 +2,7 @@
 CREATE PROCEDURE [svc].[usp_Credential_Insert]
     @Domain					NVARCHAR (128) 
     ,@UserName				NVARCHAR (128) 
-    ,@EncryptedPassword		NVARCHAR (128) 
+    ,@EncryptedPass			NVARCHAR (128) 
     ,@IsEnabled				BIT
     ,@IsDeletable			BIT
 
@@ -20,7 +20,7 @@ BEGIN
 			 Id         
 			,Domain   
 			,UserName
-			,EncryptedPassword
+			,EncryptedPass
 			,IsEnabled
 			,IsDeletable
 			,CreatedUtc
@@ -30,7 +30,7 @@ BEGIN
 			 @CREDENTIALID          
 			,@Domain
 			,@UserName
-			,@EncryptedPassword
+			,@EncryptedPass
 			,@IsEnabled
 			,@IsDeletable
 			,@CREATEDUTC

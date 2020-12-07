@@ -19,7 +19,7 @@ namespace Bhbk.Cli.Aurora.Commands
     {
         private readonly IConfiguration _conf;
         private readonly IUnitOfWork _uow;
-        private User _user;
+        private UserLogin _user;
         private bool _deleteAll = false;
 
         public UserNetDeleteCommand()
@@ -38,9 +38,9 @@ namespace Bhbk.Cli.Aurora.Commands
                 if (string.IsNullOrEmpty(arg))
                     throw new ConsoleHelpAsException($"  *** No user name given ***");
 
-                _user = _uow.Users.Get(QueryExpressionFactory.GetQueryExpression<User>()
+                _user = _uow.UserLogins.Get(QueryExpressionFactory.GetQueryExpression<UserLogin>()
                     .Where(x => x.IdentityAlias == arg).ToLambda(),
-                        new List<Expression<Func<User, object>>>()
+                        new List<Expression<Func<UserLogin, object>>>()
                         {
                             x => x.Networks,
                         })
@@ -62,7 +62,7 @@ namespace Bhbk.Cli.Aurora.Commands
             {
                 var exists = _user.Networks;
 
-                OutputFactory.StdOutNetworks(exists);
+                StandardOutputFactory.Networks(exists);
                 Console.Out.WriteLine();
 
                 if (_deleteAll == true)

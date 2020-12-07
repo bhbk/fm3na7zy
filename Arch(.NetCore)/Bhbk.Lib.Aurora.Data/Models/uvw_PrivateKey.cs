@@ -12,8 +12,8 @@ namespace Bhbk.Lib.Aurora.Data.Models
         public Guid PublicKeyId { get; set; }
         public string KeyValue { get; set; }
         public string KeyAlgo { get; set; }
-        public string KeyPass { get; set; }
         public string KeyFormat { get; set; }
+        public string EncryptedPass { get; set; }
         public bool IsEnabled { get; set; }
         public bool IsDeletable { get; set; }
         public DateTimeOffset CreatedUtc { get; set; }

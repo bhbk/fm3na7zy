@@ -23,7 +23,7 @@ namespace Bhbk.Lib.Aurora.Data_EF6.Models
         public System.Guid Id { get; set; }
         public string Domain { get; set; }
         public string UserName { get; set; }
-        public string EncryptedPassword { get; set; }
+        public string EncryptedPass { get; set; }
         public bool IsEnabled { get; set; }
         public bool IsDeletable { get; set; }
         public System.DateTimeOffset CreatedUtc { get; set; }

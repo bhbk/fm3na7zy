@@ -13,7 +13,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Factories
 {
     internal static class FileSystemFactory
     {
-        internal static FileSystemProvider CreateFileSystem(IServiceScopeFactory factory, ILogger logger, User user,
+        internal static FileSystemProvider CreateFileSystem(IServiceScopeFactory factory, ILogger logger, UserLogin user,
             string identityUser, string identityPass)
         {
             LogLevel fsLoggerLevel;

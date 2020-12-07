@@ -86,7 +86,7 @@ namespace Bhbk.Cli.Aurora.Commands
                 _uow.Networks.Update(network);
                 _uow.Commit();
 
-                OutputFactory.StdOutNetworks(new List<Network> { network });
+                StandardOutputFactory.Networks(new List<Network> { network });
 
                 return StandardOutput.FondFarewell();
             }

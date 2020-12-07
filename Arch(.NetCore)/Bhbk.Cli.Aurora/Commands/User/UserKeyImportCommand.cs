@@ -25,7 +25,7 @@ namespace Bhbk.Cli.Aurora.Commands
         private readonly IConfiguration _conf;
         private readonly IUnitOfWork _uow;
         private FileInfo _path;
-        private User _user;
+        private UserLogin _user;
         private string _privKeyPass, _pubKeyComment;
 
         public UserKeyImportCommand()
@@ -44,9 +44,9 @@ namespace Bhbk.Cli.Aurora.Commands
                 if (string.IsNullOrEmpty(arg))
                     throw new ConsoleHelpAsException($"  *** No user name given ***");
 
-                _user = _uow.Users.Get(QueryExpressionFactory.GetQueryExpression<User>()
+                _user = _uow.UserLogins.Get(QueryExpressionFactory.GetQueryExpression<UserLogin>()
                     .Where(x => x.IdentityAlias == arg).ToLambda(),
-                        new List<Expression<Func<User, object>>>()
+                        new List<Expression<Func<UserLogin, object>>>()
                         {
                             x => x.PrivateKeys,
                             x => x.PublicKeys
@@ -142,7 +142,7 @@ namespace Bhbk.Cli.Aurora.Commands
                     .Where(x => x.PublicKeyId == keyPair.Item1.Id).ToLambda())
                     .Single();
 
-                OutputFactory.StdOutKeyPairs(new List<PublicKey> { pubKey }, new List<PrivateKey> { privKey });
+                StandardOutputFactory.KeyPairs(new List<PublicKey> { pubKey }, new List<PrivateKey> { privKey });
 
                 return StandardOutput.FondFarewell();
             }

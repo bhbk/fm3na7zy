@@ -57,7 +57,7 @@ namespace Bhbk.Cli.Aurora.Commands
                 if (exists != null)
                 {
                     Console.Out.WriteLine("  *** The config key/value pair entered already exists ***");
-                    OutputFactory.StdOutSettings(new List<Setting> { exists });
+                    StandardOutputFactory.Settings(new List<Setting> { exists });
 
                     return StandardOutput.FondFarewell();
                 }
@@ -72,7 +72,7 @@ namespace Bhbk.Cli.Aurora.Commands
 
                 _uow.Commit();
 
-                OutputFactory.StdOutSettings(new List<Setting> { config });
+                StandardOutputFactory.Settings(new List<Setting> { config });
 
                 return StandardOutput.FondFarewell();
             }

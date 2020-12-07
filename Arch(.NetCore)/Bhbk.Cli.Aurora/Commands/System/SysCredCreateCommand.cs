@@ -59,7 +59,7 @@ namespace Bhbk.Cli.Aurora.Commands
                 if (exists != null)
                 {
                     Console.Out.WriteLine("  *** The credential entered already exists ***");
-                    OutputFactory.StdOutCredentials(new List<Credential> { exists });
+                    StandardOutputFactory.Credentials(new List<Credential> { exists });
 
                     return StandardOutput.FondFarewell();
                 }
@@ -83,14 +83,14 @@ namespace Bhbk.Cli.Aurora.Commands
                     {
                         Domain = _credDomain,
                         UserName = _credLogin,
-                        EncryptedPassword = cipherText,
+                        EncryptedPass = cipherText,
                         IsEnabled = true,
                         IsDeletable = true,
                     });
 
                 _uow.Commit();
 
-                OutputFactory.StdOutCredentials(new List<Credential> { credential });
+                StandardOutputFactory.Credentials(new List<Credential> { credential });
 
                 return StandardOutput.FondFarewell();
             }

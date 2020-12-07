@@ -89,7 +89,7 @@ namespace Bhbk.Cli.Aurora.Commands
                     _uow.PublicKeys.Update(pubKey);
                     _uow.Commit();
 
-                    OutputFactory.StdOutKeyPairs(new List<PublicKey> { pubKey }, new List<PrivateKey> { privKey });
+                    StandardOutputFactory.KeyPairs(new List<PublicKey> { pubKey }, new List<PrivateKey> { privKey });
                 }
 
                 return StandardOutput.FondFarewell();

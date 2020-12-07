@@ -12,8 +12,7 @@ namespace Bhbk.Lib.Aurora.Data.Models
         public bool OnDelete { get; set; }
         public bool OnDownload { get; set; }
         public bool OnUpload { get; set; }
-        public string ToFirstName { get; set; }
-        public string ToLastName { get; set; }
+        public string ToDisplayName { get; set; }
         public string ToEmailAddress { get; set; }
         public string ToPhoneNumber { get; set; }
         public bool IsEnabled { get; set; }

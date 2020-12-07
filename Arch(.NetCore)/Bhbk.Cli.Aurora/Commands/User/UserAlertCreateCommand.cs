@@ -21,7 +21,7 @@ namespace Bhbk.Cli.Aurora.Commands
     {
         private IConfiguration _conf;
         private IUnitOfWork _uow;
-        private User _user;
+        private UserLogin _user;
         private string _displayName, _emailAddress, _textAddress;
         private bool _delete = false, _download = false, _upload = false;
 
@@ -41,9 +41,9 @@ namespace Bhbk.Cli.Aurora.Commands
                 if (string.IsNullOrEmpty(arg))
                     throw new ConsoleHelpAsException($"  *** No user name given ***");
 
-                _user = _uow.Users.Get(QueryExpressionFactory.GetQueryExpression<User>()
+                _user = _uow.UserLogins.Get(QueryExpressionFactory.GetQueryExpression<UserLogin>()
                     .Where(x => x.IdentityAlias == arg).ToLambda(),
-                        new List<Expression<Func<User, object>>>()
+                        new List<Expression<Func<UserLogin, object>>>()
                         {
                             x => x.Alerts,
                         })
@@ -115,7 +115,7 @@ namespace Bhbk.Cli.Aurora.Commands
                     if (found != null)
                     {
                         Console.Out.WriteLine("  *** The alert entered already exists for user ***");
-                        OutputFactory.StdOutUserAlerts(new List<UserAlert> { found });
+                        StandardOutputFactory.Alerts(new List<UserAlert> { found });
 
                         return StandardOutput.FondFarewell();
                     }
@@ -129,7 +129,7 @@ namespace Bhbk.Cli.Aurora.Commands
                     if (found != null)
                     {
                         Console.Out.WriteLine("  *** The alert entered already exists for user ***");
-                        OutputFactory.StdOutUserAlerts(new List<UserAlert> { found });
+                        StandardOutputFactory.Alerts(new List<UserAlert> { found });
 
                         return StandardOutput.FondFarewell();
                     }
@@ -150,7 +150,7 @@ namespace Bhbk.Cli.Aurora.Commands
 
                 _uow.Commit();
 
-                OutputFactory.StdOutUserAlerts(new List<UserAlert> { alert });
+                StandardOutputFactory.Alerts(new List<UserAlert> { alert });
 
                 return StandardOutput.FondFarewell();
             }

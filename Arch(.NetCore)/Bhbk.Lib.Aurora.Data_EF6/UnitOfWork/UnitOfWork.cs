@@ -17,10 +17,10 @@ namespace Bhbk.Lib.Aurora.Data_EF6.UnitOfWork
         public IGenericRepository<PublicKey> PublicKeys { get; private set; }
         public IGenericRepository<Session> Sessions { get; private set; }
         public IGenericRepository<Setting> Settings { get; private set; }
-        public IGenericRepository<User> Users { get; private set; }
         public IGenericRepository<UserAlert> UserAlerts { get; private set; }
         public IGenericRepository<UserFile> UserFiles { get; private set; }
         public IGenericRepository<UserFolder> UserFolders { get; private set; }
+        public IGenericRepository<UserLogin> UserLogins { get; private set; }
         public IGenericRepository<UserMount> UserMounts { get; private set; }
 
         public UnitOfWork(string connection)
@@ -62,10 +62,10 @@ namespace Bhbk.Lib.Aurora.Data_EF6.UnitOfWork
             PublicKeys = new GenericRepository<PublicKey>(_context);
             Sessions = new GenericRepository<Session>(_context);
             Settings = new GenericRepository<Setting>(_context);
-            Users = new GenericRepository<User>(_context);
             UserAlerts = new GenericRepository<UserAlert>(_context);
             UserFiles = new GenericRepository<UserFile>(_context);
             UserFolders = new GenericRepository<UserFolder>(_context);
+            UserLogins = new GenericRepository<UserLogin>(_context);
             UserMounts = new GenericRepository<UserMount>(_context);
         }
 

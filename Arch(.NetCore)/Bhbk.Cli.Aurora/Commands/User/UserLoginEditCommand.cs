@@ -20,7 +20,7 @@ namespace Bhbk.Cli.Aurora.Commands
     {
         private IConfiguration _conf;
         private IUnitOfWork _uow;
-        private User _user;
+        private UserLogin _user;
         private Guid _id;
         private FileSystemProviderType _fileSystem;
         private readonly string _fileSystemList = string.Join(", ", Enum.GetNames(typeof(FileSystemProviderType)));
@@ -41,9 +41,9 @@ namespace Bhbk.Cli.Aurora.Commands
             {
                 _id = Guid.Parse(arg);
 
-                _user = _uow.Users.Get(QueryExpressionFactory.GetQueryExpression<User>()
+                _user = _uow.UserLogins.Get(QueryExpressionFactory.GetQueryExpression<UserLogin>()
                     .Where(x => x.IdentityId == _id).ToLambda(),
-                        new List<Expression<Func<User, object>>>()
+                        new List<Expression<Func<UserLogin, object>>>()
                         {
                             x => x.Files,
                             x => x.Folders,
@@ -129,10 +129,10 @@ namespace Bhbk.Cli.Aurora.Commands
                 if (_isDeletable.HasValue)
                     _user.IsDeletable = _isDeletable.Value;
 
-                _uow.Users.Update(_user);
+                _uow.UserLogins.Update(_user);
                 _uow.Commit();
 
-                OutputFactory.StdOutUsers(new List<User> { _user });
+                StandardOutputFactory.Logins(new List<UserLogin> { _user }, "extras");
 
                 return StandardOutput.FondFarewell();
             }

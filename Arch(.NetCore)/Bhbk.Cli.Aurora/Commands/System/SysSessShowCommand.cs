@@ -4,6 +4,7 @@ using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
 using Bhbk.Lib.CommandLine.IO;
 using Bhbk.Lib.Common.Primitives.Enums;
 using Bhbk.Lib.Common.Services;
+using Bhbk.Lib.QueryExpression;
 using Bhbk.Lib.QueryExpression.Extensions;
 using Bhbk.Lib.QueryExpression.Factories;
 using ManyConsole;
@@ -11,7 +12,6 @@ using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
 
 namespace Bhbk.Cli.Aurora.Commands
 {
@@ -19,7 +19,8 @@ namespace Bhbk.Cli.Aurora.Commands
     {
         private readonly IConfiguration _conf;
         private readonly IUnitOfWork _uow;
-        private string _cidr, _user;
+        private string _network, _user;
+        private bool _active = false;
 
         public SysSessShowCommand()
         {
@@ -32,10 +33,16 @@ namespace Bhbk.Cli.Aurora.Commands
 
             IsCommand("sys-sess-show", "Show session(s) on system");
 
-            HasOption("c|cidr=", "Enter CIDR address to search for", arg =>
+            HasOption("a|active", "Show only active session(s)", arg =>
             {
                 if (!string.IsNullOrEmpty(arg))
-                    _cidr = arg;
+                    _active = true;
+            });
+
+            HasOption("n|network=", "Enter CIDR address to search for", arg =>
+            {
+                if (!string.IsNullOrEmpty(arg))
+                    _network = arg;
             });
 
             HasOption("u|user=", "Enter user to search for", arg =>
@@ -49,35 +56,47 @@ namespace Bhbk.Cli.Aurora.Commands
         {
             try
             {
-                List<string> remoteEndPoints;
+                IQueryExpression<Session> expr;
 
-                if (!string.IsNullOrEmpty(_user))
-                    remoteEndPoints = _uow.Sessions.Get(QueryExpressionFactory.GetQueryExpression<Session>()
-                        .Where(x => x.IdentityAlias.Contains(_user)).ToLambda())
-                        .OrderBy(x => x.IdentityAlias)
-                        .Select(x => x.RemoteEndPoint).Distinct().ToList();
-
-                else if (!string.IsNullOrEmpty(_cidr))
-                    remoteEndPoints = _uow.Sessions.Get(QueryExpressionFactory.GetQueryExpression<Session>()
-                        .Where(x => x.RemoteEndPoint.Contains(_cidr)).ToLambda())
-                        .OrderBy(x => x.IdentityAlias)
-                        .Select(x => x.RemoteEndPoint).Distinct().ToList();
-
+                if (!string.IsNullOrEmpty(_network))
+                {
+                    if (_active)
+                        expr = QueryExpressionFactory.GetQueryExpression<Session>()
+                            .Where(x => x.RemoteEndPoint.Contains(_network) && x.IsActive == true);
+                    else
+                        expr = QueryExpressionFactory.GetQueryExpression<Session>()
+                            .Where(x => x.RemoteEndPoint.Contains(_network));
+                }
+                else if (!string.IsNullOrEmpty(_user))
+                {
+                    if (_active)
+                        expr = QueryExpressionFactory.GetQueryExpression<Session>()
+                            .Where(x => x.IdentityAlias.Contains(_user) && x.IsActive == true);
+                    else
+                        expr = QueryExpressionFactory.GetQueryExpression<Session>()
+                            .Where(x => x.IdentityAlias.Contains(_user));
+                }
                 else
-                    remoteEndPoints = _uow.Sessions.Get()
-                        .OrderBy(x => x.IdentityAlias)
-                        .Select(x => x.RemoteEndPoint).Distinct().ToList();
+                {
+                    if (_active)
+                        expr = QueryExpressionFactory.GetQueryExpression<Session>()
+                            .Where(x => x.IsActive == true);
+                    else
+                        expr = QueryExpressionFactory.GetQueryExpression<Session>();
+                }
 
-                foreach (var remoteEndpoint in remoteEndPoints)
+                var remotes = _uow.Sessions.Get(expr.ToLambda())
+                    .OrderBy(x => x.IdentityAlias).ThenBy(x => x.CreatedUtc)
+                    .Select(x => x.RemoteEndPoint).Distinct().TakeLast(100).ToList();
+
+                foreach (var remote in remotes)
                 {
                     var sessions = _uow.Sessions.Get(QueryExpressionFactory.GetQueryExpression<Session>()
-                        .Where(x => x.RemoteEndPoint == remoteEndpoint).ToLambda());
-
-                    var session = sessions.Where(x => x.IdentityAlias != null)
-                        .FirstOrDefault();
+                        .Where(x => x.RemoteEndPoint == remote).ToLambda());
 
                     Console.Out.WriteLine();
-                    OutputFactory.StdOutSessions(sessions.OrderBy(x => x.CreatedUtc));
+                    StandardOutputFactory.Sessions(sessions
+                        .OrderBy(x => x.CreatedUtc), "extras");
                 }
 
                 return StandardOutput.FondFarewell();

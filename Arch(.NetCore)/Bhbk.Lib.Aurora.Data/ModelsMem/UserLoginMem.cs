@@ -5,9 +5,9 @@ using System.Collections.Generic;
 
 namespace Bhbk.Lib.Aurora.Data.ModelsMem
 {
-    public partial class UserMem
+    public partial class UserLoginMem
     {
-        public UserMem()
+        public UserLoginMem()
         {
             Files = new HashSet<UserFileMem>();
             Folders = new HashSet<UserFolderMem>();

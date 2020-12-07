@@ -22,18 +22,18 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
             var pvalues = new []
             {
                 new SqlParameter("IdentityId", SqlDbType.UniqueIdentifier) { Value = entity.IdentityId },
-                new SqlParameter("ToFirstName", SqlDbType.NVarChar) { Value = entity.ToFirstName },
-                new SqlParameter("ToLastName", SqlDbType.NVarChar) { Value = entity.ToLastName },
-                new SqlParameter("ToEmailAddress", SqlDbType.NVarChar) { Value = (object)entity.ToEmailAddress ?? DBNull.Value },
-                new SqlParameter("ToPhoneNumber", SqlDbType.NVarChar) { Value = (object)entity.ToPhoneNumber ?? DBNull.Value },
                 new SqlParameter("OnDelete", SqlDbType.Bit) { Value = entity.OnDelete },
                 new SqlParameter("OnDownload", SqlDbType.Bit) { Value = entity.OnDownload },
                 new SqlParameter("OnUpload", SqlDbType.Bit) { Value = entity.OnUpload },
+                new SqlParameter("ToDisplayName", SqlDbType.NVarChar) { Value = entity.ToDisplayName },
+                new SqlParameter("ToEmailAddress", SqlDbType.NVarChar) { Value = (object)entity.ToEmailAddress ?? DBNull.Value },
+                new SqlParameter("ToPhoneNumber", SqlDbType.NVarChar) { Value = (object)entity.ToPhoneNumber ?? DBNull.Value },
+                new SqlParameter("IsEnabled", SqlDbType.Bit) { Value = entity.IsEnabled },
                 rvalue,
             };
 
             return _context.SqlQuery<uvw_UserAlert>("EXEC @ReturnValue = [svc].[usp_UserAlert_Insert] "
-                + "@IdentityId, @FolderId, @VirtualName, @RealPath, @RealFileName, @RealFileSize, @HashSHA256, @IsReadOnly", pvalues)
+                + "@IdentityId, @OnDelete, @OnDownload, @OnUpload, @ToDisplayName, @ToEmailAddress, @ToPhoneNumber, @IsEnabled", pvalues)
                     .Single();
         }
 
@@ -96,19 +96,18 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
             {
                 new SqlParameter("Id", SqlDbType.UniqueIdentifier) { Value = entity.Id },
                 new SqlParameter("IdentityId", SqlDbType.UniqueIdentifier) { Value = entity.IdentityId },
-                new SqlParameter("ToFirstName", SqlDbType.NVarChar) { Value = entity.ToFirstName },
-                new SqlParameter("ToLastName", SqlDbType.NVarChar) { Value = entity.ToLastName },
-                new SqlParameter("ToEmailAddress", SqlDbType.NVarChar) { Value = (object)entity.ToEmailAddress ?? DBNull.Value },
-                new SqlParameter("ToPhoneNumber", SqlDbType.NVarChar) { Value = (object)entity.ToPhoneNumber ?? DBNull.Value },
                 new SqlParameter("OnDelete", SqlDbType.Bit) { Value = entity.OnDelete },
                 new SqlParameter("OnDownload", SqlDbType.Bit) { Value = entity.OnDownload },
                 new SqlParameter("OnUpload", SqlDbType.Bit) { Value = entity.OnUpload },
+                new SqlParameter("ToDisplayName", SqlDbType.NVarChar) { Value = entity.ToDisplayName },
+                new SqlParameter("ToEmailAddress", SqlDbType.NVarChar) { Value = (object)entity.ToEmailAddress ?? DBNull.Value },
+                new SqlParameter("ToPhoneNumber", SqlDbType.NVarChar) { Value = (object)entity.ToPhoneNumber ?? DBNull.Value },
+                new SqlParameter("IsEnabled", SqlDbType.Bit) { Value = entity.IsEnabled },
                 rvalue,
             };
 
             return _context.SqlQuery<uvw_UserAlert>("EXEC @ReturnValue = [svc].[usp_UserAlert_Update] "
-                + "@Id, @IdentityId, @FolderId, @VirtualName, @RealPath, @RealFileName, @RealFileSize, @FileHashSHA256, @IsReadOnly, "
-                + "@LastAccessedUtc, @LastUpdatedUtc, @LastVerifiedUtc", pvalues)
+                + "@Id, @IdentityId, @OnDelete, @OnDownload, @OnUpload, @ToDisplayName, @ToEmailAddress, @ToPhoneNumber, @IsEnabled", pvalues)
                     .Single();
         }
 

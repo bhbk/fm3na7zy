@@ -5,8 +5,8 @@ CREATE PROCEDURE [svc].[usp_PrivateKey_Update]
     ,@PublicKeyId			UNIQUEIDENTIFIER
     ,@KeyValue				NVARCHAR (MAX) 
     ,@KeyAlgo				NVARCHAR (16) 
-    ,@KeyPass				NVARCHAR (1024) 
     ,@KeyFormat				NVARCHAR (16) 
+    ,@EncryptedPass 		NVARCHAR (1024) 
     ,@IsEnabled				BIT
     ,@IsDeletable			BIT
 
@@ -23,8 +23,8 @@ BEGIN
 			 PublicKeyId			= @PublicKeyId
 			,KeyValue				= @KeyValue
 			,KeyAlgo				= @KeyAlgo
-			,KeyPass				= @KeyPass
 			,KeyFormat				= @KeyFormat
+			,EncryptedPass	    	= @EncryptedPass
 			,IsEnabled				= @IsEnabled
 			,IsDeletable			= @IsDeletable
             ,LastUpdatedUtc			= @LASTUPDATED

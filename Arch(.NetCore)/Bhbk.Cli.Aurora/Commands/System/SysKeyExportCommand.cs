@@ -44,7 +44,7 @@ namespace Bhbk.Cli.Aurora.Commands
                 var privKeys = _uow.PrivateKeys.Get(QueryExpressionFactory.GetQueryExpression<PrivateKey>()
                     .Where(x => x.IdentityId == null).ToLambda());
 
-                OutputFactory.StdOutKeyPairs(pubKeys.OrderBy(x => x.CreatedUtc), privKeys);
+                StandardOutputFactory.KeyPairs(pubKeys.OrderBy(x => x.CreatedUtc), privKeys);
 
                 Console.Out.WriteLine();
                 Console.Out.Write("  *** Enter GUID of public key to export *** : ");
@@ -82,11 +82,11 @@ namespace Bhbk.Cli.Aurora.Commands
 
                     if (pubKey.PrivateKeyId != null)
                     {
-                        var privKey = _uow.PrivateKeys.Get(QueryExpressionFactory.GetQueryExpression<PublicKey>()
-                            .Where(x => x.IdentityId == null && x.PrivateKeyId == pubKey.PrivateKeyId).ToLambda())
+                        var privKey = _uow.PrivateKeys.Get(QueryExpressionFactory.GetQueryExpression<PrivateKey>()
+                            .Where(x => x.IdentityId == null && x.Id == pubKey.PrivateKeyId).ToLambda())
                             .Single();
 
-                        var privKeyPass = AES.DecryptString(privKey.KeyPass, _conf["Databases:AuroraSecret"]);
+                        var privKeyPass = AES.DecryptString(privKey.EncryptedPass, _conf["Databases:AuroraSecret"]);
 
                         //private newopenssh key format
                         var privNewOpenSshFile = new FileInfo(dir + "priv." + SshPrivateKeyFormat.NewOpenSsh.ToString().ToLower() + ".txt");

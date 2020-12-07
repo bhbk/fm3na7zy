@@ -52,25 +52,25 @@ namespace Bhbk.Daemon.Aurora.SFTP
                     return new UnitOfWork(_conf["Databases:AuroraEntities"], _instance);
                 });
                 sc.AddSingleton<IHostedService, Daemon>();
-                sc.AddTransient<IAlertService, AlertService>(_ =>
+                sc.AddSingleton<IAlertService, AlertService>(_ =>
                 {
                     return new AlertService(_conf)
                     {
-                        Grant = new ResourceOwnerGrantV2(_conf)
+                        Grant = new ClientCredentialGrantV2(_conf)
                     };
                 });
-                sc.AddTransient<IAdminService, AdminService>(_ =>
+                sc.AddSingleton<IAdminService, AdminService>(_ =>
                 {
                     return new AdminService(_conf)
                     {
-                        Grant = new ResourceOwnerGrantV2(_conf)
+                        Grant = new ClientCredentialGrantV2(_conf)
                     };
                 });
-                sc.AddTransient<IStsService, StsService>(_ =>
+                sc.AddSingleton<IStsService, StsService>(_ =>
                 {
                     return new StsService(_conf)
                     {
-                        Grant = new ResourceOwnerGrantV2(_conf)
+                        Grant = new ClientCredentialGrantV2(_conf)
                     };
                 });
             });
@@ -108,21 +108,21 @@ namespace Bhbk.Daemon.Aurora.SFTP
                 {
                     return new AlertService(_conf)
                     {
-                        Grant = new ResourceOwnerGrantV2(_conf)
+                        Grant = new ClientCredentialGrantV2(_conf)
                     };
                 });
                 sc.AddTransient<IAdminService, AdminService>(_ =>
                 {
                     return new AdminService(_conf)
                     {
-                        Grant = new ResourceOwnerGrantV2(_conf)
+                        Grant = new ClientCredentialGrantV2(_conf)
                     };
                 });
                 sc.AddTransient<IStsService, StsService>(_ =>
                 {
                     return new StsService(_conf)
                     {
-                        Grant = new ResourceOwnerGrantV2(_conf)
+                        Grant = new ClientCredentialGrantV2(_conf)
                     };
                 });
             });

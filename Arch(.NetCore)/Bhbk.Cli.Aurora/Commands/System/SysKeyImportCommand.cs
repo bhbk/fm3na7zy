@@ -110,7 +110,7 @@ namespace Bhbk.Cli.Aurora.Commands
                     .Where(x => x.PublicKeyId == keyPair.Item1.Id).ToLambda())
                     .Single();
 
-                OutputFactory.StdOutKeyPairs(new List<PublicKey> { pubKey }, new List<PrivateKey> { privKey });
+                StandardOutputFactory.KeyPairs(new List<PublicKey> { pubKey }, new List<PrivateKey> { privKey });
 
                 return StandardOutput.FondFarewell();
             }

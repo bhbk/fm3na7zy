@@ -46,7 +46,7 @@ namespace Bhbk.Cli.Aurora.Commands
                 var pubKeys = _uow.PublicKeys.Get(QueryExpressionFactory.GetQueryExpression<PublicKey>()
                     .Where(x => x.IdentityId == null && x.IsDeletable == true).ToLambda());
 
-                OutputFactory.StdOutKeyPairs(pubKeys.OrderBy(x => x.CreatedUtc), privKeys);
+                StandardOutputFactory.KeyPairs(pubKeys.OrderBy(x => x.CreatedUtc), privKeys);
                 Console.Out.WriteLine();
 
                 if (_deleteAll == true)

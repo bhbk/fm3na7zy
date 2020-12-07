@@ -7,8 +7,8 @@ SELECT
 	,PublicKeyId
 	,KeyValue
 	,KeyAlgo
-	,KeyPass
 	,KeyFormat
+	,EncryptedPass
 	,IsEnabled
 	,IsDeletable
 	,CreatedUtc

@@ -11,6 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Reflection;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
@@ -62,8 +63,8 @@ namespace Bhbk.WebApi.Aurora.Tasks
                                 {
                                     problems.Add(file);
 
-                                    Log.Error($"'{callPath}' validation on {filePath} returned hash of '{hashCheck}' that does not" +
-                                        $" match recorded hash of '{file.HashSHA256}'");
+                                    Log.Error($"'{callPath}' failed on {Dns.GetHostName().ToUpper()} for {filePath}" +
+                                        $" recorded hash '{file.HashSHA256}' does not match returned hash '{hashCheck}'");
 
                                     continue;
                                 }
@@ -74,7 +75,9 @@ namespace Bhbk.WebApi.Aurora.Tasks
                         catch (Exception ex)
                             when (ex is CryptographicException || ex is IOException)
                         {
-                            Log.Fatal($"'{callPath}' validation on {filePath} returned error {ex}");
+                            problems.Add(file);
+
+                            Log.Fatal(ex, $"'{callPath}' failed on {Dns.GetHostName().ToUpper()} for {filePath}");
                         }
                     }
 
@@ -86,7 +89,7 @@ namespace Bhbk.WebApi.Aurora.Tasks
             }
             catch (Exception ex)
             {
-                Log.Error(ex.ToString());
+                Log.Fatal(ex, $"'{callPath}' failed on {Dns.GetHostName().ToUpper()}");
             }
             finally
             {

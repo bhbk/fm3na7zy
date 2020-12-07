@@ -64,11 +64,11 @@ namespace Bhbk.Cli.Aurora.Commands
                 var keys = _uow.PrivateKeys.Get();
 
                 Console.Out.WriteLine("  *** Current credential encrypted passwords *** ");
-                OutputFactory.StdOutCredentialSecrets(creds);
+                StandardOutputFactory.CredentialSecrets(creds);
                 Console.Out.WriteLine();
 
                 Console.Out.WriteLine("  *** Current private key encrypted passwords *** ");
-                OutputFactory.StdOutKeyPairSecrets(keys);
+                StandardOutputFactory.KeyPairSecrets(keys);
                 Console.Out.WriteLine();
 
                 var updatedCreds = UserHelper.ChangeCredentialSecrets(creds.ToList(), secretCurrent, secretNew);
@@ -81,11 +81,11 @@ namespace Bhbk.Cli.Aurora.Commands
                 if (decision.ToLower() == "yes")
                 {
                     Console.Out.WriteLine("  *** New credential encrypted passwords *** ");
-                    OutputFactory.StdOutCredentialSecrets(updatedCreds);
+                    StandardOutputFactory.CredentialSecrets(updatedCreds);
                     Console.Out.WriteLine();
 
                     Console.Out.WriteLine("  *** New private key encrypted passwords *** ");
-                    OutputFactory.StdOutKeyPairSecrets(updatedKeys);
+                    StandardOutputFactory.KeyPairSecrets(updatedKeys);
                     Console.Out.WriteLine();
 
                     _uow.Credentials.Update(updatedCreds);

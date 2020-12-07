@@ -2,6 +2,8 @@
 using Microsoft.Extensions.Hosting;
 using Serilog;
 using System;
+using System.Net;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -21,6 +23,8 @@ namespace Bhbk.Daemon.Aurora.FTP
         {
             await Task.Run(() =>
             {
+                var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
+
                 try
                 {
                     using (var scope = _factory.CreateScope())
@@ -30,7 +34,7 @@ namespace Bhbk.Daemon.Aurora.FTP
                 }
                 catch (Exception ex)
                 {
-                    Log.Error(ex.ToString());
+                     Log.Fatal(ex, $"'{callPath}' failed on {Dns.GetHostName().ToUpper()}");
                 }
             }, cancellationToken);
         }
@@ -39,13 +43,15 @@ namespace Bhbk.Daemon.Aurora.FTP
         {
             await Task.Run(() =>
             {
+                var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
+
                 try
                 {
 
                 }
                 catch (Exception ex)
                 {
-                    Log.Error(ex.ToString());
+                     Log.Fatal(ex, $"'{callPath}' failed on {Dns.GetHostName().ToUpper()}");
                 }
             }, cancellationToken);
         }

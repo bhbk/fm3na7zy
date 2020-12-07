@@ -5,8 +5,8 @@ CREATE PROCEDURE [svc].[usp_PrivateKey_Insert]
     ,@PublicKeyId			UNIQUEIDENTIFIER
     ,@KeyValue				NVARCHAR (MAX) 
     ,@KeyAlgo				NVARCHAR (16) 
-    ,@KeyPass				NVARCHAR (1024) 
     ,@KeyFormat				NVARCHAR (16) 
+    ,@EncryptedPass			NVARCHAR (1024) 
     ,@IsEnabled				BIT
     ,@IsDeletable			BIT
 
@@ -25,8 +25,8 @@ BEGIN
 			,PublicKeyId   
 			,KeyValue
 			,KeyAlgo
-			,KeyPass
 			,KeyFormat
+			,EncryptedPass
 			,IsEnabled
 			,IsDeletable
 			,CreatedUtc
@@ -38,8 +38,8 @@ BEGIN
 			,@PublicKeyId
 			,@KeyValue
 			,@KeyAlgo
-			,@KeyPass
 			,@KeyFormat
+			,@EncryptedPass
 			,@IsEnabled
 			,@IsDeletable
 			,@CREATEDUTC

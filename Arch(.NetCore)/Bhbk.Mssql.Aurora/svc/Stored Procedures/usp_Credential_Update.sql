@@ -3,7 +3,7 @@ CREATE PROCEDURE [svc].[usp_Credential_Update]
      @Id					UNIQUEIDENTIFIER 
     ,@Domain				NVARCHAR (128) 
     ,@UserName				NVARCHAR (128) 
-    ,@EncryptedPassword		NVARCHAR (128) 
+    ,@EncryptedPass 		NVARCHAR (128) 
     ,@IsEnabled				BIT
     ,@IsDeletable			BIT
 
@@ -20,7 +20,7 @@ BEGIN
              Id						= @Id
 			,Domain					= @Domain
 			,UserName				= @UserName
-			,EncryptedPassword		= @EncryptedPassword
+			,EncryptedPass  		= @EncryptedPass
 			,IsEnabled				= @IsEnabled
             ,IsDeletable			= @IsDeletable
             ,LastUpdatedUtc			= @LASTUPDATED
