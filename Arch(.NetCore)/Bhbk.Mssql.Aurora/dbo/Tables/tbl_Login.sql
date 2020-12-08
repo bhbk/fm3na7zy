@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[tbl_Login] (
     [UserId]               UNIQUEIDENTIFIER   NOT NULL,
-    [UserLoginType]        NVARCHAR (16)      NOT NULL,
+    [UserAuthType]         NVARCHAR (16)      NOT NULL,
     [UserName]             NVARCHAR (128)     NOT NULL,
     [FileSystemType]       NVARCHAR (16)      NOT NULL,
     [FileSystemChrootPath] NVARCHAR (64)      NULL,
@@ -15,6 +15,8 @@
     [LastUpdatedUtc]       DATETIMEOFFSET (7) NULL,
     CONSTRAINT [PK_tbl_Login] PRIMARY KEY CLUSTERED ([UserId] ASC)
 );
+
+
 
 
 GO

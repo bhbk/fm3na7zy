@@ -76,7 +76,7 @@ namespace Bhbk.Cli.Aurora.Commands
                 _uow.Ambassadors.Update(ambassador);
                 _uow.Commit();
 
-                StandardOutputFactory.Credentials(new List<E_Ambassador> { ambassador });
+                StandardOutputFactory.Ambassadors(new List<E_Ambassador> { ambassador });
 
                 return StandardOutput.FondFarewell();
             }

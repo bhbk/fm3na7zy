@@ -37,7 +37,7 @@ namespace Bhbk.Cli.Aurora.Commands
                 var exists = _uow.Ambassadors.Get(QueryExpressionFactory.GetQueryExpression<E_Ambassador>()
                     .Where(x => x.IsDeletable == true).ToLambda());
 
-                StandardOutputFactory.Credentials(exists);
+                StandardOutputFactory.Ambassadors(exists);
 
                 Console.Out.WriteLine();
                 Console.Out.Write("  *** Enter GUID of credential to delete *** : ");

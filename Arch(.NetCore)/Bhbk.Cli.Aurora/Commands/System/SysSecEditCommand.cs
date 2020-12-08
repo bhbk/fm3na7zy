@@ -11,6 +11,7 @@ using Bhbk.Lib.QueryExpression.Extensions;
 using Bhbk.Lib.QueryExpression.Factories;
 using ManyConsole;
 using Microsoft.Extensions.Configuration;
+using Rebex;
 using Rebex.Security.Cryptography;
 using System;
 using System.Linq;
@@ -60,19 +61,28 @@ namespace Bhbk.Cli.Aurora.Commands
                 Console.Out.WriteLine($"  *** The new secret to encrypt passwords is *** : {secretNew}");
                 Console.Out.WriteLine();
 
-                var creds = _uow.Ambassadors.Get();
-                var keys = _uow.PrivateKeys.Get();
+                var loginType = UserAuthType.Local.ToString().ToLower();
 
-                Console.Out.WriteLine("  *** Current credential encrypted passwords *** ");
-                StandardOutputFactory.CredentialSecrets(creds);
+                var ambassadors = _uow.Ambassadors.Get();
+                var privateKeys = _uow.PrivateKeys.Get();
+                var logins = _uow.Logins.Get(QueryExpressionFactory.GetQueryExpression<E_Login>()
+                    .Where(x => x.UserAuthType.ToLower() == loginType).ToLambda());
+
+                Console.Out.WriteLine("  *** Current ambassador encrypted passwords *** ");
+                StandardOutputFactory.AmbassadorSecrets(ambassadors);
                 Console.Out.WriteLine();
 
                 Console.Out.WriteLine("  *** Current private key encrypted passwords *** ");
-                StandardOutputFactory.KeyPairSecrets(keys);
+                StandardOutputFactory.KeyPairSecrets(privateKeys);
                 Console.Out.WriteLine();
 
-                var updatedCreds = UserHelper.ChangeCredentialSecrets(creds.ToList(), secretCurrent, secretNew);
-                var updatedKeys = KeyHelper.ChangePrivKeySecrets(keys.ToList(), secretCurrent, secretNew);
+                Console.Out.WriteLine("  *** Current login encrypted passwords *** ");
+                StandardOutputFactory.LoginSecrets(logins);
+                Console.Out.WriteLine();
+
+                var updatedAmbassadors = UserHelper.ChangeAmbassadorSecrets(ambassadors.ToList(), secretCurrent, secretNew);
+                var updatedKeys = KeyHelper.ChangePrivKeySecrets(privateKeys.ToList(), secretCurrent, secretNew);
+                var updatedLogins = UserHelper.ChangeLoginSecrets(logins.ToList(), secretCurrent, secretNew);
 
                 Console.Out.Write("  *** Enter yes/no to proceed *** : ");
                 var decision = StandardInput.GetInput();
@@ -80,16 +90,21 @@ namespace Bhbk.Cli.Aurora.Commands
 
                 if (decision.ToLower() == "yes")
                 {
-                    Console.Out.WriteLine("  *** New credential encrypted passwords *** ");
-                    StandardOutputFactory.CredentialSecrets(updatedCreds);
+                    Console.Out.WriteLine("  *** New ambassador encrypted passwords *** ");
+                    StandardOutputFactory.AmbassadorSecrets(updatedAmbassadors);
                     Console.Out.WriteLine();
 
                     Console.Out.WriteLine("  *** New private key encrypted passwords *** ");
                     StandardOutputFactory.KeyPairSecrets(updatedKeys);
                     Console.Out.WriteLine();
 
-                    _uow.Ambassadors.Update(updatedCreds);
+                    Console.Out.WriteLine("  *** New login encrypted passwords *** ");
+                    StandardOutputFactory.LoginSecrets(updatedLogins);
+                    Console.Out.WriteLine();
+
+                    _uow.Ambassadors.Update(updatedAmbassadors);
                     _uow.PrivateKeys.Update(updatedKeys);
+                    _uow.Logins.Update(updatedLogins);
                     _uow.Commit();
                 }
 

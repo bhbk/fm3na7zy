@@ -115,10 +115,9 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Login' does not have a primary 
             
             
             
-            
           </Key>
           <Property Name="UserId" Type="uniqueidentifier" Nullable="false" />
-          <Property Name="UserLoginType" Type="nvarchar" MaxLength="16" Nullable="false" />
+          <Property Name="UserAuthType" Type="nvarchar" MaxLength="16" Nullable="false" />
           <Property Name="UserName" Type="nvarchar" MaxLength="128" Nullable="false" />
           <Property Name="FileSystemType" Type="nvarchar" MaxLength="16" Nullable="false" />
           <Property Name="FileSystemChrootPath" Type="nvarchar" MaxLength="64" />
@@ -378,6 +377,7 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Usage' does not have a primary 
         </Function>
         <Function Name="usp_Login_Insert" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="svc">
           <Parameter Name="UserId" Type="uniqueidentifier" Mode="In" />
+          <Parameter Name="UserAuthType" Type="nvarchar" Mode="In" />
           <Parameter Name="UserName" Type="nvarchar" Mode="In" />
           <Parameter Name="FileSystemType" Type="nvarchar" Mode="In" />
           <Parameter Name="IsPasswordRequired" Type="bit" Mode="In" />
@@ -390,6 +390,7 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Usage' does not have a primary 
         </Function>
         <Function Name="usp_Login_Update" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="svc">
           <Parameter Name="UserId" Type="uniqueidentifier" Mode="In" />
+          <Parameter Name="UserAuthType" Type="nvarchar" Mode="In" />
           <Parameter Name="UserName" Type="nvarchar" Mode="In" />
           <Parameter Name="FileSystemType" Type="nvarchar" Mode="In" />
           <Parameter Name="FileSystemChrootPath" Type="nvarchar" Mode="In" />
@@ -602,7 +603,7 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Usage' does not have a primary 
           <EntitySet Name="uvw_Login" EntityType="Self.uvw_Login" store:Type="Views" store:Schema="svc">
             <DefiningQuery>SELECT 
     [uvw_Login].[UserId] AS [UserId], 
-    [uvw_Login].[UserLoginType] AS [UserLoginType], 
+    [uvw_Login].[UserAuthType] AS [UserAuthType], 
     [uvw_Login].[UserName] AS [UserName], 
     [uvw_Login].[FileSystemType] AS [FileSystemType], 
     [uvw_Login].[FileSystemChrootPath] AS [FileSystemChrootPath], 
@@ -798,7 +799,7 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Usage' does not have a primary 
             <PropertyRef Name="UserId" />
           </Key>
           <Property Name="UserId" Type="Guid" Nullable="false" />
-          <Property Name="UserLoginType" Type="String" Nullable="false" MaxLength="16" FixedLength="false" Unicode="true" />
+          <Property Name="UserAuthType" Type="String" Nullable="false" MaxLength="16" FixedLength="false" Unicode="true" />
           <Property Name="UserName" Type="String" MaxLength="128" FixedLength="false" Unicode="true" Nullable="false" />
           <Property Name="FileSystemType" Type="String" MaxLength="16" FixedLength="false" Unicode="true" Nullable="false" />
           <Property Name="FileSystemChrootPath" Type="String" MaxLength="64" FixedLength="false" Unicode="true" />
@@ -1014,6 +1015,7 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Usage' does not have a primary 
           </FunctionImport>
           <FunctionImport Name="usp_Login_Insert" ReturnType="Collection(AuroraModels.usp_Login_Insert_Result)">
             <Parameter Name="UserId" Mode="In" Type="Guid" />
+            <Parameter Name="UserAuthType" Mode="In" Type="String" />
             <Parameter Name="UserName" Mode="In" Type="String" />
             <Parameter Name="FileSystemType" Mode="In" Type="String" />
             <Parameter Name="IsPasswordRequired" Mode="In" Type="Boolean" />
@@ -1026,6 +1028,7 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Usage' does not have a primary 
           </FunctionImport>
           <FunctionImport Name="usp_Login_Update" ReturnType="Collection(AuroraModels.usp_Login_Update_Result)">
             <Parameter Name="UserId" Mode="In" Type="Guid" />
+            <Parameter Name="UserAuthType" Mode="In" Type="String" />
             <Parameter Name="UserName" Mode="In" Type="String" />
             <Parameter Name="FileSystemType" Mode="In" Type="String" />
             <Parameter Name="FileSystemChrootPath" Mode="In" Type="String" />
@@ -2006,8 +2009,8 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Usage' does not have a primary 
           <EntitySetMapping Name="E_Login">
             <EntityTypeMapping TypeName="AuroraModels.E_Login">
               <MappingFragment StoreEntitySet="uvw_Login">
+                <ScalarProperty Name="UserAuthType" ColumnName="UserAuthType" />
                 <ScalarProperty Name="EncryptedPass" ColumnName="EncryptedPass" />
-                <ScalarProperty Name="UserLoginType" ColumnName="UserLoginType" />
                 <ScalarProperty Name="FileSystemChrootPath" ColumnName="FileSystemChrootPath" />
                 <ScalarProperty Name="IsFileSystemReadOnly" ColumnName="IsFileSystemReadOnly" />
                 <ScalarProperty Name="IsPublicKeyRequired" ColumnName="IsPublicKeyRequired" />
@@ -2028,6 +2031,7 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Usage' does not have a primary 
                   <ScalarProperty Name="UserId" ParameterName="UserId" />
                 </DeleteFunction>
                 <UpdateFunction FunctionName="AuroraModels.Store.usp_Login_Update">
+                  <ScalarProperty Name="UserAuthType" ParameterName="UserAuthType" Version="Current" />
                   <ScalarProperty Name="EncryptedPass" ParameterName="EncryptedPass" Version="Current" />
                   <ScalarProperty Name="FileSystemChrootPath" ParameterName="FileSystemChrootPath" Version="Current" />
                   <ScalarProperty Name="IsFileSystemReadOnly" ParameterName="IsFileSystemReadOnly" Version="Current" />
@@ -2042,6 +2046,7 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Usage' does not have a primary 
                   <ResultBinding Name="LastUpdatedUtc" ColumnName="LastUpdatedUtc" />
                 </UpdateFunction>
                 <InsertFunction FunctionName="AuroraModels.Store.usp_Login_Insert">
+                  <ScalarProperty Name="UserAuthType" ParameterName="UserAuthType" />
                   <ScalarProperty Name="EncryptedPass" ParameterName="EncryptedPass" />
                   <ScalarProperty Name="IsFileSystemReadOnly" ParameterName="IsFileSystemReadOnly" />
                   <ScalarProperty Name="IsPublicKeyRequired" ParameterName="IsPublicKeyRequired" />

@@ -97,7 +97,7 @@ namespace Bhbk.Cli.Aurora.Commands
                 {
                     var credentials = _uow.Ambassadors.Get();
 
-                    StandardOutputFactory.Credentials(credentials);
+                    StandardOutputFactory.Ambassadors(credentials);
 
                     Console.Out.WriteLine();
                     Console.Out.Write("  *** Enter GUID of credential to use for mount *** : ");

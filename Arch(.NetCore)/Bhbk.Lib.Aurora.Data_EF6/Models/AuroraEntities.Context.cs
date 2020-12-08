@@ -428,11 +428,15 @@ namespace Bhbk.Lib.Aurora.Data_EF6.Models
             return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<usp_Login_Delete_Result>("usp_Login_Delete", userIdParameter);
         }
     
-        public virtual ObjectResult<usp_Login_Insert_Result> usp_Login_Insert(Nullable<System.Guid> userId, string userName, string fileSystemType, Nullable<bool> isPasswordRequired, Nullable<bool> isPublicKeyRequired, Nullable<bool> isFileSystemReadOnly, string debugger, string encryptedPass, Nullable<bool> isEnabled, Nullable<bool> isDeletable)
+        public virtual ObjectResult<usp_Login_Insert_Result> usp_Login_Insert(Nullable<System.Guid> userId, string userAuthType, string userName, string fileSystemType, Nullable<bool> isPasswordRequired, Nullable<bool> isPublicKeyRequired, Nullable<bool> isFileSystemReadOnly, string debugger, string encryptedPass, Nullable<bool> isEnabled, Nullable<bool> isDeletable)
         {
             var userIdParameter = userId.HasValue ?
                 new ObjectParameter("UserId", userId) :
                 new ObjectParameter("UserId", typeof(System.Guid));
+    
+            var userAuthTypeParameter = userAuthType != null ?
+                new ObjectParameter("UserAuthType", userAuthType) :
+                new ObjectParameter("UserAuthType", typeof(string));
     
             var userNameParameter = userName != null ?
                 new ObjectParameter("UserName", userName) :
@@ -470,14 +474,18 @@ namespace Bhbk.Lib.Aurora.Data_EF6.Models
                 new ObjectParameter("IsDeletable", isDeletable) :
                 new ObjectParameter("IsDeletable", typeof(bool));
     
-            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<usp_Login_Insert_Result>("usp_Login_Insert", userIdParameter, userNameParameter, fileSystemTypeParameter, isPasswordRequiredParameter, isPublicKeyRequiredParameter, isFileSystemReadOnlyParameter, debuggerParameter, encryptedPassParameter, isEnabledParameter, isDeletableParameter);
+            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<usp_Login_Insert_Result>("usp_Login_Insert", userIdParameter, userAuthTypeParameter, userNameParameter, fileSystemTypeParameter, isPasswordRequiredParameter, isPublicKeyRequiredParameter, isFileSystemReadOnlyParameter, debuggerParameter, encryptedPassParameter, isEnabledParameter, isDeletableParameter);
         }
     
-        public virtual ObjectResult<usp_Login_Update_Result> usp_Login_Update(Nullable<System.Guid> userId, string userName, string fileSystemType, string fileSystemChrootPath, Nullable<bool> isPasswordRequired, Nullable<bool> isPublicKeyRequired, Nullable<bool> isFileSystemReadOnly, string debugger, string encryptedPass, Nullable<bool> isEnabled, Nullable<bool> isDeletable)
+        public virtual ObjectResult<usp_Login_Update_Result> usp_Login_Update(Nullable<System.Guid> userId, string userAuthType, string userName, string fileSystemType, string fileSystemChrootPath, Nullable<bool> isPasswordRequired, Nullable<bool> isPublicKeyRequired, Nullable<bool> isFileSystemReadOnly, string debugger, string encryptedPass, Nullable<bool> isEnabled, Nullable<bool> isDeletable)
         {
             var userIdParameter = userId.HasValue ?
                 new ObjectParameter("UserId", userId) :
                 new ObjectParameter("UserId", typeof(System.Guid));
+    
+            var userAuthTypeParameter = userAuthType != null ?
+                new ObjectParameter("UserAuthType", userAuthType) :
+                new ObjectParameter("UserAuthType", typeof(string));
     
             var userNameParameter = userName != null ?
                 new ObjectParameter("UserName", userName) :
@@ -519,7 +527,7 @@ namespace Bhbk.Lib.Aurora.Data_EF6.Models
                 new ObjectParameter("IsDeletable", isDeletable) :
                 new ObjectParameter("IsDeletable", typeof(bool));
     
-            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<usp_Login_Update_Result>("usp_Login_Update", userIdParameter, userNameParameter, fileSystemTypeParameter, fileSystemChrootPathParameter, isPasswordRequiredParameter, isPublicKeyRequiredParameter, isFileSystemReadOnlyParameter, debuggerParameter, encryptedPassParameter, isEnabledParameter, isDeletableParameter);
+            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<usp_Login_Update_Result>("usp_Login_Update", userIdParameter, userAuthTypeParameter, userNameParameter, fileSystemTypeParameter, fileSystemChrootPathParameter, isPasswordRequiredParameter, isPublicKeyRequiredParameter, isFileSystemReadOnlyParameter, debuggerParameter, encryptedPassParameter, isEnabledParameter, isDeletableParameter);
         }
     
         public virtual ObjectResult<usp_Alert_Delete_Result> usp_Alert_Delete(Nullable<System.Guid> id)

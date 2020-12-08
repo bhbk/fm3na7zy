@@ -28,7 +28,7 @@ namespace Bhbk.Lib.Aurora.Data_EF6.Models
         }
     
         public System.Guid UserId { get; set; }
-        public string UserLoginType { get; set; }
+        public string UserAuthType { get; set; }
         public string UserName { get; set; }
         public string FileSystemType { get; set; }
         public string FileSystemChrootPath { get; set; }

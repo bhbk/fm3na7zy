@@ -38,8 +38,8 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
 
             using (var scope = factory.CreateScope())
             {
-                var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
                 var conf = scope.ServiceProvider.GetRequiredService<IConfiguration>();
+                var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
 
                 var userMount = uow.Mounts.Get(QueryExpressionFactory.GetQueryExpression<E_Mount>()
                     .Where(x => x.UserId == _user.UserId).ToLambda())
@@ -53,14 +53,12 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                         .Where(x => x.Id == userMount.AmbassadorId).ToLambda())
                         .Single();
 
-                    var secret = conf["Databases:AuroraSecret"];
-                    string decryptedPass = string.Empty;
-                    string encryptedPass = string.Empty;
+                    string decryptedPass;
 
                     try
                     {
+                        var secret = conf["Databases:AuroraSecret"];
                         decryptedPass = AES.DecryptString(ambassadorCred.EncryptedPass, secret);
-                        encryptedPass = AES.EncryptString(decryptedPass, secret);
                     }
                     catch (CryptographicException)
                     {

@@ -29,14 +29,14 @@ namespace Bhbk.Cli.Aurora.Factories
             }
         }
 
-        public static void Credentials(IEnumerable<E_Ambassador> creds)
+        public static void Ambassadors(IEnumerable<E_Ambassador> creds)
         {
             foreach (var cred in creds)
             {
                 Console.Out.WriteLine();
 
                 Console.ForegroundColor = ConsoleColor.Green;
-                Console.Out.WriteLine($"  [credential GUID] {cred.Id}{(!cred.IsDeletable ? " is not deletable and" : null)}" +
+                Console.Out.WriteLine($"  [ambassador GUID] {cred.Id}{(!cred.IsDeletable ? " is not deletable and" : null)}" +
                     $"{(cred.IsEnabled ? " is enabled" : " is disabled")} [created] {cred.CreatedUtc.LocalDateTime}");
 
                 Console.ForegroundColor = ConsoleColor.White;
@@ -46,14 +46,14 @@ namespace Bhbk.Cli.Aurora.Factories
             }
         }
 
-        public static void CredentialSecrets(IEnumerable<E_Ambassador> creds)
+        public static void AmbassadorSecrets(IEnumerable<E_Ambassador> creds)
         {
             foreach (var cred in creds)
             {
                 Console.Out.WriteLine();
 
                 Console.ForegroundColor = ConsoleColor.Green;
-                Console.Out.WriteLine($"  [credential GUID] {cred.Id}'{(!cred.IsDeletable ? " is not deletable and" : null)}" +
+                Console.Out.WriteLine($"  [ambassador GUID] {cred.Id}'{(!cred.IsDeletable ? " is not deletable and" : null)}" +
                     $"{(cred.IsEnabled ? " is enabled" : " is disabled")} [created] {cred.CreatedUtc.LocalDateTime}");
 
                 Console.ForegroundColor = ConsoleColor.White;
@@ -155,6 +155,23 @@ namespace Bhbk.Cli.Aurora.Factories
             }
         }
 
+        public static void LoginSecrets(IEnumerable<E_Login> logins)
+        {
+            foreach (var login in logins)
+            {
+                Console.Out.WriteLine();
+
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.Out.WriteLine($"  [login GUID] {login.UserId}'{(!login.IsDeletable ? " is not deletable and" : null)}" +
+                    $"{(login.IsEnabled ? " is enabled" : " is disabled")} [created] {login.CreatedUtc.LocalDateTime}");
+
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.Out.WriteLine($"    [encrypted password] '{login.EncryptedPass}'");
+
+                Console.ResetColor();
+            }
+        }
+
         public static void Mounts(IEnumerable<E_Mount> mounts)
         {
             foreach (var mount in mounts)
@@ -167,7 +184,7 @@ namespace Bhbk.Cli.Aurora.Factories
 
                 Console.ForegroundColor = ConsoleColor.White;
                 if (mount.AmbassadorId.HasValue)
-                    Console.Out.WriteLine($"    [credential GUID] {mount.Ambassador.Id} [username] {mount.Ambassador.UserName}");
+                    Console.Out.WriteLine($"    [ambassador GUID] {mount.Ambassador.Id} [username] {mount.Ambassador.UserName}");
 
                 Console.ResetColor();
             }
@@ -212,7 +229,7 @@ namespace Bhbk.Cli.Aurora.Factories
                 }
 
                 Console.ForegroundColor = ConsoleColor.White;
-                Console.Out.Write($"[client] {session.RemoteEndPoint} [server] {session.LocalEndPoint} [action] {session.CallPath} [detail] {session.Details}" +
+                Console.Out.Write($"[remote] {session.RemoteEndPoint} [local] {session.LocalEndPoint} [action] {session.CallPath} [detail] {session.Details}" +
                     $"{(string.IsNullOrEmpty(session.RemoteSoftwareIdentifier) ? null : " [software] " + session.RemoteSoftwareIdentifier + "")}" +
                     $" [when] {session.CreatedUtc.LocalDateTime}" +
                     $"{Environment.NewLine}");
@@ -221,18 +238,18 @@ namespace Bhbk.Cli.Aurora.Factories
             }
         }
 
-        public static void Settings(IEnumerable<E_Setting> configs)
+        public static void Settings(IEnumerable<E_Setting> settings)
         {
-            foreach (var config in configs)
+            foreach (var setting in settings)
             {
                 Console.Out.WriteLine();
 
                 Console.ForegroundColor = ConsoleColor.Green;
-                Console.Out.WriteLine($"  [config GUID] {config.Id}{(!config.IsDeletable ? " is not deletable" : null)}" +
-                    $" [when] {config.CreatedUtc.LocalDateTime}");
+                Console.Out.WriteLine($"  [setting GUID] {setting.Id}{(!setting.IsDeletable ? " is not deletable" : null)}" +
+                    $" [when] {setting.CreatedUtc.LocalDateTime}");
 
                 Console.ForegroundColor = ConsoleColor.White;
-                Console.Out.WriteLine($"    [key] {config.ConfigKey} [value] {config.ConfigValue}");
+                Console.Out.WriteLine($"    [key] {setting.ConfigKey} [value] {setting.ConfigValue}");
 
                 Console.ResetColor();
             }

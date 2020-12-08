@@ -54,7 +54,7 @@ namespace Bhbk.Cli.Aurora.Commands
                 if (exists != null)
                 {
                     Console.Out.WriteLine("  *** The credential entered already exists ***");
-                    StandardOutputFactory.Credentials(new List<E_Ambassador> { exists });
+                    StandardOutputFactory.Ambassadors(new List<E_Ambassador> { exists });
 
                     return StandardOutput.FondFarewell();
                 }
@@ -84,7 +84,7 @@ namespace Bhbk.Cli.Aurora.Commands
 
                 _uow.Commit();
 
-                StandardOutputFactory.Credentials(new List<E_Ambassador> { ambassador });
+                StandardOutputFactory.Ambassadors(new List<E_Ambassador> { ambassador });
 
                 return StandardOutput.FondFarewell();
             }

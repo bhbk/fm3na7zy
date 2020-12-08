@@ -58,7 +58,7 @@ namespace Bhbk.WebApi.Aurora.Tasks
             }
 
             Log.Information($"'{callPath}' completed");
-            Log.Information($"'{callPath}' will run again at {context.NextFireTimeUtc.Value.LocalDateTime}");
+            Log.Information($"'{callPath}' will run again at {context.NextFireTimeUtc.GetValueOrDefault().LocalDateTime}");
 
             return Task.CompletedTask;
         }

@@ -3,7 +3,7 @@ CREATE VIEW [svc].[uvw_Login]
 AS
 SELECT
 	UserId
-	,UserLoginType
+	,UserAuthType
 	,UserName
 	,FileSystemType
 	,FileSystemChrootPath

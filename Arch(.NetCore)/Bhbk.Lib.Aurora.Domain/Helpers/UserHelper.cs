@@ -9,6 +9,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Security.Cryptography;
 
 /*
  * https://docs.microsoft.com/en-us/windows/win32/secauthn/logonuserexexw
@@ -23,6 +24,48 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
     {
         private const int LOGON32_PROVIDER_DEFAULT = 0;
         private const int LOGON32_LOGON_INTERACTIVE = 2;
+
+        public static ICollection<E_Ambassador> ChangeAmbassadorSecrets(ICollection<E_Ambassador> creds,
+            string secretCurrent, string secretNew)
+        {
+            var ambassadorCreds = new List<E_Ambassador>();
+
+            foreach (var cred in creds)
+            {
+                var decryptedPass = AES.DecryptString(cred.EncryptedPass, secretCurrent);
+                var encryptedPass = AES.EncryptString(decryptedPass, secretCurrent);
+
+                if (cred.EncryptedPass != encryptedPass)
+                    throw new CryptographicException();
+
+                cred.EncryptedPass = AES.EncryptString(decryptedPass, secretNew);
+
+                ambassadorCreds.Add(cred);
+            }
+
+            return ambassadorCreds;
+        }
+
+        public static ICollection<E_Login> ChangeLoginSecrets(ICollection<E_Login> creds,
+            string secretCurrent, string secretNew)
+        {
+            var loginCreds = new List<E_Login>();
+
+            foreach (var cred in creds)
+            {
+                var decryptedPass = AES.DecryptString(cred.EncryptedPass, secretCurrent);
+                var encryptedPass = AES.EncryptString(decryptedPass, secretCurrent);
+
+                if (cred.EncryptedPass != encryptedPass)
+                    throw new CryptographicException();
+
+                cred.EncryptedPass = AES.EncryptString(decryptedPass, secretNew);
+
+                loginCreds.Add(cred);
+            }
+
+            return loginCreds;
+        }
 
         public static SafeAccessTokenHandle GetSafeAccessTokenHandle(string domain, string user, string pass)
         {
@@ -61,27 +104,6 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
             }
 
             return false;
-        }
-
-        public static ICollection<E_Ambassador> ChangeCredentialSecrets(ICollection<E_Ambassador> creds, 
-            string secretCurrent, string secretNew)
-        {
-            var userCreds = new List<E_Ambassador>();
-
-            foreach (var cred in creds)
-            {
-                var decryptedPass = AES.DecryptString(cred.EncryptedPass, secretCurrent);
-                var encryptedPass = AES.EncryptString(decryptedPass, secretCurrent);
-
-                if (cred.EncryptedPass != encryptedPass)
-                    throw new InvalidOperationException();
-
-                cred.EncryptedPass = AES.EncryptString(decryptedPass, secretNew);
-
-                userCreds.Add(cred);
-            }
-
-            return userCreds;
         }
 
         [DllImport("advapi32.dll", SetLastError = true, CharSet = CharSet.Unicode)]

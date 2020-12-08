@@ -54,7 +54,7 @@ namespace Bhbk.WebApi.Aurora.Tasks
                         try
                         {
                             using (var sha256 = new SHA256Managed())
-                            using (var fs = new FileStream(filePath.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                            using (var fs = new FileStream(filePath.FullName, FileMode.Open, FileAccess.Read, FileShare.Read))
                             {
                                 var hash = sha256.ComputeHash(fs);
                                 var hashCheck = Strings.GetHexString(hash);
@@ -71,17 +71,18 @@ namespace Bhbk.WebApi.Aurora.Tasks
                                 else
                                     file.LastVerifiedUtc = DateTime.UtcNow;
                             }
+
+                            uow.Files.Update(file);
+                            uow.Commit();
                         }
                         catch (Exception ex)
                             when (ex is CryptographicException || ex is IOException)
                         {
                             problems.Add(file);
 
-                            Log.Fatal(ex, $"'{callPath}' failed on {Dns.GetHostName().ToUpper()} for {filePath}");
+                            Log.Error(ex, $"'{callPath}' failed on {Dns.GetHostName().ToUpper()} for {filePath}");
                         }
                     }
-
-                    uow.Commit();
 
                     if (files.Any())
                         Log.Information($"'{callPath}' validation on {files.Count()} files found {problems.Count} problems");
@@ -97,7 +98,7 @@ namespace Bhbk.WebApi.Aurora.Tasks
             }
 
             Log.Information($"'{callPath}' completed");
-            Log.Information($"'{callPath}' will run again at {context.NextFireTimeUtc.Value.LocalDateTime}");
+            Log.Information($"'{callPath}' will run again at {context.NextFireTimeUtc.GetValueOrDefault().LocalDateTime}");
 
             return Task.CompletedTask;
         }

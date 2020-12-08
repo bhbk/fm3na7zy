@@ -1,6 +1,7 @@
 ﻿
 CREATE PROCEDURE [svc].[usp_Login_Insert]
      @UserId				UNIQUEIDENTIFIER
+    ,@UserAuthType			NVARCHAR (16) 
     ,@UserName				NVARCHAR (128) 
     ,@FileSystemType		NVARCHAR (16) 
     ,@IsPasswordRequired	BIT
@@ -22,6 +23,7 @@ BEGIN
 		INSERT INTO [dbo].[tbl_Login]
 			(
 			 UserId
+			,UserAuthType
 			,UserName
 			,FileSystemType
 			,IsPasswordRequired
@@ -36,6 +38,7 @@ BEGIN
 		VALUES
 			(
 			@UserId
+			,@UserAuthType
 			,@UserName
 			,@FileSystemType
 			,@IsPasswordRequired

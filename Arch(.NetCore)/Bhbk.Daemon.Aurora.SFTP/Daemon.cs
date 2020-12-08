@@ -32,6 +32,7 @@ using System.Net;
 using System.Net.Http;
 using System.Reflection;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -229,7 +230,34 @@ namespace Bhbk.Daemon.Aurora.SFTP
 
                             foreach (var session in _server.Sessions)
                             {
-                                var remote = session.ClientEndPoint.ToString();
+                                var user = uow.Logins.Get(QueryExpressionFactory.GetQueryExpression<E_Login>()
+                                    .Where(x => x.UserName == session.UserName).ToLambda(),
+                                        new List<Expression<Func<E_Login, object>>>()
+                                        {
+                                            x => x.Usage,
+                                        })
+                                    .SingleOrDefault();
+
+                                /*
+                                 * if connection disrupted decrement sessions in use for a user.
+                                 */
+
+                                if (user != null)
+                                {
+                                    user.Usage.SessionsInUse--;
+                                    uow.Usages.Update(user.Usage);
+                                }
+
+                                uow.Sessions.Create(
+                                    new E_Session
+                                    {
+                                        UserId = user?.UserId ?? null,
+                                        CallPath = callPath,
+                                        Details = $"duration:'{session.Duration}' reason:'node-restart'",
+                                        LocalEndPoint = _localEndPoint,
+                                        RemoteEndPoint = session.ClientEndPoint.ToString(),
+                                        IsActive = false,
+                                    });
 
                                 var entries = uow.Sessions.Get(QueryExpressionFactory.GetQueryExpression<E_Session>()
                                     .Where(x => x.LocalEndPoint == _localEndPoint && x.IsActive == true).ToLambda());
@@ -240,11 +268,13 @@ namespace Bhbk.Daemon.Aurora.SFTP
                                 uow.Sessions.Update(entries);
                                 uow.Commit();
 
-                                Log.Warning($"'{callPath}' '{session.UserName}' client:'{session.ClientEndPoint}' " +
-                                    $"duration:'{session.Duration}' force disconnect, server restart");
-
                                 session.SendMessage($"'{session.UserName}' client:'{session.ClientEndPoint}' " +
-                                    $"duration:'{session.Duration}' force disconnect, server restart");
+                                    $"duration:'{session.Duration}' reason:'node-restart'");
+
+                                session.Close();
+
+                                Log.Warning($"'{callPath}' '{session.UserName}' client:'{session.ClientEndPoint}' " +
+                                    $"duration:'{session.Duration}' reason:'node-restart'");
                             }
                         }
 
@@ -430,7 +460,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                      * does user have correct login type...
                      */
 
-                    if (user.UserLoginType != UserLoginType.Identity.ToString())
+                    if (user.UserAuthType != UserAuthType.Identity.ToString())
                     {
                         Log.Warning($"'{callPath}' user:'{e.UserName}' denied:'login-type'");
 
@@ -741,67 +771,78 @@ namespace Bhbk.Daemon.Aurora.SFTP
 
                         try
                         {
-                            /*
-                             * does user have valid account...
-                             */
-
-                            var identityUser = admin.User_GetV1(user.UserId.ToString())
-                                .AsTask().Result;
-
-                            if (identityUser.IsLockedOut
-                                || !identityUser.PasswordConfirmed
-                                || !identityUser.EmailConfirmed)
+                            if (user.UserAuthType == UserAuthType.Identity.ToString())
                             {
-                                Log.Warning($"'{callPath}' '{e.UserName}' identity-user:'{identityUser.Email}' denied:'invalid'");
+                                /*
+                                 * is identity user and password valid...
+                                 */
 
-                                uow.Sessions.Create(
-                                    new E_Session
-                                    {
-                                        UserId = user.UserId,
-                                        CallPath = callPath,
-                                        Details = $"identity-user:'{identityUser.Email}' denied:'invalid'",
-                                        LocalEndPoint = _localEndPoint,
-                                        RemoteEndPoint = e.ClientEndPoint.ToString(),
-                                        RemoteSoftwareIdentifier = e.ClientSoftwareIdentifier,
-                                        IsActive = true,
-                                    });
+                                var identityUser = admin.User_GetV1(user.UserId.ToString())
+                                    .AsTask().Result;
 
-                                uow.Commit();
+                                if (identityUser.IsLockedOut
+                                    || !identityUser.PasswordConfirmed
+                                    || !identityUser.EmailConfirmed)
+                                {
+                                    Log.Warning($"'{callPath}' '{e.UserName}' identity-user:'{identityUser.Email}' denied:'invalid'");
 
-                                throw new UnauthorizedAccessException();
+                                    uow.Sessions.Create(
+                                        new E_Session
+                                        {
+                                            UserId = user.UserId,
+                                            CallPath = callPath,
+                                            Details = $"identity-user:'{identityUser.Email}' denied:'invalid'",
+                                            LocalEndPoint = _localEndPoint,
+                                            RemoteEndPoint = e.ClientEndPoint.ToString(),
+                                            RemoteSoftwareIdentifier = e.ClientSoftwareIdentifier,
+                                            IsActive = true,
+                                        });
+
+                                    uow.Commit();
+
+                                    throw new UnauthorizedAccessException();
+                                }
+
+                                /*
+                                 * is identity user in required role(s)...
+                                 */
+
+                                var identityRoles = admin.User_GetRolesV1(user.UserId.ToString())
+                                    .AsTask().Result;
+
+                                if (!identityRoles.Where(x => x.Name == DefaultConstants.RoleForDaemonUsers_Aurora).Any())
+                                {
+                                    Log.Warning($"'{callPath}' '{e.UserName}' identity-user:'{identityUser.Email}'" +
+                                        $" missing-role:'{DefaultConstants.RoleForDaemonUsers_Aurora}'");
+
+                                    uow.Sessions.Create(
+                                        new E_Session
+                                        {
+                                            UserId = user.UserId,
+                                            CallPath = callPath,
+                                            Details = $"identity-user:'{identityUser.Email}' missing-role:'{DefaultConstants.RoleForDaemonUsers_Aurora}'",
+                                            LocalEndPoint = _localEndPoint,
+                                            RemoteEndPoint = e.ClientEndPoint.ToString(),
+                                            RemoteSoftwareIdentifier = e.ClientSoftwareIdentifier,
+                                            IsActive = true,
+                                        });
+
+                                    uow.Commit();
+
+                                    throw new UnauthorizedAccessException();
+                                }
                             }
-
-                            /*
-                             * does user have valid role...
-                             */
-
-                            var identityRoles = admin.User_GetRolesV1(user.UserId.ToString())
-                                .AsTask().Result;
-
-                            if (!identityRoles.Where(x => x.Name == DefaultConstants.RoleForDaemonUsers_Aurora).Any())
+                            else if (user.UserAuthType == UserAuthType.Local.ToString())
                             {
-                                Log.Warning($"'{callPath}' '{e.UserName}' identity-user:'{identityUser.Email}'" +
-                                    $" missing-role:'{DefaultConstants.RoleForDaemonUsers_Aurora}'");
-
-                                uow.Sessions.Create(
-                                    new E_Session
-                                    {
-                                        UserId = user.UserId,
-                                        CallPath = callPath,
-                                        Details = $"identity-user:'{identityUser.Email}' missing-role:'{DefaultConstants.RoleForDaemonUsers_Aurora}'",
-                                        LocalEndPoint = _localEndPoint,
-                                        RemoteEndPoint = e.ClientEndPoint.ToString(),
-                                        RemoteSoftwareIdentifier = e.ClientSoftwareIdentifier,
-                                        IsActive = true,
-                                    });
-
-                                uow.Commit();
-
-                                throw new UnauthorizedAccessException();
+                                /*
+                                 * no need for additional checks if local user and public key valid...
+                                 */
                             }
+                            else
+                                throw new NotImplementedException();
                         }
                         catch (Exception ex)
-                            when (ex is HttpRequestException || ex is UnauthorizedAccessException)
+                            when (ex is CryptographicException || ex is HttpRequestException || ex is UnauthorizedAccessException)
                         {
                             Log.Warning($"'{callPath}'" +
                                 $"{Environment.NewLine} {ex.Message}" +
@@ -923,54 +964,71 @@ namespace Bhbk.Daemon.Aurora.SFTP
                     {
                         try
                         {
-                            /*
-                             * does user have valid account...
-                             */
-
-                            var identityUser = admin.User_GetV1(user.UserId.ToString())
-                                .AsTask().Result;
-
-                            var identityGrant = sts.ResourceOwner_GrantV2(
-                                new ResourceOwnerV2()
-                                {
-                                    issuer = conf["IdentityCredential:IssuerName"],
-                                    client = string.Empty,
-                                    grant_type = "password",
-                                    user = identityUser.UserName,
-                                    password = e.Password,
-                                })
-                                .AsTask().Result;
-
-                            /*
-                             * does user have valid role...
-                             */
-
-                            var jwt = new JwtSecurityToken(identityGrant.access_token);
-
-                            if (!jwt.Claims.Any(x => x.Type == ClaimTypes.Role && x.Value == DefaultConstants.RoleForDaemonUsers_Aurora))
+                            if (user.UserAuthType == UserAuthType.Identity.ToString())
                             {
-                                Log.Warning($"'{callPath}' '{e.UserName}' identity-user:'{identityUser.Email}' " +
-                                    $"missing-role:'{DefaultConstants.RoleForDaemonUsers_Aurora}'");
+                                /*
+                                 * is identity user and password valid...
+                                 */
 
-                                uow.Sessions.Create(
-                                    new E_Session
+                                var identityUser = admin.User_GetV1(user.UserId.ToString())
+                                .AsTask().Result;
+
+                                var identityGrant = sts.ResourceOwner_GrantV2(
+                                    new ResourceOwnerV2()
                                     {
-                                        UserId = user.UserId,
-                                        CallPath = callPath,
-                                        Details = $"identity-user:'{identityUser.Email}' missing-role:'{DefaultConstants.RoleForDaemonUsers_Aurora}'",
-                                        LocalEndPoint = _localEndPoint,
-                                        RemoteEndPoint = e.ClientEndPoint.ToString(),
-                                        RemoteSoftwareIdentifier = e.ClientSoftwareIdentifier,
-                                        IsActive = true,
-                                    });
+                                        issuer = conf["IdentityCredential:IssuerName"],
+                                        client = string.Empty,
+                                        grant_type = "password",
+                                        user = identityUser.UserName,
+                                        password = e.Password,
+                                    })
+                                    .AsTask().Result;
 
-                                uow.Commit();
+                                /*
+                                 * is identity user in required role(s)...
+                                 */
 
-                                throw new UnauthorizedAccessException();
+                                var jwt = new JwtSecurityToken(identityGrant.access_token);
+
+                                if (!jwt.Claims.Any(x => x.Type == ClaimTypes.Role && x.Value == DefaultConstants.RoleForDaemonUsers_Aurora))
+                                {
+                                    Log.Warning($"'{callPath}' '{e.UserName}' identity-user:'{identityUser.Email}' " +
+                                        $"missing-role:'{DefaultConstants.RoleForDaemonUsers_Aurora}'");
+
+                                    uow.Sessions.Create(
+                                        new E_Session
+                                        {
+                                            UserId = user.UserId,
+                                            CallPath = callPath,
+                                            Details = $"identity-user:'{identityUser.Email}' missing-role:'{DefaultConstants.RoleForDaemonUsers_Aurora}'",
+                                            LocalEndPoint = _localEndPoint,
+                                            RemoteEndPoint = e.ClientEndPoint.ToString(),
+                                            RemoteSoftwareIdentifier = e.ClientSoftwareIdentifier,
+                                            IsActive = true,
+                                        });
+
+                                    uow.Commit();
+
+                                    throw new UnauthorizedAccessException();
+                                }
                             }
+                            else if (user.UserAuthType == UserAuthType.Local.ToString())
+                            {
+                                /*
+                                 * is local user and password valid...
+                                 */
+
+                                var secret = conf["Databases:AuroraSecret"];
+                                var decryptedPass = AES.DecryptString(user.EncryptedPass, secret);
+
+                                if (decryptedPass != e.Password)
+                                    throw new UnauthorizedAccessException();
+                            }
+                            else
+                                throw new NotImplementedException();
                         }
                         catch (Exception ex)
-                            when (ex is HttpRequestException || ex is UnauthorizedAccessException)
+                            when (ex is CryptographicException || ex is HttpRequestException || ex is UnauthorizedAccessException)
                         {
                             Log.Warning($"'{callPath}'" +
                                 $"{Environment.NewLine} {ex.Message}" +
@@ -1112,8 +1170,8 @@ namespace Bhbk.Daemon.Aurora.SFTP
                         .SingleOrDefault();
 
                     /*
-                     * if connection attempt did not succeed in connect phase, pre-authentication phase and authentication phase 
-                     * there would be no need to decrement sessions in use for a user.
+                     * if connection attempt did not succeed in connect phase, pre-authentication phase and authentication 
+                     * stages there would be no need to decrement sessions in use for a user.
                      */
 
                     if (user != null)
@@ -1130,9 +1188,8 @@ namespace Bhbk.Daemon.Aurora.SFTP
                             Details = $"duration:'{e.Session.Duration}'",
                             LocalEndPoint = _localEndPoint,
                             RemoteEndPoint = ServerSession.Current.ClientEndPoint.ToString(),
-                            IsActive = true,
+                            IsActive = false,
                         });
-                    uow.Commit();
 
                     var entries = uow.Sessions.Get(QueryExpressionFactory.GetQueryExpression<E_Session>()
                         .Where(x => x.LocalEndPoint == _localEndPoint && x.RemoteEndPoint == remote && x.IsActive == true).ToLambda());
@@ -1170,7 +1227,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                         .Where(x => x.UserName == ServerSession.Current.UserName).ToLambda(),
                             new List<Expression<Func<E_Login, object>>>()
                             {
-                                    x => x.Alerts,
+                                x => x.Alerts,
                             })
                         .Single();
 
@@ -1253,7 +1310,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                         .Where(x => x.UserName == ServerSession.Current.UserName).ToLambda(),
                             new List<Expression<Func<E_Login, object>>>()
                             {
-                                    x => x.Alerts,
+                                x => x.Alerts,
                             })
                         .Single();
 

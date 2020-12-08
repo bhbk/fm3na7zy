@@ -1,6 +1,7 @@
 ﻿
 CREATE PROCEDURE [svc].[usp_Login_Update]
      @UserId	    		UNIQUEIDENTIFIER
+    ,@UserAuthType			NVARCHAR (16) 
     ,@UserName	    		NVARCHAR (128) 
     ,@FileSystemType		NVARCHAR (16) 
 	,@FileSystemChrootPath	NVARCHAR (64)
@@ -22,7 +23,8 @@ BEGIN
 
         UPDATE [dbo].[tbl_Login]
         SET
-			 UserName		    	= @UserName
+            UserAuthType            = @UserAuthType
+			,UserName		    	= @UserName
 			,FileSystemType			= @FileSystemType
 			,FileSystemChrootPath	= @FileSystemChrootPath
 			,IsPasswordRequired		= @IsPasswordRequired

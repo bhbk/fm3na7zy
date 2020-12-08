@@ -25,9 +25,9 @@ namespace Bhbk.Cli.Aurora.Commands
     {
         private readonly IConfiguration _conf;
         private readonly IUnitOfWork _uow;
-        private UserLoginType _loginType;
+        private UserAuthType _authType;
         private FileSystemProviderType _fileSystemType;
-        private readonly string _loginTypeList = string.Join(", ", Enum.GetNames(typeof(UserLoginType)));
+        private readonly string _authTypeList = string.Join(", ", Enum.GetNames(typeof(UserAuthType)));
         private readonly string _fileSystemTypeList = string.Join(", ", Enum.GetNames(typeof(FileSystemProviderType)));
         private string _userName;
 
@@ -59,8 +59,8 @@ namespace Bhbk.Cli.Aurora.Commands
 
             HasRequiredOption("l|login=", "Enter type of login for user", arg =>
             {
-                if (!Enum.TryParse(arg, out _loginType))
-                    throw new ConsoleHelpAsException($"  *** Invalid login type. Options are '{_loginTypeList}' ***");
+                if (!Enum.TryParse(arg, out _authType))
+                    throw new ConsoleHelpAsException($"  *** Invalid login type. Options are '{_authTypeList}' ***");
             });
 
             HasRequiredOption("f|filesystem=", "Enter type of filesystem for user", arg =>
@@ -76,7 +76,7 @@ namespace Bhbk.Cli.Aurora.Commands
             {
                 var user = new E_Login
                 {
-                    UserLoginType = _loginType.ToString(),
+                    UserAuthType = _authType.ToString(),
                     UserName = _userName,
                     FileSystemType = _fileSystemType.ToString(),
                     IsPasswordRequired = true,
@@ -86,14 +86,14 @@ namespace Bhbk.Cli.Aurora.Commands
                     IsDeletable = false,
                 };
 
-                if (_loginType == UserLoginType.Identity)
+                if (_authType == UserAuthType.Identity)
                 {
                     var admin = new AdminService(_conf)
                     {
                         Grant = new ClientCredentialGrantV2(_conf)
                     };
 
-                    Console.Out.Write($"  *** Enter email (full or partial) of ({_loginType}) user to look for *** : ");
+                    Console.Out.Write($"  *** Enter email (full or partial) of ({_authType}) user to look for *** : ");
                     var emailSearch = StandardInput.GetInput();
                     Console.Out.WriteLine();
 
@@ -120,17 +120,17 @@ namespace Bhbk.Cli.Aurora.Commands
                         Console.Out.WriteLine($"  [identity GUID] {identityUser.Id} [email] {identityUser.UserName}");
 
                     Console.Out.WriteLine();
-                    Console.Out.Write($"  *** Enter GUID of ({_loginType}) user *** : ");
+                    Console.Out.Write($"  *** Enter GUID of ({_authType}) user *** : ");
                     var identityGuid = Guid.Parse(StandardInput.GetInput());
 
                     user.UserId = identityGuid;
                 }
 
-                if (_loginType == UserLoginType.Local)
+                if (_authType == UserAuthType.Local)
                 {
                     var secret = _conf["Databases:AuroraSecret"];
 
-                    Console.Out.Write($"  *** Enter password of ({_loginType}) user *** : ");
+                    Console.Out.Write($"  *** Enter password of ({_authType}) user *** : ");
                     var decryptedPass = StandardInput.GetHiddenInput();
                     Console.Out.WriteLine();
 
