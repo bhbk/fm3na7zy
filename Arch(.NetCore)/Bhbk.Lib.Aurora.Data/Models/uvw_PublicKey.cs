@@ -8,7 +8,7 @@ namespace Bhbk.Lib.Aurora.Data.Models
     public partial class uvw_PublicKey
     {
         public Guid Id { get; set; }
-        public Guid? IdentityId { get; set; }
+        public Guid? UserId { get; set; }
         public Guid? PrivateKeyId { get; set; }
         public string KeyValue { get; set; }
         public string KeyAlgo { get; set; }

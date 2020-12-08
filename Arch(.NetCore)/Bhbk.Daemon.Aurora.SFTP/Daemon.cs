@@ -85,7 +85,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
 
                         var keyType = ConfigType.RebexLicense.ToString();
 
-                        var license = uow.Settings.Get(QueryExpressionFactory.GetQueryExpression<Setting>()
+                        var license = uow.Settings.Get(QueryExpressionFactory.GetQueryExpression<E_Setting>()
                             .Where(x => x.ConfigKey == keyType).ToLambda())
                             .OrderBy(x => x.CreatedUtc)
                             .Last();
@@ -114,8 +114,8 @@ namespace Bhbk.Daemon.Aurora.SFTP
 
                             if (Enum.TryParse(hostKeyAlgo, out hostKeyAlgosSupported))
                             {
-                                var privKey = uow.PrivateKeys.Get(QueryExpressionFactory.GetQueryExpression<PrivateKey>()
-                                    .Where(x => x.IdentityId == null && x.IsEnabled == true && x.KeyAlgo == hostKeyAlgo).ToLambda())
+                                var privKey = uow.PrivateKeys.Get(QueryExpressionFactory.GetQueryExpression<E_PrivateKey>()
+                                    .Where(x => x.UserId == null && x.IsEnabled == true && x.KeyAlgo == hostKeyAlgo).ToLambda())
                                     .OrderBy(x => x.CreatedUtc)
                                     .LastOrDefault();
 
@@ -154,7 +154,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                          * clear out orphan session entries from un-graceful shutdown of daemon...
                          */
 
-                        var entries = uow.Sessions.Get(QueryExpressionFactory.GetQueryExpression<Session>()
+                        var entries = uow.Sessions.Get(QueryExpressionFactory.GetQueryExpression<E_Session>()
                             .Where(x => x.LocalEndPoint == _localEndPoint && x.IsActive == true).ToLambda());
 
                         foreach (var entry in entries)
@@ -203,7 +203,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                 }
                 catch (Exception ex)
                 {
-                     Log.Fatal(ex, $"'{callPath}' failed on {Dns.GetHostName().ToUpper()}");
+                    Log.Fatal(ex, $"'{callPath}' failed on {Dns.GetHostName().ToUpper()}");
                 }
             }, cancellationToken);
         }
@@ -231,7 +231,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                             {
                                 var remote = session.ClientEndPoint.ToString();
 
-                                var entries = uow.Sessions.Get(QueryExpressionFactory.GetQueryExpression<Session>()
+                                var entries = uow.Sessions.Get(QueryExpressionFactory.GetQueryExpression<E_Session>()
                                     .Where(x => x.LocalEndPoint == _localEndPoint && x.IsActive == true).ToLambda());
 
                                 foreach (var entry in entries)
@@ -254,7 +254,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                 }
                 catch (Exception ex)
                 {
-                     Log.Fatal(ex, $"'{callPath}' failed on {Dns.GetHostName().ToUpper()}");
+                    Log.Fatal(ex, $"'{callPath}' failed on {Dns.GetHostName().ToUpper()}");
                 }
             }, cancellationToken);
         }
@@ -263,8 +263,8 @@ namespace Bhbk.Daemon.Aurora.SFTP
             SshHostKeyAlgorithm keyAlgo, SignatureHashAlgorithm sigAlgo, int keySize)
         {
             var keyAlgoStr = keyAlgo.ToString();
-            var privKey = uow.PrivateKeys.Get(QueryExpressionFactory.GetQueryExpression<PrivateKey>()
-                .Where(x => x.IdentityId == null && x.IsEnabled == true && x.KeyAlgo == keyAlgoStr).ToLambda())
+            var privKey = uow.PrivateKeys.Get(QueryExpressionFactory.GetQueryExpression<E_PrivateKey>()
+                .Where(x => x.UserId == null && x.IsEnabled == true && x.KeyAlgo == keyAlgoStr).ToLambda())
                 .OrderBy(x => x.CreatedUtc)
                 .LastOrDefault();
 
@@ -300,8 +300,8 @@ namespace Bhbk.Daemon.Aurora.SFTP
                 {
                     var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
 
-                    var networks = uow.Networks.Get(QueryExpressionFactory.GetQueryExpression<Network>()
-                        .Where(x => x.IdentityId == null && x.IsEnabled).ToLambda())
+                    var networks = uow.Networks.Get(QueryExpressionFactory.GetQueryExpression<E_Network>()
+                        .Where(x => x.UserId == null && x.IsEnabled).ToLambda())
                         .OrderBy(x => x.SequenceId);
 
                     /*
@@ -318,7 +318,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                             Log.Warning($"'{callPath}' client:'{e.ClientEndPoint}' denied:'network'");
 
                             uow.Sessions.Create(
-                                new Session
+                                new E_Session
                                 {
                                     CallPath = callPath,
                                     Details = "denied:'network'",
@@ -339,7 +339,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                             Log.Information($"'{callPath}' client:'{e.ClientEndPoint}' allowed:'network'");
 
                             uow.Sessions.Create(
-                                new Session
+                                new E_Session
                                 {
                                     CallPath = callPath,
                                     Details = "allowed:'network'",
@@ -358,7 +358,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                     Log.Warning($"'{callPath}' client:'{e.ClientEndPoint}' denied:'default'");
 
                     uow.Sessions.Create(
-                        new Session
+                        new E_Session
                         {
                             CallPath = callPath,
                             Details = "denied:'default'",
@@ -375,7 +375,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
             }
             catch (Exception ex)
             {
-                 Log.Fatal(ex, $"'{callPath}' failed on {Dns.GetHostName().ToUpper()}");
+                Log.Fatal(ex, $"'{callPath}' failed on {Dns.GetHostName().ToUpper()}");
 
                 e.Accept = false;
                 return;
@@ -391,12 +391,13 @@ namespace Bhbk.Daemon.Aurora.SFTP
                 using (var scope = _factory.CreateScope())
                 {
                     var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
-                    var user = uow.UserLogins.Get(QueryExpressionFactory.GetQueryExpression<UserLogin>()
-                        .Where(x => x.IdentityAlias == e.UserName && x.IsEnabled).ToLambda(),
-                            new List<Expression<Func<UserLogin, object>>>()
+                    var user = uow.Logins.Get(QueryExpressionFactory.GetQueryExpression<E_Login>()
+                        .Where(x => x.UserName == e.UserName && x.IsEnabled).ToLambda(),
+                            new List<Expression<Func<E_Login, object>>>()
                             {
                                 x => x.Networks,
                                 x => x.PublicKeys,
+                                x => x.Usage,
                             })
                         .SingleOrDefault();
 
@@ -409,10 +410,35 @@ namespace Bhbk.Daemon.Aurora.SFTP
                         Log.Warning($"'{callPath}' user:'{e.UserName}' denied");
 
                         uow.Sessions.Create(
-                            new Session
+                            new E_Session
                             {
                                 CallPath = callPath,
                                 Details = $"user:'{e.UserName}' denied",
+                                LocalEndPoint = _localEndPoint,
+                                RemoteEndPoint = e.ClientEndPoint.ToString(),
+                                RemoteSoftwareIdentifier = e.ClientSoftwareIdentifier,
+                                IsActive = true,
+                            });
+
+                        uow.Commit();
+
+                        e.Reject();
+                        return;
+                    }
+
+                    /*
+                     * does user have correct login type...
+                     */
+
+                    if (user.UserLoginType != UserLoginType.Identity.ToString())
+                    {
+                        Log.Warning($"'{callPath}' user:'{e.UserName}' denied:'login-type'");
+
+                        uow.Sessions.Create(
+                            new E_Session
+                            {
+                                CallPath = callPath,
+                                Details = $"user:'{e.UserName}' denied:'login-type'",
                                 LocalEndPoint = _localEndPoint,
                                 RemoteEndPoint = e.ClientEndPoint.ToString(),
                                 RemoteSoftwareIdentifier = e.ClientSoftwareIdentifier,
@@ -433,16 +459,16 @@ namespace Bhbk.Daemon.Aurora.SFTP
                         .Where(x => x.UserName == e.UserName)
                         .Count();
 
-                    if (sessions >= user.SessionMax)
+                    if (sessions >= user.Usage.SessionMax)
                     {
-                        Log.Warning($"'{callPath}' '{e.UserName}' session-maximum:'{user.SessionMax}' sessions-in-use:'{sessions}' denied");
+                        Log.Warning($"'{callPath}' '{e.UserName}' session-maximum:'{user.Usage.SessionMax}' sessions-in-use:'{sessions}' denied");
 
                         uow.Sessions.Create(
-                            new Session
+                            new E_Session
                             {
-                                IdentityId = user.IdentityId,
+                                UserId = user.UserId,
                                 CallPath = callPath,
-                                Details = $"session-maximum:'{user.SessionMax}' sessions-in-use:'{sessions}' denied",
+                                Details = $"session-maximum:'{user.Usage.SessionMax}' sessions-in-use:'{sessions}' denied",
                                 LocalEndPoint = _localEndPoint,
                                 RemoteEndPoint = e.ClientEndPoint.ToString(),
                                 RemoteSoftwareIdentifier = e.ClientSoftwareIdentifier,
@@ -455,14 +481,14 @@ namespace Bhbk.Daemon.Aurora.SFTP
                         return;
                     }
 
-                    Log.Information($"'{callPath}' '{e.UserName}' session-maximum:'{user.SessionMax}' sessions-in-use:'{sessions}' allowed");
+                    Log.Information($"'{callPath}' '{e.UserName}' session-maximum:'{user.Usage.SessionMax}' sessions-in-use:'{sessions}' allowed");
 
                     uow.Sessions.Create(
-                        new Session
+                        new E_Session
                         {
-                            IdentityId = user.IdentityId,
+                            UserId = user.UserId,
                             CallPath = callPath,
-                            Details = $"session-maximum:'{user.SessionMax}' sessions-in-use:'{sessions}' allowed",
+                            Details = $"session-maximum:'{user.Usage.SessionMax}' sessions-in-use:'{sessions}' allowed",
                             LocalEndPoint = _localEndPoint,
                             RemoteEndPoint = e.ClientEndPoint.ToString(),
                             RemoteSoftwareIdentifier = e.ClientSoftwareIdentifier,
@@ -475,8 +501,8 @@ namespace Bhbk.Daemon.Aurora.SFTP
                      * does user have network filtering rule to allow session...
                      */
 
-                    var networks = uow.Networks.Get(QueryExpressionFactory.GetQueryExpression<Network>()
-                        .Where(x => x.IdentityId == user.IdentityId && x.IsEnabled).ToLambda())
+                    var networks = uow.Networks.Get(QueryExpressionFactory.GetQueryExpression<E_Network>()
+                        .Where(x => x.UserId == user.UserId && x.IsEnabled).ToLambda())
                         .OrderBy(x => x.SequenceId);
 
                     var allowed = false;
@@ -491,9 +517,9 @@ namespace Bhbk.Daemon.Aurora.SFTP
                             Log.Warning($"'{callPath}' '{e.UserName}' denied:'network'");
 
                             uow.Sessions.Create(
-                                new Session
+                                new E_Session
                                 {
-                                    IdentityId = user.IdentityId,
+                                    UserId = user.UserId,
                                     CallPath = callPath,
                                     Details = $"denied:'network'",
                                     LocalEndPoint = _localEndPoint,
@@ -514,9 +540,9 @@ namespace Bhbk.Daemon.Aurora.SFTP
                             Log.Information($"'{callPath}' '{e.UserName}' allowed:'network'");
 
                             uow.Sessions.Create(
-                                new Session
+                                new E_Session
                                 {
-                                    IdentityId = user.IdentityId,
+                                    UserId = user.UserId,
                                     CallPath = callPath,
                                     Details = $"allowed:'network'",
                                     LocalEndPoint = _localEndPoint,
@@ -537,9 +563,9 @@ namespace Bhbk.Daemon.Aurora.SFTP
                         Log.Warning($"'{callPath}' '{e.UserName}' denied:'network'");
 
                         uow.Sessions.Create(
-                            new Session
+                            new E_Session
                             {
-                                IdentityId = user.IdentityId,
+                                UserId = user.UserId,
                                 CallPath = callPath,
                                 Details = $"denied:'network'",
                                 LocalEndPoint = _localEndPoint,
@@ -564,9 +590,9 @@ namespace Bhbk.Daemon.Aurora.SFTP
                         Log.Information($"'{callPath}' '{e.UserName}' required:'public-key and password'");
 
                         uow.Sessions.Create(
-                            new Session
+                            new E_Session
                             {
-                                IdentityId = user.IdentityId,
+                                UserId = user.UserId,
                                 CallPath = callPath,
                                 Details = "required:'public-key and password'",
                                 LocalEndPoint = _localEndPoint,
@@ -591,9 +617,9 @@ namespace Bhbk.Daemon.Aurora.SFTP
                         Log.Information($"'{callPath}' '{e.UserName}' required:'public-key'");
 
                         uow.Sessions.Create(
-                            new Session
+                            new E_Session
                             {
-                                IdentityId = user.IdentityId,
+                                UserId = user.UserId,
                                 CallPath = callPath,
                                 Details = "required:'public-key'",
                                 LocalEndPoint = _localEndPoint,
@@ -618,9 +644,9 @@ namespace Bhbk.Daemon.Aurora.SFTP
                         Log.Information($"'{callPath}' '{e.UserName}' required:'password'");
 
                         uow.Sessions.Create(
-                            new Session
+                            new E_Session
                             {
-                                IdentityId = user.IdentityId,
+                                UserId = user.UserId,
                                 CallPath = callPath,
                                 Details = "required:'password'",
                                 LocalEndPoint = _localEndPoint,
@@ -638,9 +664,9 @@ namespace Bhbk.Daemon.Aurora.SFTP
                     Log.Warning($"'{callPath}' '{e.UserName}' denied:'default'");
 
                     uow.Sessions.Create(
-                        new Session
+                        new E_Session
                         {
-                            IdentityId = user.IdentityId,
+                            UserId = user.UserId,
                             CallPath = callPath,
                             Details = "denied:'default'",
                             LocalEndPoint = _localEndPoint,
@@ -657,7 +683,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
             }
             catch (Exception ex)
             {
-                 Log.Fatal(ex, $"'{callPath}' failed on {Dns.GetHostName().ToUpper()}");
+                Log.Fatal(ex, $"'{callPath}' failed on {Dns.GetHostName().ToUpper()}");
             }
         }
 
@@ -675,12 +701,13 @@ namespace Bhbk.Daemon.Aurora.SFTP
                     var admin = scope.ServiceProvider.GetRequiredService<IAdminService>();
                     var sts = scope.ServiceProvider.GetRequiredService<IStsService>();
 
-                    var user = uow.UserLogins.Get(QueryExpressionFactory.GetQueryExpression<UserLogin>()
-                        .Where(x => x.IdentityAlias == e.UserName && x.IsEnabled).ToLambda(),
-                            new List<Expression<Func<UserLogin, object>>>()
+                    var user = uow.Logins.Get(QueryExpressionFactory.GetQueryExpression<E_Login>()
+                        .Where(x => x.UserName == e.UserName && x.IsEnabled).ToLambda(),
+                            new List<Expression<Func<E_Login, object>>>()
                             {
                                 x => x.Mount,
                                 x => x.PublicKeys,
+                                x => x.Usage,
                             })
                         .Single();
 
@@ -695,9 +722,9 @@ namespace Bhbk.Daemon.Aurora.SFTP
                             Log.Warning($"'{callPath}' '{e.UserName}' denied:'public-key'");
 
                             uow.Sessions.Create(
-                                new Session
+                                new E_Session
                                 {
-                                    IdentityId = user.IdentityId,
+                                    UserId = user.UserId,
                                     CallPath = callPath,
                                     Details = "denied:'pubkey-key'",
                                     LocalEndPoint = _localEndPoint,
@@ -718,7 +745,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                              * does user have valid account...
                              */
 
-                            var identityUser = admin.User_GetV1(user.IdentityId.ToString())
+                            var identityUser = admin.User_GetV1(user.UserId.ToString())
                                 .AsTask().Result;
 
                             if (identityUser.IsLockedOut
@@ -728,9 +755,9 @@ namespace Bhbk.Daemon.Aurora.SFTP
                                 Log.Warning($"'{callPath}' '{e.UserName}' identity-user:'{identityUser.Email}' denied:'invalid'");
 
                                 uow.Sessions.Create(
-                                    new Session
+                                    new E_Session
                                     {
-                                        IdentityId = user.IdentityId,
+                                        UserId = user.UserId,
                                         CallPath = callPath,
                                         Details = $"identity-user:'{identityUser.Email}' denied:'invalid'",
                                         LocalEndPoint = _localEndPoint,
@@ -748,7 +775,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                              * does user have valid role...
                              */
 
-                            var identityRoles = admin.User_GetRolesV1(user.IdentityId.ToString())
+                            var identityRoles = admin.User_GetRolesV1(user.UserId.ToString())
                                 .AsTask().Result;
 
                             if (!identityRoles.Where(x => x.Name == DefaultConstants.RoleForDaemonUsers_Aurora).Any())
@@ -757,9 +784,9 @@ namespace Bhbk.Daemon.Aurora.SFTP
                                     $" missing-role:'{DefaultConstants.RoleForDaemonUsers_Aurora}'");
 
                                 uow.Sessions.Create(
-                                    new Session
+                                    new E_Session
                                     {
-                                        IdentityId = user.IdentityId,
+                                        UserId = user.UserId,
                                         CallPath = callPath,
                                         Details = $"identity-user:'{identityUser.Email}' missing-role:'{DefaultConstants.RoleForDaemonUsers_Aurora}'",
                                         LocalEndPoint = _localEndPoint,
@@ -783,9 +810,9 @@ namespace Bhbk.Daemon.Aurora.SFTP
                             Log.Warning($"'{callPath}' '{e.UserName}' denied:'public-key'");
 
                             uow.Sessions.Create(
-                                new Session
+                                new E_Session
                                 {
-                                    IdentityId = user.IdentityId,
+                                    UserId = user.UserId,
                                     CallPath = callPath,
                                     Details = $"denied:'public-key'",
                                     LocalEndPoint = _localEndPoint,
@@ -807,9 +834,9 @@ namespace Bhbk.Daemon.Aurora.SFTP
                         Log.Information($"'{callPath}' '{e.UserName}' accepted:'public-key'");
 
                         uow.Sessions.Create(
-                            new Session
+                            new E_Session
                             {
-                                IdentityId = user.IdentityId,
+                                UserId = user.UserId,
                                 CallPath = callPath,
                                 Details = "accepted:'public-key'",
                                 LocalEndPoint = _localEndPoint,
@@ -828,14 +855,14 @@ namespace Bhbk.Daemon.Aurora.SFTP
                              */
 
                             if (user.FileSystemType.ToLower() == FileSystemProviderType.SMB.ToString().ToLower()
-                                && !user.Mount.CredentialId.HasValue)
+                                && !user.Mount.AmbassadorId.HasValue)
                             {
                                 Log.Error($"'{callPath}' '{e.UserName}' {FileSystemProviderType.SMB} filesystem mount denied:'missing-credential'");
 
                                 uow.Sessions.Create(
-                                    new Session
+                                    new E_Session
                                     {
-                                        IdentityId = user.IdentityId,
+                                        UserId = user.UserId,
                                         CallPath = callPath,
                                         Details = $"{FileSystemProviderType.SMB} filesystem mount denied:'missing-credential'",
                                         LocalEndPoint = _localEndPoint,
@@ -863,6 +890,23 @@ namespace Bhbk.Daemon.Aurora.SFTP
                             var fsUser = new FileServerUser(e.UserName, e.Password, ShellType.Scp);
                             fsUser.SetFileSystem(fs);
 
+                            /*
+                             * persist session count for user so cli has data-point...
+                             */
+
+                            user.Usage.SessionsInUse = (short)_server.Sessions
+                                .Where(x => x.UserName == e.UserName)
+                                .Count();
+
+                            /*
+                             * add session that is about to be created...
+                             */
+
+                            user.Usage.SessionsInUse++;
+
+                            uow.Usages.Update(user.Usage);
+                            uow.Commit();
+
                             e.Accept(fsUser);
                             return;
                         }
@@ -883,7 +927,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                              * does user have valid account...
                              */
 
-                            var identityUser = admin.User_GetV1(user.IdentityId.ToString())
+                            var identityUser = admin.User_GetV1(user.UserId.ToString())
                                 .AsTask().Result;
 
                             var identityGrant = sts.ResourceOwner_GrantV2(
@@ -909,9 +953,9 @@ namespace Bhbk.Daemon.Aurora.SFTP
                                     $"missing-role:'{DefaultConstants.RoleForDaemonUsers_Aurora}'");
 
                                 uow.Sessions.Create(
-                                    new Session
+                                    new E_Session
                                     {
-                                        IdentityId = user.IdentityId,
+                                        UserId = user.UserId,
                                         CallPath = callPath,
                                         Details = $"identity-user:'{identityUser.Email}' missing-role:'{DefaultConstants.RoleForDaemonUsers_Aurora}'",
                                         LocalEndPoint = _localEndPoint,
@@ -935,9 +979,9 @@ namespace Bhbk.Daemon.Aurora.SFTP
                             Log.Warning($"'{callPath}' '{e.UserName}' denied:'password'");
 
                             uow.Sessions.Create(
-                                new Session
+                                new E_Session
                                 {
-                                    IdentityId = user.IdentityId,
+                                    UserId = user.UserId,
                                     CallPath = callPath,
                                     Details = $"denied:'password'",
                                     LocalEndPoint = _localEndPoint,
@@ -959,9 +1003,9 @@ namespace Bhbk.Daemon.Aurora.SFTP
                         Log.Information($"'{callPath}' '{e.UserName}' accepted:'password'");
 
                         uow.Sessions.Create(
-                            new Session
+                            new E_Session
                             {
-                                IdentityId = user.IdentityId,
+                                UserId = user.UserId,
                                 CallPath = callPath,
                                 Details = "accepted:'password'",
                                 LocalEndPoint = _localEndPoint,
@@ -988,6 +1032,23 @@ namespace Bhbk.Daemon.Aurora.SFTP
                             var fsUser = new FileServerUser(e.UserName, e.Password, ShellType.Scp);
                             fsUser.SetFileSystem(fs);
 
+                            /*
+                             * persist session count for user so cli has data-point...
+                             */
+
+                            user.Usage.SessionsInUse = (short)_server.Sessions
+                                .Where(x => x.UserName == e.UserName)
+                                .Count();
+
+                            /*
+                             * add session that is about to be created...
+                             */
+
+                            user.Usage.SessionsInUse++;
+
+                            uow.Usages.Update(user.Usage);
+                            uow.Commit();
+
                             e.Accept(fsUser);
                             return;
                         }
@@ -1007,9 +1068,9 @@ namespace Bhbk.Daemon.Aurora.SFTP
                     Log.Warning($"'{callPath}' '{e.UserName}' denied:'default'");
 
                     uow.Sessions.Create(
-                        new Session
+                        new E_Session
                         {
-                            IdentityId = user.IdentityId,
+                            UserId = user.UserId,
                             CallPath = callPath,
                             Details = "denied:'default'",
                             LocalEndPoint = _localEndPoint,
@@ -1026,7 +1087,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
             }
             catch (Exception ex)
             {
-                 Log.Fatal(ex, $"'{callPath}' failed on {Dns.GetHostName().ToUpper()}");
+                Log.Fatal(ex, $"'{callPath}' failed on {Dns.GetHostName().ToUpper()}");
             }
         }
 
@@ -1042,8 +1103,12 @@ namespace Bhbk.Daemon.Aurora.SFTP
                 {
                     var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
 
-                    var user = uow.UserLogins.Get(QueryExpressionFactory.GetQueryExpression<UserLogin>()
-                        .Where(x => x.IdentityAlias == ServerSession.Current.UserName).ToLambda())
+                    var user = uow.Logins.Get(QueryExpressionFactory.GetQueryExpression<E_Login>()
+                        .Where(x => x.UserName == ServerSession.Current.UserName).ToLambda(),
+                            new List<Expression<Func<E_Login, object>>>()
+                            {
+                                x => x.Usage,
+                            })
                         .SingleOrDefault();
 
                     /*
@@ -1053,14 +1118,14 @@ namespace Bhbk.Daemon.Aurora.SFTP
 
                     if (user != null)
                     {
-                        user.SessionsInUse--;
-                        uow.UserLogins.Update(user);
+                        user.Usage.SessionsInUse--;
+                        uow.Usages.Update(user.Usage);
                     }
 
                     uow.Sessions.Create(
-                        new Session
+                        new E_Session
                         {
-                            IdentityId = user?.IdentityId ?? null,
+                            UserId = user?.UserId ?? null,
                             CallPath = callPath,
                             Details = $"duration:'{e.Session.Duration}'",
                             LocalEndPoint = _localEndPoint,
@@ -1069,7 +1134,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                         });
                     uow.Commit();
 
-                    var entries = uow.Sessions.Get(QueryExpressionFactory.GetQueryExpression<Session>()
+                    var entries = uow.Sessions.Get(QueryExpressionFactory.GetQueryExpression<E_Session>()
                         .Where(x => x.LocalEndPoint == _localEndPoint && x.RemoteEndPoint == remote && x.IsActive == true).ToLambda());
 
                     foreach (var entry in entries)
@@ -1078,13 +1143,13 @@ namespace Bhbk.Daemon.Aurora.SFTP
                     uow.Sessions.Update(entries);
                     uow.Commit();
 
-                    Log.Information($"'{callPath}'{(string.IsNullOrEmpty(user?.IdentityAlias) ? null : " '" + user.IdentityAlias + "'")}" +
+                    Log.Information($"'{callPath}'{(string.IsNullOrEmpty(user?.UserName) ? null : " '" + user.UserName + "'")}" +
                         $" client:'{e.Session.ClientEndPoint}' duration:'{e.Session.Duration}'");
                 }
             }
             catch (Exception ex)
             {
-                 Log.Fatal(ex, $"'{callPath}' failed on {Dns.GetHostName().ToUpper()}");
+                Log.Fatal(ex, $"'{callPath}' failed on {Dns.GetHostName().ToUpper()}");
             }
         }
 
@@ -1101,9 +1166,9 @@ namespace Bhbk.Daemon.Aurora.SFTP
                     var admin = scope.ServiceProvider.GetRequiredService<IAdminService>();
                     var alert = scope.ServiceProvider.GetRequiredService<IAlertService>();
 
-                    var user = uow.UserLogins.Get(QueryExpressionFactory.GetQueryExpression<UserLogin>()
-                        .Where(x => x.IdentityAlias == ServerSession.Current.UserName).ToLambda(),
-                            new List<Expression<Func<UserLogin, object>>>()
+                    var user = uow.Logins.Get(QueryExpressionFactory.GetQueryExpression<E_Login>()
+                        .Where(x => x.UserName == ServerSession.Current.UserName).ToLambda(),
+                            new List<Expression<Func<E_Login, object>>>()
                             {
                                     x => x.Alerts,
                             })
@@ -1114,9 +1179,9 @@ namespace Bhbk.Daemon.Aurora.SFTP
                      */
 
                     uow.Sessions.Create(
-                        new Session
+                        new E_Session
                         {
-                            IdentityId = user.IdentityId,
+                            UserId = user.UserId,
                             CallPath = callPath,
                             Details = $"file:'/{e.FullPath}' size:'{e.BytesTransferred / 1048576f}MB'",
                             LocalEndPoint = _localEndPoint,
@@ -1167,7 +1232,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
             }
             catch (Exception ex)
             {
-                 Log.Fatal(ex, $"'{callPath}' failed on {Dns.GetHostName().ToUpper()}");
+                Log.Fatal(ex, $"'{callPath}' failed on {Dns.GetHostName().ToUpper()}");
             }
         }
 
@@ -1184,9 +1249,9 @@ namespace Bhbk.Daemon.Aurora.SFTP
                     var admin = scope.ServiceProvider.GetRequiredService<IAdminService>();
                     var alert = scope.ServiceProvider.GetRequiredService<IAlertService>();
 
-                    var user = uow.UserLogins.Get(QueryExpressionFactory.GetQueryExpression<UserLogin>()
-                        .Where(x => x.IdentityAlias == ServerSession.Current.UserName).ToLambda(),
-                            new List<Expression<Func<UserLogin, object>>>()
+                    var user = uow.Logins.Get(QueryExpressionFactory.GetQueryExpression<E_Login>()
+                        .Where(x => x.UserName == ServerSession.Current.UserName).ToLambda(),
+                            new List<Expression<Func<E_Login, object>>>()
                             {
                                     x => x.Alerts,
                             })
@@ -1197,9 +1262,9 @@ namespace Bhbk.Daemon.Aurora.SFTP
                      */
 
                     uow.Sessions.Create(
-                        new Session
+                        new E_Session
                         {
-                            IdentityId = user.IdentityId,
+                            UserId = user.UserId,
                             CallPath = callPath,
                             Details = $"file:'/{e.FullPath}' size:'{e.BytesTransferred / 1048576f}MB'",
                             LocalEndPoint = _localEndPoint,
@@ -1250,7 +1315,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
             }
             catch (Exception ex)
             {
-                 Log.Fatal(ex, $"'{callPath}' failed on {Dns.GetHostName().ToUpper()}");
+                Log.Fatal(ex, $"'{callPath}' failed on {Dns.GetHostName().ToUpper()}");
             }
         }
 
@@ -1265,8 +1330,8 @@ namespace Bhbk.Daemon.Aurora.SFTP
                     using (var scope = _factory.CreateScope())
                     {
                         var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
-                        var user = uow.UserLogins.Get(QueryExpressionFactory.GetQueryExpression<UserLogin>()
-                            .Where(x => x.IdentityAlias == ServerSession.Current.UserName).ToLambda())
+                        var user = uow.Logins.Get(QueryExpressionFactory.GetQueryExpression<E_Login>()
+                            .Where(x => x.UserName == ServerSession.Current.UserName).ToLambda())
                             .Single();
 
                         /*
@@ -1274,9 +1339,9 @@ namespace Bhbk.Daemon.Aurora.SFTP
                          */
 
                         uow.Sessions.Create(
-                            new Session
+                            new E_Session
                             {
-                                IdentityId = user.IdentityId,
+                                UserId = user.UserId,
                                 CallPath = callPath,
                                 Details = $"file:'{e.Node.Path.StringPath}' size:'{e.Node.Length / 1048576f}MB'",
                                 LocalEndPoint = _localEndPoint,
@@ -1295,7 +1360,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
             {
                 e.CancelOperation();
 
-                 Log.Fatal(ex, $"'{callPath}' failed on {Dns.GetHostName().ToUpper()}");
+                Log.Fatal(ex, $"'{callPath}' failed on {Dns.GetHostName().ToUpper()}");
             }
         }
 
@@ -1314,9 +1379,9 @@ namespace Bhbk.Daemon.Aurora.SFTP
                         var admin = scope.ServiceProvider.GetRequiredService<IAdminService>();
                         var alert = scope.ServiceProvider.GetRequiredService<IAlertService>();
 
-                        var user = uow.UserLogins.Get(QueryExpressionFactory.GetQueryExpression<UserLogin>()
-                            .Where(x => x.IdentityAlias == ServerSession.Current.UserName).ToLambda(),
-                                new List<Expression<Func<UserLogin, object>>>()
+                        var user = uow.Logins.Get(QueryExpressionFactory.GetQueryExpression<E_Login>()
+                            .Where(x => x.UserName == ServerSession.Current.UserName).ToLambda(),
+                                new List<Expression<Func<E_Login, object>>>()
                                 {
                                     x => x.Alerts,
                                 })
@@ -1327,9 +1392,9 @@ namespace Bhbk.Daemon.Aurora.SFTP
                          */
 
                         uow.Sessions.Create(
-                            new Session
+                            new E_Session
                             {
-                                IdentityId = user.IdentityId,
+                                UserId = user.UserId,
                                 CallPath = callPath,
                                 Details = $"file:'{e.ResultNode.Path.StringPath}' size:'{e.ResultNode.Length / 1048576f}MB'",
                                 LocalEndPoint = _localEndPoint,
@@ -1379,7 +1444,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
             }
             catch (Exception ex)
             {
-                 Log.Fatal(ex, $"'{callPath}' failed on {Dns.GetHostName().ToUpper()}");
+                Log.Fatal(ex, $"'{callPath}' failed on {Dns.GetHostName().ToUpper()}");
             }
         }
 
@@ -1395,8 +1460,8 @@ namespace Bhbk.Daemon.Aurora.SFTP
                     using (var scope = _factory.CreateScope())
                     {
                         var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
-                        var user = uow.UserLogins.Get(QueryExpressionFactory.GetQueryExpression<UserLogin>()
-                            .Where(x => x.IdentityAlias == ServerSession.Current.UserName).ToLambda())
+                        var user = uow.Logins.Get(QueryExpressionFactory.GetQueryExpression<E_Login>()
+                            .Where(x => x.UserName == ServerSession.Current.UserName).ToLambda())
                             .Single();
 
                         /*
@@ -1404,9 +1469,9 @@ namespace Bhbk.Daemon.Aurora.SFTP
                          */
 
                         uow.Sessions.Create(
-                            new Session
+                            new E_Session
                             {
-                                IdentityId = user.IdentityId,
+                                UserId = user.UserId,
                                 CallPath = callPath,
                                 Details = $"file:'{e.Node.Path.StringPath}' size:'{e.Node.Length / 1048576f}MB'",
                                 LocalEndPoint = _localEndPoint,
@@ -1425,7 +1490,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
             {
                 e.CancelOperation();
 
-                 Log.Fatal(ex, $"'{callPath}' failed on {Dns.GetHostName().ToUpper()}");
+                Log.Fatal(ex, $"'{callPath}' failed on {Dns.GetHostName().ToUpper()}");
             }
         }
 
@@ -1443,9 +1508,9 @@ namespace Bhbk.Daemon.Aurora.SFTP
                         var conf = scope.ServiceProvider.GetRequiredService<IConfiguration>();
                         var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
 
-                        var user = uow.UserLogins.Get(QueryExpressionFactory.GetQueryExpression<UserLogin>()
-                            .Where(x => x.IdentityAlias == ServerSession.Current.UserName).ToLambda(),
-                                new List<Expression<Func<UserLogin, object>>>()
+                        var user = uow.Logins.Get(QueryExpressionFactory.GetQueryExpression<E_Login>()
+                            .Where(x => x.UserName == ServerSession.Current.UserName).ToLambda(),
+                                new List<Expression<Func<E_Login, object>>>()
                                 {
                                     x => x.Alerts,
                                 })
@@ -1456,9 +1521,9 @@ namespace Bhbk.Daemon.Aurora.SFTP
                          */
 
                         uow.Sessions.Create(
-                            new Session
+                            new E_Session
                             {
-                                IdentityId = user.IdentityId,
+                                UserId = user.UserId,
                                 CallPath = callPath,
                                 Details = $"file:'{e.Node.Path.StringPath}' size:'{e.Node.Length / 1048576f}MB'",
                                 LocalEndPoint = _localEndPoint,
@@ -1476,7 +1541,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
             }
             catch (Exception ex)
             {
-                 Log.Fatal(ex, $"'{callPath}' failed on {Dns.GetHostName().ToUpper()}");
+                Log.Fatal(ex, $"'{callPath}' failed on {Dns.GetHostName().ToUpper()}");
             }
         }
 
@@ -1491,8 +1556,8 @@ namespace Bhbk.Daemon.Aurora.SFTP
                     using (var scope = _factory.CreateScope())
                     {
                         var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
-                        var user = uow.UserLogins.Get(QueryExpressionFactory.GetQueryExpression<UserLogin>()
-                            .Where(x => x.IdentityAlias == ServerSession.Current.UserName).ToLambda())
+                        var user = uow.Logins.Get(QueryExpressionFactory.GetQueryExpression<E_Login>()
+                            .Where(x => x.UserName == ServerSession.Current.UserName).ToLambda())
                             .Single();
 
                         /*
@@ -1500,9 +1565,9 @@ namespace Bhbk.Daemon.Aurora.SFTP
                          */
 
                         uow.Sessions.Create(
-                            new Session
+                            new E_Session
                             {
-                                IdentityId = user.IdentityId,
+                                UserId = user.UserId,
                                 CallPath = callPath,
                                 Details = $"file:'{e.Node.Path.StringPath}' size:'{e.Node.Length / 1048576f}MB'",
                                 LocalEndPoint = _localEndPoint,
@@ -1521,7 +1586,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
             {
                 e.CancelOperation();
 
-                 Log.Fatal(ex, $"'{callPath}' failed on {Dns.GetHostName().ToUpper()}");
+                Log.Fatal(ex, $"'{callPath}' failed on {Dns.GetHostName().ToUpper()}");
             }
         }
 
@@ -1538,9 +1603,9 @@ namespace Bhbk.Daemon.Aurora.SFTP
                         var conf = scope.ServiceProvider.GetRequiredService<IConfiguration>();
                         var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
 
-                        var user = uow.UserLogins.Get(QueryExpressionFactory.GetQueryExpression<UserLogin>()
-                            .Where(x => x.IdentityAlias == ServerSession.Current.UserName).ToLambda(),
-                                new List<Expression<Func<UserLogin, object>>>()
+                        var user = uow.Logins.Get(QueryExpressionFactory.GetQueryExpression<E_Login>()
+                            .Where(x => x.UserName == ServerSession.Current.UserName).ToLambda(),
+                                new List<Expression<Func<E_Login, object>>>()
                                 {
                                     x => x.Alerts,
                                 })
@@ -1551,9 +1616,9 @@ namespace Bhbk.Daemon.Aurora.SFTP
                          */
 
                         uow.Sessions.Create(
-                            new Session
+                            new E_Session
                             {
-                                IdentityId = user.IdentityId,
+                                UserId = user.UserId,
                                 CallPath = callPath,
                                 Details = $"file:'{e.ResultNode.Path.StringPath}' size:'{e.ResultNode.Length / 1048576f}MB'",
                                 LocalEndPoint = _localEndPoint,
@@ -1570,7 +1635,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
             }
             catch (Exception ex)
             {
-                 Log.Fatal(ex, $"'{callPath}' failed on {Dns.GetHostName().ToUpper()}");
+                Log.Fatal(ex, $"'{callPath}' failed on {Dns.GetHostName().ToUpper()}");
             }
         }
 

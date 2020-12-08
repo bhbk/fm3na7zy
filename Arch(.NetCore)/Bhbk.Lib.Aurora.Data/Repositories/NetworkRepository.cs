@@ -21,7 +21,7 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
 
             var pvalues = new []
             {
-                new SqlParameter("IdentityId", SqlDbType.UniqueIdentifier) { Value = entity.IdentityId.HasValue ? (object)entity.IdentityId.Value : DBNull.Value },
+                new SqlParameter("UserId", SqlDbType.UniqueIdentifier) { Value = entity.UserId.HasValue ? (object)entity.UserId.Value : DBNull.Value },
                 new SqlParameter("Address", SqlDbType.NVarChar) { Value = entity.Address },
                 new SqlParameter("Action", SqlDbType.NVarChar) { Value = entity.Action },
                 new SqlParameter("IsEnabled", SqlDbType.Bit) { Value = entity.IsEnabled },
@@ -29,7 +29,7 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
             };
 
             return _context.SqlQuery<uvw_Network>("EXEC @ReturnValue = [svc].[usp_Network_Insert] "
-                + "@IdentityId, @Address, @Action, @IsEnabled", pvalues)
+                + "@UserId, @Address, @Action, @IsEnabled", pvalues)
                     .Single();
         }
 
@@ -91,7 +91,7 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
             var pvalues = new []
             {
                 new SqlParameter("Id", SqlDbType.UniqueIdentifier) { Value = entity.Id },
-                new SqlParameter("IdentityId", SqlDbType.UniqueIdentifier) { Value = entity.IdentityId.HasValue ? (object)entity.IdentityId.Value : DBNull.Value },
+                new SqlParameter("UserId", SqlDbType.UniqueIdentifier) { Value = entity.UserId.HasValue ? (object)entity.UserId.Value : DBNull.Value },
                 new SqlParameter("Address", SqlDbType.NVarChar) { Value = entity.Address },
                 new SqlParameter("Action", SqlDbType.NVarChar) { Value = entity.Action },
                 new SqlParameter("IsEnabled", SqlDbType.Bit) { Value = entity.IsEnabled },
@@ -99,7 +99,7 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
             };
 
             return _context.SqlQuery<uvw_Network>("EXEC @ReturnValue = [svc].[usp_Network_Update] "
-                + "@Id, @IdentityId, @Address, @Action, @IsEnabled", pvalues)
+                + "@Id, @UserId, @Address, @Action, @IsEnabled", pvalues)
                     .Single();
         }
 

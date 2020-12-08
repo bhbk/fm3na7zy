@@ -19,7 +19,7 @@ namespace Bhbk.Cli.Aurora.Commands
     {
         private readonly IConfiguration _conf;
         private readonly IUnitOfWork _uow;
-        private UserLogin _user;
+        private E_Login _user;
 
         public UserLoginShowCommand()
         {
@@ -37,15 +37,15 @@ namespace Bhbk.Cli.Aurora.Commands
                 if (string.IsNullOrEmpty(arg))
                     throw new ConsoleHelpAsException($"  *** No user given ***");
 
-                _user = _uow.UserLogins.Get(QueryExpressionFactory.GetQueryExpression<UserLogin>()
-                    .Where(x => x.IdentityAlias == arg).ToLambda(),
-                        new List<Expression<Func<UserLogin, object>>>()
+                _user = _uow.Logins.Get(QueryExpressionFactory.GetQueryExpression<E_Login>()
+                    .Where(x => x.UserName == arg).ToLambda(),
+                        new List<Expression<Func<E_Login, object>>>()
                         {
                             x => x.Alerts,
                             x => x.Files,
                             x => x.Folders,
                             x => x.Mount,
-                            x => x.Mount.Credential,
+                            x => x.Mount.Ambassador,
                             x => x.Networks,
                             x => x.PrivateKeys,
                             x => x.PublicKeys,
@@ -63,23 +63,23 @@ namespace Bhbk.Cli.Aurora.Commands
         {
             try
             {
-                StandardOutputFactory.Logins(new List<UserLogin> { _user }, "extras");
+                StandardOutputFactory.Logins(new List<E_Login> { _user }, "extras");
 
                 if (_user.Mount != null)
-                    StandardOutputFactory.Mounts(new List<UserMount> { _user.Mount });
+                    StandardOutputFactory.Mounts(new List<E_Mount> { _user.Mount });
 
                 StandardOutputFactory.KeyPairs(_user.PublicKeys.OrderBy(x => x.CreatedUtc), _user.PrivateKeys);
                 StandardOutputFactory.Networks(_user.Networks.OrderBy(x => x.Action));
                 StandardOutputFactory.Alerts(_user.Alerts.OrderBy(x => x.ToDisplayName));
 
-                var remotes = _uow.Sessions.Get(QueryExpressionFactory.GetQueryExpression<Session>()
-                    .Where(x => x.IdentityId == _user.IdentityId && x.IsActive == true).ToLambda())
-                    .OrderBy(x => x.IdentityAlias).ThenBy(x => x.CreatedUtc)
+                var remotes = _uow.Sessions.Get(QueryExpressionFactory.GetQueryExpression<E_Session>()
+                    .Where(x => x.UserId == _user.UserId && x.IsActive == true).ToLambda())
+                    .OrderBy(x => x.UserName).ThenBy(x => x.CreatedUtc)
                     .Select(x => x.RemoteEndPoint).Distinct().TakeLast(100).ToList();
 
                 foreach (var remote in remotes)
                 {
-                    var sessions = _uow.Sessions.Get(QueryExpressionFactory.GetQueryExpression<Session>()
+                    var sessions = _uow.Sessions.Get(QueryExpressionFactory.GetQueryExpression<E_Session>()
                         .Where(x => x.RemoteEndPoint == remote).ToLambda());
 
                     Console.Out.WriteLine();

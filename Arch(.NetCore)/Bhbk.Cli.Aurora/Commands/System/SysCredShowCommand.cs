@@ -30,7 +30,7 @@ namespace Bhbk.Cli.Aurora.Commands
         {
             try
             {
-                var exists = _uow.Credentials.Get();
+                var exists = _uow.Ambassadors.Get();
 
                 StandardOutputFactory.Credentials(exists);
 

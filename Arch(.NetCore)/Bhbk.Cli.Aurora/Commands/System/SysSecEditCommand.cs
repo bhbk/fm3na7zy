@@ -38,7 +38,7 @@ namespace Bhbk.Cli.Aurora.Commands
         {
             var keyType = ConfigType.RebexLicense.ToString();
 
-            var license = _uow.Settings.Get(QueryExpressionFactory.GetQueryExpression<Setting>()
+            var license = _uow.Settings.Get(QueryExpressionFactory.GetQueryExpression<E_Setting>()
                 .Where(x => x.ConfigKey == keyType).ToLambda())
                 .OrderBy(x => x.CreatedUtc)
                 .Last();
@@ -60,7 +60,7 @@ namespace Bhbk.Cli.Aurora.Commands
                 Console.Out.WriteLine($"  *** The new secret to encrypt passwords is *** : {secretNew}");
                 Console.Out.WriteLine();
 
-                var creds = _uow.Credentials.Get();
+                var creds = _uow.Ambassadors.Get();
                 var keys = _uow.PrivateKeys.Get();
 
                 Console.Out.WriteLine("  *** Current credential encrypted passwords *** ");
@@ -88,7 +88,7 @@ namespace Bhbk.Cli.Aurora.Commands
                     StandardOutputFactory.KeyPairSecrets(updatedKeys);
                     Console.Out.WriteLine();
 
-                    _uow.Credentials.Update(updatedCreds);
+                    _uow.Ambassadors.Update(updatedCreds);
                     _uow.PrivateKeys.Update(updatedKeys);
                     _uow.Commit();
                 }

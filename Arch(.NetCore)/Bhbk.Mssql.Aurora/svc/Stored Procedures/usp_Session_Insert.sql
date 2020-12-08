@@ -1,6 +1,6 @@
 ﻿
 CREATE PROCEDURE [svc].[usp_Session_Insert]
-    @IdentityId					UNIQUEIDENTIFIER
+    @UserId						UNIQUEIDENTIFIER
    ,@CallPath					VARCHAR(256)
    ,@Details					VARCHAR(MAX)
    ,@LocalEndPoint				VARCHAR(128)
@@ -18,7 +18,7 @@ DECLARE @CREATED DATETIMEOFFSET = GETUTCDATE()
 
 INSERT INTO [dbo].[tbl_Session] 
 	(Id
-	,IdentityId
+	,UserId
 	,CallPath
 	,Details
 	,LocalEndPoint
@@ -30,7 +30,7 @@ INSERT INTO [dbo].[tbl_Session]
 	)
 VALUES 
 	(@STATEID
-    ,@IdentityId
+    ,@UserId
     ,@CallPath
     ,@Details
     ,@LocalEndPoint

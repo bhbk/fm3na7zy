@@ -23,7 +23,7 @@ namespace Bhbk.Cli.Aurora.Commands
     {
         private readonly IConfiguration _conf;
         private readonly IUnitOfWork _uow;
-        private UserLogin _user;
+        private E_Login _user;
 
         public UserKeyExportCommand()
         {
@@ -41,9 +41,9 @@ namespace Bhbk.Cli.Aurora.Commands
                 if (string.IsNullOrEmpty(arg))
                     throw new ConsoleHelpAsException($"  *** No user name given ***");
 
-                _user = _uow.UserLogins.Get(QueryExpressionFactory.GetQueryExpression<UserLogin>()
-                    .Where(x => x.IdentityAlias == arg).ToLambda(),
-                        new List<Expression<Func<UserLogin, object>>>()
+                _user = _uow.Logins.Get(QueryExpressionFactory.GetQueryExpression<E_Login>()
+                    .Where(x => x.UserName == arg).ToLambda(),
+                        new List<Expression<Func<E_Login, object>>>()
                         {
                             x => x.PrivateKeys,
                             x => x.PublicKeys,
@@ -74,7 +74,7 @@ namespace Bhbk.Cli.Aurora.Commands
 
                 if (pubKey != null)
                 {
-                    var dir = $"{Directory.GetCurrentDirectory()}{Path.DirectorySeparatorChar}.{_user.IdentityAlias}" +
+                    var dir = $"{Directory.GetCurrentDirectory()}{Path.DirectorySeparatorChar}.{_user.UserName}" +
                         $"{Path.DirectorySeparatorChar}{pubKey.Id.ToString().ToLower()}{Path.DirectorySeparatorChar}";
 
                     if (!Directory.Exists(dir))
@@ -100,7 +100,7 @@ namespace Bhbk.Cli.Aurora.Commands
 
                     //public opensshbase64 key format in "authorized_keys"
                     var pubOpenSshBase64File = new FileInfo(dir + "authorized_keys.txt");
-                    var pubOpenSshBase64Str = KeyHelper.ExportPubKeyBase64(_user, new List<PublicKey> { pubKey });
+                    var pubOpenSshBase64Str = KeyHelper.ExportPubKeyBase64(_user, new List<E_PublicKey> { pubKey });
                     File.WriteAllText(pubOpenSshBase64File.FullName, pubOpenSshBase64Str.ToString());
                     Console.Out.WriteLine("Created " + pubOpenSshBase64File);
 

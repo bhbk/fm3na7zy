@@ -17,15 +17,15 @@ namespace Bhbk.Lib.Aurora.Data.ModelsMem
         {
         }
 
-        public virtual DbSet<UserLoginMem> UserLoginMem { get; set; }
-        public virtual DbSet<UserFileMem> UserFileMem { get; set; }
-        public virtual DbSet<UserFolderMem> UserFolderMem { get; set; }
+        public virtual DbSet<E_LoginMem> UserLoginMem { get; set; }
+        public virtual DbSet<E_FileMem> UserFileMem { get; set; }
+        public virtual DbSet<E_FolderMem> UserFolderMem { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.HasAnnotation("Relational:Collation", "SQL_Latin1_General_CP1_CI_AS");
 
-            modelBuilder.Entity<UserFileMem>(entity =>
+            modelBuilder.Entity<E_FileMem>(entity =>
             {
                 entity.ToTable("UserFileMem");
 
@@ -50,11 +50,11 @@ namespace Bhbk.Lib.Aurora.Data.ModelsMem
 
                 entity.HasOne(d => d.User)
                     .WithMany(p => p.Files)
-                    .HasForeignKey(d => d.IdentityId)
+                    .HasForeignKey(d => d.UserId)
                     .HasConstraintName("FK_UserFileMem_IdentityID");
             });
 
-            modelBuilder.Entity<UserFolderMem>(entity =>
+            modelBuilder.Entity<E_FolderMem>(entity =>
             {
                 entity.ToTable("UserFolderMem");
 
@@ -69,7 +69,7 @@ namespace Bhbk.Lib.Aurora.Data.ModelsMem
 
                 entity.HasOne(d => d.User)
                     .WithMany(p => p.Folders)
-                    .HasForeignKey(d => d.IdentityId)
+                    .HasForeignKey(d => d.UserId)
                     .HasConstraintName("FK_UserFolderMem_IdentityID");
 
                 entity.HasOne(d => d.Parent)
@@ -78,19 +78,19 @@ namespace Bhbk.Lib.Aurora.Data.ModelsMem
                     .HasConstraintName("FK_UserFolderMem_ParentID");
             });
 
-            modelBuilder.Entity<UserLoginMem>(entity =>
+            modelBuilder.Entity<E_LoginMem>(entity =>
             {
-                entity.HasKey(e => e.IdentityId)
+                entity.HasKey(e => e.UserId)
                     .HasName("PK_UserLoginMem");
 
                 entity.ToTable("UserLoginMem");
 
-                entity.HasIndex(e => e.IdentityId, "IX_UserLoginMem")
+                entity.HasIndex(e => e.UserId, "IX_UserLoginMem")
                     .IsUnique();
 
-                entity.Property(e => e.IdentityId).ValueGeneratedNever();
+                entity.Property(e => e.UserId).ValueGeneratedNever();
 
-                entity.Property(e => e.IdentityAlias)
+                entity.Property(e => e.UserName)
                     .IsRequired()
                     .HasMaxLength(128)
                     .IsUnicode(false);

@@ -21,7 +21,7 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
 
             var pvalues = new []
             {
-                new SqlParameter("IdentityId", SqlDbType.UniqueIdentifier) { Value = entity.IdentityId.HasValue ? (object)entity.IdentityId.Value : DBNull.Value },
+                new SqlParameter("UserId", SqlDbType.UniqueIdentifier) { Value = entity.UserId.HasValue ? (object)entity.UserId.Value : DBNull.Value },
                 new SqlParameter("PublicKeyId", SqlDbType.UniqueIdentifier) { Value = entity.PublicKeyId },
                 new SqlParameter("KeyValueBase64", SqlDbType.NVarChar) { Value = entity.KeyValue },
                 new SqlParameter("KeyValueAlgo", SqlDbType.NVarChar) { Value = entity.KeyAlgo },
@@ -32,7 +32,7 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
             };
 
             return _context.SqlQuery<uvw_PrivateKey>("EXEC @ReturnValue = [svc].[usp_PrivateKey_Insert] "
-                + "@IdentityId, @PublicKeyId, @KeyValueBase64, @KeyValueAlgo, @KeyValuePass, @IsEnabled, @IsDeletable", pvalues)
+                + "@UserId, @PublicKeyId, @KeyValueBase64, @KeyValueAlgo, @KeyValuePass, @IsEnabled, @IsDeletable", pvalues)
                     .Single();
         }
 
@@ -94,7 +94,7 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
             var pvalues = new []
             {
                 new SqlParameter("Id", SqlDbType.UniqueIdentifier) { Value = entity.Id },
-                new SqlParameter("IdentityId", SqlDbType.UniqueIdentifier) { Value = entity.IdentityId.HasValue ? (object)entity.IdentityId.Value : DBNull.Value },
+                new SqlParameter("UserId", SqlDbType.UniqueIdentifier) { Value = entity.UserId.HasValue ? (object)entity.UserId.Value : DBNull.Value },
                 new SqlParameter("PublicKeyId", SqlDbType.UniqueIdentifier) { Value = entity.PublicKeyId },
                 new SqlParameter("KeyValueBase64", SqlDbType.NVarChar) { Value = entity.KeyValue },
                 new SqlParameter("KeyValueAlgo", SqlDbType.NVarChar) { Value = entity.KeyAlgo },
@@ -104,8 +104,8 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
                 rvalue,
             };
 
-            return _context.SqlQuery<uvw_PrivateKey>("EXEC @ReturnValue = [svc].[usp_PrivateKey_Insert] "
-                + "@Id, @IdentityId, @PublicKeyId, @KeyValueBase64, @KeyValueAlgo, @KeyValuePass, @IsEnabled, @IsDeletable", pvalues)
+            return _context.SqlQuery<uvw_PrivateKey>("EXEC @ReturnValue = [svc].[usp_PrivateKey_Update] "
+                + "@Id, @UserId, @PublicKeyId, @KeyValueBase64, @KeyValueAlgo, @KeyValuePass, @IsEnabled, @IsDeletable", pvalues)
                     .Single();
         }
 

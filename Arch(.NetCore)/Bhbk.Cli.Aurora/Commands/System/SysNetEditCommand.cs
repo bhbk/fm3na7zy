@@ -65,8 +65,8 @@ namespace Bhbk.Cli.Aurora.Commands
         {
             try
             {
-                var networks = _uow.Networks.Get(QueryExpressionFactory.GetQueryExpression<Network>()
-                    .Where(x => x.IdentityId == null).ToLambda());
+                var networks = _uow.Networks.Get(QueryExpressionFactory.GetQueryExpression<E_Network>()
+                    .Where(x => x.UserId == null).ToLambda());
 
                 var network = networks.Where(x => x.Id == _id)
                     .SingleOrDefault();
@@ -86,7 +86,7 @@ namespace Bhbk.Cli.Aurora.Commands
                 _uow.Networks.Update(network);
                 _uow.Commit();
 
-                StandardOutputFactory.Networks(new List<Network> { network });
+                StandardOutputFactory.Networks(new List<E_Network> { network });
 
                 return StandardOutput.FondFarewell();
             }

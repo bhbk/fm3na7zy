@@ -1,0 +1,52 @@
+﻿
+CREATE PROCEDURE [svc].[usp_Folder_Insert]
+     @UserId				UNIQUEIDENTIFIER
+    ,@ParentId				UNIQUEIDENTIFIER
+    ,@VirtualName			NVARCHAR (MAX) 
+    ,@IsReadOnly			BIT
+
+AS
+BEGIN
+	SET NOCOUNT ON;
+
+	BEGIN TRY
+
+		DECLARE @FOLDERID UNIQUEIDENTIFIER = NEWID()
+        DECLARE @CREATEDUTC DATETIMEOFFSET (7) = GETUTCDATE()
+
+		INSERT INTO [dbo].[tbl_Folder]
+			(
+			 Id         
+			,UserId
+			,ParentId
+			,VirtualName  
+			,IsReadOnly
+			,CreatedUtc
+			,LastAccessedUtc
+			,LastUpdatedUtc
+			)
+		VALUES
+			(
+			 @FOLDERID          
+			,@UserId
+			,@ParentId
+			,@VirtualName
+			,@IsReadOnly
+			,@CREATEDUTC
+			,@CREATEDUTC
+			,@CREATEDUTC
+			);
+
+		IF @@ROWCOUNT != 1
+			THROW 51000, 'ERROR', 1;
+
+		SELECT * FROM [dbo].[tbl_Folder] WHERE Id = @FOLDERID
+
+    END TRY
+
+    BEGIN CATCH
+        THROW;
+
+    END CATCH
+
+END

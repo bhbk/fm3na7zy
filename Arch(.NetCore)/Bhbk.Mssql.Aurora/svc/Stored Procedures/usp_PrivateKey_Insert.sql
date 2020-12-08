@@ -1,7 +1,7 @@
 ﻿
 CREATE PROCEDURE [svc].[usp_PrivateKey_Insert]
 	 @Id					UNIQUEIDENTIFIER
-    ,@IdentityId			UNIQUEIDENTIFIER
+    ,@UserId				UNIQUEIDENTIFIER
     ,@PublicKeyId			UNIQUEIDENTIFIER
     ,@KeyValue				NVARCHAR (MAX) 
     ,@KeyAlgo				NVARCHAR (16) 
@@ -21,7 +21,7 @@ BEGIN
 		INSERT INTO [dbo].[tbl_PrivateKey]
 			(
 			 Id         
-			,IdentityId
+			,UserId
 			,PublicKeyId   
 			,KeyValue
 			,KeyAlgo
@@ -34,7 +34,7 @@ BEGIN
 		VALUES
 			(
 			 @Id       
-			,@IdentityId
+			,@UserId
 			,@PublicKeyId
 			,@KeyValue
 			,@KeyAlgo

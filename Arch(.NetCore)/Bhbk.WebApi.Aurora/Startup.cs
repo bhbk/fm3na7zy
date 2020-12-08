@@ -121,7 +121,7 @@ namespace Bhbk.WebApi.Aurora
 
             var keyType = ConfigType.RebexLicense.ToString();
 
-            var license = uow.Settings.Get(QueryExpressionFactory.GetQueryExpression<Setting>()
+            var license = uow.Settings.Get(QueryExpressionFactory.GetQueryExpression<E_Setting>()
                 .Where(x => x.ConfigKey == keyType).ToLambda())
                 .OrderBy(x => x.CreatedUtc)
                 .Last();

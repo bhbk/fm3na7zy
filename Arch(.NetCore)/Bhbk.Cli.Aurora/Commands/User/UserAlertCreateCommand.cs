@@ -21,7 +21,7 @@ namespace Bhbk.Cli.Aurora.Commands
     {
         private IConfiguration _conf;
         private IUnitOfWork _uow;
-        private UserLogin _user;
+        private E_Login _user;
         private string _displayName, _emailAddress, _textAddress;
         private bool _delete = false, _download = false, _upload = false;
 
@@ -41,9 +41,9 @@ namespace Bhbk.Cli.Aurora.Commands
                 if (string.IsNullOrEmpty(arg))
                     throw new ConsoleHelpAsException($"  *** No user name given ***");
 
-                _user = _uow.UserLogins.Get(QueryExpressionFactory.GetQueryExpression<UserLogin>()
-                    .Where(x => x.IdentityAlias == arg).ToLambda(),
-                        new List<Expression<Func<UserLogin, object>>>()
+                _user = _uow.Logins.Get(QueryExpressionFactory.GetQueryExpression<E_Login>()
+                    .Where(x => x.UserName == arg).ToLambda(),
+                        new List<Expression<Func<E_Login, object>>>()
                         {
                             x => x.Alerts,
                         })
@@ -115,7 +115,7 @@ namespace Bhbk.Cli.Aurora.Commands
                     if (found != null)
                     {
                         Console.Out.WriteLine("  *** The alert entered already exists for user ***");
-                        StandardOutputFactory.Alerts(new List<UserAlert> { found });
+                        StandardOutputFactory.Alerts(new List<E_Alert> { found });
 
                         return StandardOutput.FondFarewell();
                     }
@@ -129,16 +129,16 @@ namespace Bhbk.Cli.Aurora.Commands
                     if (found != null)
                     {
                         Console.Out.WriteLine("  *** The alert entered already exists for user ***");
-                        StandardOutputFactory.Alerts(new List<UserAlert> { found });
+                        StandardOutputFactory.Alerts(new List<E_Alert> { found });
 
                         return StandardOutput.FondFarewell();
                     }
                 }
 
-                var alert = _uow.UserAlerts.Create(
-                    new UserAlert
+                var alert = _uow.Alerts.Create(
+                    new E_Alert
                     {
-                        IdentityId = _user.IdentityId,
+                        UserId = _user.UserId,
                         OnDelete = _delete,
                         OnDownload = _download,
                         OnUpload = _upload,
@@ -150,7 +150,7 @@ namespace Bhbk.Cli.Aurora.Commands
 
                 _uow.Commit();
 
-                StandardOutputFactory.Alerts(new List<UserAlert> { alert });
+                StandardOutputFactory.Alerts(new List<E_Alert> { alert });
 
                 return StandardOutput.FondFarewell();
             }

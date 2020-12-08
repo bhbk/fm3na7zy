@@ -1,6 +1,6 @@
 ﻿
 CREATE PROCEDURE [svc].[usp_Setting_Insert]
-     @IdentityId			UNIQUEIDENTIFIER
+     @UserId				UNIQUEIDENTIFIER
     ,@ConfigKey				NVARCHAR (MAX) 
     ,@ConfigValue			NVARCHAR (MAX) 
     ,@IsDeletable			BIT
@@ -17,7 +17,7 @@ BEGIN
 		INSERT INTO [dbo].[tbl_Setting]
 			(
 			 Id         
-			,IdentityId           
+			,UserId           
 			,ConfigKey   
 			,ConfigValue
 			,IsDeletable
@@ -26,7 +26,7 @@ BEGIN
 		VALUES
 			(
 			 @SETTINGID          
-			,@IdentityId         
+			,@UserId         
 			,@ConfigKey
 			,@ConfigValue
 			,@IsDeletable

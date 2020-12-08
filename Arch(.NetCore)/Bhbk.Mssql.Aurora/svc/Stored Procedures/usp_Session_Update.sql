@@ -1,7 +1,7 @@
 ﻿
 CREATE PROCEDURE [svc].[usp_Session_Update]
     @Id						    UNIQUEIDENTIFIER
-   ,@IdentityId					UNIQUEIDENTIFIER
+   ,@UserId			    		UNIQUEIDENTIFIER
    ,@CallPath					VARCHAR(256)
    ,@Details					VARCHAR(MAX)
    ,@LocalEndPoint				VARCHAR(128)
@@ -17,7 +17,7 @@ SET NOCOUNT ON;
 DECLARE @UPDATED DATETIMEOFFSET = GETUTCDATE()
 
 UPDATE [dbo].[tbl_Session] 
-SET  IdentityId					=	@IdentityId
+SET  UserId					=	@UserId
     ,CallPath					=   @CallPath
     ,Details					=   @Details
     ,LocalEndPoint				=   @LocalEndPoint

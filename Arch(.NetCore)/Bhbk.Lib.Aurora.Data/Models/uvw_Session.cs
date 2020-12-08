@@ -8,8 +8,8 @@ namespace Bhbk.Lib.Aurora.Data.Models
     public partial class uvw_Session
     {
         public Guid Id { get; set; }
-        public Guid? IdentityId { get; set; }
-        public string IdentityAlias { get; set; }
+        public Guid? UserId { get; set; }
+        public string UserName { get; set; }
         public string CallPath { get; set; }
         public string Details { get; set; }
         public string LocalEndPoint { get; set; }

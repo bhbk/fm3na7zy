@@ -1,0 +1,80 @@
+﻿
+CREATE PROCEDURE [svc].[usp_Login_Insert]
+     @UserId				UNIQUEIDENTIFIER
+    ,@UserName				NVARCHAR (128) 
+    ,@FileSystemType		NVARCHAR (16) 
+    ,@IsPasswordRequired	BIT
+    ,@IsPublicKeyRequired	BIT
+    ,@IsFileSystemReadOnly	BIT
+    ,@Debugger				NVARCHAR (16) 
+    ,@EncryptedPass			NVARCHAR (1024) 
+    ,@IsEnabled				BIT
+    ,@IsDeletable			BIT
+
+AS
+BEGIN
+	SET NOCOUNT ON;
+
+	BEGIN TRY
+
+        DECLARE @CREATEDUTC DATETIMEOFFSET (7) = GETUTCDATE()
+
+		INSERT INTO [dbo].[tbl_Login]
+			(
+			 UserId
+			,UserName
+			,FileSystemType
+			,IsPasswordRequired
+			,IsPublicKeyRequired
+			,IsFileSystemReadOnly
+			,Debugger
+			,EncryptedPass
+			,IsEnabled
+			,IsDeletable
+			,CreatedUtc
+			)
+		VALUES
+			(
+			@UserId
+			,@UserName
+			,@FileSystemType
+			,@IsPasswordRequired
+			,@IsPublicKeyRequired
+			,@IsFileSystemReadOnly
+			,@Debugger
+			,@EncryptedPass
+			,@IsEnabled
+			,@IsDeletable
+			,@CREATEDUTC
+			);
+
+		IF @@ROWCOUNT != 1
+			THROW 51000, 'ERROR', 1;
+
+		INSERT INTO [dbo].[tbl_Usage]
+			(
+			 UserId
+			,QuotaInBytes
+			,QuotaUsedInBytes
+			,SessionMax
+			,SessionsInUse
+			)
+		VALUES
+			(
+			@UserId
+			,1073741824
+			,0
+			,1
+			,0
+			);
+
+		SELECT * FROM [dbo].[tbl_Login] WHERE UserId = @UserId
+
+    END TRY
+
+    BEGIN CATCH
+        THROW;
+
+    END CATCH
+
+END

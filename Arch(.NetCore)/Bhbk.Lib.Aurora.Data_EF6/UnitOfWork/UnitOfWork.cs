@@ -11,17 +11,18 @@ namespace Bhbk.Lib.Aurora.Data_EF6.UnitOfWork
     {
         private readonly AuroraEntities _context;
         public InstanceContext InstanceType { get; private set; }
-        public IGenericRepository<Credential> Credentials { get; private set; }
-        public IGenericRepository<Network> Networks { get; private set; }
-        public IGenericRepository<PrivateKey> PrivateKeys { get; private set; }
-        public IGenericRepository<PublicKey> PublicKeys { get; private set; }
-        public IGenericRepository<Session> Sessions { get; private set; }
-        public IGenericRepository<Setting> Settings { get; private set; }
-        public IGenericRepository<UserAlert> UserAlerts { get; private set; }
-        public IGenericRepository<UserFile> UserFiles { get; private set; }
-        public IGenericRepository<UserFolder> UserFolders { get; private set; }
-        public IGenericRepository<UserLogin> UserLogins { get; private set; }
-        public IGenericRepository<UserMount> UserMounts { get; private set; }
+        public IGenericRepository<E_Alert> Alerts { get; private set; }
+        public IGenericRepository<E_Ambassador> Ambassadors { get; private set; }
+        public IGenericRepository<E_File> Files { get; private set; }
+        public IGenericRepository<E_Folder> Folders { get; private set; }
+        public IGenericRepository<E_Login> Logins { get; private set; }
+        public IGenericRepository<E_Mount> Mounts { get; private set; }
+        public IGenericRepository<E_Network> Networks { get; private set; }
+        public IGenericRepository<E_PrivateKey> PrivateKeys { get; private set; }
+        public IGenericRepository<E_PublicKey> PublicKeys { get; private set; }
+        public IGenericRepository<E_Session> Sessions { get; private set; }
+        public IGenericRepository<E_Setting> Settings { get; private set; }
+        public IGenericRepository<E_Usage> Usages { get; private set; }
 
         public UnitOfWork(string connection)
             : this(connection, new ContextService(InstanceContext.DeployedOrLocal)) { }
@@ -56,17 +57,18 @@ namespace Bhbk.Lib.Aurora.Data_EF6.UnitOfWork
 
             InstanceType = instance.InstanceType;
 
-            Credentials = new GenericRepository<Credential>(_context);
-            Networks = new GenericRepository<Network>(_context);
-            PrivateKeys = new GenericRepository<PrivateKey>(_context);
-            PublicKeys = new GenericRepository<PublicKey>(_context);
-            Sessions = new GenericRepository<Session>(_context);
-            Settings = new GenericRepository<Setting>(_context);
-            UserAlerts = new GenericRepository<UserAlert>(_context);
-            UserFiles = new GenericRepository<UserFile>(_context);
-            UserFolders = new GenericRepository<UserFolder>(_context);
-            UserLogins = new GenericRepository<UserLogin>(_context);
-            UserMounts = new GenericRepository<UserMount>(_context);
+            Alerts = new GenericRepository<E_Alert>(_context);
+            Ambassadors = new GenericRepository<E_Ambassador>(_context);
+            Files = new GenericRepository<E_File>(_context);
+            Folders = new GenericRepository<E_Folder>(_context);
+            Logins = new GenericRepository<E_Login>(_context);
+            Mounts = new GenericRepository<E_Mount>(_context);
+            Networks = new GenericRepository<E_Network>(_context);
+            PrivateKeys = new GenericRepository<E_PrivateKey>(_context);
+            PublicKeys = new GenericRepository<E_PublicKey>(_context);
+            Sessions = new GenericRepository<E_Session>(_context);
+            Settings = new GenericRepository<E_Setting>(_context);
+            Usages = new GenericRepository<E_Usage>(_context);
         }
 
         public void Commit()

@@ -56,7 +56,7 @@ namespace Bhbk.Cli.Aurora.Commands
         {
             try
             {
-                var config = _uow.Settings.Get(QueryExpressionFactory.GetQueryExpression<Setting>()
+                var config = _uow.Settings.Get(QueryExpressionFactory.GetQueryExpression<E_Setting>()
                     .Where(x => x.Id == _id).ToLambda())
                     .SingleOrDefault();
 
@@ -72,7 +72,7 @@ namespace Bhbk.Cli.Aurora.Commands
                 _uow.Settings.Update(config);
                 _uow.Commit();
 
-                StandardOutputFactory.Settings(new List<Setting> { config });
+                StandardOutputFactory.Settings(new List<E_Setting> { config });
 
                 return StandardOutput.FondFarewell();
             }

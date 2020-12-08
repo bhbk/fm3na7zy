@@ -21,7 +21,7 @@ namespace Bhbk.Cli.Aurora.Commands
     {
         private IConfiguration _conf;
         private IUnitOfWork _uow;
-        private UserLogin _user;
+        private E_Login _user;
         private Guid _id;
         private string _displayName, _emailAddress, _phoneNumber;
         private bool? _delete, _download, _upload, _isEnabled;
@@ -42,9 +42,9 @@ namespace Bhbk.Cli.Aurora.Commands
                 if (string.IsNullOrEmpty(arg))
                     throw new ConsoleHelpAsException($"  *** No user name given ***");
 
-                _user = _uow.UserLogins.Get(QueryExpressionFactory.GetQueryExpression<UserLogin>()
-                    .Where(x => x.IdentityAlias == arg).ToLambda(),
-                        new List<Expression<Func<UserLogin, object>>>()
+                _user = _uow.Logins.Get(QueryExpressionFactory.GetQueryExpression<E_Login>()
+                    .Where(x => x.UserName == arg).ToLambda(),
+                        new List<Expression<Func<E_Login, object>>>()
                         {
                             x => x.Alerts,
                         })
@@ -145,10 +145,10 @@ namespace Bhbk.Cli.Aurora.Commands
                 if (_isEnabled.HasValue)
                     alert.IsEnabled = _isEnabled.Value;
 
-                _uow.UserAlerts.Update(alert);
+                _uow.Alerts.Update(alert);
                 _uow.Commit();
 
-                StandardOutputFactory.Alerts(new List<UserAlert> { alert });
+                StandardOutputFactory.Alerts(new List<E_Alert> { alert });
 
                 return StandardOutput.FondFarewell();
             }

@@ -21,7 +21,7 @@ namespace Bhbk.Cli.Aurora.Commands
     {
         private IConfiguration _conf;
         private IUnitOfWork _uow;
-        private UserLogin _user;
+        private E_Login _user;
         private Guid _id;
         private bool? _isEnabled;
         private Int32 _sequence = Int32.MinValue;
@@ -45,9 +45,9 @@ namespace Bhbk.Cli.Aurora.Commands
                 if (string.IsNullOrEmpty(arg))
                     throw new ConsoleHelpAsException($"  *** No user name given ***");
 
-                _user = _uow.UserLogins.Get(QueryExpressionFactory.GetQueryExpression<UserLogin>()
-                    .Where(x => x.IdentityAlias == arg).ToLambda(),
-                        new List<Expression<Func<UserLogin, object>>>()
+                _user = _uow.Logins.Get(QueryExpressionFactory.GetQueryExpression<E_Login>()
+                    .Where(x => x.UserName == arg).ToLambda(),
+                        new List<Expression<Func<E_Login, object>>>()
                         {
                             x => x.Networks,
                         })
@@ -111,7 +111,7 @@ namespace Bhbk.Cli.Aurora.Commands
                 _uow.Networks.Update(network);
                 _uow.Commit();
 
-                StandardOutputFactory.Networks(new List<Network> { network });
+                StandardOutputFactory.Networks(new List<E_Network> { network });
 
                 return StandardOutput.FondFarewell();
             }

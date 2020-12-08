@@ -9,7 +9,7 @@ namespace Bhbk.Cli.Aurora.Factories
 {
     public class StandardOutputFactory
     {
-        public static void Alerts(IEnumerable<UserAlert> alerts)
+        public static void Alerts(IEnumerable<E_Alert> alerts)
         {
             foreach (var alert in alerts.OrderBy(x => x.ToDisplayName))
             {
@@ -29,7 +29,7 @@ namespace Bhbk.Cli.Aurora.Factories
             }
         }
 
-        public static void Credentials(IEnumerable<Credential> creds)
+        public static void Credentials(IEnumerable<E_Ambassador> creds)
         {
             foreach (var cred in creds)
             {
@@ -40,13 +40,13 @@ namespace Bhbk.Cli.Aurora.Factories
                     $"{(cred.IsEnabled ? " is enabled" : " is disabled")} [created] {cred.CreatedUtc.LocalDateTime}");
 
                 Console.ForegroundColor = ConsoleColor.White;
-                Console.Out.WriteLine($"    login [domain] {cred.Domain} [user] {cred.UserName}");
+                Console.Out.WriteLine($"    [login] {cred.UserName}");
 
                 Console.ResetColor();
             }
         }
 
-        public static void CredentialSecrets(IEnumerable<Credential> creds)
+        public static void CredentialSecrets(IEnumerable<E_Ambassador> creds)
         {
             foreach (var cred in creds)
             {
@@ -63,7 +63,7 @@ namespace Bhbk.Cli.Aurora.Factories
             }
         }
 
-        public static void KeyPairs(IEnumerable<PublicKey> pubKeys, IEnumerable<PrivateKey> privKeys)
+        public static void KeyPairs(IEnumerable<E_PublicKey> pubKeys, IEnumerable<E_PrivateKey> privKeys)
         {
             foreach (var pubKey in pubKeys)
             {
@@ -90,7 +90,7 @@ namespace Bhbk.Cli.Aurora.Factories
             };
         }
 
-        public static void KeyPairSecrets(IEnumerable<PrivateKey> privKeys)
+        public static void KeyPairSecrets(IEnumerable<E_PrivateKey> privKeys)
         {
             foreach (var key in privKeys)
             {
@@ -107,7 +107,7 @@ namespace Bhbk.Cli.Aurora.Factories
             };
         }
 
-        public static void Logins(IEnumerable<UserLogin> users, string extras = null)
+        public static void Logins(IEnumerable<E_Login> users, string extras = null)
         {
             foreach (var user in users)
             {
@@ -119,7 +119,7 @@ namespace Bhbk.Cli.Aurora.Factories
                 else
                     Console.ForegroundColor = ConsoleColor.White;
 
-                Console.Out.WriteLine($"  [user GUID] {user.IdentityId} [alias] {user.IdentityAlias}{(!user.IsDeletable ? " is not deletable and" : null)}" +
+                Console.Out.WriteLine($"  [user GUID] {user.UserId} [alias] {user.UserName}{(!user.IsDeletable ? " is not deletable and" : null)}" +
                     $"{(user.IsEnabled ? " is enabled" : " is disabled")} [created] {user.CreatedUtc.LocalDateTime}");
 
                 if (!string.IsNullOrEmpty(extras))
@@ -129,7 +129,7 @@ namespace Bhbk.Cli.Aurora.Factories
                         $"{(string.IsNullOrEmpty(user.FileSystemChrootPath) ? null : " with chroot to " + (user.FileSystemChrootPath) + "")}" +
                         $"{Environment.NewLine}    password authentication is {(user.IsPasswordRequired ? "enabled" : "disabled")} " +
                         $"{Environment.NewLine}    public key authentication is {(user.IsPublicKeyRequired ? "enabled" : "disabled")} " +
-                        $"{Environment.NewLine}    session maximum is {user.SessionMax} and {user.SessionsInUse} currently used");
+                        $"{Environment.NewLine}    session maximum is {user.Usage.SessionMax} and {user.Usage.SessionsInUse} currently used");
 
                     FileSystemProviderType userFileSystem;
                     Enum.TryParse(user.FileSystemType, out userFileSystem);
@@ -137,7 +137,7 @@ namespace Bhbk.Cli.Aurora.Factories
                     switch (userFileSystem)
                     {
                         case FileSystemProviderType.Database:
-                            Console.Out.WriteLine($"    quota maximum is {user.QuotaInBytes / 1048576f}MB and quota used {user.QuotaUsedInBytes / 1048576f}MB");
+                            Console.Out.WriteLine($"    quota maximum is {user.Usage.QuotaInBytes / 1048576f}MB and quota used {user.Usage.QuotaUsedInBytes / 1048576f}MB");
                             break;
                         case FileSystemProviderType.Memory:
                             Console.Out.WriteLine($"    quota maximum is 100MB and quota used is N/A... all deleted at session end");
@@ -155,25 +155,25 @@ namespace Bhbk.Cli.Aurora.Factories
             }
         }
 
-        public static void Mounts(IEnumerable<UserMount> mounts)
+        public static void Mounts(IEnumerable<E_Mount> mounts)
         {
             foreach (var mount in mounts)
             {
                 Console.Out.WriteLine();
 
                 Console.ForegroundColor = ConsoleColor.Green;
-                Console.Out.WriteLine($"  [mount for] {mount.UserLogin.IdentityAlias} [path] {mount.ServerAddress}{mount.ServerShare}" +
+                Console.Out.WriteLine($"  [mount for] {mount.Login.UserName} [path] {mount.ServerAddress}{mount.ServerShare}" +
                     $" [protocol] {mount.AuthType}");
 
                 Console.ForegroundColor = ConsoleColor.White;
-                if (mount.CredentialId.HasValue)
-                    Console.Out.WriteLine($"    mount credential [domain] {mount.Credential.Domain} [user] {mount.Credential.UserName}");
+                if (mount.AmbassadorId.HasValue)
+                    Console.Out.WriteLine($"    [credential GUID] {mount.Ambassador.Id} [username] {mount.Ambassador.UserName}");
 
                 Console.ResetColor();
             }
         }
 
-        public static void Networks(IEnumerable<Network> networks)
+        public static void Networks(IEnumerable<E_Network> networks)
         {
             if (networks.Count() > 0)
                 Console.Out.WriteLine();
@@ -188,7 +188,7 @@ namespace Bhbk.Cli.Aurora.Factories
             }
         }
 
-        public static void Sessions(IEnumerable<Session> sessions, string extras = null)
+        public static void Sessions(IEnumerable<E_Session> sessions, string extras = null)
         {
             foreach (var session in sessions)
             {
@@ -199,7 +199,7 @@ namespace Bhbk.Cli.Aurora.Factories
 
                 if (!string.IsNullOrEmpty(extras))
                 {
-                    if (string.IsNullOrEmpty(session?.IdentityAlias))
+                    if (string.IsNullOrEmpty(session?.UserName))
                     {
                         Console.ForegroundColor = ConsoleColor.Yellow;
                         Console.Out.Write($"[user] unknown ");
@@ -207,7 +207,7 @@ namespace Bhbk.Cli.Aurora.Factories
                     else
                     {
                         Console.ForegroundColor = ConsoleColor.Green;
-                        Console.Out.Write($"[user] {session.IdentityAlias} ");
+                        Console.Out.Write($"[user] {session.UserName} ");
                     }
                 }
 
@@ -221,7 +221,7 @@ namespace Bhbk.Cli.Aurora.Factories
             }
         }
 
-        public static void Settings(IEnumerable<Setting> configs)
+        public static void Settings(IEnumerable<E_Setting> configs)
         {
             foreach (var config in configs)
             {

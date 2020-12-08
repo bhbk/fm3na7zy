@@ -14,8 +14,8 @@ namespace Bhbk.Lib.Aurora.Data_EF6.ModelsMem
 
         }
 
-        public virtual DbSet<UserLoginMem> Users { get; set; }
-        public virtual DbSet<UserFileMem> UserFiles { get; set; }
-        public virtual DbSet<UserFolderMem> UserFolders { get; set; }
+        public virtual DbSet<E_LoginMem> Users { get; set; }
+        public virtual DbSet<E_FileMem> UserFiles { get; set; }
+        public virtual DbSet<E_FolderMem> UserFolders { get; set; }
     }
 }

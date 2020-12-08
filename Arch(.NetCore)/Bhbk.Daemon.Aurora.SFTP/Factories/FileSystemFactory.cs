@@ -13,7 +13,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Factories
 {
     internal static class FileSystemFactory
     {
-        internal static FileSystemProvider CreateFileSystem(IServiceScopeFactory factory, ILogger logger, UserLogin user,
+        internal static FileSystemProvider CreateFileSystem(IServiceScopeFactory factory, ILogger logger, E_Login user,
             string identityUser, string identityPass)
         {
             LogLevel fsLoggerLevel;
@@ -46,7 +46,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Factories
                     {
                         if (user.IsFileSystemReadOnly)
                         {
-                            Log.Information($"'{callPath}' '{user.IdentityAlias}' initialize '{typeof(DatabaseReadOnlyFileSystem).Name}'");
+                            Log.Information($"'{callPath}' '{user.UserName}' initialize '{typeof(DatabaseReadOnlyFileSystem).Name}'");
 
                             if (string.IsNullOrEmpty(user.FileSystemChrootPath))
                                 return new DatabaseReadOnlyFileSystem(fsSettings, factory, user);
@@ -60,7 +60,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Factories
                         }
                         else
                         {
-                            Log.Information($"'{callPath}' '{user.IdentityAlias}' initialize '{typeof(DatabaseReadWriteFileSystem).Name}'");
+                            Log.Information($"'{callPath}' '{user.UserName}' initialize '{typeof(DatabaseReadWriteFileSystem).Name}'");
 
                             if (string.IsNullOrEmpty(user.FileSystemChrootPath))
                                 return new DatabaseReadWriteFileSystem(fsSettings, factory, user);
@@ -78,7 +78,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Factories
                     {
                         if (user.IsFileSystemReadOnly)
                         {
-                            Log.Information($"'{callPath}' '{user.IdentityAlias}' initialize '{typeof(MemoryReadOnlyFileSystem).Name}'");
+                            Log.Information($"'{callPath}' '{user.UserName}' initialize '{typeof(MemoryReadOnlyFileSystem).Name}'");
 
                             if (string.IsNullOrEmpty(user.FileSystemChrootPath))
                                 return new MemoryReadOnlyFileSystem(fsSettings, factory, user);
@@ -92,7 +92,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Factories
                         }
                         else
                         {
-                            Log.Information($"'{callPath}' '{user.IdentityAlias}' initialize '{typeof(MemoryReadWriteFileSystem).Name}'");
+                            Log.Information($"'{callPath}' '{user.UserName}' initialize '{typeof(MemoryReadWriteFileSystem).Name}'");
 
                             if (string.IsNullOrEmpty(user.FileSystemChrootPath))
                                 return new MemoryReadWriteFileSystem(fsSettings, factory, user);
@@ -110,7 +110,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Factories
                     {
                         if (user.IsFileSystemReadOnly)
                         {
-                            Log.Information($"'{callPath}' '{user.IdentityAlias}' initialize '{typeof(SmbReadOnlyFileSystem).Name}'");
+                            Log.Information($"'{callPath}' '{user.UserName}' initialize '{typeof(SmbReadOnlyFileSystem).Name}'");
 
                             if (string.IsNullOrEmpty(user.FileSystemChrootPath))
                                 return new SmbReadOnlyFileSystem(fsSettings, factory, user, identityUser, identityPass);
@@ -124,7 +124,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Factories
                         }
                         else
                         {
-                            Log.Information($"'{callPath}' '{user.IdentityAlias}' initialize '{typeof(SmbReadWriteFileSystem).Name}'");
+                            Log.Information($"'{callPath}' '{user.UserName}' initialize '{typeof(SmbReadWriteFileSystem).Name}'");
 
                             if (string.IsNullOrEmpty(user.FileSystemChrootPath))
                                 return new SmbReadWriteFileSystem(fsSettings, factory, user, identityUser, identityPass);

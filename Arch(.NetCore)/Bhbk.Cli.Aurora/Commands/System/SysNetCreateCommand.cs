@@ -59,8 +59,8 @@ namespace Bhbk.Cli.Aurora.Commands
         {
             try
             {
-                var networks = _uow.Networks.Get(QueryExpressionFactory.GetQueryExpression<Network>()
-                    .Where(x => x.IdentityId == null && x.IsEnabled == true).ToLambda());
+                var networks = _uow.Networks.Get(QueryExpressionFactory.GetQueryExpression<E_Network>()
+                    .Where(x => x.UserId == null && x.IsEnabled == true).ToLambda());
 
                 var exists = networks.Where(x => x.Address == _cidr.ToString())
                     .SingleOrDefault();
@@ -68,13 +68,13 @@ namespace Bhbk.Cli.Aurora.Commands
                 if (exists != null)
                 {
                     Console.Out.WriteLine("  *** The network entered already exists for user ***");
-                    StandardOutputFactory.Networks(new List<Network> { exists });
+                    StandardOutputFactory.Networks(new List<E_Network> { exists });
 
                     return StandardOutput.FondFarewell();
                 }
 
                 var network = _uow.Networks.Create(
-                    new Network
+                    new E_Network
                     {
                         SequenceId = _sequence,
                         Address = _cidr.ToString(),
@@ -85,7 +85,7 @@ namespace Bhbk.Cli.Aurora.Commands
 
                 _uow.Commit();
 
-                StandardOutputFactory.Networks(new List<Network> { network });
+                StandardOutputFactory.Networks(new List<E_Network> { network });
 
                 return StandardOutput.FondFarewell();
             }

@@ -3,7 +3,7 @@ CREATE VIEW [svc].[uvw_PublicKey]
 AS
 SELECT
 	Id
-	,IdentityId
+	,UserId
 	,PrivateKeyId
 	,KeyValue
 	,KeyAlgo

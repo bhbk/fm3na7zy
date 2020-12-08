@@ -52,7 +52,7 @@ namespace Bhbk.Cli.Aurora.Commands
         {
             var key = ConfigType.RebexLicense.ToString();
 
-            var license = _uow.Settings.Get(QueryExpressionFactory.GetQueryExpression<Setting>()
+            var license = _uow.Settings.Get(QueryExpressionFactory.GetQueryExpression<E_Setting>()
                 .Where(x => x.ConfigKey == key).ToLambda())
                 .OrderBy(x => x.CreatedUtc)
                 .Last();
@@ -82,11 +82,11 @@ namespace Bhbk.Cli.Aurora.Commands
 
                 var keyPair = KeyHelper.ImportKeyPair(_conf, _uow, SignatureHashAlgorithm.SHA256, stream, _privKeyPass);
 
-                var pubKey = _uow.PublicKeys.Get(QueryExpressionFactory.GetQueryExpression<PublicKey>()
+                var pubKey = _uow.PublicKeys.Get(QueryExpressionFactory.GetQueryExpression<E_PublicKey>()
                     .Where(x => x.Id == keyPair.Item1.Id).ToLambda())
                     .SingleOrDefault();
 
-                var privKey = _uow.PrivateKeys.Get(QueryExpressionFactory.GetQueryExpression<PrivateKey>()
+                var privKey = _uow.PrivateKeys.Get(QueryExpressionFactory.GetQueryExpression<E_PrivateKey>()
                     .Where(x => x.PublicKeyId == keyPair.Item1.Id).ToLambda())
                     .SingleOrDefault();
 
@@ -102,15 +102,15 @@ namespace Bhbk.Cli.Aurora.Commands
                     _uow.Commit();
                 }
 
-                pubKey = _uow.PublicKeys.Get(QueryExpressionFactory.GetQueryExpression<PublicKey>()
+                pubKey = _uow.PublicKeys.Get(QueryExpressionFactory.GetQueryExpression<E_PublicKey>()
                     .Where(x => x.Id == keyPair.Item1.Id).ToLambda())
                     .Single();
 
-                privKey = _uow.PrivateKeys.Get(QueryExpressionFactory.GetQueryExpression<PrivateKey>()
+                privKey = _uow.PrivateKeys.Get(QueryExpressionFactory.GetQueryExpression<E_PrivateKey>()
                     .Where(x => x.PublicKeyId == keyPair.Item1.Id).ToLambda())
                     .Single();
 
-                StandardOutputFactory.KeyPairs(new List<PublicKey> { pubKey }, new List<PrivateKey> { privKey });
+                StandardOutputFactory.KeyPairs(new List<E_PublicKey> { pubKey }, new List<E_PrivateKey> { privKey });
 
                 return StandardOutput.FondFarewell();
             }

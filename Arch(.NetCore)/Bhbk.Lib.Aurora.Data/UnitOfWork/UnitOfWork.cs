@@ -15,17 +15,18 @@ namespace Bhbk.Lib.Aurora.Data.UnitOfWork
         private readonly AuroraEntities _context;
         private readonly ILoggerFactory _logger;
         public InstanceContext InstanceType { get; private set; }
-        public CredentialRepository Credentials { get; private set; }
+        public AlertRepository Alerts { get; private set; }
+        public AmbassadorRepository Ambassadors { get; private set; }
+        public FileRepository Files { get; private set; }
+        public FolderRepository Folders { get; private set; }
+        public LoginRepository Logins { get; private set; }
+        public MountRepository Mounts { get; private set; }
         public NetworkRepository Networks { get; private set; }
         public PrivateKeyRepository PrivateKeys { get; private set; }
         public PublicKeyRepository PublicKeys { get; private set; }
         public SessionRepository Sessions { get; private set; }
         public SettingRepository Settings { get; private set; }
-        public UserAlertRepository UserAlerts { get; private set; }
-        public UserFileRepository UserFiles { get; private set; }
-        public UserFolderRepository UserFolders { get; private set; }
-        public UserLoginRepository UserLogins { get; private set; }
-        public UserMountRepository UserMounts { get; private set; }
+        public UsageRepository Usages { get; private set; }
 
         public UnitOfWork(string connection)
             : this(connection, new ContextService(InstanceContext.DeployedOrLocal)) { }
@@ -84,17 +85,18 @@ namespace Bhbk.Lib.Aurora.Data.UnitOfWork
 
             InstanceType = instance.InstanceType;
 
-            Credentials = new CredentialRepository(_context);
+            Alerts = new AlertRepository(_context);
+            Ambassadors = new AmbassadorRepository(_context);
+            Files = new FileRepository(_context);
+            Folders = new FolderRepository(_context);
+            Logins = new LoginRepository(_context);
+            Mounts = new MountRepository(_context);
             Networks = new NetworkRepository(_context);
             PrivateKeys = new PrivateKeyRepository(_context);
             PublicKeys = new PublicKeyRepository(_context);
             Sessions = new SessionRepository(_context);
             Settings = new SettingRepository(_context);
-            UserAlerts = new UserAlertRepository(_context);
-            UserFiles = new UserFileRepository(_context);
-            UserFolders = new UserFolderRepository(_context);
-            UserLogins = new UserLoginRepository(_context);
-            UserMounts = new UserMountRepository(_context);
+            Usages = new UsageRepository(_context);
         }
 
         public void Commit()

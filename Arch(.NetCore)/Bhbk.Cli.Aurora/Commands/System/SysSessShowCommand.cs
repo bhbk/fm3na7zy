@@ -56,42 +56,42 @@ namespace Bhbk.Cli.Aurora.Commands
         {
             try
             {
-                IQueryExpression<Session> expr;
+                IQueryExpression<E_Session> expr;
 
                 if (!string.IsNullOrEmpty(_network))
                 {
                     if (_active)
-                        expr = QueryExpressionFactory.GetQueryExpression<Session>()
+                        expr = QueryExpressionFactory.GetQueryExpression<E_Session>()
                             .Where(x => x.RemoteEndPoint.Contains(_network) && x.IsActive == true);
                     else
-                        expr = QueryExpressionFactory.GetQueryExpression<Session>()
+                        expr = QueryExpressionFactory.GetQueryExpression<E_Session>()
                             .Where(x => x.RemoteEndPoint.Contains(_network));
                 }
                 else if (!string.IsNullOrEmpty(_user))
                 {
                     if (_active)
-                        expr = QueryExpressionFactory.GetQueryExpression<Session>()
-                            .Where(x => x.IdentityAlias.Contains(_user) && x.IsActive == true);
+                        expr = QueryExpressionFactory.GetQueryExpression<E_Session>()
+                            .Where(x => x.UserName.Contains(_user) && x.IsActive == true);
                     else
-                        expr = QueryExpressionFactory.GetQueryExpression<Session>()
-                            .Where(x => x.IdentityAlias.Contains(_user));
+                        expr = QueryExpressionFactory.GetQueryExpression<E_Session>()
+                            .Where(x => x.UserName.Contains(_user));
                 }
                 else
                 {
                     if (_active)
-                        expr = QueryExpressionFactory.GetQueryExpression<Session>()
+                        expr = QueryExpressionFactory.GetQueryExpression<E_Session>()
                             .Where(x => x.IsActive == true);
                     else
-                        expr = QueryExpressionFactory.GetQueryExpression<Session>();
+                        expr = QueryExpressionFactory.GetQueryExpression<E_Session>();
                 }
 
                 var remotes = _uow.Sessions.Get(expr.ToLambda())
-                    .OrderBy(x => x.IdentityAlias).ThenBy(x => x.CreatedUtc)
+                    .OrderBy(x => x.UserName).ThenBy(x => x.CreatedUtc)
                     .Select(x => x.RemoteEndPoint).Distinct().TakeLast(100).ToList();
 
                 foreach (var remote in remotes)
                 {
-                    var sessions = _uow.Sessions.Get(QueryExpressionFactory.GetQueryExpression<Session>()
+                    var sessions = _uow.Sessions.Get(QueryExpressionFactory.GetQueryExpression<E_Session>()
                         .Where(x => x.RemoteEndPoint == remote).ToLambda());
 
                     Console.Out.WriteLine();

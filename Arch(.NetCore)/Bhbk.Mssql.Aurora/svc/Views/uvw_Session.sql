@@ -4,8 +4,8 @@ CREATE VIEW [svc].[uvw_Session]
 AS
 
 SELECT t1.[Id]
-      ,t1.[IdentityId]
-	  ,t2.IdentityAlias
+      ,t1.[UserId]
+	  ,t2.[UserName]
       ,t1.[CallPath]
       ,t1.[Details]
       ,t1.[LocalEndPoint]
@@ -15,4 +15,4 @@ SELECT t1.[Id]
       ,t1.[IsActive]
       ,t1.[CreatedUtc]
   FROM [dbo].[tbl_Session] AS t1
-			LEFT JOIN [dbo].[tbl_UserLogin] AS t2 ON t1.IdentityId = t2.IdentityId
+			LEFT JOIN [dbo].[tbl_Login] AS t2 ON t1.UserId = t2.UserId

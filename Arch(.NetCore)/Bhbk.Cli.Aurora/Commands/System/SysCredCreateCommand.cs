@@ -19,7 +19,7 @@ namespace Bhbk.Cli.Aurora.Commands
     {
         private readonly IConfiguration _conf;
         private readonly IUnitOfWork _uow;
-        private string _credDomain, _credLogin, _credPass;
+        private string _credLogin, _credPass;
 
         public SysCredCreateCommand()
         {
@@ -31,11 +31,6 @@ namespace Bhbk.Cli.Aurora.Commands
             _uow = new UnitOfWork(_conf["Databases:AuroraEntities"], instance);
 
             IsCommand("sys-cred-create", "Create credential for system");
-
-            HasRequiredOption("d|domain=", "Enter domain", arg =>
-            {
-                _credDomain = arg;
-            });
 
             HasRequiredOption("l|login=", "Enter login", arg =>
             {
@@ -52,14 +47,14 @@ namespace Bhbk.Cli.Aurora.Commands
         {
             try
             {
-                var exists = _uow.Credentials.Get(QueryExpressionFactory.GetQueryExpression<Credential>()
-                    .Where(x => x.Domain == _credDomain && x.UserName == _credLogin).ToLambda())
+                var exists = _uow.Ambassadors.Get(QueryExpressionFactory.GetQueryExpression<E_Ambassador>()
+                    .Where(x => x.UserName == _credLogin).ToLambda())
                     .SingleOrDefault();
 
                 if (exists != null)
                 {
                     Console.Out.WriteLine("  *** The credential entered already exists ***");
-                    StandardOutputFactory.Credentials(new List<Credential> { exists });
+                    StandardOutputFactory.Credentials(new List<E_Ambassador> { exists });
 
                     return StandardOutput.FondFarewell();
                 }
@@ -78,10 +73,9 @@ namespace Bhbk.Cli.Aurora.Commands
                 if (_credPass != plainText)
                     throw new ArithmeticException();
 
-                var credential = _uow.Credentials.Create(
-                    new Credential
+                var ambassador = _uow.Ambassadors.Create(
+                    new E_Ambassador
                     {
-                        Domain = _credDomain,
                         UserName = _credLogin,
                         EncryptedPass = cipherText,
                         IsEnabled = true,
@@ -90,7 +84,7 @@ namespace Bhbk.Cli.Aurora.Commands
 
                 _uow.Commit();
 
-                StandardOutputFactory.Credentials(new List<Credential> { credential });
+                StandardOutputFactory.Credentials(new List<E_Ambassador> { ambassador });
 
                 return StandardOutput.FondFarewell();
             }

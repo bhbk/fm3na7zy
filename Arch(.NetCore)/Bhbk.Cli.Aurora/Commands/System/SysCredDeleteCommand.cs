@@ -34,7 +34,7 @@ namespace Bhbk.Cli.Aurora.Commands
         {
             try
             {
-                var exists = _uow.Credentials.Get(QueryExpressionFactory.GetQueryExpression<Credential>()
+                var exists = _uow.Ambassadors.Get(QueryExpressionFactory.GetQueryExpression<E_Ambassador>()
                     .Where(x => x.IsDeletable == true).ToLambda());
 
                 StandardOutputFactory.Credentials(exists);
@@ -43,8 +43,8 @@ namespace Bhbk.Cli.Aurora.Commands
                 Console.Out.Write("  *** Enter GUID of credential to delete *** : ");
                 var input = Guid.Parse(StandardInput.GetInput());
 
-                var mounts = _uow.UserMounts.Get(QueryExpressionFactory.GetQueryExpression<UserMount>()
-                    .Where(x => x.CredentialId == input).ToLambda());
+                var mounts = _uow.Mounts.Get(QueryExpressionFactory.GetQueryExpression<E_Mount>()
+                    .Where(x => x.AmbassadorId == input).ToLambda());
 
                 if (mounts.Any())
                 {
@@ -55,7 +55,7 @@ namespace Bhbk.Cli.Aurora.Commands
                     return StandardOutput.FondFarewell();
                 }
 
-                _uow.Credentials.Delete(exists.Where(x => x.Id == input));
+                _uow.Ambassadors.Delete(exists.Where(x => x.Id == input));
                 _uow.Commit();
 
                 return StandardOutput.FondFarewell();

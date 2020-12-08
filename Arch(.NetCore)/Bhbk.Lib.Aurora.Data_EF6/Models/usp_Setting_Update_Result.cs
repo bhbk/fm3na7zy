@@ -14,7 +14,7 @@ namespace Bhbk.Lib.Aurora.Data_EF6.Models
     public partial class usp_Setting_Update_Result
     {
         public System.Guid Id { get; set; }
-        public Nullable<System.Guid> IdentityId { get; set; }
+        public Nullable<System.Guid> UserId { get; set; }
         public string ConfigKey { get; set; }
         public string ConfigValue { get; set; }
         public bool IsDeletable { get; set; }

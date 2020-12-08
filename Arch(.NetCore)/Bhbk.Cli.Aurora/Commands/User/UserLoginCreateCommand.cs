@@ -5,6 +5,7 @@ using Bhbk.Lib.Aurora.Primitives.Enums;
 using Bhbk.Lib.CommandLine.IO;
 using Bhbk.Lib.Common.Primitives.Enums;
 using Bhbk.Lib.Common.Services;
+using Bhbk.Lib.Cryptography.Encryption;
 using Bhbk.Lib.DataState.Interfaces;
 using Bhbk.Lib.DataState.Models;
 using Bhbk.Lib.Identity.Grants;
@@ -16,6 +17,7 @@ using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 
 namespace Bhbk.Cli.Aurora.Commands
 {
@@ -23,8 +25,10 @@ namespace Bhbk.Cli.Aurora.Commands
     {
         private readonly IConfiguration _conf;
         private readonly IUnitOfWork _uow;
-        private FileSystemProviderType _fileSystem;
-        private readonly string _fileSystemList = string.Join(", ", Enum.GetNames(typeof(FileSystemProviderType)));
+        private UserLoginType _loginType;
+        private FileSystemProviderType _fileSystemType;
+        private readonly string _loginTypeList = string.Join(", ", Enum.GetNames(typeof(UserLoginType)));
+        private readonly string _fileSystemTypeList = string.Join(", ", Enum.GetNames(typeof(FileSystemProviderType)));
         private string _userName;
 
         public UserLoginCreateCommand()
@@ -43,8 +47,8 @@ namespace Bhbk.Cli.Aurora.Commands
                 if (string.IsNullOrEmpty(arg))
                     throw new ConsoleHelpAsException($"  *** No user given ***");
 
-                var user = _uow.UserLogins.Get(QueryExpressionFactory.GetQueryExpression<UserLogin>()
-                    .Where(x => x.IdentityAlias == arg).ToLambda())
+                var user = _uow.Logins.Get(QueryExpressionFactory.GetQueryExpression<E_Login>()
+                    .Where(x => x.UserName == arg).ToLambda())
                     .SingleOrDefault();
 
                 if (user != null)
@@ -53,10 +57,16 @@ namespace Bhbk.Cli.Aurora.Commands
                 _userName = arg;
             });
 
+            HasRequiredOption("l|login=", "Enter type of login for user", arg =>
+            {
+                if (!Enum.TryParse(arg, out _loginType))
+                    throw new ConsoleHelpAsException($"  *** Invalid login type. Options are '{_loginTypeList}' ***");
+            });
+
             HasRequiredOption("f|filesystem=", "Enter type of filesystem for user", arg =>
             {
-                if (!Enum.TryParse(arg, out _fileSystem))
-                    throw new ConsoleHelpAsException($"  *** Invalid filesystem type. Options are '{_fileSystemList}' ***");
+                if (!Enum.TryParse(arg, out _fileSystemType))
+                    throw new ConsoleHelpAsException($"  *** Invalid filesystem type. Options are '{_fileSystemTypeList}' ***");
             });
         }
 
@@ -64,58 +74,83 @@ namespace Bhbk.Cli.Aurora.Commands
         {
             try
             {
-                var admin = new AdminService(_conf)
+                var user = new E_Login
                 {
-                    Grant = new ClientCredentialGrantV2(_conf)
+                    UserLoginType = _loginType.ToString(),
+                    UserName = _userName,
+                    FileSystemType = _fileSystemType.ToString(),
+                    IsPasswordRequired = true,
+                    IsPublicKeyRequired = false,
+                    IsFileSystemReadOnly = true,
+                    IsEnabled = true,
+                    IsDeletable = false,
                 };
 
-                Console.Out.Write("  *** Enter email (full or partial) of (Identity) user to look for *** : ");
-                var emailSearch = StandardInput.GetInput();
-                Console.Out.WriteLine();
-
-                var identityUsers = admin.User_GetV1(
-                    new DataStateV1()
+                if (_loginType == UserLoginType.Identity)
+                {
+                    var admin = new AdminService(_conf)
                     {
-                        Filter = new DataStateV1Filter()
+                        Grant = new ClientCredentialGrantV2(_conf)
+                    };
+
+                    Console.Out.Write($"  *** Enter email (full or partial) of ({_loginType}) user to look for *** : ");
+                    var emailSearch = StandardInput.GetInput();
+                    Console.Out.WriteLine();
+
+                    var identityUsers = admin.User_GetV1(
+                        new DataStateV1()
                         {
-                            Filters = new List<IDataStateFilter>()
+                            Filter = new DataStateV1Filter()
                             {
+                                Filters = new List<IDataStateFilter>()
+                                {
                                 new DataStateV1Filter { Field = "userName", Operator = "contains", Value = emailSearch },
-                            }
-                        },
-                        Sort = new List<IDataStateSort>()
-                        {
+                                }
+                            },
+                            Sort = new List<IDataStateSort>()
+                            {
                             new DataStateV1Sort() { Field = "userName", Dir = "asc" }
-                        },
-                        Skip = 0,
-                        Take = 100,
-                    })
-                    .AsTask().Result;
+                            },
+                            Skip = 0,
+                            Take = 100,
+                        })
+                        .AsTask().Result;
 
-                foreach (var identityUser in identityUsers.Data)
-                    Console.Out.WriteLine($"  [identity GUID] {identityUser.Id} [email] {identityUser.UserName}");
+                    foreach (var identityUser in identityUsers.Data)
+                        Console.Out.WriteLine($"  [identity GUID] {identityUser.Id} [email] {identityUser.UserName}");
 
-                Console.Out.WriteLine();
-                Console.Out.Write("  *** Enter GUID of (Identity) user to use *** : ");
-                var identityGuid = Guid.Parse(StandardInput.GetInput());
+                    Console.Out.WriteLine();
+                    Console.Out.Write($"  *** Enter GUID of ({_loginType}) user *** : ");
+                    var identityGuid = Guid.Parse(StandardInput.GetInput());
 
-                var user = _uow.UserLogins.Create(
-                    new UserLogin
-                    {
-                        IdentityId = identityGuid,
-                        IdentityAlias = _userName,
-                        FileSystemType = _fileSystem.ToString(),
-                        IsPasswordRequired = true,
-                        IsPublicKeyRequired = false,
-                        IsFileSystemReadOnly = true,
-                        IsEnabled = true,
-                        IsDeletable = false,
-                    });
+                    user.UserId = identityGuid;
+                }
 
+                if (_loginType == UserLoginType.Local)
+                {
+                    var secret = _conf["Databases:AuroraSecret"];
+
+                    Console.Out.Write($"  *** Enter password of ({_loginType}) user *** : ");
+                    var decryptedPass = StandardInput.GetHiddenInput();
+                    Console.Out.WriteLine();
+
+                    user.UserId = Guid.NewGuid();
+                    user.EncryptedPass = AES.EncryptString(decryptedPass, secret);
+                }
+
+                user = _uow.Logins.Create(user);
                 _uow.Commit();
 
+                user = _uow.Logins.Get(QueryExpressionFactory.GetQueryExpression<E_Login>()
+                    .Where(x => x.UserId == user.UserId).ToLambda(),
+                        new List<Expression<Func<E_Login, object>>>()
+                        {
+                            x => x.Usage,
+                        })
+                    .Single();
+                
                 Console.Out.WriteLine();
-                StandardOutputFactory.Logins(new List<UserLogin> { user }, "extras");
+                StandardOutputFactory.Logins(new List<E_Login> { user }, "extras");
 
                 return StandardOutput.FondFarewell();
             }

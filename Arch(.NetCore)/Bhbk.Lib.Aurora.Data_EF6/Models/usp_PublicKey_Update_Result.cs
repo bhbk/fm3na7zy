@@ -14,7 +14,7 @@ namespace Bhbk.Lib.Aurora.Data_EF6.Models
     public partial class usp_PublicKey_Update_Result
     {
         public System.Guid Id { get; set; }
-        public Nullable<System.Guid> IdentityId { get; set; }
+        public Nullable<System.Guid> UserId { get; set; }
         public Nullable<System.Guid> PrivateKeyId { get; set; }
         public string KeyValue { get; set; }
         public string KeyAlgo { get; set; }

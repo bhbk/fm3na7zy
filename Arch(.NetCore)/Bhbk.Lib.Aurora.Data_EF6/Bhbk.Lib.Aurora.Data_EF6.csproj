@@ -69,49 +69,97 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ModelsMem\AuroraEntitiesMem.cs" />
-    <Compile Include="ModelsMem\UserLoginMem.cs" />
-    <Compile Include="ModelsMem\UserFileMem.cs" />
-    <Compile Include="ModelsMem\UserFolderMem.cs" />
-    <Compile Include="Models\Credential.cs">
+    <Compile Include="ModelsMem\E_LoginMem.cs" />
+    <Compile Include="ModelsMem\E_FileMem.cs" />
+    <Compile Include="ModelsMem\E_FolderMem.cs" />
+    <Compile Include="Models\E_Ambassador.cs">
       <DependentUpon>AuroraEntities.tt</DependentUpon>
     </Compile>
-    <Compile Include="Models\Network.cs">
+    <Compile Include="Models\E_Network.cs">
       <DependentUpon>AuroraEntities.tt</DependentUpon>
     </Compile>
-    <Compile Include="Models\PrivateKey.cs">
+    <Compile Include="Models\E_PrivateKey.cs">
       <DependentUpon>AuroraEntities.tt</DependentUpon>
     </Compile>
-    <Compile Include="Models\PublicKey.cs">
+    <Compile Include="Models\E_PublicKey.cs">
       <DependentUpon>AuroraEntities.tt</DependentUpon>
     </Compile>
-    <Compile Include="Models\Session.cs">
+    <Compile Include="Models\E_Session.cs">
       <DependentUpon>AuroraEntities.tt</DependentUpon>
     </Compile>
-    <Compile Include="Models\Setting.cs">
+    <Compile Include="Models\E_Setting.cs">
       <DependentUpon>AuroraEntities.tt</DependentUpon>
     </Compile>
-    <Compile Include="Models\UserAlert.cs">
+    <Compile Include="Models\E_Alert.cs">
       <DependentUpon>AuroraEntities.tt</DependentUpon>
     </Compile>
-    <Compile Include="Models\UserFile.cs">
+    <Compile Include="Models\E_File.cs">
       <DependentUpon>AuroraEntities.tt</DependentUpon>
     </Compile>
-    <Compile Include="Models\UserFolder.cs">
+    <Compile Include="Models\E_Folder.cs">
       <DependentUpon>AuroraEntities.tt</DependentUpon>
     </Compile>
-    <Compile Include="Models\UserLogin.cs">
+    <Compile Include="Models\E_Login.cs">
       <DependentUpon>AuroraEntities.tt</DependentUpon>
     </Compile>
-    <Compile Include="Models\UserMount.cs">
+    <Compile Include="Models\E_Mount.cs">
       <DependentUpon>AuroraEntities.tt</DependentUpon>
     </Compile>
-    <Compile Include="Models\usp_Credential_Delete_Result.cs">
+    <Compile Include="Models\E_Usage.cs">
       <DependentUpon>AuroraEntities.tt</DependentUpon>
     </Compile>
-    <Compile Include="Models\usp_Credential_Insert_Result.cs">
+    <Compile Include="Models\usp_Alert_Delete_Result.cs">
       <DependentUpon>AuroraEntities.tt</DependentUpon>
     </Compile>
-    <Compile Include="Models\usp_Credential_Update_Result.cs">
+    <Compile Include="Models\usp_Alert_Insert_Result.cs">
+      <DependentUpon>AuroraEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\usp_Alert_Update_Result.cs">
+      <DependentUpon>AuroraEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\usp_Ambassador_Delete_Result.cs">
+      <DependentUpon>AuroraEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\usp_Ambassador_Insert_Result.cs">
+      <DependentUpon>AuroraEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\usp_Ambassador_Update_Result.cs">
+      <DependentUpon>AuroraEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\usp_File_Delete_Result.cs">
+      <DependentUpon>AuroraEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\usp_File_Insert_Result.cs">
+      <DependentUpon>AuroraEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\usp_File_Update_Result.cs">
+      <DependentUpon>AuroraEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\usp_Folder_Delete_Result.cs">
+      <DependentUpon>AuroraEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\usp_Folder_Insert_Result.cs">
+      <DependentUpon>AuroraEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\usp_Folder_Update_Result.cs">
+      <DependentUpon>AuroraEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\usp_Login_Delete_Result.cs">
+      <DependentUpon>AuroraEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\usp_Login_Insert_Result.cs">
+      <DependentUpon>AuroraEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\usp_Login_Update_Result.cs">
+      <DependentUpon>AuroraEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\usp_Mount_Delete_Result.cs">
+      <DependentUpon>AuroraEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\usp_Mount_Insert_Result.cs">
+      <DependentUpon>AuroraEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\usp_Mount_Update_Result.cs">
       <DependentUpon>AuroraEntities.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\usp_Network_Delete_Result.cs">
@@ -156,49 +204,7 @@
     <Compile Include="Models\usp_Setting_Update_Result.cs">
       <DependentUpon>AuroraEntities.tt</DependentUpon>
     </Compile>
-    <Compile Include="Models\usp_UserAlert_Delete_Result.cs">
-      <DependentUpon>AuroraEntities.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\usp_UserAlert_Insert_Result.cs">
-      <DependentUpon>AuroraEntities.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\usp_UserAlert_Update_Result.cs">
-      <DependentUpon>AuroraEntities.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\usp_UserFile_Delete_Result.cs">
-      <DependentUpon>AuroraEntities.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\usp_UserFile_Insert_Result.cs">
-      <DependentUpon>AuroraEntities.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\usp_UserFile_Update_Result.cs">
-      <DependentUpon>AuroraEntities.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\usp_UserFolder_Delete_Result.cs">
-      <DependentUpon>AuroraEntities.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\usp_UserFolder_Insert_Result.cs">
-      <DependentUpon>AuroraEntities.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\usp_UserFolder_Update_Result.cs">
-      <DependentUpon>AuroraEntities.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\usp_UserMount_Delete_Result.cs">
-      <DependentUpon>AuroraEntities.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\usp_UserMount_Insert_Result.cs">
-      <DependentUpon>AuroraEntities.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\usp_UserMount_Update_Result.cs">
-      <DependentUpon>AuroraEntities.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\usp_UserLogin_Delete_Result.cs">
-      <DependentUpon>AuroraEntities.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\usp_UserLogin_Insert_Result.cs">
-      <DependentUpon>AuroraEntities.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\usp_UserLogin_Update_Result.cs">
+    <Compile Include="Models\usp_Usage_Update_Result.cs">
       <DependentUpon>AuroraEntities.tt</DependentUpon>
     </Compile>
     <Compile Include="UnitOfWork\IUnitOfWork.cs" />

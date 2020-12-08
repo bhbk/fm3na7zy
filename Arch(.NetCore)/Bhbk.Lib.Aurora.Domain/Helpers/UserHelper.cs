@@ -37,7 +37,7 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
             return safeAccessTokenHandle;
         }
 
-        public static bool ValidatePubKey(ICollection<PublicKey> userKeys, SshPublicKey loginKey)
+        public static bool ValidatePubKey(ICollection<E_PublicKey> userKeys, SshPublicKey loginKey)
         {
             var loginStream = new MemoryStream();
             loginKey.SavePublicKey(loginStream, SshPublicKeyFormat.Pkcs8);
@@ -63,10 +63,10 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
             return false;
         }
 
-        public static ICollection<Credential> ChangeCredentialSecrets(ICollection<Credential> creds, 
+        public static ICollection<E_Ambassador> ChangeCredentialSecrets(ICollection<E_Ambassador> creds, 
             string secretCurrent, string secretNew)
         {
-            var userCreds = new List<Credential>();
+            var userCreds = new List<E_Ambassador>();
 
             foreach (var cred in creds)
             {

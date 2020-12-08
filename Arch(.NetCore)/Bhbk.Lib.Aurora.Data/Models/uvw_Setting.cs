@@ -8,7 +8,7 @@ namespace Bhbk.Lib.Aurora.Data.Models
     public partial class uvw_Setting
     {
         public Guid Id { get; set; }
-        public Guid? IdentityId { get; set; }
+        public Guid? UserId { get; set; }
         public string ConfigKey { get; set; }
         public string ConfigValue { get; set; }
         public bool IsDeletable { get; set; }

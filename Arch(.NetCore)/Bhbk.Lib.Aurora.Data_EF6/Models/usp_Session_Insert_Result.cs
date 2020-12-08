@@ -14,7 +14,7 @@ namespace Bhbk.Lib.Aurora.Data_EF6.Models
     public partial class usp_Session_Insert_Result
     {
         public System.Guid Id { get; set; }
-        public Nullable<System.Guid> IdentityId { get; set; }
+        public Nullable<System.Guid> UserId { get; set; }
         public string CallPath { get; set; }
         public string Details { get; set; }
         public string LocalEndPoint { get; set; }

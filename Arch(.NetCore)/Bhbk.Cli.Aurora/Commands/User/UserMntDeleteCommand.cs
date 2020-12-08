@@ -19,7 +19,7 @@ namespace Bhbk.Cli.Aurora.Commands
     {
         private readonly IConfiguration _conf;
         private readonly IUnitOfWork _uow;
-        private UserLogin _user;
+        private E_Login _user;
 
         public UserMntDeleteCommand()
         {
@@ -37,12 +37,12 @@ namespace Bhbk.Cli.Aurora.Commands
                 if (string.IsNullOrEmpty(arg))
                     throw new ConsoleHelpAsException($"  *** No user name given ***");
 
-                _user = _uow.UserLogins.Get(QueryExpressionFactory.GetQueryExpression<UserLogin>()
-                    .Where(x => x.IdentityAlias == arg).ToLambda(),
-                        new List<Expression<Func<UserLogin, object>>>()
+                _user = _uow.Logins.Get(QueryExpressionFactory.GetQueryExpression<E_Login>()
+                    .Where(x => x.UserName == arg).ToLambda(),
+                        new List<Expression<Func<E_Login, object>>>()
                         {
                             x => x.Mount,
-                            x => x.Mount.Credential,
+                            x => x.Mount.Ambassador,
                         })
                     .SingleOrDefault();
 
@@ -55,9 +55,9 @@ namespace Bhbk.Cli.Aurora.Commands
         {
             try
             {
-                StandardOutputFactory.Mounts(new List<UserMount> { _user.Mount });
+                StandardOutputFactory.Mounts(new List<E_Mount> { _user.Mount });
 
-                _uow.UserMounts.Delete(_user.Mount);
+                _uow.Mounts.Delete(_user.Mount);
                 _uow.Commit();
 
                 return StandardOutput.FondFarewell();

@@ -21,7 +21,7 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
 
             var pvalues = new []
             {
-                new SqlParameter("IdentityId", SqlDbType.UniqueIdentifier) { Value = entity.IdentityId.HasValue ? (object)entity.IdentityId.Value : DBNull.Value },
+                new SqlParameter("UserId", SqlDbType.UniqueIdentifier) { Value = entity.UserId.HasValue ? (object)entity.UserId.Value : DBNull.Value },
                 new SqlParameter("CallPath", SqlDbType.NVarChar) { Value = entity.CallPath },
                 new SqlParameter("Details", SqlDbType.NVarChar) { Value = (object)entity.Details ?? DBNull.Value },
                 new SqlParameter("LocalEndPoint", SqlDbType.NVarChar) { Value = (object)entity.LocalEndPoint ?? DBNull.Value },
@@ -32,7 +32,7 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
             };
 
             return _context.SqlQuery<uvw_Session>("EXEC @ReturnValue = [svc].[usp_Session_Insert] "
-                + "@IdentityId, @CallPath, @Details, @LocalEndPoint, @LocalSoftwareIdentifier, @RemoteEndPoint, @RemoteSoftwareIdentifier", pvalues)
+                + "@UserId, @CallPath, @Details, @LocalEndPoint, @LocalSoftwareIdentifier, @RemoteEndPoint, @RemoteSoftwareIdentifier", pvalues)
                     .Single();
         }
 
@@ -94,7 +94,7 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
             var pvalues = new []
             {
                 new SqlParameter("Id", SqlDbType.UniqueIdentifier) { Value = entity.Id },
-                new SqlParameter("IdentityId", SqlDbType.UniqueIdentifier) { Value = entity.IdentityId.HasValue ? (object)entity.IdentityId.Value : DBNull.Value },
+                new SqlParameter("UserId", SqlDbType.UniqueIdentifier) { Value = entity.UserId.HasValue ? (object)entity.UserId.Value : DBNull.Value },
                 new SqlParameter("CallPath", SqlDbType.NVarChar) { Value = entity.CallPath },
                 new SqlParameter("Details", SqlDbType.NVarChar) { Value = (object)entity.Details ?? DBNull.Value },
                 new SqlParameter("LocalEndPoint", SqlDbType.NVarChar) { Value = (object)entity.LocalEndPoint ?? DBNull.Value },
@@ -105,7 +105,7 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
             };
 
             return _context.SqlQuery<uvw_Session>("EXEC @ReturnValue = [svc].[usp_Session_Update] "
-                + "@Id, @IdentityId, @CallPath, @Details, @LocalEndPoint, @LocalSoftwareIdentifier, @RemoteEndPoint, @RemoteSoftwareIdentifier", pvalues)
+                + "@Id, @UserId, @CallPath, @Details, @LocalEndPoint, @LocalSoftwareIdentifier, @RemoteEndPoint, @RemoteSoftwareIdentifier", pvalues)
                     .Single();
         }
 

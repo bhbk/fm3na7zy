@@ -50,20 +50,20 @@ namespace Bhbk.Cli.Aurora.Commands
         {
             try
             {
-                var exists = _uow.Settings.Get(QueryExpressionFactory.GetQueryExpression<Setting>()
+                var exists = _uow.Settings.Get(QueryExpressionFactory.GetQueryExpression<E_Setting>()
                     .Where(x => x.ConfigKey == _configType.ToString() && x.ConfigValue == _configValue).ToLambda())
                     .LastOrDefault();
 
                 if (exists != null)
                 {
                     Console.Out.WriteLine("  *** The config key/value pair entered already exists ***");
-                    StandardOutputFactory.Settings(new List<Setting> { exists });
+                    StandardOutputFactory.Settings(new List<E_Setting> { exists });
 
                     return StandardOutput.FondFarewell();
                 }
 
                 var config = _uow.Settings.Create(
-                    new Setting
+                    new E_Setting
                     {
                         ConfigKey = _configType.ToString(),
                         ConfigValue = _configValue,
@@ -72,7 +72,7 @@ namespace Bhbk.Cli.Aurora.Commands
 
                 _uow.Commit();
 
-                StandardOutputFactory.Settings(new List<Setting> { config });
+                StandardOutputFactory.Settings(new List<E_Setting> { config });
 
                 return StandardOutput.FondFarewell();
             }

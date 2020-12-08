@@ -21,7 +21,7 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 {
     public class KeyHelper
 	{
-		public static (PublicKey, PrivateKey) CreateKeyPair(IConfiguration conf, IUnitOfWork uow,
+		public static (E_PublicKey, E_PrivateKey) CreateKeyPair(IConfiguration conf, IUnitOfWork uow,
 			SshHostKeyAlgorithm keyAlgo, SignatureHashAlgorithm sigAlgo, int keySize, string keyPass)
 		{
 			var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
@@ -34,7 +34,7 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 			keyPair.Save(privStream, keyPass, SshPrivateKeyFormat.Pkcs8);
 			keyPair.SavePublicKey(pubStream, SshPublicKeyFormat.Pkcs8);
 
-			var privKey = new PrivateKey
+			var privKey = new E_PrivateKey
 			{
 				Id = privId,
 				PublicKeyId = pubId,
@@ -50,7 +50,7 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 				$"{Environment.NewLine} algo: {privKey.KeyAlgo} format: {privKey.KeyFormat} " +
 				$"{Environment.NewLine}{privKey.KeyValue}");
 
-			var pubKey = new PublicKey
+			var pubKey = new E_PublicKey
 			{
 				Id = pubId,
 				PrivateKeyId = privId,
@@ -71,7 +71,7 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 			return (pubKey, privKey);
 		}
 
-		public static (PublicKey, PrivateKey) CreateKeyPair(IConfiguration conf, IUnitOfWork uow, UserLogin user,
+		public static (E_PublicKey, E_PrivateKey) CreateKeyPair(IConfiguration conf, IUnitOfWork uow, E_Login user,
 			SshHostKeyAlgorithm keyAlgo, SignatureHashAlgorithm sigAlgo, int keySize, string keyPass, string comment)
 		{
 			var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
@@ -84,10 +84,10 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 			keyPair.Save(privStream, keyPass, SshPrivateKeyFormat.Pkcs8);
 			keyPair.SavePublicKey(pubStream, SshPublicKeyFormat.Pkcs8);
 
-			var privKey = new PrivateKey
+			var privKey = new E_PrivateKey
 			{
 				Id = privId,
-				IdentityId = user.IdentityId,
+				UserId = user.UserId,
 				PublicKeyId = pubId,
 				KeyValue = Encoding.UTF8.GetString(privStream.ToArray()),
 				KeyAlgo = keyPair.KeyAlgorithm.ToString(),
@@ -97,14 +97,14 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 				IsDeletable = true,
 			};
 
-			Log.Information($"'{callPath}' '{user.IdentityAlias}' creating new private key... " +
+			Log.Information($"'{callPath}' '{user.UserName}' creating new private key... " +
 				$"{Environment.NewLine} algo: {privKey.KeyAlgo} format: {privKey.KeyFormat} " +
 				$"{Environment.NewLine}{privKey.KeyValue}");
 
-			var pubKey = new PublicKey
+			var pubKey = new E_PublicKey
 			{
 				Id = pubId,
-				IdentityId = user.IdentityId,
+				UserId = user.UserId,
 				PrivateKeyId = privId,
 				KeyValue = Encoding.UTF8.GetString(pubStream.ToArray()),
 				KeyAlgo = keyPair.KeyAlgorithm.ToString(),
@@ -116,7 +116,7 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 				IsDeletable = true,
 			};
 
-			Log.Information($"'{callPath}' '{user.IdentityAlias}' creating new public key... " +
+			Log.Information($"'{callPath}' '{user.UserName}' creating new public key... " +
 				$"{Environment.NewLine} algo: {pubKey.KeyAlgo} format: {pubKey.KeyFormat} " +
 				$"{Environment.NewLine} sig: {pubKey.SigValue}" +
 				$"{Environment.NewLine}{pubKey.KeyValue}");
@@ -124,10 +124,10 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 			return (pubKey, privKey);
 		}
 
-		public static ICollection<PrivateKey> ChangePrivKeySecrets(ICollection<PrivateKey> keys, 
+		public static ICollection<E_PrivateKey> ChangePrivKeySecrets(ICollection<E_PrivateKey> keys, 
 			string secretCurrent, string secretNew)
 		{
-			var privKeys = new List<PrivateKey>();
+			var privKeys = new List<E_PrivateKey>();
 
 			foreach (var key in keys)
 			{
@@ -156,7 +156,7 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 			return privKeys;
 		}
 
-		public static byte[] ExportPrivKey(PrivateKey key, SshPrivateKeyFormat keyFormat, string keyPass)
+		public static byte[] ExportPrivKey(E_PrivateKey key, SshPrivateKeyFormat keyFormat, string keyPass)
 		{
 			var privBytes = Encoding.UTF8.GetBytes(key.KeyValue);
 			var privStream = new MemoryStream();
@@ -166,7 +166,7 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 			return privStream.ToArray();
 		}
 
-		public static byte[] ExportPubKey(PublicKey key, SshPublicKeyFormat keyFormat)
+		public static byte[] ExportPubKey(E_PublicKey key, SshPublicKeyFormat keyFormat)
 		{
 			var pubBytes = Encoding.UTF8.GetBytes(key.KeyValue);
 			var pubKeyInfo = new PublicKeyInfo();
@@ -183,7 +183,7 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 		 * openssh uses base64 and special formatting for public keys like with "authorized_keys"
 		 * https://man.openbsd.org/ssh-keygen
 		 */
-		public static StringBuilder ExportPubKeyBase64(UserLogin user, ICollection<PublicKey> keys)
+		public static StringBuilder ExportPubKeyBase64(E_Login user, ICollection<E_PublicKey> keys)
 		{
 			var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
 			var sb = new StringBuilder();
@@ -224,7 +224,7 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 
 					default:
 						{
-							Log.Warning($"'{callPath}' '{user.IdentityAlias}' algorithm {pubKey.KeyAlgorithm} not supported");
+							Log.Warning($"'{callPath}' '{user.UserName}' algorithm {pubKey.KeyAlgorithm} not supported");
 							continue;
 						}
 				}
@@ -235,15 +235,15 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 			return sb;
 		}
 
-		public static (PublicKey, PrivateKey) ImportKeyPair(IConfiguration conf, IUnitOfWork uow,
+		public static (E_PublicKey, E_PrivateKey) ImportKeyPair(IConfiguration conf, IUnitOfWork uow,
 			SignatureHashAlgorithm sigAlgo, MemoryStream stream, string keyPass)
 		{
 			var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
 
 			stream.Position = 0;
 
-			PrivateKey privKey = null, privKeyFound = null;
-			PublicKey pubKey = null, pubKeyFound = null;
+			E_PrivateKey privKey = null, privKeyFound = null;
+			E_PublicKey pubKey = null, pubKeyFound = null;
 			SshPrivateKey keyPair = null;
 
 			if (string.IsNullOrEmpty(keyPass))
@@ -264,8 +264,8 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 			var privKeyValue = Encoding.UTF8.GetString(privStream.ToArray());
 			var pubKeyValue = Encoding.UTF8.GetString(pubStream.ToArray());
 
-			pubKeyFound = uow.PublicKeys.Get(QueryExpressionFactory.GetQueryExpression<PublicKey>()
-				.Where(x => x.IdentityId == null && x.KeyValue == pubKeyValue).ToLambda())
+			pubKeyFound = uow.PublicKeys.Get(QueryExpressionFactory.GetQueryExpression<E_PublicKey>()
+				.Where(x => x.UserId == null && x.KeyValue == pubKeyValue).ToLambda())
 				.SingleOrDefault();
 
 			/*
@@ -275,14 +275,14 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 			 */
 
 			if (pubKeyFound != null)
-				privKeyFound = uow.PrivateKeys.Get(QueryExpressionFactory.GetQueryExpression<PrivateKey>()
-					.Where(x => x.IdentityId == null && x.PublicKeyId == pubKeyFound.Id).ToLambda())
+				privKeyFound = uow.PrivateKeys.Get(QueryExpressionFactory.GetQueryExpression<E_PrivateKey>()
+					.Where(x => x.UserId == null && x.PublicKeyId == pubKeyFound.Id).ToLambda())
 					.SingleOrDefault();
 
 			if (privKeyFound == null
 				&& pubKeyFound == null)
 			{
-				privKey = new PrivateKey
+				privKey = new E_PrivateKey
 				{
 					Id = privId,
 					PublicKeyId = pubId,
@@ -299,7 +299,7 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 					$"{Environment.NewLine} algo:'{privKey.KeyAlgo}' format:'{privKey.KeyFormat}' " +
 					$"{Environment.NewLine}{privKey.KeyValue}");
 
-				pubKey = new PublicKey
+				pubKey = new E_PublicKey
 				{
 					Id = pubId,
 					PrivateKeyId = privId,
@@ -327,7 +327,7 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 					$"{Environment.NewLine} algo:'{privKeyFound.KeyAlgo}' format:'{privKeyFound.KeyFormat}' " +
 					$"{Environment.NewLine}{privKeyFound.KeyValue}");
 
-				pubKey = new PublicKey
+				pubKey = new E_PublicKey
 				{
 					Id = pubId,
 					PrivateKeyId = privKeyFound.Id,
@@ -356,7 +356,7 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 					$"{Environment.NewLine} sig: {pubKeyFound.SigValue}" +
 					$"{Environment.NewLine}{pubKeyFound.KeyValue}");
 
-				privKey = new PrivateKey
+				privKey = new E_PrivateKey
 				{
 					Id = privId,
 					PublicKeyId = pubKeyFound.Id,
@@ -393,15 +393,15 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 			return (pubKey, privKey);
 		}
 
-		public static (PublicKey, PrivateKey) ImportKeyPair(IConfiguration conf, IUnitOfWork uow, UserLogin user,
+		public static (E_PublicKey, E_PrivateKey) ImportKeyPair(IConfiguration conf, IUnitOfWork uow, E_Login user,
 			SignatureHashAlgorithm sigAlgo, MemoryStream stream, string keyPass, string comment)
 		{
 			var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
 
 			stream.Position = 0;
 
-			PrivateKey privKey = null, privKeyFound = null;
-			PublicKey pubKey = null, pubKeyFound = null;
+			E_PrivateKey privKey = null, privKeyFound = null;
+			E_PublicKey pubKey = null, pubKeyFound = null;
 			SshPrivateKey keyPair = null;
 
 			if (string.IsNullOrEmpty(keyPass))
@@ -422,8 +422,8 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 			var privKeyValue = Encoding.UTF8.GetString(privStream.ToArray());
 			var pubKeyValue = Encoding.UTF8.GetString(pubStream.ToArray());
 
-			pubKeyFound = uow.PublicKeys.Get(QueryExpressionFactory.GetQueryExpression<PublicKey>()
-				.Where(x => x.IdentityId == user.IdentityId && x.KeyValue == pubKeyValue).ToLambda())
+			pubKeyFound = uow.PublicKeys.Get(QueryExpressionFactory.GetQueryExpression<E_PublicKey>()
+				.Where(x => x.UserId == user.UserId && x.KeyValue == pubKeyValue).ToLambda())
 				.SingleOrDefault();
 
 			/*
@@ -433,18 +433,18 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 			 */
 
 			if (pubKeyFound != null)
-				privKeyFound = uow.PrivateKeys.Get(QueryExpressionFactory.GetQueryExpression<PrivateKey>()
-					.Where(x => x.IdentityId == user.IdentityId && x.PublicKeyId == pubKeyFound.Id).ToLambda())
+				privKeyFound = uow.PrivateKeys.Get(QueryExpressionFactory.GetQueryExpression<E_PrivateKey>()
+					.Where(x => x.UserId == user.UserId && x.PublicKeyId == pubKeyFound.Id).ToLambda())
 					.SingleOrDefault();
 
 			if (privKeyFound == null
 				&& pubKeyFound == null)
 			{
-				privKey = new PrivateKey
+				privKey = new E_PrivateKey
 				{
 					Id = privId,
 					PublicKeyId = pubId,
-					IdentityId = user.IdentityId,
+					UserId = user.UserId,
 					KeyValue = privKeyValue,
 					KeyAlgo = keyPair.KeyAlgorithm.ToString(),
 					EncryptedPass = AES.EncryptString(keyPass, conf["Databases:AuroraSecret"]),
@@ -453,16 +453,16 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 					IsDeletable = true,
 				};
 
-				Log.Information($"'{callPath}' '{user.IdentityAlias}' import private key... " +
+				Log.Information($"'{callPath}' '{user.UserName}' import private key... " +
 					$"{Environment.NewLine} pass:'{keyPass}' " +
 					$"{Environment.NewLine} algo:'{privKey.KeyAlgo}' format:'{privKey.KeyFormat}' " +
 					$"{Environment.NewLine}{privKey.KeyValue}");
 
-				pubKey = new PublicKey
+				pubKey = new E_PublicKey
 				{
 					Id = pubId,
 					PrivateKeyId = privId,
-					IdentityId = user.IdentityId,
+					UserId = user.UserId,
 					KeyValue = pubKeyValue,
 					KeyAlgo = keyPair.KeyAlgorithm.ToString(),
 					KeyFormat = SshPublicKeyFormat.Pkcs8.ToString(),
@@ -473,7 +473,7 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 					IsDeletable = true,
 				};
 
-				Log.Information($"'{callPath}' '{user.IdentityAlias}' import public key... " +
+				Log.Information($"'{callPath}' '{user.UserName}' import public key... " +
 					$"{Environment.NewLine} algo:'{pubKey.KeyAlgo}' format:'{pubKey.KeyFormat}' " +
 					$"{Environment.NewLine} sig:'{pubKey.SigValue}'" +
 					$"{Environment.NewLine}{pubKey.KeyValue}");
@@ -483,16 +483,16 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 			{
 				privKey = privKeyFound;
 
-				Log.Warning($"'{callPath}' '{user.IdentityAlias}' skip import... " +
+				Log.Warning($"'{callPath}' '{user.UserName}' skip import... " +
 					$"{Environment.NewLine} *** private key with GUID {privKeyFound.Id} already exists ***" +
 					$"{Environment.NewLine} algo:'{privKeyFound.KeyAlgo}' format:'{privKeyFound.KeyFormat}' " +
 					$"{Environment.NewLine}{privKeyFound.KeyValue}");
 
-				pubKey = new PublicKey
+				pubKey = new E_PublicKey
 				{
 					Id = pubId,
 					PrivateKeyId = privKeyFound.Id,
-					IdentityId = user.IdentityId,
+					UserId = user.UserId,
 					KeyValue = pubKeyValue,
 					KeyAlgo = keyPair.KeyAlgorithm.ToString(),
 					KeyFormat = SshPublicKeyFormat.Pkcs8.ToString(),
@@ -503,7 +503,7 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 					IsDeletable = true,
 				};
 
-				Log.Information($"'{callPath}' '{user.IdentityAlias}' import public key... " +
+				Log.Information($"'{callPath}' '{user.UserName}' import public key... " +
 					$"{Environment.NewLine} algo:'{pubKey.KeyAlgo}' format:'{pubKey.KeyFormat}' " +
 					$"{Environment.NewLine} sig:'{pubKey.SigValue}'" +
 					$"{Environment.NewLine}{pubKey.KeyValue}");
@@ -513,17 +513,17 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 			{
 				pubKey = pubKeyFound;
 
-				Log.Warning($"'{callPath}' '{user.IdentityAlias}' skip import... " +
+				Log.Warning($"'{callPath}' '{user.UserName}' skip import... " +
 					$"{Environment.NewLine} *** public key with GUID {pubKeyFound.Id} already exists ***" +
 					$"{Environment.NewLine} algo:'{pubKeyFound.KeyAlgo}' format:'{pubKeyFound.KeyFormat}' " +
 					$"{Environment.NewLine} sig:'{pubKeyFound.SigValue}'" +
 					$"{Environment.NewLine}{pubKeyFound.KeyValue}");
 
-				privKey = new PrivateKey
+				privKey = new E_PrivateKey
 				{
 					Id = privId,
 					PublicKeyId = pubKeyFound.Id,
-					IdentityId = user.IdentityId,
+					UserId = user.UserId,
 					KeyValue = privKeyValue,
 					KeyAlgo = keyPair.Fingerprint.ToString(sigAlgo, false).ToString(),
 					EncryptedPass = AES.EncryptString(keyPass, conf["Databases:AuroraSecret"]),
@@ -531,7 +531,7 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 					IsDeletable = true,
 				};
 
-				Log.Information($"'{callPath}' '{user.IdentityAlias}' import private key... " +
+				Log.Information($"'{callPath}' '{user.UserName}' import private key... " +
 					$"{Environment.NewLine} pass:'{keyPass}' " +
 					$"{Environment.NewLine} algo:'{privKey.KeyAlgo}' format:'{privKey.KeyFormat}' " +
 					$"{Environment.NewLine}{privKey.KeyValue}");
@@ -556,34 +556,34 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 			return (pubKey, privKey);
 		}
 
-		public static PublicKey ImportPubKey(IUnitOfWork uow, UserLogin user,
+		public static E_PublicKey ImportPubKey(IUnitOfWork uow, E_Login user,
 			SignatureHashAlgorithm sigAlgo, string comment, MemoryStream stream)
 		{
 			var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
 
 			stream.Position = 0;
 
-			PublicKey pubKey = null;
+			E_PublicKey pubKey = null;
 			var importedPubKey = new SshPublicKey(stream);
 			var importedPubKeyStream = new MemoryStream();
 			importedPubKey.SavePublicKey(importedPubKeyStream, SshPublicKeyFormat.Pkcs8);
 
-			Log.Information($"'{callPath}' '{user.IdentityAlias}' show original public key... " +
+			Log.Information($"'{callPath}' '{user.UserName}' show original public key... " +
 				$"{Environment.NewLine} algo:'{importedPubKey.KeyAlgorithm}' " +
 				$"{Environment.NewLine} sig:'{importedPubKey.Fingerprint.ToString(sigAlgo, false)}'" +
 				$"{Environment.NewLine}{Encoding.UTF8.GetString(stream.ToArray())}");
 
 			var pubKeyValue = Encoding.UTF8.GetString(importedPubKeyStream.ToArray());
-			var pubKeyFound = uow.PublicKeys.Get(QueryExpressionFactory.GetQueryExpression<PublicKey>()
-				.Where(x => x.IdentityId == user.IdentityId && x.KeyValue == pubKeyValue).ToLambda())
+			var pubKeyFound = uow.PublicKeys.Get(QueryExpressionFactory.GetQueryExpression<E_PublicKey>()
+				.Where(x => x.UserId == user.UserId && x.KeyValue == pubKeyValue).ToLambda())
 				.SingleOrDefault();
 
 			if (pubKeyFound == null)
 			{
-				pubKey = new PublicKey
+				pubKey = new E_PublicKey
 				{
 					Id = Guid.NewGuid(),
-					IdentityId = user.IdentityId,
+					UserId = user.UserId,
 					KeyValue = pubKeyValue,
 					KeyAlgo = importedPubKey.KeyAlgorithm.ToString(),
 					KeyFormat = SshPublicKeyFormat.Pkcs8.ToString(),
@@ -594,14 +594,14 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 					IsDeletable = true,
 				};
 
-				Log.Information($"'{callPath}' '{user.IdentityAlias}' import public key... " +
+				Log.Information($"'{callPath}' '{user.UserName}' import public key... " +
 					$"{Environment.NewLine} algo:'{pubKey.KeyAlgo}' format:'{pubKey.KeyFormat}' " +
 					$"{Environment.NewLine} sig:'{pubKey.SigValue}'" +
 					$"{Environment.NewLine}{pubKey.KeyValue}");
 			}
 			else
 			{
-				Log.Warning($"'{callPath}' '{user.IdentityAlias}' skip import... " +
+				Log.Warning($"'{callPath}' '{user.UserName}' skip import... " +
 					$"{Environment.NewLine} *** public key with GUID {pubKeyFound.Id} already exists ***" +
 					$"{Environment.NewLine} algo:'{pubKeyFound.KeyAlgo}' format:'{pubKeyFound.KeyFormat}' " +
 					$"{Environment.NewLine} sig:'{pubKeyFound.SigValue}'" +
@@ -615,12 +615,12 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 		 * openssh uses base64 and special formatting for public keys like with "authorized_keys"
 		 * https://man.openbsd.org/ssh-keygen
 		 */
-		public static ICollection<PublicKey> ImportPubKeyBase64(IUnitOfWork uow, UserLogin user,
+		public static ICollection<E_PublicKey> ImportPubKeyBase64(IUnitOfWork uow, E_Login user,
 			SignatureHashAlgorithm sigAlgo, MemoryStream stream)
 		{
 			var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
 
-			var pubKeys = new List<PublicKey>();
+			var pubKeys = new List<E_PublicKey>();
 			var pubKeyLines = new List<string>();
 
 			stream.Position = 0;
@@ -655,7 +655,7 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 
 					default:
 						{
-							Log.Warning($"'{callPath}' '{user.IdentityAlias}' algorithm '{base64[0]}' not supported");
+							Log.Warning($"'{callPath}' '{user.UserName}' algorithm '{base64[0]}' not supported");
 							continue;
 						}
 				}
@@ -664,22 +664,22 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 				var importedPubKeyStream = new MemoryStream();
 				importedPubKey.SavePublicKey(importedPubKeyStream, SshPublicKeyFormat.Pkcs8);
 
-				Log.Information($"'{callPath}' '{user.IdentityAlias}' show original public key... " +
+				Log.Information($"'{callPath}' '{user.UserName}' show original public key... " +
 					$"{Environment.NewLine} algo:'{base64[0]}'" +
 					$"{Environment.NewLine} comment:'{base64[2]}'" +
 					$"{Environment.NewLine}{base64[1]}");
 
 				var pubKeyValue = Encoding.UTF8.GetString(importedPubKeyStream.ToArray());
-				var pubKeyFound = uow.PublicKeys.Get(QueryExpressionFactory.GetQueryExpression<PublicKey>()
-					.Where(x => x.IdentityId == user.IdentityId && x.KeyValue == pubKeyValue).ToLambda())
+				var pubKeyFound = uow.PublicKeys.Get(QueryExpressionFactory.GetQueryExpression<E_PublicKey>()
+					.Where(x => x.UserId == user.UserId && x.KeyValue == pubKeyValue).ToLambda())
 					.SingleOrDefault();
 
 				if (pubKeyFound == null)
 				{
-					var pubKey = new PublicKey
+					var pubKey = new E_PublicKey
 					{
 						Id = Guid.NewGuid(),
-						IdentityId = user.IdentityId,
+						UserId = user.UserId,
 						KeyValue = pubKeyValue,
 						KeyAlgo = importedPubKey.KeyAlgorithm.ToString(),
 						KeyFormat = SshPublicKeyFormat.Pkcs8.ToString(),
@@ -692,14 +692,14 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 
 					pubKeys.Add(pubKey);
 
-					Log.Information($"'{callPath}' '{user.IdentityAlias}' import public key... " +
+					Log.Information($"'{callPath}' '{user.UserName}' import public key... " +
 						$"{Environment.NewLine} algo:'{pubKey.KeyAlgo}' format:'{pubKey.KeyFormat}' " +
 						$"{Environment.NewLine} sig:'{pubKey.SigValue}'" +
 						$"{Environment.NewLine}{pubKey.KeyValue}");
 				}
 				else
 				{
-					Log.Warning($"'{callPath}' '{user.IdentityAlias}' skip import..." +
+					Log.Warning($"'{callPath}' '{user.UserName}' skip import..." +
 						$"{Environment.NewLine} *** public key with GUID {pubKeyFound.Id} already exists ***" +
 						$"{Environment.NewLine} algo:'{pubKeyFound.KeyAlgo}' format:'{pubKeyFound.KeyFormat}' " +
 						$"{Environment.NewLine} sig:'{pubKeyFound.SigValue}'" +

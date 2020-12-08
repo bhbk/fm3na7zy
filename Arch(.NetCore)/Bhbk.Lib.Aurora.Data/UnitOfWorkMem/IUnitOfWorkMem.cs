@@ -6,8 +6,8 @@ namespace Bhbk.Lib.Aurora.Data.UnitOfWorkMem
 {
     public interface IUnitOfWorkMem : IGenericUnitOfWork
     {
-        IGenericRepository<UserLoginMem> UserLogins { get; }
-        IGenericRepository<UserFileMem> UserFiles { get; }
-        IGenericRepository<UserFolderMem> UserFolders { get; }
+        IGenericRepository<E_LoginMem> UserLogins { get; }
+        IGenericRepository<E_FileMem> UserFiles { get; }
+        IGenericRepository<E_FolderMem> UserFolders { get; }
     }
 }

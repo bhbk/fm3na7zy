@@ -17,41 +17,125 @@ namespace Bhbk.Lib.Aurora.Data.Models
         {
         }
 
-        public virtual DbSet<uvw_Credential> uvw_Credentials { get; set; }
+        public virtual DbSet<uvw_Alert> uvw_Alerts { get; set; }
+        public virtual DbSet<uvw_Ambassador> uvw_Ambassadors { get; set; }
+        public virtual DbSet<uvw_File> uvw_Files { get; set; }
+        public virtual DbSet<uvw_Folder> uvw_Folders { get; set; }
+        public virtual DbSet<uvw_Login> uvw_Logins { get; set; }
+        public virtual DbSet<uvw_Mount> uvw_Mounts { get; set; }
         public virtual DbSet<uvw_Network> uvw_Networks { get; set; }
         public virtual DbSet<uvw_PrivateKey> uvw_PrivateKeys { get; set; }
         public virtual DbSet<uvw_PublicKey> uvw_PublicKeys { get; set; }
         public virtual DbSet<uvw_Session> uvw_Sessions { get; set; }
         public virtual DbSet<uvw_Setting> uvw_Settings { get; set; }
-        public virtual DbSet<uvw_UserAlert> uvw_UserAlerts { get; set; }
-        public virtual DbSet<uvw_UserFile> uvw_UserFiles { get; set; }
-        public virtual DbSet<uvw_UserFolder> uvw_UserFolders { get; set; }
-        public virtual DbSet<uvw_UserLogin> uvw_UserLogins { get; set; }
-        public virtual DbSet<uvw_UserMount> uvw_UserMounts { get; set; }
+        public virtual DbSet<uvw_Usage> uvw_Usages { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.HasAnnotation("Relational:Collation", "SQL_Latin1_General_CP1_CI_AS");
 
-            modelBuilder.Entity<uvw_Credential>(entity =>
+            modelBuilder.Entity<uvw_Alert>(entity =>
             {
                 entity.HasNoKey();
 
-                entity.ToView("uvw_Credential", "svc");
+                entity.ToView("uvw_Alert", "svc");
 
-                entity.Property(e => e.Domain)
-                    .HasMaxLength(128)
-                    .IsUnicode(false);
+                entity.Property(e => e.ToDisplayName)
+                    .IsRequired()
+                    .HasMaxLength(128);
+
+                entity.Property(e => e.ToEmailAddress).HasMaxLength(320);
+
+                entity.Property(e => e.ToPhoneNumber).HasMaxLength(15);
+            });
+
+            modelBuilder.Entity<uvw_Ambassador>(entity =>
+            {
+                entity.HasNoKey();
+
+                entity.ToView("uvw_Ambassador", "svc");
 
                 entity.Property(e => e.EncryptedPass)
                     .IsRequired()
-                    .HasMaxLength(128)
-                    .IsUnicode(false);
+                    .HasMaxLength(128);
 
                 entity.Property(e => e.UserName)
                     .IsRequired()
-                    .HasMaxLength(128)
-                    .IsUnicode(false);
+                    .HasMaxLength(128);
+            });
+
+            modelBuilder.Entity<uvw_File>(entity =>
+            {
+                entity.HasNoKey();
+
+                entity.ToView("uvw_File", "svc");
+
+                entity.Property(e => e.HashSHA256)
+                    .IsRequired()
+                    .HasMaxLength(64);
+
+                entity.Property(e => e.RealFileName)
+                    .IsRequired()
+                    .HasMaxLength(260);
+
+                entity.Property(e => e.RealPath).IsRequired();
+
+                entity.Property(e => e.VirtualName)
+                    .IsRequired()
+                    .HasMaxLength(260);
+            });
+
+            modelBuilder.Entity<uvw_Folder>(entity =>
+            {
+                entity.HasNoKey();
+
+                entity.ToView("uvw_Folder", "svc");
+
+                entity.Property(e => e.VirtualName).IsRequired();
+            });
+
+            modelBuilder.Entity<uvw_Login>(entity =>
+            {
+                entity.HasNoKey();
+
+                entity.ToView("uvw_Login", "svc");
+
+                entity.Property(e => e.Debugger).HasMaxLength(16);
+
+                entity.Property(e => e.EncryptedPass).HasMaxLength(1024);
+
+                entity.Property(e => e.FileSystemChrootPath).HasMaxLength(64);
+
+                entity.Property(e => e.FileSystemType)
+                    .IsRequired()
+                    .HasMaxLength(16);
+
+                entity.Property(e => e.UserLoginType)
+                    .IsRequired()
+                    .HasMaxLength(16);
+
+                entity.Property(e => e.UserName)
+                    .IsRequired()
+                    .HasMaxLength(128);
+            });
+
+            modelBuilder.Entity<uvw_Mount>(entity =>
+            {
+                entity.HasNoKey();
+
+                entity.ToView("uvw_Mount", "svc");
+
+                entity.Property(e => e.AuthType)
+                    .IsRequired()
+                    .HasMaxLength(16);
+
+                entity.Property(e => e.ServerAddress)
+                    .IsRequired()
+                    .HasMaxLength(256);
+
+                entity.Property(e => e.ServerShare)
+                    .IsRequired()
+                    .HasMaxLength(256);
             });
 
             modelBuilder.Entity<uvw_Network>(entity =>
@@ -125,32 +209,21 @@ namespace Bhbk.Lib.Aurora.Data.Models
 
                 entity.Property(e => e.CallPath)
                     .IsRequired()
-                    .HasMaxLength(256)
-                    .IsUnicode(false);
-
-                entity.Property(e => e.Details).IsUnicode(false);
-
-                entity.Property(e => e.IdentityAlias)
-                    .HasMaxLength(128)
-                    .IsUnicode(false);
+                    .HasMaxLength(256);
 
                 entity.Property(e => e.LocalEndPoint)
                     .IsRequired()
-                    .HasMaxLength(128)
-                    .IsUnicode(false);
+                    .HasMaxLength(128);
 
-                entity.Property(e => e.LocalSoftwareIdentifier)
-                    .HasMaxLength(128)
-                    .IsUnicode(false);
+                entity.Property(e => e.LocalSoftwareIdentifier).HasMaxLength(128);
 
                 entity.Property(e => e.RemoteEndPoint)
                     .IsRequired()
-                    .HasMaxLength(128)
-                    .IsUnicode(false);
+                    .HasMaxLength(128);
 
-                entity.Property(e => e.RemoteSoftwareIdentifier)
-                    .HasMaxLength(128)
-                    .IsUnicode(false);
+                entity.Property(e => e.RemoteSoftwareIdentifier).HasMaxLength(128);
+
+                entity.Property(e => e.UserName).HasMaxLength(128);
             });
 
             modelBuilder.Entity<uvw_Setting>(entity =>
@@ -161,112 +234,20 @@ namespace Bhbk.Lib.Aurora.Data.Models
 
                 entity.Property(e => e.ConfigKey)
                     .IsRequired()
-                    .HasMaxLength(128)
-                    .IsUnicode(false);
+                    .HasMaxLength(128);
 
                 entity.Property(e => e.ConfigValue)
                     .IsRequired()
-                    .HasMaxLength(256)
-                    .IsUnicode(false);
+                    .HasMaxLength(256);
             });
 
-            modelBuilder.Entity<uvw_UserAlert>(entity =>
+            modelBuilder.Entity<uvw_Usage>(entity =>
             {
                 entity.HasNoKey();
 
-                entity.ToView("uvw_UserAlert", "svc");
+                entity.ToView("uvw_Usage", "svc");
 
-                entity.Property(e => e.ToDisplayName)
-                    .IsRequired()
-                    .HasMaxLength(128)
-                    .IsUnicode(false);
-
-                entity.Property(e => e.ToEmailAddress)
-                    .HasMaxLength(320)
-                    .IsUnicode(false);
-
-                entity.Property(e => e.ToPhoneNumber)
-                    .HasMaxLength(15)
-                    .IsUnicode(false);
-            });
-
-            modelBuilder.Entity<uvw_UserFile>(entity =>
-            {
-                entity.HasNoKey();
-
-                entity.ToView("uvw_UserFile", "svc");
-
-                entity.Property(e => e.HashSHA256)
-                    .IsRequired()
-                    .HasMaxLength(64);
-
-                entity.Property(e => e.RealFileName)
-                    .IsRequired()
-                    .HasMaxLength(260);
-
-                entity.Property(e => e.RealPath).IsRequired();
-
-                entity.Property(e => e.VirtualName)
-                    .IsRequired()
-                    .HasMaxLength(260);
-            });
-
-            modelBuilder.Entity<uvw_UserFolder>(entity =>
-            {
-                entity.HasNoKey();
-
-                entity.ToView("uvw_UserFolder", "svc");
-
-                entity.Property(e => e.VirtualName)
-                    .IsRequired()
-                    .IsUnicode(false);
-            });
-
-            modelBuilder.Entity<uvw_UserLogin>(entity =>
-            {
-                entity.HasNoKey();
-
-                entity.ToView("uvw_UserLogin", "svc");
-
-                entity.Property(e => e.Debugger)
-                    .HasMaxLength(16)
-                    .IsUnicode(false);
-
-                entity.Property(e => e.FileSystemChrootPath)
-                    .HasMaxLength(64)
-                    .IsUnicode(false);
-
-                entity.Property(e => e.FileSystemType)
-                    .IsRequired()
-                    .HasMaxLength(16)
-                    .IsUnicode(false);
-
-                entity.Property(e => e.IdentityAlias)
-                    .IsRequired()
-                    .HasMaxLength(128)
-                    .IsUnicode(false);
-            });
-
-            modelBuilder.Entity<uvw_UserMount>(entity =>
-            {
-                entity.HasNoKey();
-
-                entity.ToView("uvw_UserMount", "svc");
-
-                entity.Property(e => e.AuthType)
-                    .IsRequired()
-                    .HasMaxLength(16)
-                    .IsUnicode(false);
-
-                entity.Property(e => e.ServerAddress)
-                    .IsRequired()
-                    .HasMaxLength(256)
-                    .IsUnicode(false);
-
-                entity.Property(e => e.ServerShare)
-                    .IsRequired()
-                    .HasMaxLength(256)
-                    .IsUnicode(false);
+                entity.Property(e => e.UserName).HasMaxLength(128);
             });
 
             OnModelCreatingPartial(modelBuilder);

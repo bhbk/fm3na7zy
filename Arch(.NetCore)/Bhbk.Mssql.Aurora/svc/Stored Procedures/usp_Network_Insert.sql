@@ -1,6 +1,6 @@
 ﻿
 CREATE PROCEDURE [svc].[usp_Network_Insert]
-     @IdentityId			UNIQUEIDENTIFIER
+     @UserId				UNIQUEIDENTIFIER
 	,@SequenceId			INT
     ,@Address				NVARCHAR (128) 
     ,@Action				NVARCHAR (8) 
@@ -19,7 +19,7 @@ BEGIN
 		INSERT INTO [dbo].[tbl_Network]
 			(
 			 Id         
-			,IdentityId
+			,UserId
 			,SequenceId
 			,Address   
 			,Action
@@ -30,7 +30,7 @@ BEGIN
 		VALUES
 			(
 			 @NETWORKID          
-			,@IdentityId
+			,@UserId
 			,@SequenceId
 			,@Address
 			,@Action

@@ -20,7 +20,7 @@ namespace Bhbk.Cli.Aurora.Commands
     {
         private IConfiguration _conf;
         private IUnitOfWork _uow;
-        private UserLogin _user;
+        private E_Login _user;
         private Guid _id;
         private FileSystemProviderType _fileSystem;
         private readonly string _fileSystemList = string.Join(", ", Enum.GetNames(typeof(FileSystemProviderType)));
@@ -41,9 +41,9 @@ namespace Bhbk.Cli.Aurora.Commands
             {
                 _id = Guid.Parse(arg);
 
-                _user = _uow.UserLogins.Get(QueryExpressionFactory.GetQueryExpression<UserLogin>()
-                    .Where(x => x.IdentityId == _id).ToLambda(),
-                        new List<Expression<Func<UserLogin, object>>>()
+                _user = _uow.Logins.Get(QueryExpressionFactory.GetQueryExpression<E_Login>()
+                    .Where(x => x.UserId == _id).ToLambda(),
+                        new List<Expression<Func<E_Login, object>>>()
                         {
                             x => x.Files,
                             x => x.Folders,
@@ -51,6 +51,7 @@ namespace Bhbk.Cli.Aurora.Commands
                             x => x.Networks,
                             x => x.PrivateKeys,
                             x => x.PublicKeys,
+                            x => x.Usage,
                         })
                     .SingleOrDefault();
 
@@ -63,7 +64,7 @@ namespace Bhbk.Cli.Aurora.Commands
                 if (string.IsNullOrEmpty(arg))
                     throw new ConsoleHelpAsException($"  *** No alias given ***");
 
-                _user.IdentityAlias = arg;
+                _user.UserName = arg;
             });
 
             HasOption("f|filesystem=", "Enter type of filesystem", arg =>
@@ -97,7 +98,7 @@ namespace Bhbk.Cli.Aurora.Commands
                 if (string.IsNullOrEmpty(arg))
                     throw new ConsoleHelpAsException($"  *** No session maximum given ***");
 
-                _user.SessionMax = Int16.Parse(arg);
+                _user.Usage.SessionMax = Int16.Parse(arg);
             });
 
             HasOption("q|quota=", "Enter quota maximum (in bytes)", arg =>
@@ -105,7 +106,7 @@ namespace Bhbk.Cli.Aurora.Commands
                 if (string.IsNullOrEmpty(arg))
                     throw new ConsoleHelpAsException($"  *** No quota maximum given ***");
 
-                _user.QuotaInBytes = Int32.Parse(arg);
+                _user.Usage.QuotaInBytes = Int32.Parse(arg);
             });
 
             HasOption("e|enabled=", "Is user enabled", arg =>
@@ -129,10 +130,11 @@ namespace Bhbk.Cli.Aurora.Commands
                 if (_isDeletable.HasValue)
                     _user.IsDeletable = _isDeletable.Value;
 
-                _uow.UserLogins.Update(_user);
+                _uow.Logins.Update(_user);
+                _uow.Usages.Update(_user.Usage);
                 _uow.Commit();
 
-                StandardOutputFactory.Logins(new List<UserLogin> { _user }, "extras");
+                StandardOutputFactory.Logins(new List<E_Login> { _user }, "extras");
 
                 return StandardOutput.FondFarewell();
             }

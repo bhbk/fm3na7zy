@@ -20,7 +20,7 @@ namespace Bhbk.Cli.Aurora.Commands
     {
         private readonly IConfiguration _conf;
         private readonly IUnitOfWork _uow;
-        private UserLogin _user;
+        private E_Login _user;
         private bool _alternateCredential;
         private AuthType _authType;
         private string _authTypeList = string.Join(", ", Enum.GetNames(typeof(AuthType)));
@@ -41,12 +41,12 @@ namespace Bhbk.Cli.Aurora.Commands
                 if (string.IsNullOrEmpty(arg))
                     throw new ConsoleHelpAsException($"  *** No user name given ***");
 
-                _user = _uow.UserLogins.Get(QueryExpressionFactory.GetQueryExpression<UserLogin>()
-                    .Where(x => x.IdentityAlias == arg).ToLambda(),
-                        new List<Expression<Func<UserLogin, object>>>()
+                _user = _uow.Logins.Get(QueryExpressionFactory.GetQueryExpression<E_Login>()
+                    .Where(x => x.UserName == arg).ToLambda(),
+                        new List<Expression<Func<E_Login, object>>>()
                         {
                             x => x.Mount,
-                            x => x.Mount.Credential,
+                            x => x.Mount.Ambassador,
                         })
                     .SingleOrDefault();
 
@@ -84,7 +84,7 @@ namespace Bhbk.Cli.Aurora.Commands
             {
                 if (_alternateCredential)
                 {
-                    var credentials = _uow.Credentials.Get();
+                    var credentials = _uow.Ambassadors.Get();
 
                     StandardOutputFactory.Credentials(credentials);
 
@@ -93,13 +93,13 @@ namespace Bhbk.Cli.Aurora.Commands
                     var input = StandardInput.GetInput();
                     Console.Out.WriteLine();
 
-                    _user.Mount.CredentialId = Guid.Parse(input);
+                    _user.Mount.AmbassadorId = Guid.Parse(input);
                 }
 
-                _uow.UserLogins.Update(_user);
+                _uow.Logins.Update(_user);
                 _uow.Commit();
 
-                StandardOutputFactory.Mounts(new List<UserMount> { _user.Mount });
+                StandardOutputFactory.Mounts(new List<E_Mount> { _user.Mount });
 
                 return StandardOutput.FondFarewell();
             }

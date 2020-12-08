@@ -14,7 +14,7 @@ namespace Bhbk.Lib.Aurora.Data_EF6.Models
     public partial class usp_Network_Delete_Result
     {
         public System.Guid Id { get; set; }
-        public System.Guid IdentityId { get; set; }
+        public System.Guid UserId { get; set; }
         public string Address { get; set; }
         public string Action { get; set; }
         public bool IsEnabled { get; set; }

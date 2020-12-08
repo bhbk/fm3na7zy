@@ -20,7 +20,7 @@ namespace Bhbk.Cli.Aurora.Commands
         private readonly IConfiguration _conf;
         private readonly IUnitOfWork _uow;
         private Guid _id;
-        private string _credDomain, _credLogin;
+        private string _credLogin;
 
         public SysCredEditCommand()
         {
@@ -38,11 +38,6 @@ namespace Bhbk.Cli.Aurora.Commands
                 _id = Guid.Parse(arg);
             });
 
-            HasOption("d|domain=", "Enter domain", arg =>
-            {
-                _credDomain = arg;
-            });
-
             HasOption("l|login=", "Enter login", arg =>
             {
                 _credLogin = arg;
@@ -53,11 +48,11 @@ namespace Bhbk.Cli.Aurora.Commands
         {
             try
             {
-                var credential = _uow.Credentials.Get(QueryExpressionFactory.GetQueryExpression<Credential>()
+                var ambassador = _uow.Ambassadors.Get(QueryExpressionFactory.GetQueryExpression<E_Ambassador>()
                     .Where(x => x.Id == _id).ToLambda())
                     .SingleOrDefault();
 
-                if (credential == null)
+                if (ambassador == null)
                     throw new ConsoleHelpAsException($"  *** Invalid credential GUID '{_id}' ***");
 
                 Console.Out.Write("  *** Enter credential password to use *** : ");
@@ -72,19 +67,16 @@ namespace Bhbk.Cli.Aurora.Commands
                 if (credPass != decryptedPass)
                     throw new ArithmeticException();
 
-                if (_credDomain != null)
-                    credential.Domain = _credDomain;
-
                 if (_credLogin != null)
-                    credential.UserName = _credLogin;
+                    ambassador.UserName = _credLogin;
 
                 if (credPass != null)
-                    credential.EncryptedPass = encryptedPass;
+                    ambassador.EncryptedPass = encryptedPass;
 
-                _uow.Credentials.Update(credential);
+                _uow.Ambassadors.Update(ambassador);
                 _uow.Commit();
 
-                StandardOutputFactory.Credentials(new List<Credential> { credential });
+                StandardOutputFactory.Credentials(new List<E_Ambassador> { ambassador });
 
                 return StandardOutput.FondFarewell();
             }

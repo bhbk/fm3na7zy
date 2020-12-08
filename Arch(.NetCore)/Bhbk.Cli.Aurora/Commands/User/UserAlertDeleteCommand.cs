@@ -19,7 +19,7 @@ namespace Bhbk.Cli.Aurora.Commands
     {
         private IConfiguration _conf;
         private IUnitOfWork _uow;
-        private UserLogin _user;
+        private E_Login _user;
         private bool _deleteAll = false;
 
         public UserAlertDeleteCommand()
@@ -38,9 +38,9 @@ namespace Bhbk.Cli.Aurora.Commands
                 if (string.IsNullOrEmpty(arg))
                     throw new ConsoleHelpAsException($"  *** No user name given ***");
 
-                _user = _uow.UserLogins.Get(QueryExpressionFactory.GetQueryExpression<UserLogin>()
-                    .Where(x => x.IdentityAlias == arg).ToLambda(),
-                        new List<Expression<Func<UserLogin, object>>>()
+                _user = _uow.Logins.Get(QueryExpressionFactory.GetQueryExpression<E_Login>()
+                    .Where(x => x.UserName == arg).ToLambda(),
+                        new List<Expression<Func<E_Login, object>>>()
                         {
                             x => x.Alerts,
                         })
@@ -73,7 +73,7 @@ namespace Bhbk.Cli.Aurora.Commands
 
                     if (input.ToLower() == "yes")
                     {
-                        _uow.UserAlerts.Delete(exists);
+                        _uow.Alerts.Delete(exists);
                         _uow.Commit();
                     }
                 }
@@ -87,7 +87,7 @@ namespace Bhbk.Cli.Aurora.Commands
 
                     if (alert != null)
                     {
-                        _uow.UserAlerts.Delete(alert);
+                        _uow.Alerts.Delete(alert);
                         _uow.Commit();
                     }
                 }

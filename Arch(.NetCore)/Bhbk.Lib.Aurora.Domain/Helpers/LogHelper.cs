@@ -11,32 +11,32 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
     public class LogHelper : LogWriterBase
     {
         private readonly ILogger _logger;
-        private readonly UserLogin _user;
+        private readonly E_Login _user;
         private const string MessageTemplate = "{type} {user} {id} {area} {message}";
         private const string MessageTemplateWithData = "{type} {user} {id} {area} {message} {data}";
 
-        public LogHelper(ILogger logger, UserLogin user, LogLevel level)
+        public LogHelper(ILogger logger, E_Login user, LogLevel level)
         {
             Level = level;
             _user = user;
             _logger = logger;
         }
 
-        private void Write(LogLevel level, Type objectType, UserLogin user, int objectId, string area, string message, ArraySegment<byte>? data)
+        private void Write(LogLevel level, Type objectType, E_Login user, int objectId, string area, string message, ArraySegment<byte>? data)
         {
             string template = (data == null) ? MessageTemplate : MessageTemplateWithData;
 
             if (level <= LogLevel.Verbose)
-                _logger.Verbose(template, objectType, _user.IdentityAlias, objectId, area, message, data);
+                _logger.Verbose(template, objectType, _user.UserName, objectId, area, message, data);
 
             else if (level <= LogLevel.Debug)
-                _logger.Debug(template, objectType, _user.IdentityAlias, objectId, area, message, data);
+                _logger.Debug(template, objectType, _user.UserName, objectId, area, message, data);
 
             else if (level <= LogLevel.Info)
-                _logger.Information(template, objectType, _user.IdentityAlias, objectId, area, message, data);
+                _logger.Information(template, objectType, _user.UserName, objectId, area, message, data);
 
             else if (level <= LogLevel.Error)
-                _logger.Error(template, objectType, _user.IdentityAlias, objectId, area, message, data);
+                _logger.Error(template, objectType, _user.UserName, objectId, area, message, data);
         }
 
         public override void Write(LogLevel level, Type objectType, int objectId, string area, string message)

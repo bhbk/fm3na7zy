@@ -3,7 +3,7 @@ CREATE VIEW [svc].[uvw_Setting]
 AS
 SELECT
 	Id
-	,IdentityId
+	,UserId
 	,ConfigKey
 	,ConfigValue
 	,IsDeletable

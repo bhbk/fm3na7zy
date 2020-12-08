@@ -21,7 +21,7 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
 
             var pvalues = new []
             {
-                new SqlParameter("IdentityId", SqlDbType.UniqueIdentifier) { Value = entity.IdentityId.HasValue ? (object)entity.IdentityId.Value : DBNull.Value },
+                new SqlParameter("UserId", SqlDbType.UniqueIdentifier) { Value = entity.UserId.HasValue ? (object)entity.UserId.Value : DBNull.Value },
                 new SqlParameter("ConfigKey", SqlDbType.NVarChar) { Value = entity.ConfigKey },
                 new SqlParameter("ConfigValue", SqlDbType.NVarChar) { Value = entity.ConfigValue },
                 new SqlParameter("IdDeletable", SqlDbType.Bit) { Value = entity.IsDeletable },
@@ -29,7 +29,7 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
             };
 
             return _context.SqlQuery<uvw_Setting>("EXEC @ReturnValue = [svc].[usp_Setting_Insert] "
-                + "@IdentityId, @ConfigKey, @ConfigValue, @IdDeletable", pvalues)
+                + "@UserId, @ConfigKey, @ConfigValue, @IdDeletable", pvalues)
                     .Single();
         }
 
@@ -91,7 +91,7 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
             var pvalues = new []
             {
                 new SqlParameter("Id", SqlDbType.UniqueIdentifier) { Value = entity.Id },
-                new SqlParameter("IdentityId", SqlDbType.UniqueIdentifier) { Value = entity.IdentityId.HasValue ? (object)entity.IdentityId.Value : DBNull.Value },
+                new SqlParameter("UserId", SqlDbType.UniqueIdentifier) { Value = entity.UserId.HasValue ? (object)entity.UserId.Value : DBNull.Value },
                 new SqlParameter("ConfigKey", SqlDbType.NVarChar) { Value = entity.ConfigKey },
                 new SqlParameter("ConfigValue", SqlDbType.NVarChar) { Value = entity.ConfigValue },
                 new SqlParameter("IsDeletable", SqlDbType.Bit) { Value = entity.IsDeletable },
@@ -99,7 +99,7 @@ namespace Bhbk.Lib.Aurora.Data.Repositories
             };
 
             return _context.SqlQuery<uvw_Setting>("EXEC @ReturnValue = [svc].[usp_Setting_Update] "
-                + "@Id, @IdentityId, @ConfigKey, @ConfigValue, @IsDeletable", pvalues)
+                + "@Id, @UserId, @ConfigKey, @ConfigValue, @IsDeletable", pvalues)
                     .Single();
         }
 

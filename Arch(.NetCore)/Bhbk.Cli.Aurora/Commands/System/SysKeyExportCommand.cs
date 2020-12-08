@@ -38,11 +38,11 @@ namespace Bhbk.Cli.Aurora.Commands
         {
             try
             {
-                var pubKeys = _uow.PublicKeys.Get(QueryExpressionFactory.GetQueryExpression<PublicKey>()
-                    .Where(x => x.IdentityId == null).ToLambda());
+                var pubKeys = _uow.PublicKeys.Get(QueryExpressionFactory.GetQueryExpression<E_PublicKey>()
+                    .Where(x => x.UserId == null).ToLambda());
 
-                var privKeys = _uow.PrivateKeys.Get(QueryExpressionFactory.GetQueryExpression<PrivateKey>()
-                    .Where(x => x.IdentityId == null).ToLambda());
+                var privKeys = _uow.PrivateKeys.Get(QueryExpressionFactory.GetQueryExpression<E_PrivateKey>()
+                    .Where(x => x.UserId == null).ToLambda());
 
                 StandardOutputFactory.KeyPairs(pubKeys.OrderBy(x => x.CreatedUtc), privKeys);
 
@@ -82,8 +82,8 @@ namespace Bhbk.Cli.Aurora.Commands
 
                     if (pubKey.PrivateKeyId != null)
                     {
-                        var privKey = _uow.PrivateKeys.Get(QueryExpressionFactory.GetQueryExpression<PrivateKey>()
-                            .Where(x => x.IdentityId == null && x.Id == pubKey.PrivateKeyId).ToLambda())
+                        var privKey = _uow.PrivateKeys.Get(QueryExpressionFactory.GetQueryExpression<E_PrivateKey>()
+                            .Where(x => x.UserId == null && x.Id == pubKey.PrivateKeyId).ToLambda())
                             .Single();
 
                         var privKeyPass = AES.DecryptString(privKey.EncryptedPass, _conf["Databases:AuroraSecret"]);

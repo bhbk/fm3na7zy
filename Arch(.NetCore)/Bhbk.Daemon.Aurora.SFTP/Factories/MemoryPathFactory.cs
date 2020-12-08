@@ -14,38 +14,38 @@ namespace Bhbk.Daemon.Aurora.SFTP.Factories
 {
     internal class MemoryPathFactory
     {
-        internal static UserLoginMem CheckContent(IUnitOfWorkMem uow, UserLoginMem userMem)
+        internal static E_LoginMem CheckContent(IUnitOfWorkMem uow, E_LoginMem userMem)
         {
             /*
              * only neeed if in-memory sqlite instance is backed by entity framework 6. not needed if backed by ef core.
              */
 
-            uow.UserFiles.Delete(QueryExpressionFactory.GetQueryExpression<UserFileMem>()
-                .Where(x => x.IdentityId == userMem.IdentityId).ToLambda());
+            uow.UserFiles.Delete(QueryExpressionFactory.GetQueryExpression<E_FileMem>()
+                .Where(x => x.UserId == userMem.UserId).ToLambda());
 
-            uow.UserFolders.Delete(QueryExpressionFactory.GetQueryExpression<UserFolderMem>()
-                .Where(x => x.IdentityId == userMem.IdentityId).ToLambda());
+            uow.UserFolders.Delete(QueryExpressionFactory.GetQueryExpression<E_FolderMem>()
+                .Where(x => x.UserId == userMem.UserId).ToLambda());
 
             uow.Commit();
 
             return userMem;
         }
 
-        internal static UserFolderMem CheckFolder(IUnitOfWorkMem uow, UserLoginMem userMem)
+        internal static E_FolderMem CheckFolder(IUnitOfWorkMem uow, E_LoginMem userMem)
         {
             var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
 
-            var folderMem = uow.UserFolders.Get(QueryExpressionFactory.GetQueryExpression<UserFolderMem>()
-                .Where(x => x.IdentityId == userMem.IdentityId && x.ParentId == null).ToLambda())
+            var folderMem = uow.UserFolders.Get(QueryExpressionFactory.GetQueryExpression<E_FolderMem>()
+                .Where(x => x.UserId == userMem.UserId && x.ParentId == null).ToLambda())
                 .SingleOrDefault();
 
             if (folderMem == null)
             {
                 folderMem = uow.UserFolders.Create(
-                    new UserFolderMem
+                    new E_FolderMem
                     {
                         Id = Guid.NewGuid(),
-                        IdentityId = userMem.IdentityId,
+                        UserId = userMem.UserId,
                         ParentId = null,
                         VirtualName = string.Empty,
                         CreatedUtc = DateTime.UtcNow,
@@ -53,37 +53,37 @@ namespace Bhbk.Daemon.Aurora.SFTP.Factories
                     });
                 uow.Commit();
 
-                Log.Information($"'{callPath}' '{userMem.IdentityAlias}' folder:'/' at:memory");
+                Log.Information($"'{callPath}' '{userMem.UserName}' folder:'/' at:memory");
             }
 
             return folderMem;
         }
 
-        internal static UserLoginMem CheckUser(IUnitOfWorkMem uow, UserLogin user)
+        internal static E_LoginMem CheckUser(IUnitOfWorkMem uow, E_Login user)
         {
             var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
 
-            var userMem = uow.UserLogins.Get(QueryExpressionFactory.GetQueryExpression<UserLoginMem>()
-                .Where(x => x.IdentityId == user.IdentityId).ToLambda())
+            var userMem = uow.UserLogins.Get(QueryExpressionFactory.GetQueryExpression<E_LoginMem>()
+                .Where(x => x.UserId == user.UserId).ToLambda())
                 .SingleOrDefault();
 
             if (userMem == null)
             {
                 userMem = uow.UserLogins.Create(
-                    new UserLoginMem
+                    new E_LoginMem
                     {
-                        IdentityId = user.IdentityId,
-                        IdentityAlias = user.IdentityAlias,
+                        UserId = user.UserId,
+                        UserName = user.UserName,
                     });
                 uow.Commit();
 
-                Log.Information($"'{callPath}' '{user.IdentityAlias}' exists at:memory");
+                Log.Information($"'{callPath}' '{user.UserName}' exists at:memory");
             }
 
             return userMem;
         }
 
-        internal static UserFileMem PathToFile(IUnitOfWorkMem uow, UserLoginMem userMem, string path)
+        internal static E_FileMem PathToFile(IUnitOfWorkMem uow, E_LoginMem userMem, string path)
         {
             if (path.FirstOrDefault() == '/')
                 path = path.Substring(1);
@@ -97,20 +97,20 @@ namespace Bhbk.Daemon.Aurora.SFTP.Factories
 
             var folder = PathToFolder(uow, userMem, folderPath);
 
-            var file = uow.UserFiles.Get(QueryExpressionFactory.GetQueryExpression<UserFileMem>()
-                .Where(x => x.IdentityId == userMem.IdentityId && x.FolderId == folder.Id && x.VirtualName == filePath).ToLambda())
+            var file = uow.UserFiles.Get(QueryExpressionFactory.GetQueryExpression<E_FileMem>()
+                .Where(x => x.UserId == userMem.UserId && x.FolderId == folder.Id && x.VirtualName == filePath).ToLambda())
                 .SingleOrDefault();
 
             return file;
         }
 
-        internal static UserFolderMem PathToFolder(IUnitOfWorkMem uow, UserLoginMem userMem, string path)
+        internal static E_FolderMem PathToFolder(IUnitOfWorkMem uow, E_LoginMem userMem, string path)
         {
             if (path.FirstOrDefault() == '/')
                 path = path.Substring(1);
 
-            var folder = uow.UserFolders.Get(QueryExpressionFactory.GetQueryExpression<UserFolderMem>()
-                .Where(x => x.IdentityId == userMem.IdentityId && x.ParentId == null).ToLambda())
+            var folder = uow.UserFolders.Get(QueryExpressionFactory.GetQueryExpression<E_FolderMem>()
+                .Where(x => x.UserId == userMem.UserId && x.ParentId == null).ToLambda())
                 .SingleOrDefault();
 
             if (string.IsNullOrWhiteSpace(path))
@@ -118,21 +118,21 @@ namespace Bhbk.Daemon.Aurora.SFTP.Factories
 
             foreach (var entry in path.Split("/"))
             {
-                folder = uow.UserFolders.Get(QueryExpressionFactory.GetQueryExpression<UserFolderMem>()
-                    .Where(x => x.IdentityId == userMem.IdentityId && x.ParentId == folder.Id && x.VirtualName == entry).ToLambda())
+                folder = uow.UserFolders.Get(QueryExpressionFactory.GetQueryExpression<E_FolderMem>()
+                    .Where(x => x.UserId == userMem.UserId && x.ParentId == folder.Id && x.VirtualName == entry).ToLambda())
                     .SingleOrDefault();
             };
 
             return folder;
         }
 
-        internal static string FileToPath(IUnitOfWorkMem uow, UserLoginMem userMem, UserFileMem fileMem)
+        internal static string FileToPath(IUnitOfWorkMem uow, E_LoginMem userMem, E_FileMem fileMem)
         {
             var path = string.Empty;
             var paths = new List<string> { };
 
-            var folder = uow.UserFolders.Get(QueryExpressionFactory.GetQueryExpression<UserFolderMem>()
-                .Where(x => x.IdentityId == userMem.IdentityId && x.Id == fileMem.FolderId).ToLambda())
+            var folder = uow.UserFolders.Get(QueryExpressionFactory.GetQueryExpression<E_FolderMem>()
+                .Where(x => x.UserId == userMem.UserId && x.Id == fileMem.FolderId).ToLambda())
                 .Single();
 
             while (folder.ParentId != null)
@@ -149,7 +149,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Factories
             return path;
         }
 
-        internal static string FolderToPath(IUnitOfWorkMem uow, UserLoginMem userMem, UserFolderMem folderMem)
+        internal static string FolderToPath(IUnitOfWorkMem uow, E_LoginMem userMem, E_FolderMem folderMem)
         {
             var path = string.Empty;
             var paths = new List<string> { };

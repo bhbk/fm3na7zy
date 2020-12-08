@@ -1,7 +1,7 @@
 ﻿
 CREATE PROCEDURE [svc].[usp_Setting_Update]
      @Id					UNIQUEIDENTIFIER 
-    ,@IdentityId			UNIQUEIDENTIFIER
+    ,@UserId	    		UNIQUEIDENTIFIER
     ,@ConfigKey				NVARCHAR (MAX) 
     ,@ConfigValue			NVARCHAR (MAX) 
     ,@IsDeletable			BIT
@@ -17,10 +17,10 @@ BEGIN
 	         ConfigKey				= @ConfigKey
 	        ,ConfigValue			= @ConfigValue
             ,IsDeletable			= @IsDeletable
-        WHERE Id = @Id AND IdentityId = @IdentityId
+        WHERE Id = @Id AND UserId = @UserId
 
         SELECT * FROM [dbo].[tbl_Setting] 
-			WHERE Id = @Id AND IdentityId = @IdentityId
+			WHERE Id = @Id AND UserId = @UserId
 
     END TRY
 

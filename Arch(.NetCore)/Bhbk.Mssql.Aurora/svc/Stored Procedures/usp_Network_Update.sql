@@ -1,7 +1,7 @@
 ﻿
 CREATE PROCEDURE [svc].[usp_Network_Update]
      @Id					UNIQUEIDENTIFIER 
-    ,@IdentityId			UNIQUEIDENTIFIER
+    ,@UserId		    	UNIQUEIDENTIFIER
 	,@SequenceId			INT
     ,@Address				NVARCHAR (128) 
     ,@Action				NVARCHAR (8) 
@@ -24,13 +24,13 @@ BEGIN
 			,IsEnabled				= @IsEnabled
             ,IsDeletable            = @IsDeletable
             ,LastUpdatedUtc			= @LASTUPDATED
-        WHERE Id = @Id AND IdentityId = @IdentityId
+        WHERE Id = @Id AND UserId = @UserId
 
 		IF @@ROWCOUNT != 1
 			THROW 51000, 'ERROR', 1;
 
         SELECT * FROM [dbo].[tbl_Network] 
-			WHERE Id = @Id AND IdentityId = @IdentityId
+			WHERE Id = @Id AND UserId = @UserId
 
     END TRY
 

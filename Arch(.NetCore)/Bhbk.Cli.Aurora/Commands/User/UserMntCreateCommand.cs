@@ -20,7 +20,7 @@ namespace Bhbk.Cli.Aurora.Commands
     {
         private readonly IConfiguration _conf;
         private readonly IUnitOfWork _uow;
-        private UserLogin _user;
+        private E_Login _user;
         private AuthType _authType;
         private bool _alternateCredential;
         private string _serverAddress, _serverShare;
@@ -42,12 +42,12 @@ namespace Bhbk.Cli.Aurora.Commands
                 if (string.IsNullOrEmpty(arg))
                     throw new ConsoleHelpAsException($"  *** No user name given ***");
 
-                _user = _uow.UserLogins.Get(QueryExpressionFactory.GetQueryExpression<UserLogin>()
-                    .Where(x => x.IdentityAlias == arg).ToLambda(),
-                        new List<Expression<Func<UserLogin, object>>>()
+                _user = _uow.Logins.Get(QueryExpressionFactory.GetQueryExpression<E_Login>()
+                    .Where(x => x.UserName == arg).ToLambda(),
+                        new List<Expression<Func<E_Login, object>>>()
                         {
                             x => x.Mount,
-                            x => x.Mount.Credential,
+                            x => x.Mount.Ambassador,
                         })
                     .SingleOrDefault();
 
@@ -86,16 +86,16 @@ namespace Bhbk.Cli.Aurora.Commands
                 if (exists != null)
                 {
                     Console.Out.WriteLine("  *** The user already has a mount ***");
-                    StandardOutputFactory.Mounts(new List<UserMount> { exists });
+                    StandardOutputFactory.Mounts(new List<E_Mount> { exists });
 
                     return StandardOutput.FondFarewell();
                 }
 
-                UserMount mount;
+                E_Mount mount;
 
                 if (_alternateCredential)
                 {
-                    var credentials = _uow.Credentials.Get();
+                    var credentials = _uow.Ambassadors.Get();
 
                     StandardOutputFactory.Credentials(credentials);
 
@@ -104,11 +104,11 @@ namespace Bhbk.Cli.Aurora.Commands
                     var input = StandardInput.GetInput();
                     Console.Out.WriteLine();
 
-                    mount = _uow.UserMounts.Create(
-                        new UserMount
+                    mount = _uow.Mounts.Create(
+                        new E_Mount
                         {
-                            IdentityId = _user.IdentityId,
-                            CredentialId = Guid.Parse(input),
+                            UserId = _user.UserId,
+                            AmbassadorId = Guid.Parse(input),
                             AuthType = _authType.ToString(),
                             ServerAddress = _serverAddress,
                             ServerShare = _serverShare,
@@ -118,10 +118,10 @@ namespace Bhbk.Cli.Aurora.Commands
                 }
                 else
                 {
-                    mount = _uow.UserMounts.Create(
-                        new UserMount
+                    mount = _uow.Mounts.Create(
+                        new E_Mount
                         {
-                            IdentityId = _user.IdentityId,
+                            UserId = _user.UserId,
                             AuthType = _authType.ToString(),
                             ServerAddress = _serverAddress,
                             ServerShare = _serverShare,
@@ -130,7 +130,7 @@ namespace Bhbk.Cli.Aurora.Commands
                     _uow.Commit();
                 }
 
-                StandardOutputFactory.Mounts(new List<UserMount> { mount });
+                StandardOutputFactory.Mounts(new List<E_Mount> { mount });
 
                 return StandardOutput.FondFarewell();
             }
