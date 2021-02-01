@@ -1,6 +1,7 @@
 ﻿using ManyConsole;
 using Microsoft.Extensions.Configuration;
 using Serilog;
+using Serilog.Sinks.SystemConsole.Themes;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -19,7 +20,7 @@ namespace Bhbk.Cli.Aurora
             Log.Logger = new LoggerConfiguration()
                 .ReadFrom.Configuration(conf)
                 .Enrich.FromLogContext()
-                .WriteTo.Console()
+                .WriteTo.Console(theme: AnsiConsoleTheme.Code)
                 .WriteTo.File($"{Directory.GetCurrentDirectory()}{Path.DirectorySeparatorChar}appdebug-.log",
                     retainedFileCountLimit: int.Parse(conf["Serilog:RollingFile:RetainedFileCountLimit"]),
                     fileSizeLimitBytes: int.Parse(conf["Serilog:RollingFile:FileSizeLimitBytes"]),

@@ -28,7 +28,7 @@ namespace Bhbk.Cli.Aurora.Commands
                 .Build();
 
             var instance = new ContextService(InstanceContext.DeployedOrLocal);
-            _uow = new UnitOfWork(_conf["Databases:AuroraEntities"], instance);
+            _uow = new UnitOfWork(_conf["Databases:AuroraEntities_EF6"], instance);
 
             IsCommand("user-login-delete", "Delete login for user");
 
@@ -55,7 +55,7 @@ namespace Bhbk.Cli.Aurora.Commands
         {
             try
             {
-                StandardOutputFactory.Logins(new List<E_Login> { _user }, "extras");
+                StandardOutputFactory.Logins(new List<E_Login> { _user }, true);
                 Console.Out.WriteLine();
 
                 Console.Out.Write("  *** Enter 'yes' to delete user *** : ");

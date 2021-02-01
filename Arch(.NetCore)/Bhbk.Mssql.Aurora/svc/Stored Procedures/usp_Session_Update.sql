@@ -1,7 +1,6 @@
 ﻿
 CREATE PROCEDURE [svc].[usp_Session_Update]
     @Id						    UNIQUEIDENTIFIER
-   ,@UserId			    		UNIQUEIDENTIFIER
    ,@CallPath					VARCHAR(256)
    ,@Details					VARCHAR(MAX)
    ,@LocalEndPoint				VARCHAR(128)
@@ -11,23 +10,41 @@ CREATE PROCEDURE [svc].[usp_Session_Update]
    ,@IsActive					BIT
 
 AS
+BEGIN
+	SET NOCOUNT ON;
 
-SET NOCOUNT ON;
+	BEGIN TRY
 
-DECLARE @UPDATED DATETIMEOFFSET = GETUTCDATE()
+    	BEGIN TRANSACTION;
 
-UPDATE [dbo].[tbl_Session] 
-SET  UserId					=	@UserId
-    ,CallPath					=   @CallPath
-    ,Details					=   @Details
-    ,LocalEndPoint				=   @LocalEndPoint
-    ,LocalSoftwareIdentifier    =   @LocalSoftwareIdentifier
-    ,RemoteEndPoint				=   @RemoteEndPoint
-    ,RemoteSoftwareIdentifier	=   @RemoteSoftwareIdentifier
-    ,IsActive                   =   @IsActive
-WHERE Id = @Id;
+        DECLARE @UPDATED DATETIMEOFFSET = GETUTCDATE()
 
-    /*  Select all entity values to return
-        ----------------------------------------------------
-       */
-	SELECT * FROM [dbo].[tbl_Session] WHERE Id = @Id
+        UPDATE [dbo].[tbl_Session] 
+        SET  
+            CallPath					=   @CallPath
+            ,Details					=   @Details
+            ,LocalEndPoint				=   @LocalEndPoint
+            ,LocalSoftwareIdentifier    =   @LocalSoftwareIdentifier
+            ,RemoteEndPoint				=   @RemoteEndPoint
+            ,RemoteSoftwareIdentifier	=   @RemoteSoftwareIdentifier
+            ,IsActive                   =   @IsActive
+        WHERE Id = @Id;
+
+		IF @@ROWCOUNT != 1
+			THROW 51000, 'ERROR', 1;
+
+	    SELECT * FROM [dbo].[tbl_Session] 
+            WHERE Id = @Id
+
+    	COMMIT TRANSACTION;
+
+    END TRY
+
+    BEGIN CATCH
+
+    	ROLLBACK TRANSACTION;
+        THROW;
+
+    END CATCH
+
+END

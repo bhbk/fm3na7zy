@@ -32,7 +32,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
             {
                 var conf = scope.ServiceProvider.GetRequiredService<IConfiguration>();
 
-                _uowMem = new UnitOfWorkMem(conf["Databases:AuroraEntitiesMem"]);
+                _uowMem = new UnitOfWorkMem(conf["Databases:AuroraEntities_EFCore_Mem"]);
             }
 
             _userMem = MemoryPathFactory.CheckUser(_uowMem, user);
@@ -136,7 +136,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
 
                 var folderParentEntity = MemoryPathFactory.PathToFolder(_uowMem, _userMem, parent.Path.StringPath);
 
-                var folderEntity = _uowMem.UserFolders.Get(QueryExpressionFactory.GetQueryExpression<E_FolderMem>()
+                var folderEntity = _uowMem.Folders.Get(QueryExpressionFactory.GetQueryExpression<E_FolderMem>()
                     .Where(x => x.UserId == _userMem.UserId && x.ParentId == folderParentEntity.Id && x.VirtualName == name).ToLambda())
                     .SingleOrDefault();
 
@@ -145,7 +145,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                         new NodeTimeInfo(folderEntity.CreatedUtc.UtcDateTime,
                             folderEntity.LastAccessedUtc.UtcDateTime, folderEntity.LastUpdatedUtc.UtcDateTime));
 
-                var fileEntity = _uowMem.UserFiles.Get(QueryExpressionFactory.GetQueryExpression<E_FileMem>()
+                var fileEntity = _uowMem.Files.Get(QueryExpressionFactory.GetQueryExpression<E_FileMem>()
                     .Where(x => x.UserId == _userMem.UserId && x.FolderId == folderParentEntity.Id && x.VirtualName == name).ToLambda())
                     .SingleOrDefault();
 
@@ -176,7 +176,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
 
                 var folderParentEntity = MemoryPathFactory.PathToFolder(_uowMem, _userMem, parent.Path.StringPath);
 
-                var folders = _uowMem.UserFolders.Get(QueryExpressionFactory.GetQueryExpression<E_FolderMem>()
+                var folders = _uowMem.Folders.Get(QueryExpressionFactory.GetQueryExpression<E_FolderMem>()
                     .Where(x => x.UserId == _userMem.UserId).ToLambda())
                     .ToList();
 
@@ -185,7 +185,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                         new NodeTimeInfo(folder.CreatedUtc.UtcDateTime,
                             folder.LastAccessedUtc.UtcDateTime, folder.LastUpdatedUtc.UtcDateTime)));
 
-                var files = _uowMem.UserFiles.Get(QueryExpressionFactory.GetQueryExpression<E_FileMem>()
+                var files = _uowMem.Files.Get(QueryExpressionFactory.GetQueryExpression<E_FileMem>()
                     .Where(x => x.UserId == _userMem.UserId).ToLambda())
                     .ToList();
 

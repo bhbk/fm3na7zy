@@ -17,8 +17,7 @@ namespace Bhbk.Lib.Aurora.Data_EF6.Models
         public System.Guid UserId { get; set; }
         public Nullable<System.Guid> AmbassadorId { get; set; }
         public string AuthType { get; set; }
-        public string ServerAddress { get; set; }
-        public string ServerShare { get; set; }
+        public string UncPath { get; set; }
         public bool IsEnabled { get; set; }
         public bool IsDeletable { get; set; }
         public System.DateTimeOffset CreatedUtc { get; set; }

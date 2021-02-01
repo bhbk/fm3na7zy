@@ -39,21 +39,21 @@ deploy:
   only:
     - dummy
   script:
-    - set VERSION=2020.11.27.2100
+    - set AURORAVERSION=2020.11.27.2100
     - pushd Arch(.NetCore)
     - nuget restore Bhbk.Lib.Aurora.Data.EF6\Bhbk.Lib.Aurora.Data.EF6.csproj -SolutionDirectory . -Verbosity quiet
     - dotnet restore Bhbk.Aurora.sln --no-cache --verbosity quiet
     - dotnet build Bhbk.Aurora.sln --configuration Release --verbosity quiet
-    - dotnet pack Bhbk.Lib.Aurora\Bhbk.Lib.Aurora.csproj -p:PackageVersion=%VERSION% --output . --configuration Release
+    - dotnet pack Bhbk.Lib.Aurora\Bhbk.Lib.Aurora.csproj -p:PackageVersion=%AURORAVERSION% --output . --configuration Release
     - dotnet publish Bhbk.Daemon.Aurora.FTP\Bhbk.Daemon.Aurora.FTP.csproj --output Bhbk.Daemon.Aurora.FTP\bin\Release\net5.0\publish\ --configuration Release
     - dotnet publish Bhbk.Daemon.Aurora.SSH\Bhbk.Daemon.Aurora.SSH.csproj --output Bhbk.Daemon.Aurora.SSH\bin\Release\net5.0\publish\ --configuration Release
     - dotnet publish Bhbk.WebApi.Aurora\Bhbk.WebApi.Aurora.csproj --output Bhbk.WebApi.Aurora\bin\Release\net5.0\publish\ --configuration Release
-    - dotnet octo pack --id=Bhbk.Cli.Aurora --version=%VERSION% --basePath=Bhbk.Cli.Aurora\bin\Release\net5.0\publish\ --outFolder=. --overwrite
-    - dotnet octo pack --id=Bhbk.Daemon.Aurora.FTP --version=%VERSION% --basePath=Bhbk.Daemon.Aurora.FTP\bin\Release\net5.0\publish\ --outFolder=. --overwrite
-    - dotnet octo pack --id=Bhbk.Daemon.Aurora.SSH --version=%VERSION% --basePath=Bhbk.Daemon.Aurora.SSH\bin\Release\net5.0\publish\ --outFolder=. --overwrite
-    - dotnet octo pack --id=Bhbk.WebApi.Aurora --version=%VERSION% --basePath=Bhbk.WebApi.Aurora\bin\Release\net5.0\publish\ --outFolder=. --overwrite
+    - dotnet octo pack --id=Bhbk.Cli.Aurora --version=%AURORAVERSION% --basePath=Bhbk.Cli.Aurora\bin\Release\net5.0\publish\ --outFolder=. --overwrite
+    - dotnet octo pack --id=Bhbk.Daemon.Aurora.FTP --version=%AURORAVERSION% --basePath=Bhbk.Daemon.Aurora.FTP\bin\Release\net5.0\publish\ --outFolder=. --overwrite
+    - dotnet octo pack --id=Bhbk.Daemon.Aurora.SSH --version=%AURORAVERSION% --basePath=Bhbk.Daemon.Aurora.SSH\bin\Release\net5.0\publish\ --outFolder=. --overwrite
+    - dotnet octo pack --id=Bhbk.WebApi.Aurora --version=%AURORAVERSION% --basePath=Bhbk.WebApi.Aurora\bin\Release\net5.0\publish\ --outFolder=. --overwrite
     - popd
     - pushd Arch(.NetCore)
     - dotnet nuget push *.nupkg --api-key %NUGET_FEED_KEY% --source %NUGET_FEED_URL%
     - popd
-    - set VERSION=
+    - set AURORAVERSION=

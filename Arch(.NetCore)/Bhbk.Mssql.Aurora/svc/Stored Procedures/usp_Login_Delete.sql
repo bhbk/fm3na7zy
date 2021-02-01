@@ -36,50 +36,55 @@ BEGIN
 
 		BEGIN TRANSACTION;
 
-		-- Delete PrivateKey
+		-- Delete Alerts
 
-			DELETE [dbo].[tbl_PrivateKey] 
+		DELETE [dbo].[tbl_Alert] 
 			WHERE UserId = @UserId;
 
-		-- Delete PublicKey
+		-- Delete Files
 
-			DELETE [dbo].[tbl_PublicKey] 
+		DELETE [dbo].[tbl_File] 
 			WHERE UserId = @UserId;
 
-		-- Delete Network
+		-- Delete Folders
 
-			DELETE [dbo].[tbl_Network] 
-			WHERE UserId = @UserId;
-
-		-- Delete Setting
-
-			DELETE [dbo].[tbl_Setting] 
-			WHERE UserId = @UserId;
-
-		-- Delete UserUsage
-
-			DELETE [dbo].[tbl_Usage] 
-			WHERE UserId = @UserId;
-
-		-- Delete Alert
-
-			DELETE [dbo].[tbl_Alert] 
-			WHERE UserId = @UserId;
-
-		-- Delete Folder
-
-			DELETE [dbo].[tbl_Folder] 
-			WHERE UserId = @UserId;
-
-		-- Delete Mount
-
-			DELETE [dbo].[tbl_Mount] 
+		DELETE [dbo].[tbl_Folder] 
 			WHERE UserId = @UserId;
 
 		-- Delete Login
 
-			DELETE [dbo].[tbl_Login]
+		DELETE [dbo].[tbl_Login]
 			WHERE UserId = @UserId
+
+		-- Delete Mount
+
+		DELETE [dbo].[tbl_Mount] 
+			WHERE UserId = @UserId;
+
+		-- Delete Networks
+
+		DELETE [dbo].[tbl_Network] 
+			WHERE UserId = @UserId;
+
+		-- Delete PrivateKeys
+
+		DELETE [dbo].[tbl_PrivateKey] 
+			WHERE UserId = @UserId;
+
+		-- Delete PublicKeys
+
+		DELETE [dbo].[tbl_PublicKey] 
+			WHERE UserId = @UserId;
+
+		-- Delete Settings
+
+		DELETE [dbo].[tbl_Setting] 
+			WHERE UserId = @UserId;
+
+		-- Delete Usage
+
+		DELETE [dbo].[tbl_Usage] 
+			WHERE UserId = @UserId;
 
 		COMMIT TRANSACTION;
 

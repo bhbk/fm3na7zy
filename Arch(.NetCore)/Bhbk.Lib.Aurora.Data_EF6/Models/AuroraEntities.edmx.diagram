@@ -5,14 +5,14 @@
     <!-- Diagram content (shape and connector positions) -->
     <edmx:Diagrams>
       <Diagram DiagramId="9987c23f50ce4740a09964d44d420b3b" Name="Diagram1" ZoomLevel="100">
-        <EntityTypeShape EntityType="AuroraModels.E_Ambassador" Width="1.5" PointX="10.5" PointY="5.125" IsExpanded="true" />
+        <EntityTypeShape EntityType="AuroraModels.E_Ambassador" Width="1.5" PointX="10.5" PointY="4.875" IsExpanded="true" />
         <EntityTypeShape EntityType="AuroraModels.E_Network" Width="1.5" PointX="10.5" PointY="0.625" IsExpanded="true" />
         <EntityTypeShape EntityType="AuroraModels.E_PrivateKey" Width="1.5" PointX="3.25" PointY="0.625" IsExpanded="true" />
         <EntityTypeShape EntityType="AuroraModels.E_PublicKey" Width="1.5" PointX="5.75" PointY="0.625" IsExpanded="true" />
         <EntityTypeShape EntityType="AuroraModels.E_Setting" Width="1.5" PointX="0.875" PointY="0.625" IsExpanded="true" />
         <EntityTypeShape EntityType="AuroraModels.E_Login" Width="1.5" PointX="5.75" PointY="5.125" IsExpanded="true" />
-        <EntityTypeShape EntityType="AuroraModels.E_Alert" Width="1.5" PointX="3.25" PointY="9.25" IsExpanded="true" />
-        <EntityTypeShape EntityType="AuroraModels.E_File" Width="1.5" PointX="0.875" PointY="5.125" IsExpanded="true" />
+        <EntityTypeShape EntityType="AuroraModels.E_Alert" Width="1.5" PointX="10.5" PointY="8.125" IsExpanded="true" />
+        <EntityTypeShape EntityType="AuroraModels.E_File" Width="1.5" PointX="0.875" PointY="4.75" IsExpanded="true" />
         <EntityTypeShape EntityType="AuroraModels.E_Folder" Width="1.5" PointX="3.25" PointY="5.125" IsExpanded="true" />
         <EntityTypeShape EntityType="AuroraModels.E_Mount" Width="1.5" PointX="8.125" PointY="5.125" IsExpanded="true" />
         <AssociationConnector Association="AuroraModels.Login_File" />

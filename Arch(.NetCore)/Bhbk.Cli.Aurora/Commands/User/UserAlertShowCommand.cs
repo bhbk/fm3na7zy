@@ -28,7 +28,7 @@ namespace Bhbk.Cli.Aurora.Commands
                 .Build();
 
             var instance = new ContextService(InstanceContext.DeployedOrLocal);
-            _uow = new UnitOfWork(_conf["Databases:AuroraEntities"], instance);
+            _uow = new UnitOfWork(_conf["Databases:AuroraEntities_EF6"], instance);
 
             IsCommand("user-alert-show", "Show alert(s) for user");
 

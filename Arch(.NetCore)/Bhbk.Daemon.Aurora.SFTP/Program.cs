@@ -10,6 +10,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Serilog;
+using Serilog.Sinks.SystemConsole.Themes;
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -31,7 +32,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                 Log.Logger = new LoggerConfiguration()
                     .ReadFrom.Configuration(_conf)
                     .Enrich.FromLogContext()
-                    .WriteTo.Console()
+                    .WriteTo.Console(theme: AnsiConsoleTheme.Code)
                     .WriteTo.File($"{hostContext.HostingEnvironment.ContentRootPath}{Path.DirectorySeparatorChar}appdebug-.log",
                         retainedFileCountLimit: int.Parse(_conf["Serilog:RollingFile:RetainedFileCountLimit"]),
                         fileSizeLimitBytes: int.Parse(_conf["Serilog:RollingFile:FileSizeLimitBytes"]),
@@ -49,7 +50,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                 sc.AddSingleton<IMapper>(_mapper);
                 sc.AddTransient<IUnitOfWork, UnitOfWork>(_ =>
                 {
-                    return new UnitOfWork(_conf["Databases:AuroraEntities"], _instance);
+                    return new UnitOfWork(_conf["Databases:AuroraEntities_EF6"], _instance);
                 });
                 sc.AddSingleton<IHostedService, Daemon>();
                 sc.AddSingleton<IAlertService, AlertService>(_ =>
@@ -101,7 +102,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                 sc.AddSingleton<IMapper>(_mapper);
                 sc.AddTransient<IUnitOfWork, UnitOfWork>(_ =>
                 {
-                    return new UnitOfWork(_conf["Databases:AuroraEntities"], _instance);
+                    return new UnitOfWork(_conf["Databases:AuroraEntities_EF6"], _instance);
                 });
                 sc.AddSingleton<IHostedService, Daemon>();
                 sc.AddTransient<IAlertService, AlertService>(_ =>
@@ -129,7 +130,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
 
         public static void Main(string[] args = null)
         {
-            _mapper = new MapperConfiguration(x => x.AddProfile<AutoMapperProfile>())
+            _mapper = new MapperConfiguration(x => x.AddProfile<AutoMapperProfile_EF6>())
                 .CreateMapper();
 
             _conf = (IConfiguration)new ConfigurationBuilder()

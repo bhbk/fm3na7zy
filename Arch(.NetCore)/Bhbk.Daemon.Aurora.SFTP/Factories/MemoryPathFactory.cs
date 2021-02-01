@@ -20,10 +20,10 @@ namespace Bhbk.Daemon.Aurora.SFTP.Factories
              * only neeed if in-memory sqlite instance is backed by entity framework 6. not needed if backed by ef core.
              */
 
-            uow.UserFiles.Delete(QueryExpressionFactory.GetQueryExpression<E_FileMem>()
+            uow.Files.Delete(QueryExpressionFactory.GetQueryExpression<E_FileMem>()
                 .Where(x => x.UserId == userMem.UserId).ToLambda());
 
-            uow.UserFolders.Delete(QueryExpressionFactory.GetQueryExpression<E_FolderMem>()
+            uow.Folders.Delete(QueryExpressionFactory.GetQueryExpression<E_FolderMem>()
                 .Where(x => x.UserId == userMem.UserId).ToLambda());
 
             uow.Commit();
@@ -35,13 +35,13 @@ namespace Bhbk.Daemon.Aurora.SFTP.Factories
         {
             var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
 
-            var folderMem = uow.UserFolders.Get(QueryExpressionFactory.GetQueryExpression<E_FolderMem>()
+            var folderMem = uow.Folders.Get(QueryExpressionFactory.GetQueryExpression<E_FolderMem>()
                 .Where(x => x.UserId == userMem.UserId && x.ParentId == null).ToLambda())
                 .SingleOrDefault();
 
             if (folderMem == null)
             {
-                folderMem = uow.UserFolders.Create(
+                folderMem = uow.Folders.Create(
                     new E_FolderMem
                     {
                         Id = Guid.NewGuid(),
@@ -63,13 +63,13 @@ namespace Bhbk.Daemon.Aurora.SFTP.Factories
         {
             var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
 
-            var userMem = uow.UserLogins.Get(QueryExpressionFactory.GetQueryExpression<E_LoginMem>()
+            var userMem = uow.Logins.Get(QueryExpressionFactory.GetQueryExpression<E_LoginMem>()
                 .Where(x => x.UserId == user.UserId).ToLambda())
                 .SingleOrDefault();
 
             if (userMem == null)
             {
-                userMem = uow.UserLogins.Create(
+                userMem = uow.Logins.Create(
                     new E_LoginMem
                     {
                         UserId = user.UserId,
@@ -97,7 +97,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Factories
 
             var folder = PathToFolder(uow, userMem, folderPath);
 
-            var file = uow.UserFiles.Get(QueryExpressionFactory.GetQueryExpression<E_FileMem>()
+            var file = uow.Files.Get(QueryExpressionFactory.GetQueryExpression<E_FileMem>()
                 .Where(x => x.UserId == userMem.UserId && x.FolderId == folder.Id && x.VirtualName == filePath).ToLambda())
                 .SingleOrDefault();
 
@@ -109,7 +109,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Factories
             if (path.FirstOrDefault() == '/')
                 path = path.Substring(1);
 
-            var folder = uow.UserFolders.Get(QueryExpressionFactory.GetQueryExpression<E_FolderMem>()
+            var folder = uow.Folders.Get(QueryExpressionFactory.GetQueryExpression<E_FolderMem>()
                 .Where(x => x.UserId == userMem.UserId && x.ParentId == null).ToLambda())
                 .SingleOrDefault();
 
@@ -118,7 +118,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Factories
 
             foreach (var entry in path.Split("/"))
             {
-                folder = uow.UserFolders.Get(QueryExpressionFactory.GetQueryExpression<E_FolderMem>()
+                folder = uow.Folders.Get(QueryExpressionFactory.GetQueryExpression<E_FolderMem>()
                     .Where(x => x.UserId == userMem.UserId && x.ParentId == folder.Id && x.VirtualName == entry).ToLambda())
                     .SingleOrDefault();
             };
@@ -131,7 +131,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Factories
             var path = string.Empty;
             var paths = new List<string> { };
 
-            var folder = uow.UserFolders.Get(QueryExpressionFactory.GetQueryExpression<E_FolderMem>()
+            var folder = uow.Folders.Get(QueryExpressionFactory.GetQueryExpression<E_FolderMem>()
                 .Where(x => x.UserId == userMem.UserId && x.Id == fileMem.FolderId).ToLambda())
                 .Single();
 

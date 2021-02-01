@@ -18,6 +18,8 @@ BEGIN
 
 	BEGIN TRY
 
+    	BEGIN TRANSACTION;
+
         DECLARE @CREATEDUTC DATETIMEOFFSET (7) = GETUTCDATE()
 
 		INSERT INTO [dbo].[tbl_PublicKey]
@@ -54,11 +56,16 @@ BEGIN
 		IF @@ROWCOUNT != 1
 			THROW 51000, 'ERROR', 1;
 
-		SELECT * FROM [dbo].[tbl_PublicKey] WHERE Id = @Id
+		SELECT * FROM [dbo].[tbl_PublicKey] 
+			WHERE Id = @Id
+
+    	COMMIT TRANSACTION;
 
     END TRY
 
     BEGIN CATCH
+
+    	ROLLBACK TRANSACTION;
         THROW;
 
     END CATCH

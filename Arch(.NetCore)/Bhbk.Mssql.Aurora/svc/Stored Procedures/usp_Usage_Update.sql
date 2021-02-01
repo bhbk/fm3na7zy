@@ -25,7 +25,8 @@ BEGIN
 		IF @@ROWCOUNT != 1
 			THROW 51000, 'ERROR', 1;
 
-        SELECT * FROM [dbo].[tbl_Usage] WHERE UserId = @UserId
+        SELECT * FROM [dbo].[tbl_Usage] 
+            WHERE UserId = @UserId
 
     END TRY
 

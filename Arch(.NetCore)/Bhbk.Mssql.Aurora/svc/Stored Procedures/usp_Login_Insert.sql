@@ -18,6 +18,8 @@ BEGIN
 
 	BEGIN TRY
 
+    	BEGIN TRANSACTION;
+
         DECLARE @CREATEDUTC DATETIMEOFFSET (7) = GETUTCDATE()
 
 		INSERT INTO [dbo].[tbl_Login]
@@ -71,11 +73,16 @@ BEGIN
 			,0
 			);
 
-		SELECT * FROM [dbo].[tbl_Login] WHERE UserId = @UserId
+		SELECT * FROM [dbo].[tbl_Login] 
+			WHERE UserId = @UserId
+
+    	COMMIT TRANSACTION;
 
     END TRY
 
     BEGIN CATCH
+
+    	ROLLBACK TRANSACTION;
         THROW;
 
     END CATCH

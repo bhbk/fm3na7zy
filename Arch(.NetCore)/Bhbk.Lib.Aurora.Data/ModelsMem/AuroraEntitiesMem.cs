@@ -17,9 +17,9 @@ namespace Bhbk.Lib.Aurora.Data.ModelsMem
         {
         }
 
-        public virtual DbSet<E_LoginMem> UserLoginMem { get; set; }
-        public virtual DbSet<E_FileMem> UserFileMem { get; set; }
-        public virtual DbSet<E_FolderMem> UserFolderMem { get; set; }
+        public virtual DbSet<E_FileMem> FileMem { get; set; }
+        public virtual DbSet<E_FolderMem> FolderMem { get; set; }
+        public virtual DbSet<E_LoginMem> LoginMem { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -27,9 +27,9 @@ namespace Bhbk.Lib.Aurora.Data.ModelsMem
 
             modelBuilder.Entity<E_FileMem>(entity =>
             {
-                entity.ToTable("UserFileMem");
+                entity.ToTable("FileMem");
 
-                entity.HasIndex(e => e.Id, "IX_UserFileMem")
+                entity.HasIndex(e => e.Id, "IX_FileMem")
                     .IsUnique();
 
                 entity.Property(e => e.Id).ValueGeneratedNever();
@@ -46,19 +46,19 @@ namespace Bhbk.Lib.Aurora.Data.ModelsMem
                     .WithMany(p => p.Files)
                     .HasForeignKey(d => d.FolderId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_UserFileMem_FolderID");
+                    .HasConstraintName("FK_FileMem_FolderID");
 
                 entity.HasOne(d => d.User)
                     .WithMany(p => p.Files)
                     .HasForeignKey(d => d.UserId)
-                    .HasConstraintName("FK_UserFileMem_IdentityID");
+                    .HasConstraintName("FK_FileMem_IdentityID");
             });
 
             modelBuilder.Entity<E_FolderMem>(entity =>
             {
-                entity.ToTable("UserFolderMem");
+                entity.ToTable("FolderMem");
 
-                entity.HasIndex(e => e.Id, "IX_UserFolderMem")
+                entity.HasIndex(e => e.Id, "IX_FolderMem")
                     .IsUnique();
 
                 entity.Property(e => e.Id).ValueGeneratedNever();
@@ -70,22 +70,22 @@ namespace Bhbk.Lib.Aurora.Data.ModelsMem
                 entity.HasOne(d => d.User)
                     .WithMany(p => p.Folders)
                     .HasForeignKey(d => d.UserId)
-                    .HasConstraintName("FK_UserFolderMem_IdentityID");
+                    .HasConstraintName("FK_FolderMem_IdentityID");
 
                 entity.HasOne(d => d.Parent)
                     .WithMany(p => p.Folders)
                     .HasForeignKey(d => d.ParentId)
-                    .HasConstraintName("FK_UserFolderMem_ParentID");
+                    .HasConstraintName("FK_FolderMem_ParentID");
             });
 
             modelBuilder.Entity<E_LoginMem>(entity =>
             {
                 entity.HasKey(e => e.UserId)
-                    .HasName("PK_UserLoginMem");
+                    .HasName("PK_LoginMem");
 
-                entity.ToTable("UserLoginMem");
+                entity.ToTable("LoginMem");
 
-                entity.HasIndex(e => e.UserId, "IX_UserLoginMem")
+                entity.HasIndex(e => e.UserId, "IX_LoginMem")
                     .IsUnique();
 
                 entity.Property(e => e.UserId).ValueGeneratedNever();

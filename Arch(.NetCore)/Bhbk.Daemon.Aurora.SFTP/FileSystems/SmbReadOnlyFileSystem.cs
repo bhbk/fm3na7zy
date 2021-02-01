@@ -45,7 +45,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                     .Where(x => x.UserId == _user.UserId).ToLambda())
                     .Single();
 
-                _userMount = userMount.ServerAddress + userMount.ServerShare;
+                _userMount = userMount.UncPath;
 
                 if (userMount.AmbassadorId.HasValue)
                 {

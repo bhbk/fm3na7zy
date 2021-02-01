@@ -8,10 +8,11 @@ BEGIN
 
 	BEGIN TRY
 
-        SELECT * FROM [dbo].[tbl_Network] WHERE Id = @Id
+        SELECT * FROM [dbo].[tbl_Network] 
+            WHERE Id = @Id
 
         DELETE [dbo].[tbl_Network]
-        WHERE Id = @Id
+            WHERE Id = @Id
 
     END TRY
 

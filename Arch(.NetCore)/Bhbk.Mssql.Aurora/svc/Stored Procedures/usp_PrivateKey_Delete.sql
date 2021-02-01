@@ -8,10 +8,11 @@ BEGIN
 
 	BEGIN TRY
 
-        SELECT * FROM [dbo].[tbl_PrivateKey] WHERE Id = @Id
+        SELECT * FROM [dbo].[tbl_PrivateKey] 
+            WHERE Id = @Id
 
         DELETE [dbo].[tbl_PrivateKey]
-        WHERE Id = @Id
+            WHERE Id = @Id
 
     END TRY
 

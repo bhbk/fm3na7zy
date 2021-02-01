@@ -14,9 +14,9 @@ namespace Bhbk.Lib.Aurora.Data.UnitOfWorkMem
         private readonly AuroraEntitiesMem _context;
         private readonly ILoggerFactory _logger;
         public InstanceContext InstanceType { get; private set; }
-        public IGenericRepository<E_FileMem> UserFiles { get; private set; }
-        public IGenericRepository<E_FolderMem> UserFolders { get; private set; }
-        public IGenericRepository<E_LoginMem> UserLogins { get; private set; }
+        public IGenericRepository<E_FileMem> Files { get; private set; }
+        public IGenericRepository<E_FolderMem> Folders { get; private set; }
+        public IGenericRepository<E_LoginMem> Logins { get; private set; }
 
         public UnitOfWorkMem(string connection)
             : this(connection, new ContextService(InstanceContext.DeployedOrLocal)) { }
@@ -68,9 +68,8 @@ namespace Bhbk.Lib.Aurora.Data.UnitOfWorkMem
             }
 
             /*
-             * observed persistence of sqlite databases seems to vary depending on the .net architecture that is
-             * consuming it as well as parameters defined in configuration files. with entity framework core it appears must
-             * open connection. the delete and create are pre-flight checks to guard against errors if schema has changed.
+             * with entity framework core it appears must open connection. the delete and create 
+             * are pre-flight checks to guard against errors if schema has changed.
              */
 
             _context.Database.OpenConnection();
@@ -79,9 +78,9 @@ namespace Bhbk.Lib.Aurora.Data.UnitOfWorkMem
 
             InstanceType = instance.InstanceType;
 
-            UserFiles = new GenericRepository<E_FileMem>(_context);
-            UserFolders = new GenericRepository<E_FolderMem>(_context);
-            UserLogins = new GenericRepository<E_LoginMem>(_context);
+            Files = new GenericRepository<E_FileMem>(_context);
+            Folders = new GenericRepository<E_FolderMem>(_context);
+            Logins = new GenericRepository<E_LoginMem>(_context);
         }
 
         public void Commit()

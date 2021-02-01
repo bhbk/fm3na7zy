@@ -1,6 +1,7 @@
 ﻿using Bhbk.Cli.Aurora.Factories;
 using Bhbk.Lib.Aurora.Data_EF6.Models;
 using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
+using Bhbk.Lib.Aurora.Primitives.Enums;
 using Bhbk.Lib.CommandLine.IO;
 using Bhbk.Lib.Common.Primitives.Enums;
 using Bhbk.Lib.Common.Services;
@@ -10,7 +11,6 @@ using ManyConsole;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
-using System.DirectoryServices.Protocols;
 using System.Linq;
 using System.Linq.Expressions;
 
@@ -21,10 +21,10 @@ namespace Bhbk.Cli.Aurora.Commands
         private readonly IConfiguration _conf;
         private readonly IUnitOfWork _uow;
         private E_Login _user;
-        private AuthType _authType;
+        private Uri _uncPath;
+        private MountAuthType _authType;
+        private string _authTypeList = string.Join(", ", Enum.GetNames(typeof(MountAuthType)));
         private bool _alternateCredential;
-        private string _serverAddress, _serverShare;
-        private string _authTypeList = string.Join(", ", Enum.GetNames(typeof(AuthType)));
 
         public UserMntCreateCommand()
         {
@@ -33,7 +33,7 @@ namespace Bhbk.Cli.Aurora.Commands
                 .Build();
 
             var instance = new ContextService(InstanceContext.DeployedOrLocal);
-            _uow = new UnitOfWork(_conf["Databases:AuroraEntities"], instance);
+            _uow = new UnitOfWork(_conf["Databases:AuroraEntities_EF6"], instance);
 
             IsCommand("user-mount-create", "Create mount for user");
 
@@ -55,14 +55,11 @@ namespace Bhbk.Cli.Aurora.Commands
                     throw new ConsoleHelpAsException($"  *** Invalid user '{arg}' ***");
             });
 
-            HasRequiredOption("s|server=", "Enter server DNS/IP address", arg =>
+            HasRequiredOption("p|path=", "Enter UNC path", arg =>
             {
-                _serverAddress = arg;
-            });
-
-            HasRequiredOption("p|path=", "Enter server share path", arg =>
-            {
-                _serverShare = arg;
+                if(!Uri.TryCreate(arg, UriKind.Absolute, out _uncPath)
+                    || !(new Uri(arg).IsUnc))
+                    throw new ConsoleHelpAsException($"  *** Invalid UNC path '{arg}' ***");
             });
 
             HasRequiredOption("a|auth=", "Enter type of auth", arg =>
@@ -71,7 +68,7 @@ namespace Bhbk.Cli.Aurora.Commands
                     throw new ConsoleHelpAsException($"  *** Invalid auth type. Options are '{_authTypeList}' ***");
             });
 
-            HasOption("c|credential", "Is alternate credential used for mount", arg =>
+            HasOption("c|credential", "Use ambassador credential for mount", arg =>
             {
                 _alternateCredential = true;
             });
@@ -100,7 +97,7 @@ namespace Bhbk.Cli.Aurora.Commands
                     StandardOutputFactory.Ambassadors(credentials);
 
                     Console.Out.WriteLine();
-                    Console.Out.Write("  *** Enter GUID of credential to use for mount *** : ");
+                    Console.Out.Write("  *** Enter GUID of ambassador credential to use for mount *** : ");
                     var input = StandardInput.GetInput();
                     Console.Out.WriteLine();
 
@@ -110,8 +107,7 @@ namespace Bhbk.Cli.Aurora.Commands
                             UserId = _user.UserId,
                             AmbassadorId = Guid.Parse(input),
                             AuthType = _authType.ToString(),
-                            ServerAddress = _serverAddress,
-                            ServerShare = _serverShare,
+                            UncPath = _uncPath.ToString(),
                         });
 
                     _uow.Commit();
@@ -123,8 +119,7 @@ namespace Bhbk.Cli.Aurora.Commands
                         {
                             UserId = _user.UserId,
                             AuthType = _authType.ToString(),
-                            ServerAddress = _serverAddress,
-                            ServerShare = _serverShare,
+                            UncPath = _uncPath.ToString(),
                         });
 
                     _uow.Commit();

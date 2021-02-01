@@ -3,8 +3,7 @@ CREATE PROCEDURE [svc].[usp_Mount_Insert]
      @UserId				UNIQUEIDENTIFIER
     ,@AmbassadorId			UNIQUEIDENTIFIER
     ,@AuthType				NVARCHAR (16) 
-    ,@ServerAddress			NVARCHAR (260) 
-    ,@ServerShare			NVARCHAR (260) 
+    ,@UncPath				NVARCHAR (260) 
     ,@IsEnabled				BIT
 	,@IsDeletable			BIT
 
@@ -14,6 +13,8 @@ BEGIN
 
 	BEGIN TRY
 
+    	BEGIN TRANSACTION;
+
         DECLARE @CREATEDUTC DATETIMEOFFSET (7) = GETUTCDATE()
 
 		INSERT INTO [dbo].[tbl_Mount]
@@ -21,8 +22,7 @@ BEGIN
 			UserId
 			,AmbassadorId
 			,AuthType  
-			,ServerAddress
-			,ServerShare
+			,UncPath
 			,IsEnabled
 			,IsDeletable
 			,CreatedUtc
@@ -32,8 +32,7 @@ BEGIN
 			@UserId
 			,@AmbassadorId
 			,@AuthType
-			,@ServerAddress
-			,@ServerShare
+			,@UncPath
 			,@IsEnabled
 			,@IsDeletable
 			,@CREATEDUTC
@@ -42,11 +41,16 @@ BEGIN
 		IF @@ROWCOUNT != 1
 			THROW 51000, 'ERROR', 1;
 
-		SELECT * FROM [dbo].[tbl_Mount] WHERE UserId = @UserId
+		SELECT * FROM [dbo].[tbl_Mount] 
+			WHERE UserId = @UserId
+
+    	COMMIT TRANSACTION;
 
     END TRY
 
     BEGIN CATCH
+
+    	ROLLBACK TRANSACTION;
         THROW;
 
     END CATCH

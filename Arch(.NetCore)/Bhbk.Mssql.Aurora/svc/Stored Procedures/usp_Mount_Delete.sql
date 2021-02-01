@@ -8,10 +8,11 @@ BEGIN
 
 	BEGIN TRY
 
-        SELECT * FROM [dbo].[tbl_Mount] WHERE UserId = @UserId
+        SELECT * FROM [dbo].[tbl_Mount] 
+            WHERE UserId = @UserId
 
         DELETE [dbo].[tbl_Mount]
-        WHERE UserId = @UserId
+            WHERE UserId = @UserId
 
     END TRY
 

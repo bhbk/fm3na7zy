@@ -1,7 +1,6 @@
 ﻿
 CREATE PROCEDURE [svc].[usp_File_Update]
 	 @Id					UNIQUEIDENTIFIER
-	,@UserId				UNIQUEIDENTIFIER
     ,@FolderId				UNIQUEIDENTIFIER
     ,@VirtualName			NVARCHAR (260) 
     ,@IsReadOnly			BIT
@@ -19,9 +18,12 @@ BEGIN
 
 	BEGIN TRY
 
+    	BEGIN TRANSACTION;
+
         UPDATE [dbo].[tbl_File]
         SET
-			 VirtualName			= @VirtualName
+			 FolderId				= @FolderId
+			,VirtualName			= @VirtualName
 			,IsReadOnly				= @IsReadOnly
 			,RealPath				= @RealPath
 			,RealFileName			= @RealFileName
@@ -30,17 +32,21 @@ BEGIN
 			,LastAccessedUtc		= @LastAccessedUtc
             ,LastUpdatedUtc			= @LastUpdatedUtc
 			,LastVerifiedUtc		= @LastVerifiedUtc
-        WHERE Id = @Id AND FolderId = @FolderId AND UserId = @UserId
+        WHERE Id = @Id AND FolderId = @FolderId
 
 		IF @@ROWCOUNT != 1
 			THROW 51000, 'ERROR', 1;
 
         SELECT * FROM [dbo].[tbl_File] 
-			WHERE Id = @Id AND FolderId = @FolderId AND UserId = @UserId
+			WHERE Id = @Id AND FolderId = @FolderId
+
+    	COMMIT TRANSACTION;
 
     END TRY
 
     BEGIN CATCH
+
+    	ROLLBACK TRANSACTION;
         THROW;
 
     END CATCH

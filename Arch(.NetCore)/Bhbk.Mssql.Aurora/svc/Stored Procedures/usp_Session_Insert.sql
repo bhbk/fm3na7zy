@@ -10,38 +10,53 @@ CREATE PROCEDURE [svc].[usp_Session_Insert]
    ,@IsActive					BIT
 
 AS
+BEGIN
+	SET NOCOUNT ON;
 
-SET NOCOUNT ON;
+	BEGIN TRY
 
-DECLARE @STATEID UNIQUEIDENTIFIER = NEWID()
-DECLARE @CREATED DATETIMEOFFSET = GETUTCDATE()
+    	BEGIN TRANSACTION;
 
-INSERT INTO [dbo].[tbl_Session] 
-	(Id
-	,UserId
-	,CallPath
-	,Details
-	,LocalEndPoint
-	,LocalSoftwareIdentifier
-	,RemoteEndPoint
-	,RemoteSoftwareIdentifier
-	,IsActive
-	,CreatedUtc
-	)
-VALUES 
-	(@STATEID
-    ,@UserId
-    ,@CallPath
-    ,@Details
-    ,@LocalEndPoint
-	,@LocalSoftwareIdentifier
-    ,@RemoteEndPoint
-	,@RemoteSoftwareIdentifier
-	,@IsActive
-	,@CREATED
-    );
+		DECLARE @STATEID UNIQUEIDENTIFIER = NEWID()
+		DECLARE @CREATED DATETIMEOFFSET = GETUTCDATE()
 
-    /*  Select all entity values to return
-        ----------------------------------------------------
-       */
-	SELECT * FROM [dbo].[tbl_Session] WHERE Id = @STATEID
+		INSERT INTO [dbo].[tbl_Session] 
+			(Id
+			,UserId
+			,CallPath
+			,Details
+			,LocalEndPoint
+			,LocalSoftwareIdentifier
+			,RemoteEndPoint
+			,RemoteSoftwareIdentifier
+			,IsActive
+			,CreatedUtc
+			)
+		VALUES 
+			(@STATEID
+			,@UserId
+			,@CallPath
+			,@Details
+			,@LocalEndPoint
+			,@LocalSoftwareIdentifier
+			,@RemoteEndPoint
+			,@RemoteSoftwareIdentifier
+			,@IsActive
+			,@CREATED
+			);
+
+		SELECT * FROM [dbo].[tbl_Session] 
+			WHERE Id = @STATEID
+
+    	COMMIT TRANSACTION;
+
+    END TRY
+
+    BEGIN CATCH
+
+    	ROLLBACK TRANSACTION;
+        THROW;
+
+    END CATCH
+
+END

@@ -1,7 +1,6 @@
 ﻿
 CREATE PROCEDURE [svc].[usp_Alert_Update]
 	 @Id					UNIQUEIDENTIFIER
-	,@UserId	    		UNIQUEIDENTIFIER
     ,@OnDelete				BIT
     ,@OnDownload			BIT
     ,@OnUpload				BIT
@@ -16,6 +15,8 @@ BEGIN
 
 	BEGIN TRY
 
+    	BEGIN TRANSACTION;
+
         DECLARE @LASTUPDATED DATETIMEOFFSET (7) = GETUTCDATE()
 
         UPDATE [dbo].[tbl_Alert]
@@ -28,17 +29,21 @@ BEGIN
 			,ToPhoneNumber			= @ToPhoneNumber
 			,IsEnabled				= @IsEnabled
             ,LastUpdatedUtc			= @LASTUPDATED
-        WHERE Id = @Id AND UserId = @UserId
+        WHERE Id = @Id
 
 		IF @@ROWCOUNT != 1
 			THROW 51000, 'ERROR', 1;
 
         SELECT * FROM [dbo].[tbl_Alert]
-			WHERE Id = @Id AND UserId = @UserId
+			WHERE Id = @Id
+
+    	COMMIT TRANSACTION;
 
     END TRY
 
     BEGIN CATCH
+
+    	ROLLBACK TRANSACTION;
         THROW;
 
     END CATCH

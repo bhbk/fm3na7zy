@@ -37,7 +37,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
             {
                 var conf = scope.ServiceProvider.GetRequiredService<IConfiguration>();
 
-                _uowMem = new UnitOfWorkMem(conf["Databases:AuroraEntitiesMem"]);
+                _uowMem = new UnitOfWorkMem(conf["Databases:AuroraEntities_EFCore_Mem"]);
             }
 
             _userMem = MemoryPathFactory.CheckUser(_uowMem, user);
@@ -72,7 +72,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                 var folderEntity = MemoryPathFactory.PathToFolder(_uowMem, _userMem, parent.Path.StringPath);
                 var now = DateTime.UtcNow;
 
-                _uowMem.UserFolders.Create(
+                _uowMem.Folders.Create(
                     new E_FolderMem
                     {
                         Id = Guid.NewGuid(),
@@ -140,7 +140,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                     fileEntity.HashSHA256 = Strings.GetHexString(hash);
                 }
 
-                _uowMem.UserFiles.Create(fileEntity);
+                _uowMem.Files.Create(fileEntity);
                 _uowMem.Commit();
 
                 Log.Information($"'{callPath}' '{_userMem.UserName}' empty-file:'{child.Path}' at:memory");
@@ -180,7 +180,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
 
                             _userMem.QuotaUsedInBytes -= fileEntity.Data.Length;
 
-                            _uowMem.UserFiles.Delete(fileEntity);
+                            _uowMem.Files.Delete(fileEntity);
                             _uowMem.Commit();
 
                             Log.Information($"'{callPath}' '{_userMem.UserName}' file:'{node.Path}' at:memory");
@@ -191,7 +191,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                         {
                             var folderEntity = MemoryPathFactory.PathToFolder(_uowMem, _userMem, node.Path.StringPath);
 
-                            _uowMem.UserFolders.Delete(folderEntity);
+                            _uowMem.Folders.Delete(folderEntity);
                             _uowMem.Commit();
 
                             Log.Information($"'{callPath}' '{_userMem.UserName}' folder:'{node.Path}' at:memory");
@@ -306,7 +306,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
 
                 var folderParentEntity = MemoryPathFactory.PathToFolder(_uowMem, _userMem, parent.Path.StringPath);
 
-                var folderEntity = _uowMem.UserFolders.Get(QueryExpressionFactory.GetQueryExpression<E_FolderMem>()
+                var folderEntity = _uowMem.Folders.Get(QueryExpressionFactory.GetQueryExpression<E_FolderMem>()
                     .Where(x => x.UserId == _userMem.UserId && x.ParentId == folderParentEntity.Id && x.VirtualName == name).ToLambda())
                     .SingleOrDefault();
 
@@ -315,7 +315,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                         new NodeTimeInfo(folderEntity.CreatedUtc.UtcDateTime,
                             folderEntity.LastAccessedUtc.UtcDateTime, folderEntity.LastUpdatedUtc.UtcDateTime));
 
-                var fileEntity = _uowMem.UserFiles.Get(QueryExpressionFactory.GetQueryExpression<E_FileMem>()
+                var fileEntity = _uowMem.Files.Get(QueryExpressionFactory.GetQueryExpression<E_FileMem>()
                     .Where(x => x.UserId == _userMem.UserId && x.FolderId == folderParentEntity.Id && x.VirtualName == name).ToLambda())
                     .SingleOrDefault();
 
@@ -346,7 +346,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
 
                 var folderParentEntity = MemoryPathFactory.PathToFolder(_uowMem, _userMem, parent.Path.StringPath);
 
-                var folders = _uowMem.UserFolders.Get(QueryExpressionFactory.GetQueryExpression<E_FolderMem>()
+                var folders = _uowMem.Folders.Get(QueryExpressionFactory.GetQueryExpression<E_FolderMem>()
                     .Where(x => x.UserId == _userMem.UserId).ToLambda())
                     .ToList();
 
@@ -355,7 +355,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                         new NodeTimeInfo(folder.CreatedUtc.UtcDateTime,
                             folder.LastAccessedUtc.UtcDateTime, folder.LastUpdatedUtc.UtcDateTime)));
 
-                var files = _uowMem.UserFiles.Get(QueryExpressionFactory.GetQueryExpression<E_FileMem>()
+                var files = _uowMem.Files.Get(QueryExpressionFactory.GetQueryExpression<E_FileMem>()
                     .Where(x => x.UserId == _userMem.UserId).ToLambda())
                     .ToList();
 
@@ -510,7 +510,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
 
                             toBeMovedEntity.FolderId = targetEntity.Id;
 
-                            _uowMem.UserFiles.Update(toBeMovedEntity);
+                            _uowMem.Files.Update(toBeMovedEntity);
                             _uowMem.Commit();
 
                             Log.Information($"'{callPath}' '{_userMem.UserName}' from-file:'{toBeMovedPath}' to-file:'{targetPath}' at:memory");
@@ -528,7 +528,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
 
                             toBeMovedEntity.ParentId = targetEntity.Id;
 
-                            _uowMem.UserFolders.Update(toBeMovedEntity);
+                            _uowMem.Folders.Update(toBeMovedEntity);
                             _uowMem.Commit();
 
                             Log.Information($"'{callPath}' '{_userMem.UserName}' from-folder:'{toBeMovedPath}' to-folder:'{targetPath}' at:memory");
@@ -565,7 +565,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                             fileEntity.VirtualName = newName;
                             fileEntity.LastUpdatedUtc = DateTime.UtcNow;
 
-                            _uowMem.UserFiles.Update(fileEntity);
+                            _uowMem.Files.Update(fileEntity);
                             _uowMem.Commit();
 
                             Log.Information($"'{callPath}' '{_userMem.UserName}' from-file:'{node.Path}' to-file:'{node.Parent.Path}/{newName}' at:memory");
@@ -580,7 +580,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                             folderEntity.VirtualName = newName;
                             folderEntity.LastUpdatedUtc = DateTime.UtcNow;
 
-                            _uowMem.UserFolders.Update(folderEntity);
+                            _uowMem.Folders.Update(folderEntity);
                             _uowMem.Commit();
 
                             Log.Information($"'{callPath}' '{_userMem.UserName}' from-folder:'{node.Path}' to-folder:'{node.Parent.Path}{newName}' at:memory");
@@ -630,7 +630,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
 
                             _userMem.QuotaUsedInBytes += content.Length;
 
-                            _uowMem.UserFiles.Update(fileEntity);
+                            _uowMem.Files.Update(fileEntity);
                             _uowMem.Commit();
 
                             Log.Information($"'{callPath}' '{_userMem.UserName}' file:'{node.Path}' size:'{content.Length / 1048576f}MB' at:memory");

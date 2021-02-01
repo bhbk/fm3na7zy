@@ -29,7 +29,7 @@ namespace Bhbk.Cli.Aurora.Commands
                 .Build();
 
             var instance = new ContextService(InstanceContext.DeployedOrLocal);
-            _uow = new UnitOfWork(_conf["Databases:AuroraEntities"], instance);
+            _uow = new UnitOfWork(_conf["Databases:AuroraEntities_EF6"], instance);
 
             IsCommand("sys-sess-show", "Show session(s) on system");
 
@@ -96,7 +96,7 @@ namespace Bhbk.Cli.Aurora.Commands
 
                     Console.Out.WriteLine();
                     StandardOutputFactory.Sessions(sessions
-                        .OrderBy(x => x.CreatedUtc), "extras");
+                        .OrderBy(x => x.CreatedUtc), true);
                 }
 
                 return StandardOutput.FondFarewell();

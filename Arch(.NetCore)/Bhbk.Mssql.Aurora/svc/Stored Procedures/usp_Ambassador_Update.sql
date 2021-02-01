@@ -12,12 +12,13 @@ BEGIN
 
 	BEGIN TRY
 
+    	BEGIN TRANSACTION;
+
         DECLARE @LASTUPDATED DATETIMEOFFSET (7) = GETUTCDATE()
 
         UPDATE [dbo].[tbl_Ambassador]
         SET
-             Id						= @Id
-			,UserName				= @UserName
+            UserName				= @UserName
 			,EncryptedPass  		= @EncryptedPass
 			,IsEnabled				= @IsEnabled
             ,IsDeletable			= @IsDeletable
@@ -27,11 +28,16 @@ BEGIN
 		IF @@ROWCOUNT != 1
 			THROW 51000, 'ERROR', 1;
 
-        SELECT * FROM [dbo].[tbl_Ambassador] WHERE Id = @Id
+        SELECT * FROM [dbo].[tbl_Ambassador] 
+            WHERE Id = @Id
+
+    	COMMIT TRANSACTION;
 
     END TRY
 
     BEGIN CATCH
+
+    	ROLLBACK TRANSACTION;
         THROW;
 
     END CATCH

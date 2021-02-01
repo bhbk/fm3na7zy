@@ -1,6 +1,7 @@
 ﻿using Bhbk.Cli.Aurora.Factories;
 using Bhbk.Lib.Aurora.Data_EF6.Models;
 using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
+using Bhbk.Lib.Aurora.Primitives.Enums;
 using Bhbk.Lib.CommandLine.IO;
 using Bhbk.Lib.Common.Primitives.Enums;
 using Bhbk.Lib.Common.Services;
@@ -10,7 +11,6 @@ using ManyConsole;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
-using System.DirectoryServices.Protocols;
 using System.Linq;
 using System.Linq.Expressions;
 
@@ -21,9 +21,10 @@ namespace Bhbk.Cli.Aurora.Commands
         private readonly IConfiguration _conf;
         private readonly IUnitOfWork _uow;
         private E_Login _user;
+        private Uri _uncPath;
+        private MountAuthType _authType;
+        private string _authTypeList = string.Join(", ", Enum.GetNames(typeof(MountAuthType)));
         private bool _alternateCredential;
-        private AuthType _authType;
-        private string _authTypeList = string.Join(", ", Enum.GetNames(typeof(AuthType)));
 
         public UserMntEditCommand()
         {
@@ -32,7 +33,7 @@ namespace Bhbk.Cli.Aurora.Commands
                 .Build();
 
             var instance = new ContextService(InstanceContext.DeployedOrLocal);
-            _uow = new UnitOfWork(_conf["Databases:AuroraEntities"], instance);
+            _uow = new UnitOfWork(_conf["Databases:AuroraEntities_EF6"], instance);
 
             IsCommand("user-mount-edit", "Edit mount for user");
 
@@ -54,17 +55,16 @@ namespace Bhbk.Cli.Aurora.Commands
                     throw new ConsoleHelpAsException($"  *** Invalid user '{arg}' ***");
             });
 
-            HasOption("s|server=", "Enter server DNS/IP address", arg =>
+            HasOption("p|path=", "Enter UNC path", arg =>
             {
-                _user.Mount.ServerAddress = arg;
+                if (!Uri.TryCreate(arg, UriKind.Absolute, out _uncPath)
+                    || !(new Uri(arg).IsUnc))
+                    throw new ConsoleHelpAsException($"  *** Invalid UNC path '{arg}' ***");
+
+                _user.Mount.UncPath = arg;
             });
 
-            HasOption("p|path=", "Enter server share path", arg =>
-            {
-                _user.Mount.ServerShare = arg;
-            });
-
-            HasOption("a|auth=", "Enter type of auth to use", arg =>
+            HasOption("a|auth=", "Enter type of auth", arg =>
             {
                 if (!Enum.TryParse(arg, out _authType))
                     throw new ConsoleHelpAsException($"  *** Invalid auth type. Options are '{_authTypeList}' ***");
@@ -72,7 +72,7 @@ namespace Bhbk.Cli.Aurora.Commands
                 _user.Mount.AuthType = _authType.ToString();
             });
 
-            HasOption("c|credential", "Is alternate credential used for mount", arg =>
+            HasOption("c|credential", "Use ambassador credential for mount", arg =>
             {
                 _alternateCredential = true;
             });
@@ -89,7 +89,7 @@ namespace Bhbk.Cli.Aurora.Commands
                     StandardOutputFactory.Ambassadors(credentials);
 
                     Console.Out.WriteLine();
-                    Console.Out.Write("  *** Enter GUID of credential to use for mount *** : ");
+                    Console.Out.Write("  *** Enter GUID of ambassador credential to use for mount *** : ");
                     var input = StandardInput.GetInput();
                     Console.Out.WriteLine();
 

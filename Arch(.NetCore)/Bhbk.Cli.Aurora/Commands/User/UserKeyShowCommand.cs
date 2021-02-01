@@ -28,7 +28,7 @@ namespace Bhbk.Cli.Aurora.Commands
                 .Build();
 
             var instance = new ContextService(InstanceContext.DeployedOrLocal);
-            _uow = new UnitOfWork(_conf["Databases:AuroraEntities"], instance);
+            _uow = new UnitOfWork(_conf["Databases:AuroraEntities_EF6"], instance);
 
             IsCommand("user-key-show", "Show public/private key(s) for user");
 
@@ -47,7 +47,7 @@ namespace Bhbk.Cli.Aurora.Commands
                     .SingleOrDefault();
 
                 if (_user == null)
-                    throw new ConsoleHelpAsException($"  *** Invalid user '{arg}' ***");
+                    throw new ConsoleHelpAsException($"  *** No user '{arg}' ***");
             });
         }
 

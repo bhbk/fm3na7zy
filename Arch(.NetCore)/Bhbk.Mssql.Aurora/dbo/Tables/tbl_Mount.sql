@@ -2,8 +2,7 @@
     [UserId]         UNIQUEIDENTIFIER   NOT NULL,
     [AmbassadorId]   UNIQUEIDENTIFIER   NULL,
     [AuthType]       NVARCHAR (16)      NOT NULL,
-    [ServerAddress]  NVARCHAR (256)     NOT NULL,
-    [ServerShare]    NVARCHAR (256)     NOT NULL,
+    [UncPath]        NVARCHAR (256)     NOT NULL,
     [IsEnabled]      BIT                NOT NULL,
     [IsDeletable]    BIT                NOT NULL,
     [CreatedUtc]     DATETIMEOFFSET (7) NOT NULL,
@@ -12,6 +11,8 @@
     CONSTRAINT [FK_tbl_Mount_AmbassadorID] FOREIGN KEY ([AmbassadorId]) REFERENCES [dbo].[tbl_Ambassador] ([Id]) ON UPDATE CASCADE,
     CONSTRAINT [FK_tbl_Mount_UserID] FOREIGN KEY ([UserId]) REFERENCES [dbo].[tbl_Login] ([UserId]) ON UPDATE CASCADE
 );
+
+
 
 
 GO

@@ -44,14 +44,15 @@ namespace Bhbk.WebApi.Aurora
                 .Build();
 
             var instance = new ContextService(InstanceContext.DeployedOrLocal);
-            var mapper = new MapperConfiguration(x => x.AddProfile<AutoMapperProfile>()).CreateMapper();
+            var mapper = new MapperConfiguration(x => x.AddProfile<AutoMapperProfile_EF6>())
+                .CreateMapper();
 
             sc.AddSingleton<IConfiguration>(conf);
             sc.AddSingleton<IContextService>(instance);
             sc.AddSingleton<IMapper>(mapper);
             sc.AddScoped<IUnitOfWork, UnitOfWork>(_ =>
             {
-                return new UnitOfWork(conf["Databases:AuroraEntities"], instance);
+                return new UnitOfWork(conf["Databases:AuroraEntities_EF6"], instance);
             });
             sc.AddQuartz(jobs =>
             {
@@ -117,7 +118,7 @@ namespace Bhbk.WebApi.Aurora
              * only for owin authentication configuration.
              */
 
-            var uow = new UnitOfWork(conf["Databases:AuroraEntities"], instance);
+            var uow = new UnitOfWork(conf["Databases:AuroraEntities_EF6"], instance);
 
             var keyType = ConfigType.RebexLicense.ToString();
 

@@ -33,7 +33,7 @@ namespace Bhbk.Cli.Aurora.Commands
                 .Build();
 
             var instance = new ContextService(InstanceContext.DeployedOrLocal);
-            _uow = new UnitOfWork(_conf["Databases:AuroraEntities"], instance);
+            _uow = new UnitOfWork(_conf["Databases:AuroraEntities_EF6"], instance);
 
             IsCommand("user-login-edit", "Edit login for user");
 
@@ -134,7 +134,7 @@ namespace Bhbk.Cli.Aurora.Commands
                 _uow.Usages.Update(_user.Usage);
                 _uow.Commit();
 
-                StandardOutputFactory.Logins(new List<E_Login> { _user }, "extras");
+                StandardOutputFactory.Logins(new List<E_Login> { _user }, true);
 
                 return StandardOutput.FondFarewell();
             }

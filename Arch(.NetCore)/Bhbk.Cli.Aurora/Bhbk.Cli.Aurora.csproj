@@ -10,9 +10,9 @@
     <PackageReference Include="Bhbk.Lib.CommandLine" Version="2020.11.27.2100" />
     <PackageReference Include="Bhbk.Lib.Cryptography" Version="2020.11.27.2100" />
     <PackageReference Include="Bhbk.Lib.Identity" Version="2020.11.27.2100" />
-    <PackageReference Include="libphonenumber-csharp" Version="8.12.19" />
+    <PackageReference Include="libphonenumber-csharp" Version="8.12.21" />
     <PackageReference Include="ManyConsole" Version="2.0.1" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.1">
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.5">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
@@ -20,8 +20,7 @@
     <PackageReference Include="Rebex.Elliptic.Castle" Version="1.2.1" />
     <PackageReference Include="Rebex.Elliptic.Curve25519" Version="1.2.1" />
     <PackageReference Include="Rebex.Elliptic.Ed25519" Version="1.2.1" />
-    <PackageReference Include="Rebex.Security" Version="5.0.7620" />
-    <PackageReference Include="System.DirectoryServices.Protocols" Version="5.0.0" />
+    <PackageReference Include="Rebex.Security" Version="5.0.7733" />
   </ItemGroup>
 
   <ItemGroup>

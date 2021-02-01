@@ -115,6 +115,7 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Login' does not have a primary 
             
             
             
+            
           </Key>
           <Property Name="UserId" Type="uniqueidentifier" Nullable="false" />
           <Property Name="UserAuthType" Type="nvarchar" MaxLength="16" Nullable="false" />
@@ -139,15 +140,11 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Mount' does not have a primary 
             
             
             
-            
-            
-            
           </Key>
           <Property Name="UserId" Type="uniqueidentifier" Nullable="false" />
           <Property Name="AmbassadorId" Type="uniqueidentifier" />
           <Property Name="AuthType" Type="nvarchar" MaxLength="16" Nullable="false" />
-          <Property Name="ServerAddress" Type="nvarchar" MaxLength="256" Nullable="false" />
-          <Property Name="ServerShare" Type="nvarchar" MaxLength="256" Nullable="false" />
+          <Property Name="UncPath" Type="nvarchar" MaxLength="256" Nullable="false" />
           <Property Name="IsEnabled" Type="bit" Nullable="false" />
           <Property Name="IsDeletable" Type="bit" Nullable="false" />
           <Property Name="CreatedUtc" Type="datetimeoffset" Precision="7" Nullable="false" />
@@ -302,7 +299,6 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Usage' does not have a primary 
         </Function>
         <Function Name="usp_Alert_Update" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="svc">
           <Parameter Name="Id" Type="uniqueidentifier" Mode="In" />
-          <Parameter Name="UserId" Type="uniqueidentifier" Mode="In" />
           <Parameter Name="OnDelete" Type="bit" Mode="In" />
           <Parameter Name="OnDownload" Type="bit" Mode="In" />
           <Parameter Name="OnUpload" Type="bit" Mode="In" />
@@ -342,7 +338,6 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Usage' does not have a primary 
         </Function>
         <Function Name="usp_File_Update" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="svc">
           <Parameter Name="Id" Type="uniqueidentifier" Mode="In" />
-          <Parameter Name="UserId" Type="uniqueidentifier" Mode="In" />
           <Parameter Name="FolderId" Type="uniqueidentifier" Mode="In" />
           <Parameter Name="VirtualName" Type="nvarchar" Mode="In" />
           <Parameter Name="IsReadOnly" Type="bit" Mode="In" />
@@ -365,7 +360,6 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Usage' does not have a primary 
         </Function>
         <Function Name="usp_Folder_Update" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="svc">
           <Parameter Name="Id" Type="uniqueidentifier" Mode="In" />
-          <Parameter Name="UserId" Type="uniqueidentifier" Mode="In" />
           <Parameter Name="ParentId" Type="uniqueidentifier" Mode="In" />
           <Parameter Name="VirtualName" Type="nvarchar(max)" Mode="In" />
           <Parameter Name="IsReadOnly" Type="bit" Mode="In" />
@@ -409,8 +403,7 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Usage' does not have a primary 
           <Parameter Name="UserId" Type="uniqueidentifier" Mode="In" />
           <Parameter Name="AmbassadorId" Type="uniqueidentifier" Mode="In" />
           <Parameter Name="AuthType" Type="nvarchar" Mode="In" />
-          <Parameter Name="ServerAddress" Type="nvarchar" Mode="In" />
-          <Parameter Name="ServerShare" Type="nvarchar" Mode="In" />
+          <Parameter Name="UncPath" Type="nvarchar" Mode="In" />
           <Parameter Name="IsEnabled" Type="bit" Mode="In" />
           <Parameter Name="IsDeletable" Type="bit" Mode="In" />
         </Function>
@@ -418,8 +411,7 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Usage' does not have a primary 
           <Parameter Name="UserId" Type="uniqueidentifier" Mode="In" />
           <Parameter Name="AmbassadorId" Type="uniqueidentifier" Mode="In" />
           <Parameter Name="AuthType" Type="nvarchar" Mode="In" />
-          <Parameter Name="ServerAddress" Type="nvarchar" Mode="In" />
-          <Parameter Name="ServerShare" Type="nvarchar" Mode="In" />
+          <Parameter Name="UncPath" Type="nvarchar" Mode="In" />
           <Parameter Name="IsEnabled" Type="bit" Mode="In" />
           <Parameter Name="IsDeletable" Type="bit" Mode="In" />
         </Function>
@@ -436,7 +428,6 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Usage' does not have a primary 
         </Function>
         <Function Name="usp_Network_Update" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="svc">
           <Parameter Name="Id" Type="uniqueidentifier" Mode="In" />
-          <Parameter Name="UserId" Type="uniqueidentifier" Mode="In" />
           <Parameter Name="SequenceId" Type="int" Mode="In" />
           <Parameter Name="Address" Type="nvarchar" Mode="In" />
           <Parameter Name="Action" Type="nvarchar" Mode="In" />
@@ -459,7 +450,6 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Usage' does not have a primary 
         </Function>
         <Function Name="usp_PrivateKey_Update" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="svc">
           <Parameter Name="Id" Type="uniqueidentifier" Mode="In" />
-          <Parameter Name="UserId" Type="uniqueidentifier" Mode="In" />
           <Parameter Name="PublicKeyId" Type="uniqueidentifier" Mode="In" />
           <Parameter Name="KeyValue" Type="nvarchar(max)" Mode="In" />
           <Parameter Name="KeyAlgo" Type="nvarchar" Mode="In" />
@@ -486,7 +476,6 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Usage' does not have a primary 
         </Function>
         <Function Name="usp_PublicKey_Update" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="svc">
           <Parameter Name="Id" Type="uniqueidentifier" Mode="In" />
-          <Parameter Name="UserId" Type="uniqueidentifier" Mode="In" />
           <Parameter Name="PrivateKeyId" Type="uniqueidentifier" Mode="In" />
           <Parameter Name="KeyValue" Type="nvarchar(max)" Mode="In" />
           <Parameter Name="KeyAlgo" Type="nvarchar" Mode="In" />
@@ -512,7 +501,6 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Usage' does not have a primary 
         </Function>
         <Function Name="usp_Session_Update" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="svc">
           <Parameter Name="Id" Type="uniqueidentifier" Mode="In" />
-          <Parameter Name="UserId" Type="uniqueidentifier" Mode="In" />
           <Parameter Name="CallPath" Type="varchar" Mode="In" />
           <Parameter Name="Details" Type="varchar(max)" Mode="In" />
           <Parameter Name="LocalEndPoint" Type="varchar" Mode="In" />
@@ -532,7 +520,6 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Usage' does not have a primary 
         </Function>
         <Function Name="usp_Setting_Update" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="svc">
           <Parameter Name="Id" Type="uniqueidentifier" Mode="In" />
-          <Parameter Name="UserId" Type="uniqueidentifier" Mode="In" />
           <Parameter Name="ConfigKey" Type="nvarchar(max)" Mode="In" />
           <Parameter Name="ConfigValue" Type="nvarchar(max)" Mode="In" />
           <Parameter Name="IsDeletable" Type="bit" Mode="In" />
@@ -623,8 +610,7 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Usage' does not have a primary 
     [uvw_Mount].[UserId] AS [UserId], 
     [uvw_Mount].[AmbassadorId] AS [AmbassadorId], 
     [uvw_Mount].[AuthType] AS [AuthType], 
-    [uvw_Mount].[ServerAddress] AS [ServerAddress], 
-    [uvw_Mount].[ServerShare] AS [ServerShare], 
+    [uvw_Mount].[UncPath] AS [UncPath], 
     [uvw_Mount].[IsEnabled] AS [IsEnabled], 
     [uvw_Mount].[IsDeletable] AS [IsDeletable], 
     [uvw_Mount].[CreatedUtc] AS [CreatedUtc], 
@@ -884,8 +870,7 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Usage' does not have a primary 
           <Property Name="UserId" Type="Guid" Nullable="false" />
           <Property Name="AmbassadorId" Type="Guid" />
           <Property Name="AuthType" Type="String" MaxLength="16" FixedLength="false" Unicode="true" Nullable="false" />
-          <Property Name="ServerAddress" Type="String" MaxLength="256" FixedLength="false" Unicode="true" Nullable="false" />
-          <Property Name="ServerShare" Type="String" MaxLength="256" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="UncPath" Type="String" Nullable="false" MaxLength="256" FixedLength="false" Unicode="true" />
           <Property Name="IsEnabled" Type="Boolean" Nullable="false" />
           <Property Name="IsDeletable" Type="Boolean" Nullable="false" />
           <Property Name="CreatedUtc" Type="DateTimeOffset" Nullable="false" Precision="7" />
@@ -893,7 +878,7 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Usage' does not have a primary 
           <NavigationProperty Name="Ambassador" Relationship="AuroraModels.Ambassador_Mount" FromRole="Mount" ToRole="Ambassador" />
           <NavigationProperty Name="Login" Relationship="AuroraModels.Login_Mount" FromRole="Mount" ToRole="Login" />
         </EntityType>
-        <EntityContainer Name="AuroraEntities" annotation:LazyLoadingEnabled="true">
+        <EntityContainer Name="AuroraEntities_EF6" annotation:LazyLoadingEnabled="true">
           <EntitySet Name="E_Ambassador" EntityType="AuroraModels.E_Ambassador" />
           <EntitySet Name="E_Network" EntityType="AuroraModels.E_Network" />
           <EntitySet Name="E_PrivateKey" EntityType="AuroraModels.E_PrivateKey" />
@@ -933,7 +918,6 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Usage' does not have a primary 
           </FunctionImport>
           <FunctionImport Name="usp_Network_Update" ReturnType="Collection(AuroraModels.usp_Network_Update_Result)">
             <Parameter Name="Id" Mode="In" Type="Guid" />
-            <Parameter Name="UserId" Mode="In" Type="Guid" />
             <Parameter Name="SequenceId" Mode="In" Type="Int32" />
             <Parameter Name="Address" Mode="In" Type="String" />
             <Parameter Name="Action" Mode="In" Type="String" />
@@ -956,7 +940,6 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Usage' does not have a primary 
           </FunctionImport>
           <FunctionImport Name="usp_PrivateKey_Update" ReturnType="Collection(AuroraModels.usp_PrivateKey_Update_Result)">
             <Parameter Name="Id" Mode="In" Type="Guid" />
-            <Parameter Name="UserId" Mode="In" Type="Guid" />
             <Parameter Name="PublicKeyId" Mode="In" Type="Guid" />
             <Parameter Name="KeyValue" Mode="In" Type="String" />
             <Parameter Name="KeyAlgo" Mode="In" Type="String" />
@@ -983,7 +966,6 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Usage' does not have a primary 
           </FunctionImport>
           <FunctionImport Name="usp_PublicKey_Update" ReturnType="Collection(AuroraModels.usp_PublicKey_Update_Result)">
             <Parameter Name="Id" Mode="In" Type="Guid" />
-            <Parameter Name="UserId" Mode="In" Type="Guid" />
             <Parameter Name="PrivateKeyId" Mode="In" Type="Guid" />
             <Parameter Name="KeyValue" Mode="In" Type="String" />
             <Parameter Name="KeyAlgo" Mode="In" Type="String" />
@@ -1005,7 +987,6 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Usage' does not have a primary 
           </FunctionImport>
           <FunctionImport Name="usp_Setting_Update" ReturnType="Collection(AuroraModels.usp_Setting_Update_Result)">
             <Parameter Name="Id" Mode="In" Type="Guid" />
-            <Parameter Name="UserId" Mode="In" Type="Guid" />
             <Parameter Name="ConfigKey" Mode="In" Type="String" />
             <Parameter Name="ConfigValue" Mode="In" Type="String" />
             <Parameter Name="IsDeletable" Mode="In" Type="Boolean" />
@@ -1055,7 +1036,6 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Usage' does not have a primary 
           </FunctionImport>
           <FunctionImport Name="usp_Alert_Update" ReturnType="Collection(AuroraModels.usp_Alert_Update_Result)">
             <Parameter Name="Id" Mode="In" Type="Guid" />
-            <Parameter Name="UserId" Mode="In" Type="Guid" />
             <Parameter Name="OnDelete" Mode="In" Type="Boolean" />
             <Parameter Name="OnDownload" Mode="In" Type="Boolean" />
             <Parameter Name="OnUpload" Mode="In" Type="Boolean" />
@@ -1079,7 +1059,6 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Usage' does not have a primary 
           </FunctionImport>
           <FunctionImport Name="usp_File_Update" ReturnType="Collection(AuroraModels.usp_File_Update_Result)">
             <Parameter Name="Id" Mode="In" Type="Guid" />
-            <Parameter Name="UserId" Mode="In" Type="Guid" />
             <Parameter Name="FolderId" Mode="In" Type="Guid" />
             <Parameter Name="VirtualName" Mode="In" Type="String" />
             <Parameter Name="IsReadOnly" Mode="In" Type="Boolean" />
@@ -1102,7 +1081,6 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Usage' does not have a primary 
           </FunctionImport>
           <FunctionImport Name="usp_Folder_Update" ReturnType="Collection(AuroraModels.usp_Folder_Update_Result)">
             <Parameter Name="Id" Mode="In" Type="Guid" />
-            <Parameter Name="UserId" Mode="In" Type="Guid" />
             <Parameter Name="ParentId" Mode="In" Type="Guid" />
             <Parameter Name="VirtualName" Mode="In" Type="String" />
             <Parameter Name="IsReadOnly" Mode="In" Type="Boolean" />
@@ -1116,8 +1094,7 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Usage' does not have a primary 
             <Parameter Name="UserId" Mode="In" Type="Guid" />
             <Parameter Name="AmbassadorId" Mode="In" Type="Guid" />
             <Parameter Name="AuthType" Mode="In" Type="String" />
-            <Parameter Name="ServerAddress" Mode="In" Type="String" />
-            <Parameter Name="ServerShare" Mode="In" Type="String" />
+            <Parameter Name="UncPath" Mode="In" Type="String" />
             <Parameter Name="IsEnabled" Mode="In" Type="Boolean" />
             <Parameter Name="IsDeletable" Mode="In" Type="Boolean" />
           </FunctionImport>
@@ -1125,8 +1102,7 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Usage' does not have a primary 
             <Parameter Name="UserId" Mode="In" Type="Guid" />
             <Parameter Name="AmbassadorId" Mode="In" Type="Guid" />
             <Parameter Name="AuthType" Mode="In" Type="String" />
-            <Parameter Name="ServerAddress" Mode="In" Type="String" />
-            <Parameter Name="ServerShare" Mode="In" Type="String" />
+            <Parameter Name="UncPath" Mode="In" Type="String" />
             <Parameter Name="IsEnabled" Mode="In" Type="Boolean" />
             <Parameter Name="IsDeletable" Mode="In" Type="Boolean" />
           </FunctionImport>
@@ -1190,7 +1166,6 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Usage' does not have a primary 
           </FunctionImport>
           <FunctionImport Name="usp_Session_Update" ReturnType="Collection(AuroraModels.usp_Session_Update_Result)">
             <Parameter Name="Id" Mode="In" Type="Guid" />
-            <Parameter Name="UserId" Mode="In" Type="Guid" />
             <Parameter Name="CallPath" Mode="In" Type="String" />
             <Parameter Name="Details" Mode="In" Type="String" />
             <Parameter Name="LocalEndPoint" Mode="In" Type="String" />
@@ -1792,7 +1767,7 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Usage' does not have a primary 
     <!-- C-S mapping content -->
     <edmx:Mappings>
       <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
-        <EntityContainerMapping StorageEntityContainer="AuroraModelsStoreContainer" CdmEntityContainer="AuroraEntities">
+        <EntityContainerMapping StorageEntityContainer="AuroraModelsStoreContainer" CdmEntityContainer="AuroraEntities_EF6">
           <EntitySetMapping Name="E_Ambassador">
             <EntityTypeMapping TypeName="AuroraModels.E_Ambassador">
               <MappingFragment StoreEntitySet="uvw_Ambassador">
@@ -1854,7 +1829,6 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Usage' does not have a primary 
                   <ScalarProperty Name="IsEnabled" ParameterName="IsEnabled" Version="Current" />
                   <ScalarProperty Name="Action" ParameterName="Action" Version="Current" />
                   <ScalarProperty Name="Address" ParameterName="Address" Version="Current" />
-                  <ScalarProperty Name="UserId" ParameterName="UserId" Version="Current" />
                   <ScalarProperty Name="Id" ParameterName="Id" Version="Current" />
                   <ResultBinding Name="LastUpdatedUtc" ColumnName="LastUpdatedUtc" />
                 </UpdateFunction>
@@ -1897,7 +1871,6 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Usage' does not have a primary 
                   <ScalarProperty Name="KeyAlgo" ParameterName="KeyAlgo" Version="Current" />
                   <ScalarProperty Name="KeyValue" ParameterName="KeyValue" Version="Current" />
                   <ScalarProperty Name="PublicKeyId" ParameterName="PublicKeyId" Version="Current" />
-                  <ScalarProperty Name="UserId" ParameterName="UserId" Version="Current" />
                   <ScalarProperty Name="Id" ParameterName="Id" Version="Current" />
                   <ResultBinding Name="LastUpdatedUtc" ColumnName="LastUpdatedUtc" />
                 </UpdateFunction>
@@ -1949,7 +1922,6 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Usage' does not have a primary 
                   <ScalarProperty Name="KeyAlgo" ParameterName="KeyAlgo" Version="Current" />
                   <ScalarProperty Name="KeyValue" ParameterName="KeyValue" Version="Current" />
                   <ScalarProperty Name="PrivateKeyId" ParameterName="PrivateKeyId" Version="Current" />
-                  <ScalarProperty Name="UserId" ParameterName="UserId" Version="Current" />
                   <ScalarProperty Name="Id" ParameterName="Id" Version="Current" />
                   <ResultBinding Name="LastUpdatedUtc" ColumnName="LastUpdatedUtc" />
                 </UpdateFunction>
@@ -1994,7 +1966,6 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Usage' does not have a primary 
                   <ScalarProperty Name="IsDeletable" ParameterName="IsDeletable" Version="Current" />
                   <ScalarProperty Name="ConfigValue" ParameterName="ConfigValue" Version="Current" />
                   <ScalarProperty Name="ConfigKey" ParameterName="ConfigKey" Version="Current" />
-                  <ScalarProperty Name="UserId" ParameterName="UserId" Version="Current" />
                   <ScalarProperty Name="Id" ParameterName="Id" Version="Current" />
                 </UpdateFunction>
                 <InsertFunction FunctionName="AuroraModels.Store.usp_Setting_Insert">
@@ -2092,7 +2063,6 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Usage' does not have a primary 
                   <ScalarProperty Name="OnUpload" ParameterName="OnUpload" Version="Current" />
                   <ScalarProperty Name="OnDownload" ParameterName="OnDownload" Version="Current" />
                   <ScalarProperty Name="OnDelete" ParameterName="OnDelete" Version="Current" />
-                  <ScalarProperty Name="UserId" ParameterName="UserId" Version="Current" />
                   <ScalarProperty Name="Id" ParameterName="Id" Version="Current" />
                   <ResultBinding Name="LastUpdatedUtc" ColumnName="LastUpdatedUtc" />
                 </UpdateFunction>
@@ -2144,7 +2114,6 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Usage' does not have a primary 
                   <ScalarProperty Name="RealFileName" ParameterName="RealFileName" Version="Current" />
                   <ScalarProperty Name="RealPath" ParameterName="RealPath" Version="Current" />
                   <ScalarProperty Name="VirtualName" ParameterName="VirtualName" Version="Current" />
-                  <ScalarProperty Name="UserId" ParameterName="UserId" Version="Current" />
                   <ScalarProperty Name="FolderId" ParameterName="FolderId" Version="Current" />
                   <ScalarProperty Name="Id" ParameterName="Id" Version="Current" />
                   <ResultBinding Name="CreatedUtc" ColumnName="CreatedUtc" />
@@ -2191,7 +2160,6 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Usage' does not have a primary 
                   <ScalarProperty Name="IsReadOnly" ParameterName="IsReadOnly" Version="Current" />
                   <ScalarProperty Name="VirtualName" ParameterName="VirtualName" Version="Current" />
                   <ScalarProperty Name="ParentId" ParameterName="ParentId" Version="Current" />
-                  <ScalarProperty Name="UserId" ParameterName="UserId" Version="Current" />
                   <ScalarProperty Name="Id" ParameterName="Id" Version="Current" />
                   <ResultBinding Name="CreatedUtc" ColumnName="CreatedUtc" />
                 </UpdateFunction>
@@ -2211,11 +2179,10 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Usage' does not have a primary 
           <EntitySetMapping Name="E_Mount">
             <EntityTypeMapping TypeName="AuroraModels.E_Mount">
               <MappingFragment StoreEntitySet="uvw_Mount">
+                <ScalarProperty Name="UncPath" ColumnName="UncPath" />
                 <ScalarProperty Name="UserId" ColumnName="UserId" />
                 <ScalarProperty Name="AmbassadorId" ColumnName="AmbassadorId" />
                 <ScalarProperty Name="AuthType" ColumnName="AuthType" />
-                <ScalarProperty Name="ServerAddress" ColumnName="ServerAddress" />
-                <ScalarProperty Name="ServerShare" ColumnName="ServerShare" />
                 <ScalarProperty Name="IsEnabled" ColumnName="IsEnabled" />
                 <ScalarProperty Name="IsDeletable" ColumnName="IsDeletable" />
                 <ScalarProperty Name="CreatedUtc" ColumnName="CreatedUtc" />
@@ -2225,19 +2192,17 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Usage' does not have a primary 
             <EntityTypeMapping TypeName="AuroraModels.E_Mount">
               <ModificationFunctionMapping>
                 <UpdateFunction FunctionName="AuroraModels.Store.usp_Mount_Update">
+                  <ScalarProperty Name="UncPath" ParameterName="UncPath" Version="Current" />
                   <ScalarProperty Name="IsDeletable" ParameterName="IsDeletable" Version="Current" />
                   <ScalarProperty Name="IsEnabled" ParameterName="IsEnabled" Version="Current" />
-                  <ScalarProperty Name="ServerShare" ParameterName="ServerShare" Version="Current" />
-                  <ScalarProperty Name="ServerAddress" ParameterName="ServerAddress" Version="Current" />
                   <ScalarProperty Name="AuthType" ParameterName="AuthType" Version="Current" />
                   <ScalarProperty Name="AmbassadorId" ParameterName="AmbassadorId" Version="Current" />
                   <ScalarProperty Name="UserId" ParameterName="UserId" Version="Current" />
                 </UpdateFunction>
                 <InsertFunction FunctionName="AuroraModels.Store.usp_Mount_Insert">
+                  <ScalarProperty Name="UncPath" ParameterName="UncPath" />
                   <ScalarProperty Name="IsDeletable" ParameterName="IsDeletable" />
                   <ScalarProperty Name="IsEnabled" ParameterName="IsEnabled" />
-                  <ScalarProperty Name="ServerShare" ParameterName="ServerShare" />
-                  <ScalarProperty Name="ServerAddress" ParameterName="ServerAddress" />
                   <ScalarProperty Name="AuthType" ParameterName="AuthType" />
                   <ScalarProperty Name="AmbassadorId" ParameterName="AmbassadorId" />
                   <ScalarProperty Name="UserId" ParameterName="UserId" />
@@ -2768,7 +2733,6 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Usage' does not have a primary 
                   <ScalarProperty Name="LocalEndPoint" ParameterName="LocalEndPoint" Version="Current" />
                   <ScalarProperty Name="Details" ParameterName="Details" Version="Current" />
                   <ScalarProperty Name="CallPath" ParameterName="CallPath" Version="Current" />
-                  <ScalarProperty Name="UserId" ParameterName="UserId" Version="Current" />
                   <ScalarProperty Name="Id" ParameterName="Id" Version="Current" />
                 </UpdateFunction>
               </ModificationFunctionMapping>

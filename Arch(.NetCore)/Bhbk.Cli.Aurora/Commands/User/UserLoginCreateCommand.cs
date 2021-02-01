@@ -38,7 +38,7 @@ namespace Bhbk.Cli.Aurora.Commands
                 .Build();
 
             var instance = new ContextService(InstanceContext.DeployedOrLocal);
-            _uow = new UnitOfWork(_conf["Databases:AuroraEntities"], instance);
+            _uow = new UnitOfWork(_conf["Databases:AuroraEntities_EF6"], instance);
 
             IsCommand("user-login-create", "Create login for user");
 
@@ -150,7 +150,7 @@ namespace Bhbk.Cli.Aurora.Commands
                     .Single();
                 
                 Console.Out.WriteLine();
-                StandardOutputFactory.Logins(new List<E_Login> { user }, "extras");
+                StandardOutputFactory.Logins(new List<E_Login> { user }, true);
 
                 return StandardOutput.FondFarewell();
             }

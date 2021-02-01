@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Serilog;
+using Serilog.Sinks.SystemConsole.Themes;
 using System.Diagnostics;
 using System.IO;
 
@@ -21,7 +22,7 @@ namespace Bhbk.WebApi.Aurora
                 Log.Logger = new LoggerConfiguration()
                     .ReadFrom.Configuration(_conf)
                     .Enrich.FromLogContext()
-                    .WriteTo.Console()
+                    .WriteTo.Console(theme: AnsiConsoleTheme.Code)
                     .WriteTo.File($"{hostContext.HostingEnvironment.ContentRootPath}{Path.DirectorySeparatorChar}appdebug-.log",
                         retainedFileCountLimit: int.Parse(_conf["Serilog:RollingFile:RetainedFileCountLimit"]),
                         fileSizeLimitBytes: int.Parse(_conf["Serilog:RollingFile:FileSizeLimitBytes"]),

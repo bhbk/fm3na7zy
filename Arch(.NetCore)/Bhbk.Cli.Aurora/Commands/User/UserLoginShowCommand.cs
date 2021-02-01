@@ -28,7 +28,7 @@ namespace Bhbk.Cli.Aurora.Commands
                 .Build();
 
             var instance = new ContextService(InstanceContext.DeployedOrLocal);
-            _uow = new UnitOfWork(_conf["Databases:AuroraEntities"], instance);
+            _uow = new UnitOfWork(_conf["Databases:AuroraEntities_EF6"], instance);
 
             IsCommand("user-login-show", "Show login for user");
 
@@ -51,11 +51,12 @@ namespace Bhbk.Cli.Aurora.Commands
                             x => x.PublicKeys,
                             x => x.Sessions,
                             x => x.Settings,
+                            x => x.Usage,
                         })
                     .SingleOrDefault();
 
                 if (_user == null)
-                    throw new ConsoleHelpAsException($"  *** Invalid user '{arg}' ***");
+                    throw new ConsoleHelpAsException($"  *** No user '{arg}' ***");
             });
         }
 
@@ -63,7 +64,7 @@ namespace Bhbk.Cli.Aurora.Commands
         {
             try
             {
-                StandardOutputFactory.Logins(new List<E_Login> { _user }, "extras");
+                StandardOutputFactory.Logins(new List<E_Login> { _user }, true);
 
                 if (_user.Mount != null)
                     StandardOutputFactory.Mounts(new List<E_Mount> { _user.Mount });

@@ -1,7 +1,4 @@
 ﻿
-
-
-
 CREATE   PROCEDURE [svc].[usp_Alert_Delete]
     @Id uniqueidentifier
 
@@ -11,10 +8,11 @@ BEGIN
 
 	BEGIN TRY
 
-        SELECT * FROM [dbo].[tbl_Alert] WHERE Id = @Id
+        SELECT * FROM [dbo].[tbl_Alert] 
+            WHERE Id = @Id
 
         DELETE [dbo].[tbl_Alert]
-        WHERE Id = @Id
+            WHERE Id = @Id
 
     END TRY
 

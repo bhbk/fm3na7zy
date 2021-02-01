@@ -107,11 +107,11 @@ namespace Bhbk.Cli.Aurora.Factories
             };
         }
 
-        public static void Logins(IEnumerable<E_Login> users, string extras = null)
+        public static void Logins(IEnumerable<E_Login> users, bool? detail = null)
         {
             foreach (var user in users)
             {
-                if (!string.IsNullOrEmpty(extras))
+                if (detail.HasValue && detail.Value)
                 {
                     Console.Out.WriteLine();
                     Console.ForegroundColor = ConsoleColor.Green;
@@ -122,7 +122,7 @@ namespace Bhbk.Cli.Aurora.Factories
                 Console.Out.WriteLine($"  [user GUID] {user.UserId} [alias] {user.UserName}{(!user.IsDeletable ? " is not deletable and" : null)}" +
                     $"{(user.IsEnabled ? " is enabled" : " is disabled")} [created] {user.CreatedUtc.LocalDateTime}");
 
-                if (!string.IsNullOrEmpty(extras))
+                if (detail.HasValue && detail.Value)
                 {
                     Console.ForegroundColor = ConsoleColor.White;
                     Console.Out.WriteLine($"    file system type is '{user.FileSystemType}' and mounts as {(user.IsFileSystemReadOnly ? "read-only" : "read-write")}" +
@@ -137,13 +137,13 @@ namespace Bhbk.Cli.Aurora.Factories
                     switch (userFileSystem)
                     {
                         case FileSystemProviderType.Database:
-                            Console.Out.WriteLine($"    quota maximum is {user.Usage.QuotaInBytes / 1048576f}MB and quota used {user.Usage.QuotaUsedInBytes / 1048576f}MB");
+                            Console.Out.WriteLine($"    quota maximum is {user.Usage.QuotaInBytes / 1048576f}MB and quota used is {user.Usage.QuotaUsedInBytes / 1048576f}MB");
                             break;
                         case FileSystemProviderType.Memory:
-                            Console.Out.WriteLine($"    quota maximum is 100MB and quota used is N/A... all deleted at session end");
+                            Console.Out.WriteLine($"    quota maximum is 100MB and quota used is N/A... data is deleted at session end");
                             break;
                         case FileSystemProviderType.SMB:
-                            Console.Out.WriteLine($"    quota maximum is N/A... dependant on storage backing the mount");
+                            Console.Out.WriteLine($"    quota maximum is N/A and quota used is N/A... depends on storage backing the mount");
                             break;
                         default:
                             var validFileSystemtypes = string.Join(", ", Enum.GetNames(typeof(FileSystemProviderType)));
@@ -178,13 +178,19 @@ namespace Bhbk.Cli.Aurora.Factories
             {
                 Console.Out.WriteLine();
 
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.Out.WriteLine($"  [mount for] {mount.Login.UserName} [path] {mount.ServerAddress}{mount.ServerShare}" +
-                    $" [protocol] {mount.AuthType}");
+                if (mount.Login.FileSystemType != FileSystemProviderType.SMB.ToString())
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.Out.WriteLine($"  *** valid only with {FileSystemProviderType.SMB} filesystem ***");
+                }
+                else
+                    Console.ForegroundColor = ConsoleColor.Green;
+
+                Console.Out.WriteLine($"  [unc-path] {mount.UncPath} [protocol] {mount.AuthType}");
 
                 Console.ForegroundColor = ConsoleColor.White;
                 if (mount.AmbassadorId.HasValue)
-                    Console.Out.WriteLine($"    [ambassador GUID] {mount.Ambassador.Id} [username] {mount.Ambassador.UserName}");
+                    Console.Out.WriteLine($"    [ambassador GUID] {mount.Ambassador.Id} [ambassador username] {mount.Ambassador.UserName}");
 
                 Console.ResetColor();
             }
@@ -205,7 +211,7 @@ namespace Bhbk.Cli.Aurora.Factories
             }
         }
 
-        public static void Sessions(IEnumerable<E_Session> sessions, string extras = null)
+        public static void Sessions(IEnumerable<E_Session> sessions, bool? detail = null)
         {
             foreach (var session in sessions)
             {
@@ -214,7 +220,7 @@ namespace Bhbk.Cli.Aurora.Factories
                 else
                     Console.Out.Write("  ");
 
-                if (!string.IsNullOrEmpty(extras))
+                if (detail.HasValue && detail.Value)
                 {
                     if (string.IsNullOrEmpty(session?.UserName))
                     {

@@ -5,8 +5,7 @@ SELECT
 	UserId
 	,AmbassadorId
 	,AuthType
-	,ServerAddress
-	,ServerShare
+	,UncPath
 	,IsEnabled
 	,IsDeletable
 	,CreatedUtc
