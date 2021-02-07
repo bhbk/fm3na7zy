@@ -16,6 +16,6 @@ namespace Bhbk.Lib.Aurora.Data.UnitOfWork
         public PublicKeyRepository PublicKeys { get; }
         public SessionRepository Sessions { get; }
         public SettingRepository Settings { get; }
-        public UsageRepository Usages { get; }
+        public LoginUsageRepository Usages { get; }
     }
 }

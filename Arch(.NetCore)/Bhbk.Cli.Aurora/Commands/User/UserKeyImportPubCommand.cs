@@ -1,4 +1,4 @@
-﻿using Bhbk.Cli.Aurora.Factories;
+﻿using Bhbk.Cli.Aurora.IO;
 using Bhbk.Lib.Aurora.Data_EF6.Models;
 using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
 using Bhbk.Lib.Aurora.Domain.Helpers;
@@ -16,7 +16,7 @@ using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
 
-namespace Bhbk.Cli.Aurora.Commands
+namespace Bhbk.Cli.Aurora.Commands.User
 {
     public class UserKeyImportPubCommand : ConsoleCommand
     {
@@ -33,8 +33,8 @@ namespace Bhbk.Cli.Aurora.Commands
                 .AddJsonFile("clisettings.json", optional: false, reloadOnChange: true)
                 .Build();
 
-            var instance = new ContextService(InstanceContext.DeployedOrLocal);
-            _uow = new UnitOfWork(_conf["Databases:AuroraEntities_EF6"], instance);
+            var env = new ContextService(InstanceContext.DeployedOrLocal);
+            _uow = new UnitOfWork(_conf["Databases:AuroraEntities_EF6"], env);
 
             IsCommand("user-key-import-pub", "Import public key for user");
 
@@ -108,7 +108,7 @@ namespace Bhbk.Cli.Aurora.Commands
                     _uow.PublicKeys.Create(pubKeys);
                     _uow.Commit();
 
-                    StandardOutputFactory.KeyPairs(pubKeys.OrderBy(x => x.CreatedUtc), _user.PrivateKeys);
+                    FormatOutput.KeyPairs(pubKeys.OrderBy(x => x.CreatedUtc), _user.PrivateKeys);
                 }
 
                 return StandardOutput.FondFarewell();

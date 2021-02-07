@@ -1,4 +1,4 @@
-﻿using Bhbk.Cli.Aurora.Factories;
+﻿using Bhbk.Cli.Aurora.IO;
 using Bhbk.Lib.Aurora.Data_EF6.Models;
 using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
 using Bhbk.Lib.Aurora.Primitives.Enums;
@@ -14,7 +14,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 
-namespace Bhbk.Cli.Aurora.Commands
+namespace Bhbk.Cli.Aurora.Commands.System
 {
     public class SysNetEditCommand : ConsoleCommand
     {
@@ -32,8 +32,8 @@ namespace Bhbk.Cli.Aurora.Commands
                 .AddJsonFile("clisettings.json", optional: false, reloadOnChange: true)
                 .Build();
 
-            var instance = new ContextService(InstanceContext.DeployedOrLocal);
-            _uow = new UnitOfWork(_conf["Databases:AuroraEntities_EF6"], instance);
+            var env = new ContextService(InstanceContext.DeployedOrLocal);
+            _uow = new UnitOfWork(_conf["Databases:AuroraEntities_EF6"], env);
 
             IsCommand("sys-net-edit", "Edit allow/deny network for system");
 
@@ -86,7 +86,7 @@ namespace Bhbk.Cli.Aurora.Commands
                 _uow.Networks.Update(network);
                 _uow.Commit();
 
-                StandardOutputFactory.Networks(new List<E_Network> { network });
+                FormatOutput.Networks(new List<E_Network> { network });
 
                 return StandardOutput.FondFarewell();
             }

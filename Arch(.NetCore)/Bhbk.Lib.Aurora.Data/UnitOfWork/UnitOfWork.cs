@@ -26,12 +26,12 @@ namespace Bhbk.Lib.Aurora.Data.UnitOfWork
         public PublicKeyRepository PublicKeys { get; private set; }
         public SessionRepository Sessions { get; private set; }
         public SettingRepository Settings { get; private set; }
-        public UsageRepository Usages { get; private set; }
+        public LoginUsageRepository Usages { get; private set; }
 
         public UnitOfWork(string connection)
             : this(connection, new ContextService(InstanceContext.DeployedOrLocal)) { }
 
-        public UnitOfWork(string connection, IContextService instance)
+        public UnitOfWork(string connection, IContextService env)
         {
             _logger = LoggerFactory.Create(opt =>
             {
@@ -41,7 +41,7 @@ namespace Bhbk.Lib.Aurora.Data.UnitOfWork
                     .AddConsole();
             });
 
-            switch (instance.InstanceType)
+            switch (env.InstanceType)
             {
                 case InstanceContext.DeployedOrLocal:
                     {
@@ -83,7 +83,7 @@ namespace Bhbk.Lib.Aurora.Data.UnitOfWork
             _context.ChangeTracker.LazyLoadingEnabled = false;
             _context.ChangeTracker.CascadeDeleteTiming = CascadeTiming.Immediate;
 
-            InstanceType = instance.InstanceType;
+            InstanceType = env.InstanceType;
 
             Alerts = new AlertRepository(_context);
             Ambassadors = new AmbassadorRepository(_context);
@@ -96,7 +96,7 @@ namespace Bhbk.Lib.Aurora.Data.UnitOfWork
             PublicKeys = new PublicKeyRepository(_context);
             Sessions = new SessionRepository(_context);
             Settings = new SettingRepository(_context);
-            Usages = new UsageRepository(_context);
+            Usages = new LoginUsageRepository(_context);
         }
 
         public void Commit()

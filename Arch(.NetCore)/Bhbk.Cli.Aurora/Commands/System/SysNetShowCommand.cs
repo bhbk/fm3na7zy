@@ -1,4 +1,4 @@
-﻿using Bhbk.Cli.Aurora.Factories;
+﻿using Bhbk.Cli.Aurora.IO;
 using Bhbk.Lib.Aurora.Data_EF6.Models;
 using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
 using Bhbk.Lib.CommandLine.IO;
@@ -11,7 +11,7 @@ using Microsoft.Extensions.Configuration;
 using System;
 using System.Linq;
 
-namespace Bhbk.Cli.Aurora.Commands
+namespace Bhbk.Cli.Aurora.Commands.System
 {
     public class SysNetShowCommand : ConsoleCommand
     {
@@ -24,8 +24,8 @@ namespace Bhbk.Cli.Aurora.Commands
                 .AddJsonFile("clisettings.json", optional: false, reloadOnChange: true)
                 .Build();
 
-            var instance = new ContextService(InstanceContext.DeployedOrLocal);
-            _uow = new UnitOfWork(_conf["Databases:AuroraEntities_EF6"], instance);
+            var env = new ContextService(InstanceContext.DeployedOrLocal);
+            _uow = new UnitOfWork(_conf["Databases:AuroraEntities_EF6"], env);
 
             IsCommand("sys-net-show", "Show allow/deny network(s) for system");
         }
@@ -37,7 +37,7 @@ namespace Bhbk.Cli.Aurora.Commands
                 var networks = _uow.Networks.Get(QueryExpressionFactory.GetQueryExpression<E_Network>()
                     .Where(x => x.UserId == null).ToLambda());
 
-                StandardOutputFactory.Networks(networks);
+                FormatOutput.Networks(networks);
 
                 return StandardOutput.FondFarewell();
             }

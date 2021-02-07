@@ -33,7 +33,7 @@ namespace Bhbk.Daemon.Aurora.FTP
     public class Program
     {
         private static IConfiguration _conf;
-        private static IContextService _instance;
+        private static IContextService _env;
         private static IMapper _mapper;
 
         public static IHostBuilder CreateLinuxHostBuilder(string[] args) =>
@@ -56,10 +56,10 @@ namespace Bhbk.Daemon.Aurora.FTP
             {
                 options.AddSingleton<IMapper>(_mapper);
                 options.AddSingleton<IConfiguration>(_conf);
-                options.AddSingleton<IContextService>(_instance);
+                options.AddSingleton<IContextService>(_env);
                 options.AddTransient<IUnitOfWork, UnitOfWork>(_ =>
                 {
-                    return new UnitOfWork(_conf["Databases:AuroraEntities_EF6"], _instance);
+                    return new UnitOfWork(_conf["Databases:AuroraEntities_EF6"], _env);
                 });
                 options.AddSingleton<IHostedService, Daemon>();
             });
@@ -84,10 +84,10 @@ namespace Bhbk.Daemon.Aurora.FTP
             {
                 options.AddSingleton<IMapper>(_mapper);
                 options.AddSingleton<IConfiguration>(_conf);
-                options.AddSingleton<IContextService>(_instance);
+                options.AddSingleton<IContextService>(_env);
                 options.AddTransient<IUnitOfWork, UnitOfWork>(_ =>
                 {
-                    return new UnitOfWork(_conf["Databases:AuroraEntities_EF6"], _instance);
+                    return new UnitOfWork(_conf["Databases:AuroraEntities_EF6"], _env);
                 });
                 options.AddSingleton<IHostedService, Daemon>();
             });
@@ -101,7 +101,7 @@ namespace Bhbk.Daemon.Aurora.FTP
                 .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
                 .Build();
 
-            _instance = new ContextService(InstanceContext.DeployedOrLocal);
+            _env = new ContextService(InstanceContext.DeployedOrLocal);
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
                 CreateLinuxHostBuilder(args).Build().Run();

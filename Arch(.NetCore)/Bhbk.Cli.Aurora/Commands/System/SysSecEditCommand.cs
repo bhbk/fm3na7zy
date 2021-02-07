@@ -1,4 +1,4 @@
-﻿using Bhbk.Cli.Aurora.Factories;
+﻿using Bhbk.Cli.Aurora.IO;
 using Bhbk.Lib.Aurora.Data_EF6.Models;
 using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
 using Bhbk.Lib.Aurora.Domain.Helpers;
@@ -16,7 +16,7 @@ using Rebex.Security.Cryptography;
 using System;
 using System.Linq;
 
-namespace Bhbk.Cli.Aurora.Commands
+namespace Bhbk.Cli.Aurora.Commands.System
 {
     public class SysSecEditCommand : ConsoleCommand
     {
@@ -29,8 +29,8 @@ namespace Bhbk.Cli.Aurora.Commands
                 .AddJsonFile("clisettings.json", optional: false, reloadOnChange: true)
                 .Build();
 
-            var instance = new ContextService(InstanceContext.DeployedOrLocal);
-            _uow = new UnitOfWork(_conf["Databases:AuroraEntities_EF6"], instance);
+            var env = new ContextService(InstanceContext.DeployedOrLocal);
+            _uow = new UnitOfWork(_conf["Databases:AuroraEntities_EF6"], env);
 
             IsCommand("sys-sec-edit", "Edit encrypt/decrypt secret in use by system");
         }
@@ -69,15 +69,15 @@ namespace Bhbk.Cli.Aurora.Commands
                     .Where(x => x.UserAuthType.ToLower() == loginType).ToLambda());
 
                 Console.Out.WriteLine("  *** Current ambassador encrypted passwords *** ");
-                StandardOutputFactory.AmbassadorSecrets(ambassadors);
+                FormatOutput.AmbassadorSecrets(ambassadors);
                 Console.Out.WriteLine();
 
                 Console.Out.WriteLine("  *** Current private key encrypted passwords *** ");
-                StandardOutputFactory.KeyPairSecrets(privateKeys);
+                FormatOutput.KeyPairSecrets(privateKeys);
                 Console.Out.WriteLine();
 
                 Console.Out.WriteLine("  *** Current login encrypted passwords *** ");
-                StandardOutputFactory.LoginSecrets(logins);
+                FormatOutput.LoginSecrets(logins);
                 Console.Out.WriteLine();
 
                 var updatedAmbassadors = UserHelper.ChangeAmbassadorSecrets(ambassadors.ToList(), secretCurrent, secretNew);
@@ -91,15 +91,15 @@ namespace Bhbk.Cli.Aurora.Commands
                 if (decision.ToLower() == "yes")
                 {
                     Console.Out.WriteLine("  *** New ambassador encrypted passwords *** ");
-                    StandardOutputFactory.AmbassadorSecrets(updatedAmbassadors);
+                    FormatOutput.AmbassadorSecrets(updatedAmbassadors);
                     Console.Out.WriteLine();
 
                     Console.Out.WriteLine("  *** New private key encrypted passwords *** ");
-                    StandardOutputFactory.KeyPairSecrets(updatedKeys);
+                    FormatOutput.KeyPairSecrets(updatedKeys);
                     Console.Out.WriteLine();
 
                     Console.Out.WriteLine("  *** New login encrypted passwords *** ");
-                    StandardOutputFactory.LoginSecrets(updatedLogins);
+                    FormatOutput.LoginSecrets(updatedLogins);
                     Console.Out.WriteLine();
 
                     _uow.Ambassadors.Update(updatedAmbassadors);

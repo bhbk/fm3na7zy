@@ -47,20 +47,20 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
 
             MemoryPathFactory.CheckFolder(_uowMem, _userMem);
 
-            var folderKeysNode = new DirectoryNode(".ssh", Root);
-            var fileKeysNode = new FileNode("authorized_keys", folderKeysNode);
+            //var folderKeysNode = new DirectoryNode(".ssh", Root);
+            //var fileKeysNode = new FileNode("authorized_keys", folderKeysNode);
 
-            if (!Exists(folderKeysNode.Path, NodeType.Directory))
-                CreateDirectory(Root, folderKeysNode);
+            //if (!Exists(folderKeysNode.Path, NodeType.Directory))
+            //    CreateDirectory(Root, folderKeysNode);
 
-            if (Exists(fileKeysNode.Path, NodeType.File))
-                Delete(fileKeysNode);
+            //if (Exists(fileKeysNode.Path, NodeType.File))
+            //    Delete(fileKeysNode);
 
-            var pubKeysContent = KeyHelper.ExportPubKeyBase64(user, user.PublicKeys);
+            //var pubKeysContent = KeyHelper.ExportPubKeyBase64(user, user.PublicKeys);
 
-            CreateFile(folderKeysNode, fileKeysNode);
-            SaveContent(fileKeysNode, NodeContent.CreateDelayedWriteContent(
-                new MemoryStream(Encoding.UTF8.GetBytes(pubKeysContent.ToString()))));
+            //CreateFile(folderKeysNode, fileKeysNode);
+            //SaveContent(fileKeysNode, NodeContent.CreateDelayedWriteContent(
+            //    new MemoryStream(Encoding.UTF8.GetBytes(pubKeysContent.ToString()))));
         }
 
         protected override DirectoryNode CreateDirectory(DirectoryNode parent, DirectoryNode child)

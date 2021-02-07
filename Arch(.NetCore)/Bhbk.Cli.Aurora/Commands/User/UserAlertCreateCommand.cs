@@ -1,4 +1,4 @@
-﻿using Bhbk.Cli.Aurora.Factories;
+﻿using Bhbk.Cli.Aurora.IO;
 using Bhbk.Lib.Aurora.Data_EF6.Models;
 using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
 using Bhbk.Lib.CommandLine.IO;
@@ -15,7 +15,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Linq.Expressions;
 
-namespace Bhbk.Cli.Aurora.Commands
+namespace Bhbk.Cli.Aurora.Commands.User
 {
     public class UserAlertCreateCommand : ConsoleCommand
     {
@@ -31,8 +31,8 @@ namespace Bhbk.Cli.Aurora.Commands
                 .AddJsonFile("clisettings.json", optional: false, reloadOnChange: true)
                 .Build();
 
-            var instance = new ContextService(InstanceContext.DeployedOrLocal);
-            _uow = new UnitOfWork(_conf["Databases:AuroraEntities_EF6"], instance);
+            var env = new ContextService(InstanceContext.DeployedOrLocal);
+            _uow = new UnitOfWork(_conf["Databases:AuroraEntities_EF6"], env);
 
             IsCommand("user-alert-create", "Create alert for user");
 
@@ -115,7 +115,7 @@ namespace Bhbk.Cli.Aurora.Commands
                     if (found != null)
                     {
                         Console.Out.WriteLine("  *** The alert entered already exists for user ***");
-                        StandardOutputFactory.Alerts(new List<E_Alert> { found });
+                        FormatOutput.Alerts(new List<E_Alert> { found });
 
                         return StandardOutput.FondFarewell();
                     }
@@ -129,7 +129,7 @@ namespace Bhbk.Cli.Aurora.Commands
                     if (found != null)
                     {
                         Console.Out.WriteLine("  *** The alert entered already exists for user ***");
-                        StandardOutputFactory.Alerts(new List<E_Alert> { found });
+                        FormatOutput.Alerts(new List<E_Alert> { found });
 
                         return StandardOutput.FondFarewell();
                     }
@@ -150,7 +150,7 @@ namespace Bhbk.Cli.Aurora.Commands
 
                 _uow.Commit();
 
-                StandardOutputFactory.Alerts(new List<E_Alert> { alert });
+                FormatOutput.Alerts(new List<E_Alert> { alert });
 
                 return StandardOutput.FondFarewell();
             }

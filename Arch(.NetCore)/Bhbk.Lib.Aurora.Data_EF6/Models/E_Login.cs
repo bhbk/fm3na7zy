@@ -59,6 +59,6 @@ namespace Bhbk.Lib.Aurora.Data_EF6.Models
         public virtual ICollection<E_Setting> Settings { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<E_Session> Sessions { get; set; }
-        public virtual E_Usage Usage { get; set; }
+        public virtual E_LoginUsage Usage { get; set; }
     }
 }

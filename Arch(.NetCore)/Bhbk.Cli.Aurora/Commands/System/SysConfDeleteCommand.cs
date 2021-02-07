@@ -1,4 +1,4 @@
-﻿using Bhbk.Cli.Aurora.Factories;
+﻿using Bhbk.Cli.Aurora.IO;
 using Bhbk.Lib.Aurora.Data_EF6.Models;
 using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
 using Bhbk.Lib.CommandLine.IO;
@@ -11,7 +11,7 @@ using Microsoft.Extensions.Configuration;
 using System;
 using System.Linq;
 
-namespace Bhbk.Cli.Aurora.Commands
+namespace Bhbk.Cli.Aurora.Commands.System
 {
     public class SysConfDeleteCommand : ConsoleCommand
     {
@@ -24,8 +24,8 @@ namespace Bhbk.Cli.Aurora.Commands
                 .AddJsonFile("clisettings.json", optional: false, reloadOnChange: true)
                 .Build();
 
-            var instance = new ContextService(InstanceContext.DeployedOrLocal);
-            _uow = new UnitOfWork(_conf["Databases:AuroraEntities_EF6"], instance);
+            var env = new ContextService(InstanceContext.DeployedOrLocal);
+            _uow = new UnitOfWork(_conf["Databases:AuroraEntities_EF6"], env);
 
             IsCommand("sys-conf-delete", "Delete config key/value pair for system");
         }
@@ -37,7 +37,7 @@ namespace Bhbk.Cli.Aurora.Commands
                 var configs = _uow.Settings.Get(QueryExpressionFactory.GetQueryExpression<E_Setting>()
                     .Where(x => x.UserId == null && x.IsDeletable == true).ToLambda());
 
-                StandardOutputFactory.Settings(configs);
+                FormatOutput.Settings(configs);
 
                 Console.Out.WriteLine();
                 Console.Out.Write("  *** Enter GUID of config key/value pair to delete *** : ");

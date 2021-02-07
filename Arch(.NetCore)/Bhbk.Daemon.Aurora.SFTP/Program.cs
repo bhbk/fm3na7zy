@@ -20,9 +20,9 @@ namespace Bhbk.Daemon.Aurora.SFTP
     public class Program
     {
         private static IConfiguration _conf;
-        private static IContextService _instance;
-        private static ILogger _logger;
-        private static IMapper _mapper;
+        private static IContextService _env;
+        private static ILogger _log;
+        private static IMapper _map;
 
         public static IHostBuilder CreateLinuxHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
@@ -39,18 +39,18 @@ namespace Bhbk.Daemon.Aurora.SFTP
                         rollingInterval: RollingInterval.Day)
                     .CreateLogger();
 
-                _logger = Log.Logger;
+                _log = Log.Logger;
             })
             .UseSerilog()
             .ConfigureServices((hostContext, sc) =>
             {
                 sc.AddSingleton<IConfiguration>(_conf);
-                sc.AddSingleton<IContextService>(_instance);
-                sc.AddSingleton<ILogger>(_logger);
-                sc.AddSingleton<IMapper>(_mapper);
+                sc.AddSingleton<IContextService>(_env);
+                sc.AddSingleton<ILogger>(_log);
+                sc.AddSingleton<IMapper>(_map);
                 sc.AddTransient<IUnitOfWork, UnitOfWork>(_ =>
                 {
-                    return new UnitOfWork(_conf["Databases:AuroraEntities_EF6"], _instance);
+                    return new UnitOfWork(_conf["Databases:AuroraEntities_EF6"], _env);
                 });
                 sc.AddSingleton<IHostedService, Daemon>();
                 sc.AddSingleton<IAlertService, AlertService>(_ =>
@@ -92,17 +92,17 @@ namespace Bhbk.Daemon.Aurora.SFTP
                         rollingInterval: RollingInterval.Day)
                     .CreateLogger();
 
-                _logger = Log.Logger;
+                _log = Log.Logger;
             })
             .ConfigureServices((hostContext, sc) =>
             {
                 sc.AddSingleton<IConfiguration>(_conf);
-                sc.AddSingleton<IContextService>(_instance);
-                sc.AddSingleton<ILogger>(_logger);
-                sc.AddSingleton<IMapper>(_mapper);
+                sc.AddSingleton<IContextService>(_env);
+                sc.AddSingleton<ILogger>(_log);
+                sc.AddSingleton<IMapper>(_map);
                 sc.AddTransient<IUnitOfWork, UnitOfWork>(_ =>
                 {
-                    return new UnitOfWork(_conf["Databases:AuroraEntities_EF6"], _instance);
+                    return new UnitOfWork(_conf["Databases:AuroraEntities_EF6"], _env);
                 });
                 sc.AddSingleton<IHostedService, Daemon>();
                 sc.AddTransient<IAlertService, AlertService>(_ =>
@@ -130,14 +130,14 @@ namespace Bhbk.Daemon.Aurora.SFTP
 
         public static void Main(string[] args = null)
         {
-            _mapper = new MapperConfiguration(x => x.AddProfile<AutoMapperProfile_EF6>())
+            _map = new MapperConfiguration(x => x.AddProfile<AutoMapperProfile_EF6>())
                 .CreateMapper();
 
             _conf = (IConfiguration)new ConfigurationBuilder()
                 .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
                 .Build();
 
-            _instance = new ContextService(InstanceContext.DeployedOrLocal);
+            _env = new ContextService(InstanceContext.DeployedOrLocal);
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 CreateWindowsHostBuilder(args).Build().Run();

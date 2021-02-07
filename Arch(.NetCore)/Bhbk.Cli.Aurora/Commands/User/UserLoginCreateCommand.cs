@@ -1,4 +1,4 @@
-﻿using Bhbk.Cli.Aurora.Factories;
+﻿using Bhbk.Cli.Aurora.IO;
 using Bhbk.Lib.Aurora.Data_EF6.Models;
 using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
 using Bhbk.Lib.Aurora.Primitives.Enums;
@@ -19,7 +19,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 
-namespace Bhbk.Cli.Aurora.Commands
+namespace Bhbk.Cli.Aurora.Commands.User
 {
     public class UserLoginCreateCommand : ConsoleCommand
     {
@@ -37,8 +37,8 @@ namespace Bhbk.Cli.Aurora.Commands
                 .AddJsonFile("clisettings.json", optional: false, reloadOnChange: true)
                 .Build();
 
-            var instance = new ContextService(InstanceContext.DeployedOrLocal);
-            _uow = new UnitOfWork(_conf["Databases:AuroraEntities_EF6"], instance);
+            var env = new ContextService(InstanceContext.DeployedOrLocal);
+            _uow = new UnitOfWork(_conf["Databases:AuroraEntities_EF6"], env);
 
             IsCommand("user-login-create", "Create login for user");
 
@@ -81,9 +81,11 @@ namespace Bhbk.Cli.Aurora.Commands
                     FileSystemType = _fileSystemType.ToString(),
                     IsPasswordRequired = true,
                     IsPublicKeyRequired = false,
-                    IsFileSystemReadOnly = true,
+                    IsFileSystemReadOnly = false,
+                    Debugger = null,
+                    EncryptedPass = null,
                     IsEnabled = true,
-                    IsDeletable = false,
+                    IsDeletable = true,
                 };
 
                 if (_authType == UserAuthType.Identity)
@@ -104,12 +106,12 @@ namespace Bhbk.Cli.Aurora.Commands
                             {
                                 Filters = new List<IDataStateFilter>()
                                 {
-                                new DataStateV1Filter { Field = "userName", Operator = "contains", Value = emailSearch },
+                                    new DataStateV1Filter { Field = "userName", Operator = "contains", Value = emailSearch },
                                 }
                             },
                             Sort = new List<IDataStateSort>()
                             {
-                            new DataStateV1Sort() { Field = "userName", Dir = "asc" }
+                                new DataStateV1Sort() { Field = "userName", Dir = "asc" }
                             },
                             Skip = 0,
                             Take = 100,
@@ -150,7 +152,7 @@ namespace Bhbk.Cli.Aurora.Commands
                     .Single();
                 
                 Console.Out.WriteLine();
-                StandardOutputFactory.Logins(new List<E_Login> { user }, true);
+                FormatOutput.Logins(new List<E_Login> { user }, true);
 
                 return StandardOutput.FondFarewell();
             }

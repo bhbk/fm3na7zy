@@ -133,10 +133,33 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Login' does not have a primary 
           <Property Name="LastUpdatedUtc" Type="datetimeoffset" Precision="7" />
         </EntityType>
         <!--Errors Found During Generation:
+warning 6002: The table/view 'BhbkAurora.svc.uvw_LoginUsage' does not have a primary key defined. The key has been inferred and the definition was created as a read-only table/view.-->
+        <EntityType Name="uvw_LoginUsage">
+          <Key>
+            <PropertyRef Name="UserId" />
+            <PropertyRef Name="QuotaInBytes" />
+            <PropertyRef Name="QuotaUsedInBytes" />
+            <PropertyRef Name="SessionMax" />
+            <PropertyRef Name="SessionsInUse" />
+            
+            
+            
+            
+          </Key>
+          <Property Name="UserId" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="UserName" Type="nvarchar" MaxLength="128" />
+          <Property Name="QuotaInBytes" Type="bigint" Nullable="false" />
+          <Property Name="QuotaUsedInBytes" Type="bigint" Nullable="false" />
+          <Property Name="SessionMax" Type="smallint" Nullable="false" />
+          <Property Name="SessionsInUse" Type="smallint" Nullable="false" />
+        </EntityType>
+        <!--Errors Found During Generation:
 warning 6002: The table/view 'BhbkAurora.svc.uvw_Mount' does not have a primary key defined. The key has been inferred and the definition was created as a read-only table/view.-->
         <EntityType Name="uvw_Mount">
           <Key>
             <PropertyRef Name="UserId" />
+            
+            
             
             
             
@@ -267,23 +290,6 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Setting' does not have a primar
           <Property Name="CreatedUtc" Type="datetimeoffset" Precision="7" Nullable="false" />
           <Property Name="LastUpdatedUtc" Type="datetimeoffset" Precision="7" />
         </EntityType>
-        <!--Errors Found During Generation:
-warning 6002: The table/view 'BhbkAurora.svc.uvw_Usage' does not have a primary key defined. The key has been inferred and the definition was created as a read-only table/view.-->
-        <EntityType Name="uvw_Usage">
-          <Key>
-            <PropertyRef Name="UserId" />
-            
-            
-            
-            
-          </Key>
-          <Property Name="UserId" Type="uniqueidentifier" Nullable="false" />
-          <Property Name="UserName" Type="nvarchar" MaxLength="128" />
-          <Property Name="QuotaInBytes" Type="bigint" Nullable="false" />
-          <Property Name="QuotaUsedInBytes" Type="bigint" Nullable="false" />
-          <Property Name="SessionMax" Type="smallint" Nullable="false" />
-          <Property Name="SessionsInUse" Type="smallint" Nullable="false" />
-        </EntityType>
         <Function Name="usp_Alert_Delete" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="svc">
           <Parameter Name="Id" Type="uniqueidentifier" Mode="In" />
         </Function>
@@ -395,6 +401,13 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Usage' does not have a primary 
           <Parameter Name="EncryptedPass" Type="nvarchar" Mode="In" />
           <Parameter Name="IsEnabled" Type="bit" Mode="In" />
           <Parameter Name="IsDeletable" Type="bit" Mode="In" />
+        </Function>
+        <Function Name="usp_LoginUsage_Update" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="svc">
+          <Parameter Name="UserId" Type="uniqueidentifier" Mode="In" />
+          <Parameter Name="QuotaInBytes" Type="bigint" Mode="In" />
+          <Parameter Name="QuotaUsedInBytes" Type="bigint" Mode="In" />
+          <Parameter Name="SessionMax" Type="smallint" Mode="In" />
+          <Parameter Name="SessionsInUse" Type="smallint" Mode="In" />
         </Function>
         <Function Name="usp_Mount_Delete" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="svc">
           <Parameter Name="UserId" Type="uniqueidentifier" Mode="In" />
@@ -524,13 +537,6 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Usage' does not have a primary 
           <Parameter Name="ConfigValue" Type="nvarchar(max)" Mode="In" />
           <Parameter Name="IsDeletable" Type="bit" Mode="In" />
         </Function>
-        <Function Name="usp_Usage_Update" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="svc">
-          <Parameter Name="UserId" Type="uniqueidentifier" Mode="In" />
-          <Parameter Name="QuotaInBytes" Type="bigint" Mode="In" />
-          <Parameter Name="QuotaUsedInBytes" Type="bigint" Mode="In" />
-          <Parameter Name="SessionMax" Type="smallint" Mode="In" />
-          <Parameter Name="SessionsInUse" Type="smallint" Mode="In" />
-        </Function>
         <EntityContainer Name="AuroraModelsStoreContainer">
           <EntitySet Name="uvw_Alert" EntityType="Self.uvw_Alert" store:Type="Views" store:Schema="svc">
             <DefiningQuery>SELECT 
@@ -604,6 +610,16 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Usage' does not have a primary 
     [uvw_Login].[CreatedUtc] AS [CreatedUtc], 
     [uvw_Login].[LastUpdatedUtc] AS [LastUpdatedUtc]
     FROM [svc].[uvw_Login] AS [uvw_Login]</DefiningQuery>
+          </EntitySet>
+          <EntitySet Name="uvw_LoginUsage" EntityType="Self.uvw_LoginUsage" store:Type="Views" store:Schema="svc">
+            <DefiningQuery>SELECT 
+    [uvw_LoginUsage].[UserId] AS [UserId], 
+    [uvw_LoginUsage].[UserName] AS [UserName], 
+    [uvw_LoginUsage].[QuotaInBytes] AS [QuotaInBytes], 
+    [uvw_LoginUsage].[QuotaUsedInBytes] AS [QuotaUsedInBytes], 
+    [uvw_LoginUsage].[SessionMax] AS [SessionMax], 
+    [uvw_LoginUsage].[SessionsInUse] AS [SessionsInUse]
+    FROM [svc].[uvw_LoginUsage] AS [uvw_LoginUsage]</DefiningQuery>
           </EntitySet>
           <EntitySet Name="uvw_Mount" EntityType="Self.uvw_Mount" store:Type="Views" store:Schema="svc">
             <DefiningQuery>SELECT 
@@ -687,16 +703,6 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Usage' does not have a primary 
     [uvw_Setting].[CreatedUtc] AS [CreatedUtc], 
     [uvw_Setting].[LastUpdatedUtc] AS [LastUpdatedUtc]
     FROM [svc].[uvw_Setting] AS [uvw_Setting]</DefiningQuery>
-          </EntitySet>
-          <EntitySet Name="uvw_Usage" EntityType="Self.uvw_Usage" store:Type="Views" store:Schema="svc">
-            <DefiningQuery>SELECT 
-    [uvw_Usage].[UserId] AS [UserId], 
-    [uvw_Usage].[UserName] AS [UserName], 
-    [uvw_Usage].[QuotaInBytes] AS [QuotaInBytes], 
-    [uvw_Usage].[QuotaUsedInBytes] AS [QuotaUsedInBytes], 
-    [uvw_Usage].[SessionMax] AS [SessionMax], 
-    [uvw_Usage].[SessionsInUse] AS [SessionsInUse]
-    FROM [svc].[uvw_Usage] AS [uvw_Usage]</DefiningQuery>
           </EntitySet>
         </EntityContainer>
       </Schema></edmx:StorageModels>
@@ -1178,18 +1184,19 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Usage' does not have a primary 
             <End Role="Login" EntitySet="E_Login" />
             <End Role="Session" EntitySet="E_Session" />
           </AssociationSet>
-          <EntitySet Name="E_Usage" EntityType="AuroraModels.E_Usage" />
-          <FunctionImport Name="usp_Usage_Update" ReturnType="Collection(AuroraModels.usp_Usage_Update_Result)">
+          <EntitySet Name="E_LoginUsage" EntityType="AuroraModels.E_LoginUsage" />
+          <AssociationSet Name="Login_Usage" Association="AuroraModels.Login_Usage">
+            <End Role="Login" EntitySet="E_Login" />
+            <End Role="Usage" EntitySet="E_LoginUsage" />
+          </AssociationSet>
+          <EntitySet Name="uvw_LoginUsage" EntityType="AuroraModels.uvw_LoginUsage" />
+          <FunctionImport Name="usp_LoginUsage_Update" ReturnType="Collection(AuroraModels.usp_LoginUsage_Update_Result)">
             <Parameter Name="UserId" Mode="In" Type="Guid" />
             <Parameter Name="QuotaInBytes" Mode="In" Type="Int64" />
             <Parameter Name="QuotaUsedInBytes" Mode="In" Type="Int64" />
             <Parameter Name="SessionMax" Mode="In" Type="Int16" />
             <Parameter Name="SessionsInUse" Mode="In" Type="Int16" />
           </FunctionImport>
-          <AssociationSet Name="Login_Usage" Association="AuroraModels.Login_Usage">
-            <End Role="Login" EntitySet="E_Login" />
-            <End Role="Usage" EntitySet="E_Usage" />
-          </AssociationSet>
         </EntityContainer>
         <ComplexType Name="usp_Ambassador_Delete_Result">
           <Property Type="Guid" Name="Id" Nullable="false" />
@@ -1731,7 +1738,7 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Usage' does not have a primary 
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <EntityType Name="E_Usage">
+        <EntityType Name="E_LoginUsage">
           <Key>
             <PropertyRef Name="UserId" />
           </Key>
@@ -1743,16 +1750,9 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Usage' does not have a primary 
           <Property Name="SessionsInUse" Type="Int16" Nullable="false" />
           <NavigationProperty Name="Login" Relationship="AuroraModels.Login_Usage" FromRole="Usage" ToRole="Login" />
         </EntityType>
-        <ComplexType Name="usp_Usage_Update_Result">
-          <Property Type="Guid" Name="UserId" Nullable="false" />
-          <Property Type="Int64" Name="QuotaInBytes" Nullable="false" />
-          <Property Type="Int64" Name="QuotaUsedInBytes" Nullable="false" />
-          <Property Type="Int16" Name="SessionMax" Nullable="false" />
-          <Property Type="Int16" Name="SessionsInUse" Nullable="false" />
-        </ComplexType>
         <Association Name="Login_Usage">
           <End Type="AuroraModels.E_Login" Role="Login" Multiplicity="1" />
-          <End Type="AuroraModels.E_Usage" Role="Usage" Multiplicity="1" />
+          <End Type="AuroraModels.E_LoginUsage" Role="Usage" Multiplicity="1" />
           <ReferentialConstraint>
             <Principal Role="Login">
               <PropertyRef Name="UserId" />
@@ -1762,6 +1762,28 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Usage' does not have a primary 
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <EntityType Name="uvw_LoginUsage">
+          <Key>
+            <PropertyRef Name="UserId" />
+            <PropertyRef Name="QuotaInBytes" />
+            <PropertyRef Name="QuotaUsedInBytes" />
+            <PropertyRef Name="SessionMax" />
+            <PropertyRef Name="SessionsInUse" />
+          </Key>
+          <Property Name="UserId" Type="Guid" Nullable="false" />
+          <Property Name="UserName" Type="String" MaxLength="128" FixedLength="false" Unicode="true" />
+          <Property Name="QuotaInBytes" Type="Int64" Nullable="false" />
+          <Property Name="QuotaUsedInBytes" Type="Int64" Nullable="false" />
+          <Property Name="SessionMax" Type="Int16" Nullable="false" />
+          <Property Name="SessionsInUse" Type="Int16" Nullable="false" />
+        </EntityType>
+        <ComplexType Name="usp_LoginUsage_Update_Result">
+          <Property Type="Guid" Name="UserId" Nullable="false" />
+          <Property Type="Int64" Name="QuotaInBytes" Nullable="false" />
+          <Property Type="Int64" Name="QuotaUsedInBytes" Nullable="false" />
+          <Property Type="Int16" Name="SessionMax" Nullable="false" />
+          <Property Type="Int16" Name="SessionsInUse" Nullable="false" />
+        </ComplexType>
       </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
@@ -2028,7 +2050,6 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Usage' does not have a primary 
                   <ScalarProperty Name="FileSystemType" ParameterName="FileSystemType" />
                   <ScalarProperty Name="UserName" ParameterName="UserName" />
                   <ScalarProperty Name="UserId" ParameterName="UserId" />
-                  <ResultBinding Name="UserId" ColumnName="UserId" />
                   <ResultBinding Name="CreatedUtc" ColumnName="CreatedUtc" />
                 </InsertFunction>
               </ModificationFunctionMapping>
@@ -2769,9 +2790,9 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Usage' does not have a primary 
               </ComplexTypeMapping>
             </ResultMapping>
           </FunctionImportMapping>
-          <EntitySetMapping Name="E_Usage">
-            <EntityTypeMapping TypeName="AuroraModels.E_Usage">
-              <MappingFragment StoreEntitySet="uvw_Usage">
+          <EntitySetMapping Name="uvw_LoginUsage">
+            <EntityTypeMapping TypeName="AuroraModels.uvw_LoginUsage">
+              <MappingFragment StoreEntitySet="uvw_LoginUsage">
                 <ScalarProperty Name="SessionsInUse" ColumnName="SessionsInUse" />
                 <ScalarProperty Name="SessionMax" ColumnName="SessionMax" />
                 <ScalarProperty Name="QuotaUsedInBytes" ColumnName="QuotaUsedInBytes" />
@@ -2780,9 +2801,21 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Usage' does not have a primary 
                 <ScalarProperty Name="UserId" ColumnName="UserId" />
               </MappingFragment>
             </EntityTypeMapping>
-            <EntityTypeMapping TypeName="AuroraModels.E_Usage">
+          </EntitySetMapping>
+          <EntitySetMapping Name="E_LoginUsage">
+            <EntityTypeMapping TypeName="IsTypeOf(AuroraModels.E_LoginUsage)">
+              <MappingFragment StoreEntitySet="uvw_LoginUsage">
+                <ScalarProperty Name="SessionsInUse" ColumnName="SessionsInUse" />
+                <ScalarProperty Name="SessionMax" ColumnName="SessionMax" />
+                <ScalarProperty Name="QuotaUsedInBytes" ColumnName="QuotaUsedInBytes" />
+                <ScalarProperty Name="QuotaInBytes" ColumnName="QuotaInBytes" />
+                <ScalarProperty Name="UserName" ColumnName="UserName" />
+                <ScalarProperty Name="UserId" ColumnName="UserId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+            <EntityTypeMapping TypeName="AuroraModels.E_LoginUsage">
               <ModificationFunctionMapping>
-                <UpdateFunction FunctionName="AuroraModels.Store.usp_Usage_Update">
+                <UpdateFunction FunctionName="AuroraModels.Store.usp_LoginUsage_Update">
                   <ScalarProperty Name="SessionsInUse" ParameterName="SessionsInUse" Version="Current" />
                   <ScalarProperty Name="SessionMax" ParameterName="SessionMax" Version="Current" />
                   <ScalarProperty Name="QuotaUsedInBytes" ParameterName="QuotaUsedInBytes" Version="Current" />
@@ -2792,9 +2825,9 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Usage' does not have a primary 
               </ModificationFunctionMapping>
             </EntityTypeMapping>
           </EntitySetMapping>
-          <FunctionImportMapping FunctionImportName="usp_Usage_Update" FunctionName="AuroraModels.Store.usp_Usage_Update">
+          <FunctionImportMapping FunctionImportName="usp_LoginUsage_Update" FunctionName="AuroraModels.Store.usp_LoginUsage_Update">
             <ResultMapping>
-              <ComplexTypeMapping TypeName="AuroraModels.usp_Usage_Update_Result">
+              <ComplexTypeMapping TypeName="AuroraModels.usp_LoginUsage_Update_Result">
                 <ScalarProperty Name="UserId" ColumnName="UserId" />
                 <ScalarProperty Name="QuotaInBytes" ColumnName="QuotaInBytes" />
                 <ScalarProperty Name="QuotaUsedInBytes" ColumnName="QuotaUsedInBytes" />
@@ -2803,7 +2836,7 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Usage' does not have a primary 
               </ComplexTypeMapping>
             </ResultMapping>
           </FunctionImportMapping>
-        </EntityContainerMapping>
+          </EntityContainerMapping>
       </Mapping>
     </edmx:Mappings>
   </edmx:Runtime>

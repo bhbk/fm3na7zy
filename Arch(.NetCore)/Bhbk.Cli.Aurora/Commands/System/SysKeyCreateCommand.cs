@@ -1,4 +1,4 @@
-﻿using Bhbk.Cli.Aurora.Factories;
+﻿using Bhbk.Cli.Aurora.IO;
 using Bhbk.Lib.Aurora.Data_EF6.Models;
 using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
 using Bhbk.Lib.Aurora.Domain.Helpers;
@@ -13,7 +13,7 @@ using Rebex.Security.Certificates;
 using System;
 using System.Collections.Generic;
 
-namespace Bhbk.Cli.Aurora.Commands
+namespace Bhbk.Cli.Aurora.Commands.System
 {
     public class SysKeyCreateCommand : ConsoleCommand
     {
@@ -30,8 +30,8 @@ namespace Bhbk.Cli.Aurora.Commands
                 .AddJsonFile("clisettings.json", optional: false, reloadOnChange: true)
                 .Build();
 
-            var instance = new ContextService(InstanceContext.DeployedOrLocal);
-            _uow = new UnitOfWork(_conf["Databases:AuroraEntities_EF6"], instance);
+            var env = new ContextService(InstanceContext.DeployedOrLocal);
+            _uow = new UnitOfWork(_conf["Databases:AuroraEntities_EF6"], env);
 
             IsCommand("sys-key-create", "Create public/private key for system");
 
@@ -82,7 +82,7 @@ namespace Bhbk.Cli.Aurora.Commands
 
                 _uow.Commit();
 
-                StandardOutputFactory.KeyPairs(new List<E_PublicKey> { keyPair.Item1 }, new List<E_PrivateKey> { keyPair.Item2 });
+                FormatOutput.KeyPairs(new List<E_PublicKey> { keyPair.Item1 }, new List<E_PrivateKey> { keyPair.Item2 });
 
                 return StandardOutput.FondFarewell();
             }

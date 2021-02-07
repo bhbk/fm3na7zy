@@ -6,7 +6,7 @@ namespace Bhbk.Lib.Aurora.Domain.Factories
     public class DefaultDataFactory
     {
         private readonly IUnitOfWork _uow;
-        private readonly IMapper _mapper;
+        private readonly IMapper _map;
 
         public DefaultDataFactory(IUnitOfWork uow)
         {

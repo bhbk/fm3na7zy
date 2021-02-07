@@ -83,7 +83,7 @@ BEGIN
 
 		-- Delete Usage
 
-		DELETE [dbo].[tbl_Usage] 
+		DELETE [dbo].[tbl_LoginUsage] 
 			WHERE UserId = @UserId;
 
 		COMMIT TRANSACTION;

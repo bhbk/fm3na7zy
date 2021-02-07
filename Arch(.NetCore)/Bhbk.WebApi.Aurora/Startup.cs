@@ -43,16 +43,16 @@ namespace Bhbk.WebApi.Aurora
                 .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
                 .Build();
 
-            var instance = new ContextService(InstanceContext.DeployedOrLocal);
+            var env = new ContextService(InstanceContext.DeployedOrLocal);
             var mapper = new MapperConfiguration(x => x.AddProfile<AutoMapperProfile_EF6>())
                 .CreateMapper();
 
             sc.AddSingleton<IConfiguration>(conf);
-            sc.AddSingleton<IContextService>(instance);
+            sc.AddSingleton<IContextService>(env);
             sc.AddSingleton<IMapper>(mapper);
             sc.AddScoped<IUnitOfWork, UnitOfWork>(_ =>
             {
-                return new UnitOfWork(conf["Databases:AuroraEntities_EF6"], instance);
+                return new UnitOfWork(conf["Databases:AuroraEntities_EF6"], env);
             });
             sc.AddQuartz(jobs =>
             {
@@ -110,7 +110,7 @@ namespace Bhbk.WebApi.Aurora
                 options.WaitForJobsToComplete = true;
             });
 
-            if (instance.InstanceType != InstanceContext.DeployedOrLocal)
+            if (env.InstanceType != InstanceContext.DeployedOrLocal)
                 throw new NotSupportedException();
 
             /*
@@ -118,7 +118,7 @@ namespace Bhbk.WebApi.Aurora
              * only for owin authentication configuration.
              */
 
-            var uow = new UnitOfWork(conf["Databases:AuroraEntities_EF6"], instance);
+            var uow = new UnitOfWork(conf["Databases:AuroraEntities_EF6"], env);
 
             var keyType = ConfigType.RebexLicense.ToString();
 

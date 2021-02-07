@@ -17,7 +17,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Factories
         internal static E_LoginMem CheckContent(IUnitOfWorkMem uow, E_LoginMem userMem)
         {
             /*
-             * only neeed if in-memory sqlite instance is backed by entity framework 6. not needed if backed by ef core.
+             * only neeed if in-memory sqlite env is backed by entity framework 6. not needed if backed by ef core.
              */
 
             uow.Files.Delete(QueryExpressionFactory.GetQueryExpression<E_FileMem>()

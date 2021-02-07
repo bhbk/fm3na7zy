@@ -92,7 +92,7 @@
     <Compile Include="Models\E_Mount.cs">
       <DependentUpon>AuroraEntities.tt</DependentUpon>
     </Compile>
-    <Compile Include="Models\E_Usage.cs">
+    <Compile Include="Models\E_LoginUsage.cs">
       <DependentUpon>AuroraEntities.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\usp_Alert_Delete_Result.cs">
@@ -129,6 +129,9 @@
       <DependentUpon>AuroraEntities.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\usp_Folder_Update_Result.cs">
+      <DependentUpon>AuroraEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\usp_LoginUsage_Update_Result.cs">
       <DependentUpon>AuroraEntities.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\usp_Login_Delete_Result.cs">
@@ -191,7 +194,7 @@
     <Compile Include="Models\usp_Setting_Update_Result.cs">
       <DependentUpon>AuroraEntities.tt</DependentUpon>
     </Compile>
-    <Compile Include="Models\usp_Usage_Update_Result.cs">
+    <Compile Include="Models\uvw_LoginUsage.cs">
       <DependentUpon>AuroraEntities.tt</DependentUpon>
     </Compile>
     <Compile Include="UnitOfWork\IUnitOfWork.cs" />

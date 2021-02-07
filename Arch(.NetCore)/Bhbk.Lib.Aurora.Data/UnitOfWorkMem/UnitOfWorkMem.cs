@@ -21,7 +21,7 @@ namespace Bhbk.Lib.Aurora.Data.UnitOfWorkMem
         public UnitOfWorkMem(string connection)
             : this(connection, new ContextService(InstanceContext.DeployedOrLocal)) { }
 
-        public UnitOfWorkMem(string connection, IContextService instance)
+        public UnitOfWorkMem(string connection, IContextService env)
         {
             _logger = LoggerFactory.Create(opt =>
             {
@@ -31,7 +31,7 @@ namespace Bhbk.Lib.Aurora.Data.UnitOfWorkMem
                     .AddConsole();
             });
 
-            switch (instance.InstanceType)
+            switch (env.InstanceType)
             {
                 case InstanceContext.DeployedOrLocal:
                 case InstanceContext.End2EndTest:
@@ -76,7 +76,7 @@ namespace Bhbk.Lib.Aurora.Data.UnitOfWorkMem
             _context.Database.EnsureDeleted();
             _context.Database.EnsureCreated();
 
-            InstanceType = instance.InstanceType;
+            InstanceType = env.InstanceType;
 
             Files = new GenericRepository<E_FileMem>(_context);
             Folders = new GenericRepository<E_FolderMem>(_context);

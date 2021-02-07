@@ -1,4 +1,4 @@
-﻿using Bhbk.Cli.Aurora.Factories;
+﻿using Bhbk.Cli.Aurora.IO;
 using Bhbk.Lib.Aurora.Data_EF6.Models;
 using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
 using Bhbk.Lib.CommandLine.IO;
@@ -13,7 +13,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 
-namespace Bhbk.Cli.Aurora.Commands
+namespace Bhbk.Cli.Aurora.Commands.User
 {
     public class UserLoginShowCommand : ConsoleCommand
     {
@@ -27,8 +27,8 @@ namespace Bhbk.Cli.Aurora.Commands
                 .AddJsonFile("clisettings.json", optional: false, reloadOnChange: true)
                 .Build();
 
-            var instance = new ContextService(InstanceContext.DeployedOrLocal);
-            _uow = new UnitOfWork(_conf["Databases:AuroraEntities_EF6"], instance);
+            var env = new ContextService(InstanceContext.DeployedOrLocal);
+            _uow = new UnitOfWork(_conf["Databases:AuroraEntities_EF6"], env);
 
             IsCommand("user-login-show", "Show login for user");
 
@@ -64,14 +64,14 @@ namespace Bhbk.Cli.Aurora.Commands
         {
             try
             {
-                StandardOutputFactory.Logins(new List<E_Login> { _user }, true);
+                FormatOutput.Logins(new List<E_Login> { _user }, true);
 
                 if (_user.Mount != null)
-                    StandardOutputFactory.Mounts(new List<E_Mount> { _user.Mount });
+                    FormatOutput.Mounts(new List<E_Mount> { _user.Mount });
 
-                StandardOutputFactory.KeyPairs(_user.PublicKeys.OrderBy(x => x.CreatedUtc), _user.PrivateKeys);
-                StandardOutputFactory.Networks(_user.Networks.OrderBy(x => x.Action));
-                StandardOutputFactory.Alerts(_user.Alerts.OrderBy(x => x.ToDisplayName));
+                FormatOutput.KeyPairs(_user.PublicKeys.OrderBy(x => x.CreatedUtc), _user.PrivateKeys);
+                FormatOutput.Networks(_user.Networks.OrderBy(x => x.Action));
+                FormatOutput.Alerts(_user.Alerts.OrderBy(x => x.ToDisplayName));
 
                 var remotes = _uow.Sessions.Get(QueryExpressionFactory.GetQueryExpression<E_Session>()
                     .Where(x => x.UserId == _user.UserId && x.IsActive == true).ToLambda())
@@ -84,7 +84,7 @@ namespace Bhbk.Cli.Aurora.Commands
                         .Where(x => x.RemoteEndPoint == remote).ToLambda());
 
                     Console.Out.WriteLine();
-                    StandardOutputFactory.Sessions(sessions
+                    FormatOutput.Sessions(sessions
                         .OrderBy(x => x.CreatedUtc));
                 }
 

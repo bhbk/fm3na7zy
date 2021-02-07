@@ -28,7 +28,7 @@ namespace Bhbk.Lib.Aurora.Data.Models
         public virtual DbSet<uvw_PublicKey> uvw_PublicKeys { get; set; }
         public virtual DbSet<uvw_Session> uvw_Sessions { get; set; }
         public virtual DbSet<uvw_Setting> uvw_Settings { get; set; }
-        public virtual DbSet<uvw_Usage> uvw_Usages { get; set; }
+        public virtual DbSet<uvw_LoginUsage> uvw_Usages { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -241,7 +241,7 @@ namespace Bhbk.Lib.Aurora.Data.Models
                     .HasMaxLength(256);
             });
 
-            modelBuilder.Entity<uvw_Usage>(entity =>
+            modelBuilder.Entity<uvw_LoginUsage>(entity =>
             {
                 entity.HasNoKey();
 

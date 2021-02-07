@@ -22,14 +22,14 @@ namespace Bhbk.Lib.Aurora.Data_EF6.UnitOfWork
         public IGenericRepository<E_PublicKey> PublicKeys { get; private set; }
         public IGenericRepository<E_Session> Sessions { get; private set; }
         public IGenericRepository<E_Setting> Settings { get; private set; }
-        public IGenericRepository<E_Usage> Usages { get; private set; }
+        public IGenericRepository<E_LoginUsage> Usages { get; private set; }
 
         public UnitOfWork(string connection)
             : this(connection, new ContextService(InstanceContext.DeployedOrLocal)) { }
 
-        public UnitOfWork(string connection, IContextService instance)
+        public UnitOfWork(string connection, IContextService env)
         {
-            switch (instance.InstanceType)
+            switch (env.InstanceType)
             {
                 case InstanceContext.DeployedOrLocal:
                 case InstanceContext.End2EndTest:
@@ -55,7 +55,7 @@ namespace Bhbk.Lib.Aurora.Data_EF6.UnitOfWork
             _context.Configuration.LazyLoadingEnabled = false;
             _context.Configuration.ProxyCreationEnabled = true;
 
-            InstanceType = instance.InstanceType;
+            InstanceType = env.InstanceType;
 
             Alerts = new GenericRepository<E_Alert>(_context);
             Ambassadors = new GenericRepository<E_Ambassador>(_context);
@@ -68,7 +68,7 @@ namespace Bhbk.Lib.Aurora.Data_EF6.UnitOfWork
             PublicKeys = new GenericRepository<E_PublicKey>(_context);
             Sessions = new GenericRepository<E_Session>(_context);
             Settings = new GenericRepository<E_Setting>(_context);
-            Usages = new GenericRepository<E_Usage>(_context);
+            Usages = new GenericRepository<E_LoginUsage>(_context);
         }
 
         public void Commit()

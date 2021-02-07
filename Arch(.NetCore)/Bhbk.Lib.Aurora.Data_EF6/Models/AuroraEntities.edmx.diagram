@@ -28,7 +28,7 @@
         <AssociationConnector Association="AuroraModels.Login_Mount" />
         <EntityTypeShape EntityType="AuroraModels.E_Session" Width="1.5" PointX="8.125" PointY="0.625" />
         <AssociationConnector Association="AuroraModels.Login_Session" />
-        <EntityTypeShape EntityType="AuroraModels.E_Usage" Width="1.5" PointX="8.125" PointY="9.125" />
+        <EntityTypeShape EntityType="AuroraModels.E_LoginUsage" Width="1.5" PointX="8.125" PointY="9.125" />
         <AssociationConnector Association="AuroraModels.Login_Usage" />
       </Diagram>
     </edmx:Diagrams>

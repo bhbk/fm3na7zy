@@ -56,7 +56,7 @@ BEGIN
 		IF @@ROWCOUNT != 1
 			THROW 51000, 'ERROR', 1;
 
-		INSERT INTO [dbo].[tbl_Usage]
+		INSERT INTO [dbo].[tbl_LoginUsage]
 			(
 			 UserId
 			,QuotaInBytes

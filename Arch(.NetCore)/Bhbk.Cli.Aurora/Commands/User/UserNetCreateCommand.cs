@@ -1,4 +1,4 @@
-﻿using Bhbk.Cli.Aurora.Factories;
+﻿using Bhbk.Cli.Aurora.IO;
 using Bhbk.Lib.Aurora.Data_EF6.Models;
 using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
 using Bhbk.Lib.Aurora.Primitives.Enums;
@@ -15,7 +15,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Net;
 
-namespace Bhbk.Cli.Aurora.Commands
+namespace Bhbk.Cli.Aurora.Commands.User
 {
     public class UserNetCreateCommand : ConsoleCommand
     {
@@ -33,8 +33,8 @@ namespace Bhbk.Cli.Aurora.Commands
                 .AddJsonFile("clisettings.json", optional: false, reloadOnChange: true)
                 .Build();
 
-            var instance = new ContextService(InstanceContext.DeployedOrLocal);
-            _uow = new UnitOfWork(_conf["Databases:AuroraEntities_EF6"], instance);
+            var env = new ContextService(InstanceContext.DeployedOrLocal);
+            _uow = new UnitOfWork(_conf["Databases:AuroraEntities_EF6"], env);
 
             IsCommand("user-net-create", "Create allow/deny network for user");
 
@@ -84,7 +84,7 @@ namespace Bhbk.Cli.Aurora.Commands
                 if (exists != null)
                 {
                     Console.Out.WriteLine("  *** The network entered already exists for user ***");
-                    StandardOutputFactory.Networks(new List<E_Network> { exists });
+                    FormatOutput.Networks(new List<E_Network> { exists });
 
                     return StandardOutput.FondFarewell();
                 }
@@ -101,7 +101,7 @@ namespace Bhbk.Cli.Aurora.Commands
 
                 _uow.Commit();
 
-                StandardOutputFactory.Networks(new List<E_Network> { network });
+                FormatOutput.Networks(new List<E_Network> { network });
 
                 return StandardOutput.FondFarewell();
             }

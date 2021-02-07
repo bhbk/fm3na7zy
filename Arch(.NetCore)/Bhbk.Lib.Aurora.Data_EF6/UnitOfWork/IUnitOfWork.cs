@@ -17,6 +17,6 @@ namespace Bhbk.Lib.Aurora.Data_EF6.UnitOfWork
         IGenericRepository<E_File> Files { get; }
         IGenericRepository<E_Folder> Folders { get; }
         IGenericRepository<E_Mount> Mounts { get; }
-        IGenericRepository<E_Usage> Usages { get; }
+        IGenericRepository<E_LoginUsage> Usages { get; }
     }
 }

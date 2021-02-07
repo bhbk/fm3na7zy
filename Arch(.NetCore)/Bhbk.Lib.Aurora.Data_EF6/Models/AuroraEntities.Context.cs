@@ -38,7 +38,8 @@ namespace Bhbk.Lib.Aurora.Data_EF6.Models
         public virtual DbSet<E_Folder> E_Folder { get; set; }
         public virtual DbSet<E_Mount> E_Mount { get; set; }
         public virtual DbSet<E_Session> E_Session { get; set; }
-        public virtual DbSet<E_Usage> E_Usage { get; set; }
+        public virtual DbSet<E_LoginUsage> E_LoginUsage { get; set; }
+        public virtual DbSet<uvw_LoginUsage> uvw_LoginUsage { get; set; }
     
         public virtual ObjectResult<usp_Ambassador_Delete_Result> usp_Ambassador_Delete(Nullable<System.Guid> id)
         {
@@ -901,7 +902,7 @@ namespace Bhbk.Lib.Aurora.Data_EF6.Models
             return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<usp_Session_Update_Result>("usp_Session_Update", idParameter, callPathParameter, detailsParameter, localEndPointParameter, localSoftwareIdentifierParameter, remoteEndPointParameter, remoteSoftwareIdentifierParameter, isActiveParameter);
         }
     
-        public virtual ObjectResult<usp_Usage_Update_Result> usp_Usage_Update(Nullable<System.Guid> userId, Nullable<long> quotaInBytes, Nullable<long> quotaUsedInBytes, Nullable<short> sessionMax, Nullable<short> sessionsInUse)
+        public virtual ObjectResult<usp_LoginUsage_Update_Result> usp_LoginUsage_Update(Nullable<System.Guid> userId, Nullable<long> quotaInBytes, Nullable<long> quotaUsedInBytes, Nullable<short> sessionMax, Nullable<short> sessionsInUse)
         {
             var userIdParameter = userId.HasValue ?
                 new ObjectParameter("UserId", userId) :
@@ -923,7 +924,7 @@ namespace Bhbk.Lib.Aurora.Data_EF6.Models
                 new ObjectParameter("SessionsInUse", sessionsInUse) :
                 new ObjectParameter("SessionsInUse", typeof(short));
     
-            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<usp_Usage_Update_Result>("usp_Usage_Update", userIdParameter, quotaInBytesParameter, quotaUsedInBytesParameter, sessionMaxParameter, sessionsInUseParameter);
+            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<usp_LoginUsage_Update_Result>("usp_LoginUsage_Update", userIdParameter, quotaInBytesParameter, quotaUsedInBytesParameter, sessionMaxParameter, sessionsInUseParameter);
         }
     }
 }
