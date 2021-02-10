@@ -8,7 +8,6 @@ SELECT
 	,ConfigValue
 	,IsDeletable
 	,CreatedUtc
-	,LastUpdatedUtc
 
 FROM
 	[dbo].[tbl_Setting]

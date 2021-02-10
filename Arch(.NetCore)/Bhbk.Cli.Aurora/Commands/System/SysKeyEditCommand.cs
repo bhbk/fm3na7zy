@@ -52,10 +52,10 @@ namespace Bhbk.Cli.Aurora.Commands.System
         {
             try
             {
-                var privKeys = _uow.PrivateKeys.Get(QueryExpressionFactory.GetQueryExpression<E_PrivateKey>()
+                var privKeys = _uow.PrivateKeys.Get(QueryExpressionFactory.GetQueryExpression<PrivateKey_EF>()
                     .Where(x => x.UserId == null).ToLambda());
 
-                var pubKeys = _uow.PublicKeys.Get(QueryExpressionFactory.GetQueryExpression<E_PublicKey>()
+                var pubKeys = _uow.PublicKeys.Get(QueryExpressionFactory.GetQueryExpression<PublicKey_EF>()
                     .Where(x => x.UserId == null).ToLambda());
 
                 var privKey = privKeys.Where(x => x.PublicKeyId == _id)
@@ -89,7 +89,7 @@ namespace Bhbk.Cli.Aurora.Commands.System
                     _uow.PublicKeys.Update(pubKey);
                     _uow.Commit();
 
-                    FormatOutput.KeyPairs(new List<E_PublicKey> { pubKey }, new List<E_PrivateKey> { privKey });
+                    FormatOutput.KeyPairs(new List<PublicKey_EF> { pubKey }, new List<PrivateKey_EF> { privKey });
                 }
 
                 return StandardOutput.FondFarewell();

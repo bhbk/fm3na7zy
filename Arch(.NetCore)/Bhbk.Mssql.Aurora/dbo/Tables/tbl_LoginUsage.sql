@@ -5,8 +5,10 @@
     [SessionMax]       SMALLINT         NOT NULL,
     [SessionsInUse]    SMALLINT         NOT NULL,
     CONSTRAINT [PK_tbl_Usage] PRIMARY KEY CLUSTERED ([UserId] ASC),
-    CONSTRAINT [FK_tbl_Usage_UserID] FOREIGN KEY ([UserId]) REFERENCES [dbo].[tbl_Login] ([UserId]) ON UPDATE CASCADE
+    CONSTRAINT [FK_tbl_Usage_tbl_Login] FOREIGN KEY ([UserId]) REFERENCES [dbo].[tbl_Login] ([UserId]) ON UPDATE CASCADE
 );
+
+
 
 
 GO

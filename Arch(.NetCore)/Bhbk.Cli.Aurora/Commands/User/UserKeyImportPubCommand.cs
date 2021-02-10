@@ -23,7 +23,7 @@ namespace Bhbk.Cli.Aurora.Commands.User
         private readonly IConfiguration _conf;
         private readonly IUnitOfWork _uow;
         private FileInfo _path;
-        private E_Login _user;
+        private Login_EF _user;
         private bool _base64;
         private string _pubKeyComment;
 
@@ -43,9 +43,9 @@ namespace Bhbk.Cli.Aurora.Commands.User
                 if (string.IsNullOrEmpty(arg))
                     throw new ConsoleHelpAsException($"  *** No user name given ***");
 
-                _user = _uow.Logins.Get(QueryExpressionFactory.GetQueryExpression<E_Login>()
+                _user = _uow.Logins.Get(QueryExpressionFactory.GetQueryExpression<Login_EF>()
                     .Where(x => x.UserName == arg).ToLambda(),
-                        new List<Expression<Func<E_Login, object>>>()
+                        new List<Expression<Func<Login_EF, object>>>()
                         {
                             x => x.PrivateKeys,
                             x => x.PublicKeys
@@ -87,7 +87,7 @@ namespace Bhbk.Cli.Aurora.Commands.User
                 Console.Out.WriteLine("Opened " + _path.FullName);
                 Console.Out.WriteLine();
 
-                var pubKeys = new List<E_PublicKey>();
+                var pubKeys = new List<PublicKey_EF>();
                 var stream = new MemoryStream();
 
                 using (FileStream fileStream = new FileStream(_path.FullName, FileMode.Open, FileAccess.Read))
@@ -100,7 +100,7 @@ namespace Bhbk.Cli.Aurora.Commands.User
                     var pubKey = KeyHelper.ImportPubKey(_uow, _user, SignatureHashAlgorithm.SHA256, _pubKeyComment, stream);
 
                     if (pubKey != null)
-                        pubKeys = new List<E_PublicKey>() { pubKey };
+                        pubKeys = new List<PublicKey_EF>() { pubKey };
                 }
 
                 if (pubKeys != null)

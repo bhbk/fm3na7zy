@@ -40,7 +40,7 @@ namespace Bhbk.Cli.Aurora.Commands.System
         {
             try
             {
-                var networks = _uow.Networks.Get(QueryExpressionFactory.GetQueryExpression<E_Network>()
+                var networks = _uow.Networks.Get(QueryExpressionFactory.GetQueryExpression<Network_EF>()
                     .Where(x => x.UserId == null && x.IsDeletable == true).ToLambda());
 
                 FormatOutput.Networks(networks);

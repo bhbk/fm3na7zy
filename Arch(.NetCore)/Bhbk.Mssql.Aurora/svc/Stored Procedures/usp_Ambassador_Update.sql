@@ -14,15 +14,12 @@ BEGIN
 
     	BEGIN TRANSACTION;
 
-        DECLARE @LASTUPDATED DATETIMEOFFSET (7) = GETUTCDATE()
-
         UPDATE [dbo].[tbl_Ambassador]
         SET
             UserName				= @UserName
 			,EncryptedPass  		= @EncryptedPass
 			,IsEnabled				= @IsEnabled
             ,IsDeletable			= @IsDeletable
-            ,LastUpdatedUtc			= @LASTUPDATED
         WHERE Id = @Id
 
 		IF @@ROWCOUNT != 1

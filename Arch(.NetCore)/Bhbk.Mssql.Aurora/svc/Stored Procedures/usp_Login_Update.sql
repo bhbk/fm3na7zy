@@ -1,14 +1,14 @@
 ﻿
 CREATE PROCEDURE [svc].[usp_Login_Update]
      @UserId	    		UNIQUEIDENTIFIER
-    ,@UserAuthType			NVARCHAR (16) 
     ,@UserName	    		NVARCHAR (128) 
-    ,@FileSystemType		NVARCHAR (16) 
+    ,@AuthTypeId			INT 
+    ,@FileSystemTypeId		INT 
 	,@FileSystemChrootPath	NVARCHAR (64)
     ,@IsPasswordRequired	BIT
     ,@IsPublicKeyRequired	BIT
     ,@IsFileSystemReadOnly	BIT
-    ,@Debugger				NVARCHAR (16) 
+    ,@DebugTypeId				INT 
     ,@EncryptedPass			NVARCHAR (1024) 
     ,@IsEnabled				BIT
     ,@IsDeletable			BIT
@@ -21,22 +21,19 @@ BEGIN
 
     	BEGIN TRANSACTION;
 
-        DECLARE @LASTUPDATED DATETIMEOFFSET (7) = GETUTCDATE()
-
         UPDATE [dbo].[tbl_Login]
         SET
-            UserAuthType            = @UserAuthType
-			,UserName		    	= @UserName
-			,FileSystemType			= @FileSystemType
+			UserName		    	= @UserName
+            ,AuthTypeId            = @AuthTypeId
+			,FileSystemTypeId			= @FileSystemTypeId
 			,FileSystemChrootPath	= @FileSystemChrootPath
 			,IsPasswordRequired		= @IsPasswordRequired
 			,IsPublicKeyRequired	= @IsPublicKeyRequired
 			,IsFileSystemReadOnly	= @IsFileSystemReadOnly
-			,Debugger				= @Debugger
+			,DebugTypeId				= @DebugTypeId
             ,EncryptedPass          = @EncryptedPass
 			,IsEnabled				= @IsEnabled
 			,IsDeletable			= @IsDeletable
-            ,LastUpdatedUtc			= @LASTUPDATED
         WHERE UserId = @UserId
 
 		IF @@ROWCOUNT != 1

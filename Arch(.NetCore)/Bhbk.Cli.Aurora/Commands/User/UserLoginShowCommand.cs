@@ -19,7 +19,7 @@ namespace Bhbk.Cli.Aurora.Commands.User
     {
         private readonly IConfiguration _conf;
         private readonly IUnitOfWork _uow;
-        private E_Login _user;
+        private Login_EF _user;
 
         public UserLoginShowCommand()
         {
@@ -37,9 +37,9 @@ namespace Bhbk.Cli.Aurora.Commands.User
                 if (string.IsNullOrEmpty(arg))
                     throw new ConsoleHelpAsException($"  *** No user given ***");
 
-                _user = _uow.Logins.Get(QueryExpressionFactory.GetQueryExpression<E_Login>()
+                _user = _uow.Logins.Get(QueryExpressionFactory.GetQueryExpression<Login_EF>()
                     .Where(x => x.UserName == arg).ToLambda(),
-                        new List<Expression<Func<E_Login, object>>>()
+                        new List<Expression<Func<Login_EF, object>>>()
                         {
                             x => x.Alerts,
                             x => x.Files,
@@ -64,23 +64,23 @@ namespace Bhbk.Cli.Aurora.Commands.User
         {
             try
             {
-                FormatOutput.Logins(new List<E_Login> { _user }, true);
+                FormatOutput.Logins(new List<Login_EF> { _user }, true);
 
                 if (_user.Mount != null)
-                    FormatOutput.Mounts(new List<E_Mount> { _user.Mount });
+                    FormatOutput.Mounts(new List<Mount_EF> { _user.Mount });
 
                 FormatOutput.KeyPairs(_user.PublicKeys.OrderBy(x => x.CreatedUtc), _user.PrivateKeys);
                 FormatOutput.Networks(_user.Networks.OrderBy(x => x.Action));
                 FormatOutput.Alerts(_user.Alerts.OrderBy(x => x.ToDisplayName));
 
-                var remotes = _uow.Sessions.Get(QueryExpressionFactory.GetQueryExpression<E_Session>()
+                var remotes = _uow.Sessions.Get(QueryExpressionFactory.GetQueryExpression<Session_EF>()
                     .Where(x => x.UserId == _user.UserId && x.IsActive == true).ToLambda())
                     .OrderBy(x => x.UserName).ThenBy(x => x.CreatedUtc)
                     .Select(x => x.RemoteEndPoint).Distinct().TakeLast(100).ToList();
 
                 foreach (var remote in remotes)
                 {
-                    var sessions = _uow.Sessions.Get(QueryExpressionFactory.GetQueryExpression<E_Session>()
+                    var sessions = _uow.Sessions.Get(QueryExpressionFactory.GetQueryExpression<Session_EF>()
                         .Where(x => x.RemoteEndPoint == remote).ToLambda());
 
                     Console.Out.WriteLine();

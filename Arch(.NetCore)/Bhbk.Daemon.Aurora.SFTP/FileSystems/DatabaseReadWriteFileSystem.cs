@@ -2,6 +2,7 @@
 using Bhbk.Lib.Aurora.Data_EF6.Models;
 using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
 using Bhbk.Lib.Aurora.Domain.Helpers;
+using Bhbk.Lib.Aurora.Primitives.Enums;
 using Bhbk.Lib.Common.Primitives;
 using Bhbk.Lib.QueryExpression.Extensions;
 using Bhbk.Lib.QueryExpression.Factories;
@@ -27,9 +28,9 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
     internal class DatabaseReadWriteFileSystem : ReadWriteFileSystemProvider
     {
         private readonly IServiceScopeFactory _factory;
-        private E_Login _user;
+        private Login_EF _user;
 
-        internal DatabaseReadWriteFileSystem(FileSystemProviderSettings settings, IServiceScopeFactory factory, E_Login user)
+        internal DatabaseReadWriteFileSystem(FileSystemProviderSettings settings, IServiceScopeFactory factory, Login_EF user)
             : base(settings)
         {
             _factory = factory;
@@ -71,7 +72,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                     var folderEntity = DatabasePathFactory.PathToFolder(uow, _user, parent.Path.StringPath);
 
                     uow.Folders.Create(
-                        new E_Folder
+                        new Folder_EF
                         {
                             UserId = _user.UserId,
                             ParentId = folderEntity.Id,
@@ -106,9 +107,9 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                     var conf = scope.ServiceProvider.GetRequiredService<IConfiguration>();
                     var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
 
-                    _user = uow.Logins.Get(QueryExpressionFactory.GetQueryExpression<E_Login>()
+                    _user = uow.Logins.Get(QueryExpressionFactory.GetQueryExpression<Login_EF>()
                         .Where(x => x.UserId == _user.UserId).ToLambda(),
-                            new List<Expression<Func<E_Login, object>>>()
+                            new List<Expression<Func<Login_EF, object>>>()
                             {
                                 x => x.Usage,
                             })
@@ -137,7 +138,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                         throw new FileSystemOperationCanceledException($"'{callPath}' '{_user.UserName}' file:'{child.Path}' size:'{child.Length / 1048576f}MB' " +
                             $"at:'{file.FullName}' quota-maximum:'{_user.Usage.QuotaInBytes / 1048576f}MB' quota-used:'{_user.Usage.QuotaUsedInBytes / 1048576f}MB'");
 
-                    var fileEntity = new E_File
+                    var fileEntity = new File_EF
                     {
                         UserId = _user.UserId,
                         FolderId = folderEntity.Id,
@@ -157,7 +158,8 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                         var hash = sha256.ComputeHash(fs);
 
                         fileEntity.RealFileSize = fs.Length;
-                        fileEntity.HashSHA256 = Strings.GetHexString(hash);
+                        fileEntity.HashTypeId = (int)HashAlgorithmType_E.SHA256;
+                        fileEntity.HashValue = Strings.GetHexString(hash);
                     }
 
                     uow.Files.Create(fileEntity);
@@ -208,9 +210,9 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                                     + Path.DirectorySeparatorChar + fileEntity.RealPath
                                     + Path.DirectorySeparatorChar + fileEntity.RealFileName);
 
-                                _user = uow.Logins.Get(QueryExpressionFactory.GetQueryExpression<E_Login>()
+                                _user = uow.Logins.Get(QueryExpressionFactory.GetQueryExpression<Login_EF>()
                                     .Where(x => x.UserId == _user.UserId).ToLambda(),
-                                        new List<Expression<Func<E_Login, object>>>()
+                                        new List<Expression<Func<Login_EF, object>>>()
                                         {
                                             x => x.Usage,
                                         })
@@ -362,7 +364,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
 
                     var folderParentEntity = DatabasePathFactory.PathToFolder(uow, _user, parent.Path.StringPath);
 
-                    var folderEntity = uow.Folders.Get(QueryExpressionFactory.GetQueryExpression<E_Folder>()
+                    var folderEntity = uow.Folders.Get(QueryExpressionFactory.GetQueryExpression<Folder_EF>()
                         .Where(x => x.UserId == _user.UserId && x.ParentId == folderParentEntity.Id && x.VirtualName == name).ToLambda())
                         .SingleOrDefault();
 
@@ -371,7 +373,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                             new NodeTimeInfo(folderEntity.CreatedUtc.UtcDateTime,
                                 folderEntity.LastAccessedUtc.UtcDateTime, folderEntity.LastUpdatedUtc.UtcDateTime));
 
-                    var fileEntity = uow.Files.Get(QueryExpressionFactory.GetQueryExpression<E_File>()
+                    var fileEntity = uow.Files.Get(QueryExpressionFactory.GetQueryExpression<File_EF>()
                         .Where(x => x.UserId == _user.UserId && x.FolderId == folderParentEntity.Id && x.VirtualName == name).ToLambda())
                         .SingleOrDefault();
 
@@ -407,7 +409,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
 
                     var folderParentEntity = DatabasePathFactory.PathToFolder(uow, _user, parent.Path.StringPath);
 
-                    var folders = uow.Folders.Get(QueryExpressionFactory.GetQueryExpression<E_Folder>()
+                    var folders = uow.Folders.Get(QueryExpressionFactory.GetQueryExpression<Folder_EF>()
                         .Where(x => x.UserId == _user.UserId).ToLambda())
                         .ToList();
 
@@ -416,7 +418,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                             new NodeTimeInfo(folder.CreatedUtc.UtcDateTime,
                                 folder.LastAccessedUtc.UtcDateTime, folder.LastUpdatedUtc.UtcDateTime)));
 
-                    var files = uow.Files.Get(QueryExpressionFactory.GetQueryExpression<E_File>()
+                    var files = uow.Files.Get(QueryExpressionFactory.GetQueryExpression<File_EF>()
                         .Where(x => x.UserId == _user.UserId).ToLambda())
                         .ToList();
 
@@ -706,9 +708,9 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                             {
                                 var fileEntity = DatabasePathFactory.PathToFile(uow, _user, node.Path.StringPath);
 
-                                _user = uow.Logins.Get(QueryExpressionFactory.GetQueryExpression<E_Login>()
+                                _user = uow.Logins.Get(QueryExpressionFactory.GetQueryExpression<Login_EF>()
                                     .Where(x => x.UserId == _user.UserId).ToLambda(),
-                                        new List<Expression<Func<E_Login, object>>>()
+                                        new List<Expression<Func<Login_EF, object>>>()
                                         {
                                             x => x.Usage,
                                         })
@@ -733,7 +735,8 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                                     var hash = sha256.ComputeHash(fs);
 
                                     fileEntity.RealFileSize = fs.Length;
-                                    fileEntity.HashSHA256 = Strings.GetHexString(hash);
+                                    fileEntity.HashTypeId = (int)HashAlgorithmType_E.SHA256;
+                                    fileEntity.HashValue = Strings.GetHexString(hash);
                                 }
 
                                 _user.Usage.QuotaUsedInBytes += content.Length;

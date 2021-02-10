@@ -9,7 +9,6 @@ SELECT
 	,IsEnabled
 	,IsDeletable
 	,CreatedUtc
-	,LastUpdatedUtc
 
 FROM
 	[dbo].[tbl_Mount]

@@ -10,8 +10,10 @@
     [IsActive]                 BIT                NOT NULL,
     [CreatedUtc]               DATETIMEOFFSET (7) NOT NULL,
     CONSTRAINT [PK_tbl_Session] PRIMARY KEY CLUSTERED ([Id] ASC),
-    CONSTRAINT [FK_tbl_Session_UserID] FOREIGN KEY ([UserId]) REFERENCES [dbo].[tbl_Login] ([UserId]) ON UPDATE CASCADE
+    CONSTRAINT [FK_tbl_Session_tbl_Login] FOREIGN KEY ([UserId]) REFERENCES [dbo].[tbl_Login] ([UserId]) ON UPDATE CASCADE
 );
+
+
 
 
 

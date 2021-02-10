@@ -37,9 +37,9 @@ namespace Bhbk.Cli.Aurora.Commands.System
 
         public override int Run(string[] remainingArguments)
         {
-            var keyType = ConfigType.RebexLicense.ToString();
+            var keyType = ConfigType_E.RebexLicense.ToString();
 
-            var license = _uow.Settings.Get(QueryExpressionFactory.GetQueryExpression<E_Setting>()
+            var license = _uow.Settings.Get(QueryExpressionFactory.GetQueryExpression<Setting_EF>()
                 .Where(x => x.ConfigKey == keyType).ToLambda())
                 .OrderBy(x => x.CreatedUtc)
                 .Last();
@@ -61,12 +61,12 @@ namespace Bhbk.Cli.Aurora.Commands.System
                 Console.Out.WriteLine($"  *** The new secret to encrypt passwords is *** : {secretNew}");
                 Console.Out.WriteLine();
 
-                var loginType = UserAuthType.Local.ToString().ToLower();
+                var loginType = (int)AuthType_E.Local;
 
                 var ambassadors = _uow.Ambassadors.Get();
                 var privateKeys = _uow.PrivateKeys.Get();
-                var logins = _uow.Logins.Get(QueryExpressionFactory.GetQueryExpression<E_Login>()
-                    .Where(x => x.UserAuthType.ToLower() == loginType).ToLambda());
+                var logins = _uow.Logins.Get(QueryExpressionFactory.GetQueryExpression<Login_EF>()
+                    .Where(x => x.AuthTypeId == (int)loginType).ToLambda());
 
                 Console.Out.WriteLine("  *** Current ambassador encrypted passwords *** ");
                 FormatOutput.AmbassadorSecrets(ambassadors);

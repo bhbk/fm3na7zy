@@ -3,10 +3,10 @@ CREATE PROCEDURE [svc].[usp_PublicKey_Update]
      @Id					UNIQUEIDENTIFIER 
     ,@PrivateKeyId			UNIQUEIDENTIFIER
     ,@KeyValue				NVARCHAR (MAX) 
-    ,@KeyAlgo				NVARCHAR (16) 
-    ,@KeyFormat				NVARCHAR (16) 
+    ,@KeyAlgorithmId				INT
+    ,@KeyFormatId				INT 
     ,@SigValue				NVARCHAR (512) 
-    ,@SigAlgo				NVARCHAR (16) 
+    ,@SigAlgorithmId				INT 
     ,@Comment				NVARCHAR (1024) 
     ,@IsEnabled				BIT
     ,@IsDeletable			BIT
@@ -19,20 +19,17 @@ BEGIN
 
     	BEGIN TRANSACTION;
 
-        DECLARE @LASTUPDATED DATETIMEOFFSET (7) = GETUTCDATE()
-
         UPDATE [dbo].[tbl_PublicKey]
         SET
 			 PrivateKeyId			= @PrivateKeyId
 			,KeyValue				= @KeyValue
-			,KeyAlgo				= @KeyAlgo
-			,KeyFormat				= @KeyFormat
+			,KeyAlgorithmId				= @KeyAlgorithmId
+			,KeyFormatId				= @KeyFormatId
 			,SigValue				= @SigValue
-			,SigAlgo				= @SigAlgo
+			,SigAlgorithmId				= @SigAlgorithmId
 			,Comment				= @Comment
 			,IsEnabled				= @IsEnabled
 			,IsDeletable			= @IsDeletable
-            ,LastUpdatedUtc			= @LASTUPDATED
         WHERE Id = @Id
 
 		IF @@ROWCOUNT != 1

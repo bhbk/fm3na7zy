@@ -15,8 +15,6 @@ BEGIN
 
     	BEGIN TRANSACTION;
 
-        DECLARE @LASTUPDATED DATETIMEOFFSET (7) = GETUTCDATE()
-
         UPDATE [dbo].[tbl_Network]
         SET
 			 SequenceId				= @SequenceId
@@ -24,7 +22,6 @@ BEGIN
 			,Action					= @Action
 			,IsEnabled				= @IsEnabled
             ,IsDeletable            = @IsDeletable
-            ,LastUpdatedUtc			= @LASTUPDATED
         WHERE Id = @Id
 
 		IF @@ROWCOUNT != 1

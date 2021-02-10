@@ -23,7 +23,7 @@ namespace Bhbk.Cli.Aurora.Commands.User
     {
         private readonly IConfiguration _conf;
         private readonly IUnitOfWork _uow;
-        private E_Login _user;
+        private Login_EF _user;
 
         public UserKeyExportCommand()
         {
@@ -41,9 +41,9 @@ namespace Bhbk.Cli.Aurora.Commands.User
                 if (string.IsNullOrEmpty(arg))
                     throw new ConsoleHelpAsException($"  *** No user name given ***");
 
-                _user = _uow.Logins.Get(QueryExpressionFactory.GetQueryExpression<E_Login>()
+                _user = _uow.Logins.Get(QueryExpressionFactory.GetQueryExpression<Login_EF>()
                     .Where(x => x.UserName == arg).ToLambda(),
-                        new List<Expression<Func<E_Login, object>>>()
+                        new List<Expression<Func<Login_EF, object>>>()
                         {
                             x => x.PrivateKeys,
                             x => x.PublicKeys,
@@ -100,7 +100,7 @@ namespace Bhbk.Cli.Aurora.Commands.User
 
                     //public opensshbase64 key format in "authorized_keys"
                     var pubOpenSshBase64File = new FileInfo(dir + "authorized_keys.txt");
-                    var pubOpenSshBase64Str = KeyHelper.ExportPubKeyBase64(_user, new List<E_PublicKey> { pubKey });
+                    var pubOpenSshBase64Str = KeyHelper.ExportPubKeyBase64(_user, new List<PublicKey_EF> { pubKey });
                     File.WriteAllText(pubOpenSshBase64File.FullName, pubOpenSshBase64Str.ToString());
                     Console.Out.WriteLine("Created " + pubOpenSshBase64File);
 

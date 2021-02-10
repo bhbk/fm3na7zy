@@ -23,8 +23,8 @@ namespace Bhbk.Cli.Aurora.Commands.System
         private Guid _id;
         private Int32 _sequence = Int32.MinValue;
         private IPNetwork _cidr = null;
-        private NetworkActionType _actionType;
-        private readonly string _actionTypeList = string.Join(", ", Enum.GetNames(typeof(NetworkActionType)));
+        private NetworkActionType_E _actionType;
+        private readonly string _actionTypeList = string.Join(", ", Enum.GetNames(typeof(NetworkActionType_E)));
 
         public SysNetEditCommand()
         {
@@ -65,7 +65,7 @@ namespace Bhbk.Cli.Aurora.Commands.System
         {
             try
             {
-                var networks = _uow.Networks.Get(QueryExpressionFactory.GetQueryExpression<E_Network>()
+                var networks = _uow.Networks.Get(QueryExpressionFactory.GetQueryExpression<Network_EF>()
                     .Where(x => x.UserId == null).ToLambda());
 
                 var network = networks.Where(x => x.Id == _id)
@@ -86,7 +86,7 @@ namespace Bhbk.Cli.Aurora.Commands.System
                 _uow.Networks.Update(network);
                 _uow.Commit();
 
-                FormatOutput.Networks(new List<E_Network> { network });
+                FormatOutput.Networks(new List<Network_EF> { network });
 
                 return StandardOutput.FondFarewell();
             }

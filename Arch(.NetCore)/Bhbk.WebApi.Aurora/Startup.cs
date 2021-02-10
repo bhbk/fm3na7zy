@@ -120,9 +120,9 @@ namespace Bhbk.WebApi.Aurora
 
             var uow = new UnitOfWork(conf["Databases:AuroraEntities_EF6"], env);
 
-            var keyType = ConfigType.RebexLicense.ToString();
+            var keyType = ConfigType_E.RebexLicense.ToString();
 
-            var license = uow.Settings.Get(QueryExpressionFactory.GetQueryExpression<E_Setting>()
+            var license = uow.Settings.Get(QueryExpressionFactory.GetQueryExpression<Setting_EF>()
                 .Where(x => x.ConfigKey == keyType).ToLambda())
                 .OrderBy(x => x.CreatedUtc)
                 .Last();

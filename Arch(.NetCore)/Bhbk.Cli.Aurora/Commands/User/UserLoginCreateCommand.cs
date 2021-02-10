@@ -25,10 +25,10 @@ namespace Bhbk.Cli.Aurora.Commands.User
     {
         private readonly IConfiguration _conf;
         private readonly IUnitOfWork _uow;
-        private UserAuthType _authType;
-        private FileSystemProviderType _fileSystemType;
-        private readonly string _authTypeList = string.Join(", ", Enum.GetNames(typeof(UserAuthType)));
-        private readonly string _fileSystemTypeList = string.Join(", ", Enum.GetNames(typeof(FileSystemProviderType)));
+        private AuthType_E _authType;
+        private FileSystemType_E _fileSystemType;
+        private readonly string _authTypeList = string.Join(", ", Enum.GetNames(typeof(AuthType_E)));
+        private readonly string _fileSystemTypeList = string.Join(", ", Enum.GetNames(typeof(FileSystemType_E)));
         private string _userName;
 
         public UserLoginCreateCommand()
@@ -47,7 +47,7 @@ namespace Bhbk.Cli.Aurora.Commands.User
                 if (string.IsNullOrEmpty(arg))
                     throw new ConsoleHelpAsException($"  *** No user given ***");
 
-                var user = _uow.Logins.Get(QueryExpressionFactory.GetQueryExpression<E_Login>()
+                var user = _uow.Logins.Get(QueryExpressionFactory.GetQueryExpression<Login_EF>()
                     .Where(x => x.UserName == arg).ToLambda())
                     .SingleOrDefault();
 
@@ -74,21 +74,19 @@ namespace Bhbk.Cli.Aurora.Commands.User
         {
             try
             {
-                var user = new E_Login
+                var user = new Login_EF
                 {
-                    UserAuthType = _authType.ToString(),
+                    AuthTypeId = (int)_authType,
                     UserName = _userName,
-                    FileSystemType = _fileSystemType.ToString(),
+                    FileSystemTypeId = (int)_fileSystemType,
                     IsPasswordRequired = true,
                     IsPublicKeyRequired = false,
                     IsFileSystemReadOnly = false,
-                    Debugger = null,
-                    EncryptedPass = null,
                     IsEnabled = true,
                     IsDeletable = true,
                 };
 
-                if (_authType == UserAuthType.Identity)
+                if (_authType == AuthType_E.Identity)
                 {
                     var admin = new AdminService(_conf)
                     {
@@ -128,7 +126,7 @@ namespace Bhbk.Cli.Aurora.Commands.User
                     user.UserId = identityGuid;
                 }
 
-                if (_authType == UserAuthType.Local)
+                if (_authType == AuthType_E.Local)
                 {
                     var secret = _conf["Databases:AuroraSecret"];
 
@@ -143,16 +141,16 @@ namespace Bhbk.Cli.Aurora.Commands.User
                 user = _uow.Logins.Create(user);
                 _uow.Commit();
 
-                user = _uow.Logins.Get(QueryExpressionFactory.GetQueryExpression<E_Login>()
+                user = _uow.Logins.Get(QueryExpressionFactory.GetQueryExpression<Login_EF>()
                     .Where(x => x.UserId == user.UserId).ToLambda(),
-                        new List<Expression<Func<E_Login, object>>>()
+                        new List<Expression<Func<Login_EF, object>>>()
                         {
                             x => x.Usage,
                         })
                     .Single();
                 
                 Console.Out.WriteLine();
-                FormatOutput.Logins(new List<E_Login> { user }, true);
+                FormatOutput.Logins(new List<Login_EF> { user }, true);
 
                 return StandardOutput.FondFarewell();
             }

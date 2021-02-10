@@ -4,10 +4,10 @@ CREATE PROCEDURE [svc].[usp_PublicKey_Insert]
     ,@UserId				UNIQUEIDENTIFIER
     ,@PrivateKeyId			UNIQUEIDENTIFIER
     ,@KeyValue				NVARCHAR (MAX) 
-    ,@KeyAlgo				NVARCHAR (16) 
-    ,@KeyFormat				NVARCHAR (16) 
+    ,@KeyAlgorithmId				INT
+    ,@KeyFormatId				INT 
     ,@SigValue				NVARCHAR (512) 
-    ,@SigAlgo				NVARCHAR (16) 
+    ,@SigAlgo				INT 
     ,@Comment				NVARCHAR (1024) 
     ,@IsEnabled				BIT
     ,@IsDeletable			BIT
@@ -28,10 +28,10 @@ BEGIN
 			,UserId
 			,PrivateKeyId   
 			,KeyValue
-			,KeyAlgo
-			,KeyFormat
+			,KeyAlgorithmId
+			,KeyFormatId
 			,SigValue
-			,SigAlgo
+			,SigAlgorithmId
 			,Comment
 			,IsEnabled
 			,IsDeletable
@@ -43,8 +43,8 @@ BEGIN
 			,@UserId
 			,@PrivateKeyId
 			,@KeyValue
-			,@KeyAlgo
-			,@KeyFormat
+			,@KeyAlgorithmId
+			,@KeyFormatId
 			,@SigValue
 			,@SigAlgo
 			,@Comment

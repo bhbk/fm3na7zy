@@ -1,13 +1,13 @@
 ﻿
 CREATE PROCEDURE [svc].[usp_Login_Insert]
      @UserId				UNIQUEIDENTIFIER
-    ,@UserAuthType			NVARCHAR (16) 
     ,@UserName				NVARCHAR (128) 
-    ,@FileSystemType		NVARCHAR (16) 
+    ,@AuthTypeId			INT 
+    ,@FileSystemTypeId		INT 
     ,@IsPasswordRequired	BIT
     ,@IsPublicKeyRequired	BIT
     ,@IsFileSystemReadOnly	BIT
-    ,@Debugger				NVARCHAR (16) 
+    ,@DebugTypeId				INT 
     ,@EncryptedPass			NVARCHAR (1024) 
     ,@IsEnabled				BIT
     ,@IsDeletable			BIT
@@ -25,13 +25,13 @@ BEGIN
 		INSERT INTO [dbo].[tbl_Login]
 			(
 			 UserId
-			,UserAuthType
 			,UserName
-			,FileSystemType
+			,AuthTypeId
+			,FileSystemTypeId
 			,IsPasswordRequired
 			,IsPublicKeyRequired
 			,IsFileSystemReadOnly
-			,Debugger
+			,DebugTypeId
 			,EncryptedPass
 			,IsEnabled
 			,IsDeletable
@@ -40,13 +40,13 @@ BEGIN
 		VALUES
 			(
 			@UserId
-			,@UserAuthType
 			,@UserName
-			,@FileSystemType
+			,@AuthTypeId
+			,@FileSystemTypeId
 			,@IsPasswordRequired
 			,@IsPublicKeyRequired
 			,@IsFileSystemReadOnly
-			,@Debugger
+			,@DebugTypeId
 			,@EncryptedPass
 			,@IsEnabled
 			,@IsDeletable

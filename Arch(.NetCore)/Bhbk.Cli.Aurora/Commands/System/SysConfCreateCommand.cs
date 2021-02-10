@@ -19,8 +19,8 @@ namespace Bhbk.Cli.Aurora.Commands.System
     {
         private readonly IConfiguration _conf;
         private readonly IUnitOfWork _uow;
-        private ConfigType _configType;
-        private readonly string _configTypeList = string.Join(", ", Enum.GetNames(typeof(ConfigType)));
+        private ConfigType_E _configType;
+        private readonly string _configTypeList = string.Join(", ", Enum.GetNames(typeof(ConfigType_E)));
         private string _configValue;
 
         public SysConfCreateCommand()
@@ -50,20 +50,20 @@ namespace Bhbk.Cli.Aurora.Commands.System
         {
             try
             {
-                var exists = _uow.Settings.Get(QueryExpressionFactory.GetQueryExpression<E_Setting>()
+                var exists = _uow.Settings.Get(QueryExpressionFactory.GetQueryExpression<Setting_EF>()
                     .Where(x => x.ConfigKey == _configType.ToString() && x.ConfigValue == _configValue).ToLambda())
                     .LastOrDefault();
 
                 if (exists != null)
                 {
                     Console.Out.WriteLine("  *** The config key/value pair entered already exists ***");
-                    FormatOutput.Settings(new List<E_Setting> { exists });
+                    FormatOutput.Settings(new List<Setting_EF> { exists });
 
                     return StandardOutput.FondFarewell();
                 }
 
                 var config = _uow.Settings.Create(
-                    new E_Setting
+                    new Setting_EF
                     {
                         ConfigKey = _configType.ToString(),
                         ConfigValue = _configValue,
@@ -72,7 +72,7 @@ namespace Bhbk.Cli.Aurora.Commands.System
 
                 _uow.Commit();
 
-                FormatOutput.Settings(new List<E_Setting> { config });
+                FormatOutput.Settings(new List<Setting_EF> { config });
 
                 return StandardOutput.FondFarewell();
             }

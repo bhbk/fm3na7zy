@@ -20,8 +20,8 @@ namespace Bhbk.Cli.Aurora.Commands.System
         private readonly IConfiguration _conf;
         private readonly IUnitOfWork _uow;
         private Guid _id;
-        private ConfigType _configType;
-        private readonly string _configTypeList = string.Join(", ", Enum.GetNames(typeof(ConfigType)));
+        private ConfigType_E _configType;
+        private readonly string _configTypeList = string.Join(", ", Enum.GetNames(typeof(ConfigType_E)));
         private string _configValue;
 
         public SysConfEditCommand()
@@ -56,7 +56,7 @@ namespace Bhbk.Cli.Aurora.Commands.System
         {
             try
             {
-                var config = _uow.Settings.Get(QueryExpressionFactory.GetQueryExpression<E_Setting>()
+                var config = _uow.Settings.Get(QueryExpressionFactory.GetQueryExpression<Setting_EF>()
                     .Where(x => x.Id == _id).ToLambda())
                     .SingleOrDefault();
 
@@ -72,7 +72,7 @@ namespace Bhbk.Cli.Aurora.Commands.System
                 _uow.Settings.Update(config);
                 _uow.Commit();
 
-                FormatOutput.Settings(new List<E_Setting> { config });
+                FormatOutput.Settings(new List<Setting_EF> { config });
 
                 return StandardOutput.FondFarewell();
             }

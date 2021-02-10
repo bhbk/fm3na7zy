@@ -21,11 +21,11 @@ namespace Bhbk.Cli.Aurora.Commands.User
     {
         private readonly IConfiguration _conf;
         private readonly IUnitOfWork _uow;
-        private E_Login _user;
+        private Login_EF _user;
         private Int32 _sequence;
         private IPNetwork _cidr;
-        private NetworkActionType _actionType;
-        private string _actionTypeList = string.Join(", ", Enum.GetNames(typeof(NetworkActionType)));
+        private NetworkActionType_E _actionType;
+        private string _actionTypeList = string.Join(", ", Enum.GetNames(typeof(NetworkActionType_E)));
 
         public UserNetCreateCommand()
         {
@@ -43,9 +43,9 @@ namespace Bhbk.Cli.Aurora.Commands.User
                 if (string.IsNullOrEmpty(arg))
                     throw new ConsoleHelpAsException($"  *** No user name given ***");
 
-                _user = _uow.Logins.Get(QueryExpressionFactory.GetQueryExpression<E_Login>()
+                _user = _uow.Logins.Get(QueryExpressionFactory.GetQueryExpression<Login_EF>()
                     .Where(x => x.UserName == arg).ToLambda(),
-                        new List<Expression<Func<E_Login, object>>>()
+                        new List<Expression<Func<Login_EF, object>>>()
                         {
                             x => x.Networks,
                         })
@@ -84,13 +84,13 @@ namespace Bhbk.Cli.Aurora.Commands.User
                 if (exists != null)
                 {
                     Console.Out.WriteLine("  *** The network entered already exists for user ***");
-                    FormatOutput.Networks(new List<E_Network> { exists });
+                    FormatOutput.Networks(new List<Network_EF> { exists });
 
                     return StandardOutput.FondFarewell();
                 }
 
                 var network = _uow.Networks.Create(
-                    new E_Network
+                    new Network_EF
                     {
                         UserId = _user.UserId,
                         SequenceId = _sequence,
@@ -101,7 +101,7 @@ namespace Bhbk.Cli.Aurora.Commands.User
 
                 _uow.Commit();
 
-                FormatOutput.Networks(new List<E_Network> { network });
+                FormatOutput.Networks(new List<Network_EF> { network });
 
                 return StandardOutput.FondFarewell();
             }

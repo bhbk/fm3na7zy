@@ -38,10 +38,10 @@ namespace Bhbk.Cli.Aurora.Commands.System
         {
             try
             {
-                var pubKeys = _uow.PublicKeys.Get(QueryExpressionFactory.GetQueryExpression<E_PublicKey>()
+                var pubKeys = _uow.PublicKeys.Get(QueryExpressionFactory.GetQueryExpression<PublicKey_EF>()
                     .Where(x => x.UserId == null).ToLambda());
 
-                var privKeys = _uow.PrivateKeys.Get(QueryExpressionFactory.GetQueryExpression<E_PrivateKey>()
+                var privKeys = _uow.PrivateKeys.Get(QueryExpressionFactory.GetQueryExpression<PrivateKey_EF>()
                     .Where(x => x.UserId == null).ToLambda());
 
                 FormatOutput.KeyPairs(pubKeys.OrderBy(x => x.CreatedUtc), privKeys);
@@ -82,7 +82,7 @@ namespace Bhbk.Cli.Aurora.Commands.System
 
                     if (pubKey.PrivateKeyId != null)
                     {
-                        var privKey = _uow.PrivateKeys.Get(QueryExpressionFactory.GetQueryExpression<E_PrivateKey>()
+                        var privKey = _uow.PrivateKeys.Get(QueryExpressionFactory.GetQueryExpression<PrivateKey_EF>()
                             .Where(x => x.UserId == null && x.Id == pubKey.PrivateKeyId).ToLambda())
                             .Single();
 

@@ -36,7 +36,7 @@ namespace Bhbk.WebApi.Aurora.Tasks
                     var keepDuration = int.Parse(conf["Jobs:SessionActivity:KeepDuration"]);
                     var deleteBeforeDate = DateTime.UtcNow.AddSeconds(-keepDuration);
 
-                    var entries = uow.Sessions.Get(QueryExpressionFactory.GetQueryExpression<E_Session>()
+                    var entries = uow.Sessions.Get(QueryExpressionFactory.GetQueryExpression<Session_EF>()
                         .Where(x => x.CreatedUtc < deleteBeforeDate).ToLambda());
 
                     if (entries.Any())

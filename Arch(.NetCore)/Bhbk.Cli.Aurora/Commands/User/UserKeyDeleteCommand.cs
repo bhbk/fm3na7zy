@@ -19,7 +19,7 @@ namespace Bhbk.Cli.Aurora.Commands.User
     {
         private readonly IConfiguration _conf;
         private readonly IUnitOfWork _uow;
-        private E_Login _user;
+        private Login_EF _user;
         private bool _deleteAll = false;
 
         public UserKeyDeleteCommand()
@@ -38,9 +38,9 @@ namespace Bhbk.Cli.Aurora.Commands.User
                 if (string.IsNullOrEmpty(arg))
                     throw new ConsoleHelpAsException($"  *** No user name given ***");
 
-                _user = _uow.Logins.Get(QueryExpressionFactory.GetQueryExpression<E_Login>()
+                _user = _uow.Logins.Get(QueryExpressionFactory.GetQueryExpression<Login_EF>()
                     .Where(x => x.UserName == arg).ToLambda(),
-                        new List<Expression<Func<E_Login, object>>>()
+                        new List<Expression<Func<Login_EF, object>>>()
                         {
                             x => x.PrivateKeys,
                             x => x.PublicKeys,
@@ -75,12 +75,12 @@ namespace Bhbk.Cli.Aurora.Commands.User
 
                     if (input.ToLower() == "yes")
                     {
-                        _uow.PrivateKeys.Delete(QueryExpressionFactory.GetQueryExpression<E_PrivateKey>()
+                        _uow.PrivateKeys.Delete(QueryExpressionFactory.GetQueryExpression<PrivateKey_EF>()
                             .Where(x => x.UserId == _user.UserId && x.IsDeletable == true).ToLambda());
 
                         _uow.Commit();
 
-                        _uow.PublicKeys.Delete(QueryExpressionFactory.GetQueryExpression<E_PublicKey>()
+                        _uow.PublicKeys.Delete(QueryExpressionFactory.GetQueryExpression<PublicKey_EF>()
                             .Where(x => x.UserId == _user.UserId && x.IsDeletable == true).ToLambda());
 
                         _uow.Commit();
@@ -96,12 +96,12 @@ namespace Bhbk.Cli.Aurora.Commands.User
 
                     if (pubKey != null)
                     {
-                        _uow.PrivateKeys.Delete(QueryExpressionFactory.GetQueryExpression<E_PrivateKey>()
+                        _uow.PrivateKeys.Delete(QueryExpressionFactory.GetQueryExpression<PrivateKey_EF>()
                             .Where(x => x.UserId == _user.UserId && x.Id == pubKey.PrivateKeyId && x.IsDeletable == true).ToLambda());
 
                         _uow.Commit();
 
-                        _uow.PublicKeys.Delete(QueryExpressionFactory.GetQueryExpression<E_PublicKey>()
+                        _uow.PublicKeys.Delete(QueryExpressionFactory.GetQueryExpression<PublicKey_EF>()
                             .Where(x => x.UserId == _user.UserId && x.Id == pubKey.Id && x.IsDeletable == true).ToLambda());
 
                         _uow.Commit();

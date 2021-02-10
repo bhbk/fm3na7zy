@@ -59,7 +59,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Factories
             return folderMem;
         }
 
-        internal static E_LoginMem CheckUser(IUnitOfWorkMem uow, E_Login user)
+        internal static E_LoginMem CheckUser(IUnitOfWorkMem uow, Login_EF user)
         {
             var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
 

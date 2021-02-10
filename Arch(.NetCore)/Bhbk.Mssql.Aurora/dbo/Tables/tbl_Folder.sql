@@ -8,9 +8,11 @@
     [LastAccessedUtc] DATETIMEOFFSET (7) NOT NULL,
     [LastUpdatedUtc]  DATETIMEOFFSET (7) NOT NULL,
     CONSTRAINT [PK_tbl_Folder] PRIMARY KEY CLUSTERED ([Id] ASC),
-    CONSTRAINT [FK_tbl_Folder_UserID] FOREIGN KEY ([UserId]) REFERENCES [dbo].[tbl_Login] ([UserId]) ON UPDATE CASCADE,
-    CONSTRAINT [FK_tbl_Folder_ParentID] FOREIGN KEY ([ParentId]) REFERENCES [dbo].[tbl_Folder] ([Id])
+    CONSTRAINT [FK_tbl_Folder_ParentID] FOREIGN KEY ([ParentId]) REFERENCES [dbo].[tbl_Folder] ([Id]),
+    CONSTRAINT [FK_tbl_Folder_tbl_Login] FOREIGN KEY ([UserId]) REFERENCES [dbo].[tbl_Login] ([UserId]) ON UPDATE CASCADE
 );
+
+
 
 
 GO

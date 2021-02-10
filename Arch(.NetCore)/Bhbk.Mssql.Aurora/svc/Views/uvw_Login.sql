@@ -1,21 +1,21 @@
 ﻿
+
 CREATE VIEW [svc].[uvw_Login]
 AS
 SELECT
 	UserId
-	,UserAuthType
 	,UserName
-	,FileSystemType
+	,AuthTypeId
+	,FileSystemTypeId
 	,FileSystemChrootPath
 	,IsPasswordRequired
 	,IsPublicKeyRequired
 	,IsFileSystemReadOnly
-	,Debugger
+	,DebugTypeId
 	,EncryptedPass
 	,IsEnabled
 	,IsDeletable
 	,CreatedUtc
-	,LastUpdatedUtc
 
 FROM
 	[dbo].[tbl_Login]

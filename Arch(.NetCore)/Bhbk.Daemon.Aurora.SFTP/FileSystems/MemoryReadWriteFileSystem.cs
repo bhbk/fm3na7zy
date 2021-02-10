@@ -28,7 +28,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
         private readonly IUnitOfWorkMem _uowMem;
         private E_LoginMem _userMem;
 
-        internal MemoryReadWriteFileSystem(FileSystemProviderSettings settings, IServiceScopeFactory factory, E_Login user)
+        internal MemoryReadWriteFileSystem(FileSystemProviderSettings settings, IServiceScopeFactory factory, Login_EF user)
             : base(settings)
         {
             _factory = factory;

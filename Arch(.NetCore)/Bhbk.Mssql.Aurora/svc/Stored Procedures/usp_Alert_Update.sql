@@ -17,8 +17,6 @@ BEGIN
 
     	BEGIN TRANSACTION;
 
-        DECLARE @LASTUPDATED DATETIMEOFFSET (7) = GETUTCDATE()
-
         UPDATE [dbo].[tbl_Alert]
         SET
 			 OnDelete				= @OnDelete
@@ -28,7 +26,6 @@ BEGIN
 			,ToEmailAddress			= @ToEmailAddress
 			,ToPhoneNumber			= @ToPhoneNumber
 			,IsEnabled				= @IsEnabled
-            ,LastUpdatedUtc			= @LASTUPDATED
         WHERE Id = @Id
 
 		IF @@ROWCOUNT != 1

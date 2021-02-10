@@ -20,10 +20,10 @@ namespace Bhbk.Cli.Aurora.Commands.FileSystem
     {
         private readonly IConfiguration _conf;
         private readonly IUnitOfWork _uow;
-        private E_Login _user;
+        private Login_EF _user;
         private Uri _uncPath;
-        private MountAuthType _authType;
-        private string _authTypeList = string.Join(", ", Enum.GetNames(typeof(MountAuthType)));
+        private SmbAuthType_E _authType;
+        private string _authTypeList = string.Join(", ", Enum.GetNames(typeof(SmbAuthType_E)));
         private bool _alternateCredential;
 
         public FsGroupCreateCommand()
@@ -42,9 +42,9 @@ namespace Bhbk.Cli.Aurora.Commands.FileSystem
                 if (string.IsNullOrEmpty(arg))
                     throw new ConsoleHelpAsException($"  *** No user name given ***");
 
-                _user = _uow.Logins.Get(QueryExpressionFactory.GetQueryExpression<E_Login>()
+                _user = _uow.Logins.Get(QueryExpressionFactory.GetQueryExpression<Login_EF>()
                     .Where(x => x.UserName == arg).ToLambda(),
-                        new List<Expression<Func<E_Login, object>>>()
+                        new List<Expression<Func<Login_EF, object>>>()
                         {
                             x => x.Mount,
                             x => x.Mount.Ambassador,
@@ -83,12 +83,12 @@ namespace Bhbk.Cli.Aurora.Commands.FileSystem
                 if (exists != null)
                 {
                     Console.Out.WriteLine("  *** The user already has a mount ***");
-                    FormatOutput.Mounts(new List<E_Mount> { exists });
+                    FormatOutput.Mounts(new List<Mount_EF> { exists });
 
                     return StandardOutput.FondFarewell();
                 }
 
-                E_Mount mount;
+                Mount_EF mount;
 
                 if (_alternateCredential)
                 {
@@ -102,7 +102,7 @@ namespace Bhbk.Cli.Aurora.Commands.FileSystem
                     Console.Out.WriteLine();
 
                     mount = _uow.Mounts.Create(
-                        new E_Mount
+                        new Mount_EF
                         {
                             UserId = _user.UserId,
                             AmbassadorId = Guid.Parse(input),
@@ -115,7 +115,7 @@ namespace Bhbk.Cli.Aurora.Commands.FileSystem
                 else
                 {
                     mount = _uow.Mounts.Create(
-                        new E_Mount
+                        new Mount_EF
                         {
                             UserId = _user.UserId,
                             AuthType = _authType.ToString(),
@@ -125,7 +125,7 @@ namespace Bhbk.Cli.Aurora.Commands.FileSystem
                     _uow.Commit();
                 }
 
-                FormatOutput.Mounts(new List<E_Mount> { mount });
+                FormatOutput.Mounts(new List<Mount_EF> { mount });
 
                 return StandardOutput.FondFarewell();
             }

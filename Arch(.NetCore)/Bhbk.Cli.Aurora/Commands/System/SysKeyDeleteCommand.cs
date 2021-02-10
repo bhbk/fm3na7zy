@@ -40,10 +40,10 @@ namespace Bhbk.Cli.Aurora.Commands.System
         {
             try
             {
-                var privKeys = _uow.PrivateKeys.Get(QueryExpressionFactory.GetQueryExpression<E_PrivateKey>()
+                var privKeys = _uow.PrivateKeys.Get(QueryExpressionFactory.GetQueryExpression<PrivateKey_EF>()
                     .Where(x => x.UserId == null && x.IsDeletable == true).ToLambda());
 
-                var pubKeys = _uow.PublicKeys.Get(QueryExpressionFactory.GetQueryExpression<E_PublicKey>()
+                var pubKeys = _uow.PublicKeys.Get(QueryExpressionFactory.GetQueryExpression<PublicKey_EF>()
                     .Where(x => x.UserId == null && x.IsDeletable == true).ToLambda());
 
                 FormatOutput.KeyPairs(pubKeys.OrderBy(x => x.CreatedUtc), privKeys);
@@ -56,12 +56,12 @@ namespace Bhbk.Cli.Aurora.Commands.System
 
                     if (input.ToLower() == "yes")
                     {
-                        _uow.PublicKeys.Delete(QueryExpressionFactory.GetQueryExpression<E_PublicKey>()
+                        _uow.PublicKeys.Delete(QueryExpressionFactory.GetQueryExpression<PublicKey_EF>()
                             .Where(x => x.UserId == null && x.IsDeletable == true).ToLambda());
 
                         _uow.Commit();
 
-                        _uow.PrivateKeys.Delete(QueryExpressionFactory.GetQueryExpression<E_PrivateKey>()
+                        _uow.PrivateKeys.Delete(QueryExpressionFactory.GetQueryExpression<PrivateKey_EF>()
                             .Where(x => x.UserId == null && x.IsDeletable == true).ToLambda());
 
                         _uow.Commit();
@@ -72,18 +72,18 @@ namespace Bhbk.Cli.Aurora.Commands.System
                     Console.Out.Write("  *** Enter GUID of public key to delete *** : ");
                     var input = Guid.Parse(StandardInput.GetInput());
 
-                    var pubKey = _uow.PublicKeys.Get(QueryExpressionFactory.GetQueryExpression<E_PublicKey>()
+                    var pubKey = _uow.PublicKeys.Get(QueryExpressionFactory.GetQueryExpression<PublicKey_EF>()
                         .Where(x => x.Id == input && x.IsDeletable == true).ToLambda())
                         .SingleOrDefault();
 
                     if (pubKey != null)
                     {
-                        _uow.PrivateKeys.Delete(QueryExpressionFactory.GetQueryExpression<E_PrivateKey>()
+                        _uow.PrivateKeys.Delete(QueryExpressionFactory.GetQueryExpression<PrivateKey_EF>()
                             .Where(x => x.Id == pubKey.PrivateKeyId && x.IsDeletable == true).ToLambda());
 
                         _uow.Commit();
 
-                        _uow.PublicKeys.Delete(QueryExpressionFactory.GetQueryExpression<E_PublicKey>()
+                        _uow.PublicKeys.Delete(QueryExpressionFactory.GetQueryExpression<PublicKey_EF>()
                             .Where(x => x.Id == pubKey.Id && x.IsDeletable == true).ToLambda());
 
                         _uow.Commit();

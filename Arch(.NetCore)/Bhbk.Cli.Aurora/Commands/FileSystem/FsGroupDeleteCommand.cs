@@ -19,7 +19,7 @@ namespace Bhbk.Cli.Aurora.Commands.FileSystem
     {
         private readonly IConfiguration _conf;
         private readonly IUnitOfWork _uow;
-        private E_Login _user;
+        private Login_EF _user;
 
         public FsGroupDeleteCommand()
         {
@@ -37,9 +37,9 @@ namespace Bhbk.Cli.Aurora.Commands.FileSystem
                 if (string.IsNullOrEmpty(arg))
                     throw new ConsoleHelpAsException($"  *** No user name given ***");
 
-                _user = _uow.Logins.Get(QueryExpressionFactory.GetQueryExpression<E_Login>()
+                _user = _uow.Logins.Get(QueryExpressionFactory.GetQueryExpression<Login_EF>()
                     .Where(x => x.UserName == arg).ToLambda(),
-                        new List<Expression<Func<E_Login, object>>>()
+                        new List<Expression<Func<Login_EF, object>>>()
                         {
                             x => x.Mount,
                             x => x.Mount.Ambassador,
@@ -55,7 +55,7 @@ namespace Bhbk.Cli.Aurora.Commands.FileSystem
         {
             try
             {
-                FormatOutput.Mounts(new List<E_Mount> { _user.Mount });
+                FormatOutput.Mounts(new List<Mount_EF> { _user.Mount });
 
                 _uow.Mounts.Delete(_user.Mount);
                 _uow.Commit();

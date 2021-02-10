@@ -9,10 +9,13 @@
     [ToPhoneNumber]  NVARCHAR (15)      NULL,
     [IsEnabled]      BIT                NOT NULL,
     [CreatedUtc]     DATETIMEOFFSET (7) NOT NULL,
-    [LastUpdatedUtc] DATETIMEOFFSET (7) NULL,
     CONSTRAINT [PK_tbl_Alert] PRIMARY KEY CLUSTERED ([Id] ASC),
-    CONSTRAINT [FK_tbl_Alert_UserID] FOREIGN KEY ([UserId]) REFERENCES [dbo].[tbl_Login] ([UserId]) ON UPDATE CASCADE
+    CONSTRAINT [FK_tbl_Alert_tbl_Login] FOREIGN KEY ([UserId]) REFERENCES [dbo].[tbl_Login] ([UserId]) ON UPDATE CASCADE
 );
+
+
+
+
 
 
 GO

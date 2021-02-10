@@ -6,17 +6,17 @@ namespace Bhbk.Lib.Aurora.Data_EF6.UnitOfWork
 {
     public interface IUnitOfWork : IGenericUnitOfWork
     {
-        IGenericRepository<E_Ambassador> Ambassadors { get; }
-        IGenericRepository<E_Network> Networks { get; }
-        IGenericRepository<E_PrivateKey> PrivateKeys { get; }
-        IGenericRepository<E_PublicKey> PublicKeys { get; }
-        IGenericRepository<E_Session> Sessions { get; }
-        IGenericRepository<E_Setting> Settings { get; }
-        IGenericRepository<E_Login> Logins { get; }
-        IGenericRepository<E_Alert> Alerts { get; }
-        IGenericRepository<E_File> Files { get; }
-        IGenericRepository<E_Folder> Folders { get; }
-        IGenericRepository<E_Mount> Mounts { get; }
-        IGenericRepository<E_LoginUsage> Usages { get; }
+        IGenericRepository<Ambassador_EF> Ambassadors { get; }
+        IGenericRepository<Network_EF> Networks { get; }
+        IGenericRepository<PrivateKey_EF> PrivateKeys { get; }
+        IGenericRepository<PublicKey_EF> PublicKeys { get; }
+        IGenericRepository<Session_EF> Sessions { get; }
+        IGenericRepository<Setting_EF> Settings { get; }
+        IGenericRepository<Login_EF> Logins { get; }
+        IGenericRepository<Alert_EF> Alerts { get; }
+        IGenericRepository<File_EF> Files { get; }
+        IGenericRepository<Folder_EF> Folders { get; }
+        IGenericRepository<Mount_EF> Mounts { get; }
+        IGenericRepository<LoginUsage_EF> Usages { get; }
     }
 }

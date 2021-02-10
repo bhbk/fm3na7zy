@@ -8,7 +8,7 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
 {
     public static class NetworkHelper
     {
-        public static bool ValidateAddress(E_Network network, IPAddress client)
+        public static bool ValidateAddress(Network_EF network, IPAddress client)
         {
             IPNetwork cidr;
 
@@ -19,7 +19,7 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
             return false;
         }
 
-        public static bool ValidateAddress(IEnumerable<E_Network> networks, IPAddress client)
+        public static bool ValidateAddress(IEnumerable<Network_EF> networks, IPAddress client)
         {
             var found = false;
 

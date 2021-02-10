@@ -48,7 +48,7 @@ namespace Bhbk.Cli.Aurora.Commands.System
         {
             try
             {
-                var ambassador = _uow.Ambassadors.Get(QueryExpressionFactory.GetQueryExpression<E_Ambassador>()
+                var ambassador = _uow.Ambassadors.Get(QueryExpressionFactory.GetQueryExpression<Ambassador_EF>()
                     .Where(x => x.Id == _id).ToLambda())
                     .SingleOrDefault();
 
@@ -76,7 +76,7 @@ namespace Bhbk.Cli.Aurora.Commands.System
                 _uow.Ambassadors.Update(ambassador);
                 _uow.Commit();
 
-                FormatOutput.Ambassadors(new List<E_Ambassador> { ambassador });
+                FormatOutput.Ambassadors(new List<Ambassador_EF> { ambassador });
 
                 return StandardOutput.FondFarewell();
             }

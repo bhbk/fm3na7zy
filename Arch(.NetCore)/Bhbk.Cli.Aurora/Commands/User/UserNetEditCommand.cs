@@ -21,13 +21,13 @@ namespace Bhbk.Cli.Aurora.Commands.User
     {
         private IConfiguration _conf;
         private IUnitOfWork _uow;
-        private E_Login _user;
+        private Login_EF _user;
         private Guid _id;
         private bool? _isEnabled;
         private Int32 _sequence = Int32.MinValue;
         private IPNetwork _cidr = null;
-        private NetworkActionType _actionType;
-        private readonly string _actionTypeList = string.Join(", ", Enum.GetNames(typeof(NetworkActionType)));
+        private NetworkActionType_E _actionType;
+        private readonly string _actionTypeList = string.Join(", ", Enum.GetNames(typeof(NetworkActionType_E)));
 
         public UserNetEditCommand()
         {
@@ -45,9 +45,9 @@ namespace Bhbk.Cli.Aurora.Commands.User
                 if (string.IsNullOrEmpty(arg))
                     throw new ConsoleHelpAsException($"  *** No user name given ***");
 
-                _user = _uow.Logins.Get(QueryExpressionFactory.GetQueryExpression<E_Login>()
+                _user = _uow.Logins.Get(QueryExpressionFactory.GetQueryExpression<Login_EF>()
                     .Where(x => x.UserName == arg).ToLambda(),
-                        new List<Expression<Func<E_Login, object>>>()
+                        new List<Expression<Func<Login_EF, object>>>()
                         {
                             x => x.Networks,
                         })
@@ -111,7 +111,7 @@ namespace Bhbk.Cli.Aurora.Commands.User
                 _uow.Networks.Update(network);
                 _uow.Commit();
 
-                FormatOutput.Networks(new List<E_Network> { network });
+                FormatOutput.Networks(new List<Network_EF> { network });
 
                 return StandardOutput.FondFarewell();
             }

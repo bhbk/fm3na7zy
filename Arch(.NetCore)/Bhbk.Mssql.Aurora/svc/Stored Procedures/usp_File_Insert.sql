@@ -7,7 +7,8 @@ CREATE PROCEDURE [svc].[usp_File_Insert]
     ,@RealPath				NVARCHAR (MAX) 
     ,@RealFileName			NVARCHAR (260) 
 	,@RealFileSize			BIGINT
-    ,@HashSHA256			NVARCHAR (64) 
+	,@HashTypeId		INT
+    ,@HashValue			NVARCHAR (64) 
 
 AS
 BEGIN
@@ -30,7 +31,8 @@ BEGIN
 			,RealPath
 			,RealFileName
 			,RealFileSize
-			,HashSHA256
+			,HashTypeId
+			,HashValue
 			,CreatedUtc
 			,LastAccessedUtc
 			,LastUpdatedUtc
@@ -46,7 +48,8 @@ BEGIN
 			,@RealPath
 			,@RealFileName
 			,@RealFileSize
-			,@HashSHA256
+			,@HashTypeId
+			,@HashValue
 			,@CREATEDUTC
 			,@CREATEDUTC
 			,@CREATEDUTC

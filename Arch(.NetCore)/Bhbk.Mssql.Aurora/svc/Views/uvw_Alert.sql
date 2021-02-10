@@ -12,7 +12,6 @@ SELECT
 	,ToPhoneNumber
 	,IsEnabled
 	,CreatedUtc
-	,LastUpdatedUtc
 
 FROM
 	[dbo].[tbl_Alert]

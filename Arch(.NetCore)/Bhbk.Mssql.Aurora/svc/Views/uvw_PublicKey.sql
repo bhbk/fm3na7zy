@@ -1,4 +1,5 @@
 ﻿
+
 CREATE VIEW [svc].[uvw_PublicKey]
 AS
 SELECT
@@ -6,15 +7,14 @@ SELECT
 	,UserId
 	,PrivateKeyId
 	,KeyValue
-	,KeyAlgo
-	,KeyFormat
+	,KeyAlgorithmId
+	,KeyFormatId
 	,SigValue
-	,SigAlgo
+	,SigAlgorithmId
 	,Comment
 	,IsEnabled
 	,IsDeletable
 	,CreatedUtc
-	,LastUpdatedUtc
 
 FROM
 	[dbo].[tbl_PublicKey]

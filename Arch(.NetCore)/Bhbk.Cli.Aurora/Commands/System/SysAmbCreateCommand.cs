@@ -47,14 +47,14 @@ namespace Bhbk.Cli.Aurora.Commands.System
         {
             try
             {
-                var exists = _uow.Ambassadors.Get(QueryExpressionFactory.GetQueryExpression<E_Ambassador>()
+                var exists = _uow.Ambassadors.Get(QueryExpressionFactory.GetQueryExpression<Ambassador_EF>()
                     .Where(x => x.UserName == _credLogin).ToLambda())
                     .SingleOrDefault();
 
                 if (exists != null)
                 {
                     Console.Out.WriteLine("  *** The credential entered already exists ***");
-                    FormatOutput.Ambassadors(new List<E_Ambassador> { exists });
+                    FormatOutput.Ambassadors(new List<Ambassador_EF> { exists });
 
                     return StandardOutput.FondFarewell();
                 }
@@ -74,7 +74,7 @@ namespace Bhbk.Cli.Aurora.Commands.System
                     throw new ArithmeticException();
 
                 var ambassador = _uow.Ambassadors.Create(
-                    new E_Ambassador
+                    new Ambassador_EF
                     {
                         UserName = _credLogin,
                         EncryptedPass = cipherText,
@@ -84,7 +84,7 @@ namespace Bhbk.Cli.Aurora.Commands.System
 
                 _uow.Commit();
 
-                FormatOutput.Ambassadors(new List<E_Ambassador> { ambassador });
+                FormatOutput.Ambassadors(new List<Ambassador_EF> { ambassador });
 
                 return StandardOutput.FondFarewell();
             }

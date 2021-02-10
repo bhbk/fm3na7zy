@@ -42,10 +42,10 @@ namespace Bhbk.Cli.Aurora.Commands.User
         {
             try
             {
-                IEnumerable<E_Login> users;
+                IEnumerable<Login_EF> users;
 
                 if (!string.IsNullOrEmpty(_user))
-                    users = _uow.Logins.Get(QueryExpressionFactory.GetQueryExpression<E_Session>()
+                    users = _uow.Logins.Get(QueryExpressionFactory.GetQueryExpression<Session_EF>()
                         .Where(x => x.UserName.Contains(_user)).ToLambda())
                         .OrderBy(x => x.UserName).TakeLast(100);
 

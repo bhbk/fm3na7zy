@@ -7,7 +7,8 @@ CREATE PROCEDURE [svc].[usp_File_Update]
     ,@RealPath				NVARCHAR (MAX) 
     ,@RealFileName			NVARCHAR (260) 
 	,@RealFileSize			BIGINT
-    ,@HashSHA256			NVARCHAR (64) 
+	,@HashTypeId		INT
+    ,@HashValue			NVARCHAR (64) 
 	,@LastAccessedUtc		DATETIMEOFFSET (7)
 	,@LastUpdatedUtc		DATETIMEOFFSET (7)
 	,@LastVerifiedUtc		DATETIMEOFFSET (7)
@@ -28,7 +29,8 @@ BEGIN
 			,RealPath				= @RealPath
 			,RealFileName			= @RealFileName
 			,RealFileSize			= @RealFileSize
-			,HashSHA256				= @HashSHA256
+			,HashTypeId			= @HashTypeId
+			,HashValue				= @HashValue
 			,LastAccessedUtc		= @LastAccessedUtc
             ,LastUpdatedUtc			= @LastUpdatedUtc
 			,LastVerifiedUtc		= @LastVerifiedUtc

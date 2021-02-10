@@ -12,6 +12,7 @@ using Rebex.Net;
 using Rebex.Security.Certificates;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Bhbk.Cli.Aurora.Commands.System
 {
@@ -20,7 +21,13 @@ namespace Bhbk.Cli.Aurora.Commands.System
         private readonly IConfiguration _conf;
         private readonly IUnitOfWork _uow;
         private SshHostKeyAlgorithm _keyAlgo;
-        private readonly string _keyAlgoList = string.Join(", ", Enum.GetNames(typeof(SshHostKeyAlgorithm)));
+        private string _keyAlgoList = string.Join(", ", Enum.GetNames(typeof(SshHostKeyAlgorithm))
+            .Where(x => x.Equals("rsa", StringComparison.OrdinalIgnoreCase)
+                || x.Equals("dss", StringComparison.OrdinalIgnoreCase)
+                || x.Equals("ed25519", StringComparison.OrdinalIgnoreCase)
+                || x.Equals("ecdsanistp256", StringComparison.OrdinalIgnoreCase)
+                || x.Equals("ecdsanistp384", StringComparison.OrdinalIgnoreCase)
+                || x.Equals("ecdsanistp521", StringComparison.OrdinalIgnoreCase)));
         private string _privKeyPass;
         private int _privKeySize;
 
@@ -82,7 +89,7 @@ namespace Bhbk.Cli.Aurora.Commands.System
 
                 _uow.Commit();
 
-                FormatOutput.KeyPairs(new List<E_PublicKey> { keyPair.Item1 }, new List<E_PrivateKey> { keyPair.Item2 });
+                FormatOutput.KeyPairs(new List<PublicKey_EF> { keyPair.Item1 }, new List<PrivateKey_EF> { keyPair.Item2 });
 
                 return StandardOutput.FondFarewell();
             }

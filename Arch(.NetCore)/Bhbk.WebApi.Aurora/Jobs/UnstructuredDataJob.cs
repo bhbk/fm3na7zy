@@ -40,10 +40,10 @@ namespace Bhbk.WebApi.Aurora.Tasks
                     var staggerVerify = int.Parse(conf["Jobs:UnstructuredData:StaggerVerify"]);
                     var verifyAfterDate = DateTime.UtcNow.AddSeconds(-staggerVerify);
 
-                    var files = uow.Files.Get(QueryExpressionFactory.GetQueryExpression<E_File>()
+                    var files = uow.Files.Get(QueryExpressionFactory.GetQueryExpression<File_EF>()
                         .Where(x => x.LastVerifiedUtc < verifyAfterDate).ToLambda());
 
-                    var problems = new List<E_File>();
+                    var problems = new List<File_EF>();
 
                     foreach (var file in files)
                     {
@@ -59,12 +59,12 @@ namespace Bhbk.WebApi.Aurora.Tasks
                                 var hash = sha256.ComputeHash(fs);
                                 var hashCheck = Strings.GetHexString(hash);
 
-                                if (file.HashSHA256 != hashCheck)
+                                if (file.HashValue != hashCheck)
                                 {
                                     problems.Add(file);
 
                                     Log.Error($"'{callPath}' failed on {Dns.GetHostName().ToUpper()} for {filePath}" +
-                                        $" recorded hash '{file.HashSHA256}' does not match returned hash '{hashCheck}'");
+                                        $" recorded hash '{file.HashTypeId}' does not match returned hash '{hashCheck}'");
 
                                     continue;
                                 }

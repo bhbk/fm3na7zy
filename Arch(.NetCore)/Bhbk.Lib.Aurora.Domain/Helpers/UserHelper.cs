@@ -25,10 +25,10 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
         private const int LOGON32_PROVIDER_DEFAULT = 0;
         private const int LOGON32_LOGON_INTERACTIVE = 2;
 
-        public static ICollection<E_Ambassador> ChangeAmbassadorSecrets(ICollection<E_Ambassador> creds,
+        public static ICollection<Ambassador_EF> ChangeAmbassadorSecrets(ICollection<Ambassador_EF> creds,
             string secretCurrent, string secretNew)
         {
-            var ambassadorCreds = new List<E_Ambassador>();
+            var ambassadorCreds = new List<Ambassador_EF>();
 
             foreach (var cred in creds)
             {
@@ -46,10 +46,10 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
             return ambassadorCreds;
         }
 
-        public static ICollection<E_Login> ChangeLoginSecrets(ICollection<E_Login> creds,
+        public static ICollection<Login_EF> ChangeLoginSecrets(ICollection<Login_EF> creds,
             string secretCurrent, string secretNew)
         {
-            var loginCreds = new List<E_Login>();
+            var loginCreds = new List<Login_EF>();
 
             foreach (var cred in creds)
             {
@@ -80,7 +80,7 @@ namespace Bhbk.Lib.Aurora.Domain.Helpers
             return safeAccessTokenHandle;
         }
 
-        public static bool ValidatePubKey(ICollection<E_PublicKey> userKeys, SshPublicKey loginKey)
+        public static bool ValidatePubKey(ICollection<PublicKey_EF> userKeys, SshPublicKey loginKey)
         {
             var loginStream = new MemoryStream();
             loginKey.SavePublicKey(loginStream, SshPublicKeyFormat.Pkcs8);

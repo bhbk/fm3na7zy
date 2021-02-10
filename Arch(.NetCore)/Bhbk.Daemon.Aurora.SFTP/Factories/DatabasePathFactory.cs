@@ -12,18 +12,18 @@ namespace Bhbk.Daemon.Aurora.SFTP.Factories
 {
     internal class DatabasePathFactory
     {
-        internal static E_Folder CheckFolder(IUnitOfWork uow, E_Login user)
+        internal static Folder_EF CheckFolder(IUnitOfWork uow, Login_EF user)
         {
             var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
 
-            var folder = uow.Folders.Get(QueryExpressionFactory.GetQueryExpression<E_Folder>()
+            var folder = uow.Folders.Get(QueryExpressionFactory.GetQueryExpression<Folder_EF>()
                 .Where(x => x.UserId == user.UserId && x.ParentId == null).ToLambda())
                 .SingleOrDefault();
 
             if (folder == null)
             {
                 folder = uow.Folders.Create(
-                    new E_Folder
+                    new Folder_EF
                     {
                         UserId = user.UserId,
                         ParentId = null,
@@ -39,7 +39,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Factories
             return folder;
         }
 
-        internal static E_File PathToFile(IUnitOfWork uow, E_Login user, string path)
+        internal static File_EF PathToFile(IUnitOfWork uow, Login_EF user, string path)
         {
             if (path.FirstOrDefault() == '/')
                 path = path.Substring(1);
@@ -53,19 +53,19 @@ namespace Bhbk.Daemon.Aurora.SFTP.Factories
 
             var folder = PathToFolder(uow, user, folderPath);
 
-            var file = uow.Files.Get(QueryExpressionFactory.GetQueryExpression<E_File>()
+            var file = uow.Files.Get(QueryExpressionFactory.GetQueryExpression<File_EF>()
                 .Where(x => x.UserId == user.UserId && x.FolderId == folder.Id && x.VirtualName == filePath).ToLambda())
                 .SingleOrDefault();
 
             return file;
         }
 
-        internal static E_Folder PathToFolder(IUnitOfWork uow, E_Login user, string path)
+        internal static Folder_EF PathToFolder(IUnitOfWork uow, Login_EF user, string path)
         {
             if (path.FirstOrDefault() == '/')
                 path = path.Substring(1);
 
-            var folder = uow.Folders.Get(QueryExpressionFactory.GetQueryExpression<E_Folder>()
+            var folder = uow.Folders.Get(QueryExpressionFactory.GetQueryExpression<Folder_EF>()
                 .Where(x => x.UserId == user.UserId && x.ParentId == null).ToLambda())
                 .SingleOrDefault();
 
@@ -74,7 +74,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Factories
 
             foreach (var entry in path.Split("/"))
             {
-                folder = uow.Folders.Get(QueryExpressionFactory.GetQueryExpression<E_Folder>()
+                folder = uow.Folders.Get(QueryExpressionFactory.GetQueryExpression<Folder_EF>()
                     .Where(x => x.UserId == user.UserId && x.ParentId == folder.Id && x.VirtualName == entry).ToLambda())
                     .SingleOrDefault();
             };
@@ -82,12 +82,12 @@ namespace Bhbk.Daemon.Aurora.SFTP.Factories
             return folder;
         }
 
-        internal static string FileToPath(IUnitOfWork uow, E_Login user, E_File file)
+        internal static string FileToPath(IUnitOfWork uow, Login_EF user, File_EF file)
         {
             var path = string.Empty;
             var paths = new List<string> { };
 
-            var folder = uow.Folders.Get(QueryExpressionFactory.GetQueryExpression<E_Folder>()
+            var folder = uow.Folders.Get(QueryExpressionFactory.GetQueryExpression<Folder_EF>()
                 .Where(x => x.UserId == user.UserId && x.Id == file.FolderId).ToLambda())
                 .Single();
 
@@ -105,7 +105,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Factories
             return path;
         }
 
-        internal static string FolderToPath(IUnitOfWork uow, E_Login user, E_Folder folder)
+        internal static string FolderToPath(IUnitOfWork uow, Login_EF user, Folder_EF folder)
         {
             var path = string.Empty;
             var paths = new List<string> { };

@@ -10,7 +10,8 @@ SELECT
 	,RealPath
 	,RealFileName
 	,RealFileSize
-	,HashSHA256
+	,HashTypeId
+	,HashValue
 	,CreatedUtc
 	,LastAccessedUtc
 	,LastUpdatedUtc

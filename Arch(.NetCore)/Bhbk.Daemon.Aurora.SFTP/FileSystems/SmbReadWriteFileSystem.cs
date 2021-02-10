@@ -25,10 +25,10 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
     internal class SmbReadWriteFileSystem : ReadWriteFileSystemProvider
     {
         private readonly SafeAccessTokenHandle _userToken;
-        private readonly E_Login _user;
+        private readonly Login_EF _user;
         private readonly string _userMount;
 
-        internal SmbReadWriteFileSystem(FileSystemProviderSettings settings, IServiceScopeFactory factory, E_Login user,
+        internal SmbReadWriteFileSystem(FileSystemProviderSettings settings, IServiceScopeFactory factory, Login_EF user,
             string identityUser, string identityPass)
             : base(settings)
         {
@@ -41,7 +41,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
                 var conf = scope.ServiceProvider.GetRequiredService<IConfiguration>();
                 var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
 
-                var userMount = uow.Mounts.Get(QueryExpressionFactory.GetQueryExpression<E_Mount>()
+                var userMount = uow.Mounts.Get(QueryExpressionFactory.GetQueryExpression<Mount_EF>()
                     .Where(x => x.UserId == _user.UserId).ToLambda())
                     .Single();
 
@@ -49,7 +49,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.FileSystems
 
                 if (userMount.AmbassadorId.HasValue)
                 {
-                    var ambassadorCred = uow.Ambassadors.Get(QueryExpressionFactory.GetQueryExpression<E_Ambassador>()
+                    var ambassadorCred = uow.Ambassadors.Get(QueryExpressionFactory.GetQueryExpression<Ambassador_EF>()
                         .Where(x => x.Id == userMount.AmbassadorId).ToLambda())
                         .Single();
 

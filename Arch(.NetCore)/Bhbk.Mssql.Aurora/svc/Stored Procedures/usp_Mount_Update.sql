@@ -15,8 +15,6 @@ BEGIN
 
     	BEGIN TRANSACTION;
 
-        DECLARE @LASTUPDATED DATETIMEOFFSET (7) = GETUTCDATE()
-
         UPDATE [dbo].[tbl_Mount]
         SET
 			 AuthType				= @AuthType
@@ -24,7 +22,6 @@ BEGIN
 			,UncPath		    	= @UncPath
 			,IsEnabled				= @IsEnabled
 			,IsDeletable			= @IsDeletable
-            ,LastUpdatedUtc			= @LASTUPDATED
         WHERE UserId = @UserId
 
 		IF @@ROWCOUNT != 1

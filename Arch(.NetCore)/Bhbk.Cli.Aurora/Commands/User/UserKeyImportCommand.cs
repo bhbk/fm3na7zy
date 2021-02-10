@@ -25,7 +25,7 @@ namespace Bhbk.Cli.Aurora.Commands.User
         private readonly IConfiguration _conf;
         private readonly IUnitOfWork _uow;
         private FileInfo _path;
-        private E_Login _user;
+        private Login_EF _user;
         private string _privKeyPass, _pubKeyComment;
 
         public UserKeyImportCommand()
@@ -44,9 +44,9 @@ namespace Bhbk.Cli.Aurora.Commands.User
                 if (string.IsNullOrEmpty(arg))
                     throw new ConsoleHelpAsException($"  *** No user name given ***");
 
-                _user = _uow.Logins.Get(QueryExpressionFactory.GetQueryExpression<E_Login>()
+                _user = _uow.Logins.Get(QueryExpressionFactory.GetQueryExpression<Login_EF>()
                     .Where(x => x.UserName == arg).ToLambda(),
-                        new List<Expression<Func<E_Login, object>>>()
+                        new List<Expression<Func<Login_EF, object>>>()
                         {
                             x => x.PrivateKeys,
                             x => x.PublicKeys
@@ -77,9 +77,9 @@ namespace Bhbk.Cli.Aurora.Commands.User
         {
             try
             {
-                var keyType = ConfigType.RebexLicense.ToString();
+                var keyType = ConfigType_E.RebexLicense.ToString();
 
-                var license = _uow.Settings.Get(QueryExpressionFactory.GetQueryExpression<E_Setting>()
+                var license = _uow.Settings.Get(QueryExpressionFactory.GetQueryExpression<Setting_EF>()
                     .Where(x => x.ConfigKey == keyType).ToLambda())
                     .OrderBy(x => x.CreatedUtc)
                     .Last();
@@ -114,11 +114,11 @@ namespace Bhbk.Cli.Aurora.Commands.User
 
                 var keyPair = KeyHelper.ImportKeyPair(_conf, _uow, _user, SignatureHashAlgorithm.SHA256, stream, _privKeyPass, _pubKeyComment);
 
-                var pubKey = _uow.PublicKeys.Get(QueryExpressionFactory.GetQueryExpression<E_PublicKey>()
+                var pubKey = _uow.PublicKeys.Get(QueryExpressionFactory.GetQueryExpression<PublicKey_EF>()
                     .Where(x => x.Id == keyPair.Item1.Id).ToLambda())
                     .SingleOrDefault();
 
-                var privKey = _uow.PrivateKeys.Get(QueryExpressionFactory.GetQueryExpression<E_PrivateKey>()
+                var privKey = _uow.PrivateKeys.Get(QueryExpressionFactory.GetQueryExpression<PrivateKey_EF>()
                     .Where(x => x.PublicKeyId == keyPair.Item1.Id).ToLambda())
                     .SingleOrDefault();
 
@@ -134,15 +134,15 @@ namespace Bhbk.Cli.Aurora.Commands.User
                     _uow.Commit();
                 }
 
-                pubKey = _uow.PublicKeys.Get(QueryExpressionFactory.GetQueryExpression<E_PublicKey>()
+                pubKey = _uow.PublicKeys.Get(QueryExpressionFactory.GetQueryExpression<PublicKey_EF>()
                     .Where(x => x.Id == keyPair.Item1.Id).ToLambda())
                     .Single();
 
-                privKey = _uow.PrivateKeys.Get(QueryExpressionFactory.GetQueryExpression<E_PrivateKey>()
+                privKey = _uow.PrivateKeys.Get(QueryExpressionFactory.GetQueryExpression<PrivateKey_EF>()
                     .Where(x => x.PublicKeyId == keyPair.Item1.Id).ToLambda())
                     .Single();
 
-                FormatOutput.KeyPairs(new List<E_PublicKey> { pubKey }, new List<E_PrivateKey> { privKey });
+                FormatOutput.KeyPairs(new List<PublicKey_EF> { pubKey }, new List<PrivateKey_EF> { privKey });
 
                 return StandardOutput.FondFarewell();
             }

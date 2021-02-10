@@ -22,8 +22,8 @@ namespace Bhbk.Cli.Aurora.Commands.System
         private IUnitOfWork _uow;
         private IPNetwork _cidr;
         private Int32 _sequence;
-        private NetworkActionType _actionType;
-        private string _actionTypeList = string.Join(", ", Enum.GetNames(typeof(NetworkActionType)));
+        private NetworkActionType_E _actionType;
+        private string _actionTypeList = string.Join(", ", Enum.GetNames(typeof(NetworkActionType_E)));
 
         public SysNetCreateCommand()
         {
@@ -59,7 +59,7 @@ namespace Bhbk.Cli.Aurora.Commands.System
         {
             try
             {
-                var networks = _uow.Networks.Get(QueryExpressionFactory.GetQueryExpression<E_Network>()
+                var networks = _uow.Networks.Get(QueryExpressionFactory.GetQueryExpression<Network_EF>()
                     .Where(x => x.UserId == null && x.IsEnabled == true).ToLambda());
 
                 var exists = networks.Where(x => x.Address == _cidr.ToString())
@@ -68,13 +68,13 @@ namespace Bhbk.Cli.Aurora.Commands.System
                 if (exists != null)
                 {
                     Console.Out.WriteLine("  *** The network entered already exists for user ***");
-                    FormatOutput.Networks(new List<E_Network> { exists });
+                    FormatOutput.Networks(new List<Network_EF> { exists });
 
                     return StandardOutput.FondFarewell();
                 }
 
                 var network = _uow.Networks.Create(
-                    new E_Network
+                    new Network_EF
                     {
                         SequenceId = _sequence,
                         Address = _cidr.ToString(),
@@ -85,7 +85,7 @@ namespace Bhbk.Cli.Aurora.Commands.System
 
                 _uow.Commit();
 
-                FormatOutput.Networks(new List<E_Network> { network });
+                FormatOutput.Networks(new List<Network_EF> { network });
 
                 return StandardOutput.FondFarewell();
             }

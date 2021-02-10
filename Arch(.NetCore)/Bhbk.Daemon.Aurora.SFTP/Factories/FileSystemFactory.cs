@@ -13,12 +13,9 @@ namespace Bhbk.Daemon.Aurora.SFTP.Factories
 {
     internal static class FileSystemFactory
     {
-        internal static FileSystemProvider CreateFileSystem(IServiceScopeFactory factory, ILogger logger, E_Login user,
+        internal static FileSystemProvider CreateFileSystem(IServiceScopeFactory factory, ILogger logger, Login_EF user,
             string identityUser, string identityPass)
         {
-            LogLevel fsLoggerLevel;
-            FileSystemProviderType fsType;
-
             var fsSettings = new FileSystemProviderSettings()
             {
                 EnableGetContentMethodForDirectories = false,
@@ -27,22 +24,14 @@ namespace Bhbk.Daemon.Aurora.SFTP.Factories
                 EnableStrictChecks = false,
             };
 
-            if (!string.IsNullOrEmpty(user.Debugger))
-            {
-                if (!Enum.TryParse<LogLevel>(user.Debugger, true, out fsLoggerLevel))
-                    throw new InvalidCastException();
-
-                fsSettings.LogWriter = new LogHelper(logger, user, fsLoggerLevel);
-            }
-
-            if (!Enum.TryParse(user.FileSystemType, true, out fsType))
-                throw new InvalidCastException();
+            if (user.DebugTypeId != (int)LogLevel.Off)
+                fsSettings.LogWriter = new LogHelper(logger, user, (LogLevel)user.DebugTypeId);
 
             var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
 
-            switch (fsType)
+            switch (user.FileSystemTypeId)
             {
-                case FileSystemProviderType.Database:
+                case (int)FileSystemType_E.Database:
                     {
                         if (user.IsFileSystemReadOnly)
                         {
@@ -74,7 +63,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Factories
                         }
                     }
 
-                case FileSystemProviderType.Memory:
+                case (int)FileSystemType_E.Memory:
                     {
                         if (user.IsFileSystemReadOnly)
                         {
@@ -106,7 +95,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Factories
                         }
                     }
 
-                case FileSystemProviderType.SMB:
+                case (int)FileSystemType_E.SMB:
                     {
                         if (user.IsFileSystemReadOnly)
                         {

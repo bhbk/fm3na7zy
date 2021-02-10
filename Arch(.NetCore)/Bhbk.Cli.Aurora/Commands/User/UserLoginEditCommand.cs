@@ -20,10 +20,10 @@ namespace Bhbk.Cli.Aurora.Commands.User
     {
         private IConfiguration _conf;
         private IUnitOfWork _uow;
-        private E_Login _user;
+        private Login_EF _user;
         private Guid _id;
-        private FileSystemProviderType _fileSystem;
-        private readonly string _fileSystemList = string.Join(", ", Enum.GetNames(typeof(FileSystemProviderType)));
+        private FileSystemType_E _fileSystem;
+        private readonly string _fileSystemList = string.Join(", ", Enum.GetNames(typeof(FileSystemType_E)));
         private bool? _isEnabled, _isDeletable;
 
         public UserLoginEditCommand()
@@ -41,9 +41,9 @@ namespace Bhbk.Cli.Aurora.Commands.User
             {
                 _id = Guid.Parse(arg);
 
-                _user = _uow.Logins.Get(QueryExpressionFactory.GetQueryExpression<E_Login>()
+                _user = _uow.Logins.Get(QueryExpressionFactory.GetQueryExpression<Login_EF>()
                     .Where(x => x.UserId == _id).ToLambda(),
-                        new List<Expression<Func<E_Login, object>>>()
+                        new List<Expression<Func<Login_EF, object>>>()
                         {
                             x => x.Files,
                             x => x.Folders,
@@ -72,7 +72,7 @@ namespace Bhbk.Cli.Aurora.Commands.User
                 if (!Enum.TryParse(arg, out _fileSystem))
                     throw new ConsoleHelpAsException($"  *** Invalid filesystem type. Options are '{_fileSystemList}' ***");
 
-                _user.FileSystemType = _fileSystem.ToString();
+                _user.FileSystemTypeId = (int)_fileSystem;
             });
 
             HasOption("c|chroot=", "Enter chroot path", arg =>
@@ -134,7 +134,7 @@ namespace Bhbk.Cli.Aurora.Commands.User
                 _uow.Usages.Update(_user.Usage);
                 _uow.Commit();
 
-                FormatOutput.Logins(new List<E_Login> { _user }, true);
+                FormatOutput.Logins(new List<Login_EF> { _user }, true);
 
                 return StandardOutput.FondFarewell();
             }

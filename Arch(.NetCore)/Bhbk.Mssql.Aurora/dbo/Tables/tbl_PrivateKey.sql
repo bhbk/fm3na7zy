@@ -3,17 +3,26 @@
     [UserId]         UNIQUEIDENTIFIER   NULL,
     [PublicKeyId]    UNIQUEIDENTIFIER   NOT NULL,
     [KeyValue]       NVARCHAR (MAX)     NOT NULL,
-    [KeyAlgo]        NVARCHAR (16)      NOT NULL,
-    [KeyFormat]      NVARCHAR (16)      NOT NULL,
+    [KeyAlgorithmId] INT                NOT NULL,
+    [KeyFormatId]    INT                NOT NULL,
     [EncryptedPass]  NVARCHAR (1024)    NOT NULL,
     [IsEnabled]      BIT                NOT NULL,
     [IsDeletable]    BIT                NOT NULL,
     [CreatedUtc]     DATETIMEOFFSET (7) NOT NULL,
-    [LastUpdatedUtc] DATETIMEOFFSET (7) NULL,
     CONSTRAINT [PK_tbl_PrivateKey] PRIMARY KEY CLUSTERED ([Id] ASC),
-    CONSTRAINT [FK_tbl_PrivateKey_UserID] FOREIGN KEY ([UserId]) REFERENCES [dbo].[tbl_Login] ([UserId]) ON UPDATE CASCADE,
-    CONSTRAINT [FK_tbl_PrivateKey_PublicKeyID] FOREIGN KEY ([PublicKeyId]) REFERENCES [dbo].[tbl_PublicKey] ([Id])
+    CONSTRAINT [FK_tbl_PrivateKey_tbl_KeyAlgorithmType] FOREIGN KEY ([KeyAlgorithmId]) REFERENCES [dbo].[tbl_KeyAlgorithmType] ([Id]) ON UPDATE CASCADE,
+    CONSTRAINT [FK_tbl_PrivateKey_tbl_Login] FOREIGN KEY ([UserId]) REFERENCES [dbo].[tbl_Login] ([UserId]) ON UPDATE CASCADE,
+    CONSTRAINT [FK_tbl_PrivateKey_tbl_PrivateKeyFormatType] FOREIGN KEY ([KeyFormatId]) REFERENCES [dbo].[tbl_PrivateKeyFormatType] ([Id]) ON UPDATE CASCADE,
+    CONSTRAINT [FK_tbl_PrivateKey_tbl_PublicKey] FOREIGN KEY ([PublicKeyId]) REFERENCES [dbo].[tbl_PublicKey] ([Id])
 );
+
+
+
+
+
+
+
+
 
 
 

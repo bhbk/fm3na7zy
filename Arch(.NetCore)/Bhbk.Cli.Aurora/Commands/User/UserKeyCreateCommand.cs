@@ -24,10 +24,16 @@ namespace Bhbk.Cli.Aurora.Commands.User
     {
         private readonly IConfiguration _conf;
         private readonly IUnitOfWork _uow;
-        private E_Login _user;
+        private Login_EF _user;
         private int _privKeySize;
         private SshHostKeyAlgorithm _keyAlgo;
-        private string _keyAlgoList = string.Join(", ", Enum.GetNames(typeof(SshHostKeyAlgorithm)));
+        private string _keyAlgoList = string.Join(", ", Enum.GetNames(typeof(SshHostKeyAlgorithm))
+            .Where(x => x.Equals("rsa", StringComparison.OrdinalIgnoreCase)
+                || x.Equals("dss", StringComparison.OrdinalIgnoreCase)
+                || x.Equals("ed25519", StringComparison.OrdinalIgnoreCase)
+                || x.Equals("ecdsanistp256", StringComparison.OrdinalIgnoreCase)
+                || x.Equals("ecdsanistp384", StringComparison.OrdinalIgnoreCase)
+                || x.Equals("ecdsanistp521", StringComparison.OrdinalIgnoreCase)));
         private string _privKeyPass;
         private string _pubKeyComment;
 
@@ -47,9 +53,9 @@ namespace Bhbk.Cli.Aurora.Commands.User
                 if (string.IsNullOrEmpty(arg))
                     throw new ConsoleHelpAsException($"  *** No user name given ***");
 
-                _user = _uow.Logins.Get(QueryExpressionFactory.GetQueryExpression<E_Login>()
+                _user = _uow.Logins.Get(QueryExpressionFactory.GetQueryExpression<Login_EF>()
                     .Where(x => x.UserName == arg).ToLambda(),
-                        new List<Expression<Func<E_Login, object>>>()
+                        new List<Expression<Func<Login_EF, object>>>()
                         {
                             x => x.PrivateKeys,
                             x => x.PublicKeys,
@@ -115,7 +121,7 @@ namespace Bhbk.Cli.Aurora.Commands.User
 
                 _uow.Commit();
 
-                FormatOutput.KeyPairs(new List<E_PublicKey> { keyPair.Item1 }, new List<E_PrivateKey> { keyPair.Item2 });
+                FormatOutput.KeyPairs(new List<PublicKey_EF> { keyPair.Item1 }, new List<PrivateKey_EF> { keyPair.Item2 });
 
                 return StandardOutput.FondFarewell();
             }

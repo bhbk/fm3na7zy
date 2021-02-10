@@ -9,7 +9,7 @@ namespace Bhbk.Cli.Aurora.IO
 {
     public class FormatOutput
     {
-        public static void Alerts(IEnumerable<E_Alert> alerts)
+        public static void Alerts(IEnumerable<Alert_EF> alerts)
         {
             foreach (var alert in alerts.OrderBy(x => x.ToDisplayName))
             {
@@ -29,7 +29,7 @@ namespace Bhbk.Cli.Aurora.IO
             }
         }
 
-        public static void Ambassadors(IEnumerable<E_Ambassador> creds)
+        public static void Ambassadors(IEnumerable<Ambassador_EF> creds)
         {
             foreach (var cred in creds)
             {
@@ -46,7 +46,7 @@ namespace Bhbk.Cli.Aurora.IO
             }
         }
 
-        public static void AmbassadorSecrets(IEnumerable<E_Ambassador> creds)
+        public static void AmbassadorSecrets(IEnumerable<Ambassador_EF> creds)
         {
             foreach (var cred in creds)
             {
@@ -63,14 +63,14 @@ namespace Bhbk.Cli.Aurora.IO
             }
         }
 
-        public static void KeyPairs(IEnumerable<E_PublicKey> pubKeys, IEnumerable<E_PrivateKey> privKeys)
+        public static void KeyPairs(IEnumerable<PublicKey_EF> pubKeys, IEnumerable<PrivateKey_EF> privKeys)
         {
             foreach (var pubKey in pubKeys)
             {
                 Console.Out.WriteLine();
 
                 Console.ForegroundColor = ConsoleColor.Green;
-                Console.Out.WriteLine($"  [public key GUID] {pubKey.Id} [algo] {pubKey.KeyAlgo}{(!pubKey.IsDeletable ? " is not deletable and" : null)}" +
+                Console.Out.WriteLine($"  [public key GUID] {pubKey.Id} [algo] {pubKey.KeyAlgorithmId}{(!pubKey.IsDeletable ? " is not deletable and" : null)}" +
                     $"{(pubKey.IsEnabled ? " is enabled" : " is disabled")} [created] {pubKey.CreatedUtc.LocalDateTime}");
                 Console.Out.WriteLine($"    [Sig] {pubKey.SigValue}");
 
@@ -80,7 +80,7 @@ namespace Bhbk.Cli.Aurora.IO
                     var privKey = privKeys.Where(x => x.PublicKeyId == pubKey.Id)
                         .Single();
 
-                    Console.Out.WriteLine($"    [private key GUID] {privKey.Id} [algo] {privKey.KeyAlgo}{(!privKey.IsDeletable ? " is not deletable and" : null)}" +
+                    Console.Out.WriteLine($"    [private key GUID] {privKey.Id} [algo] {privKey.KeyAlgorithmId}{(!privKey.IsDeletable ? " is not deletable and" : null)}" +
                     $"{(privKey.IsEnabled ? " is enabled" : " is disabled")} [created] {pubKey.CreatedUtc.LocalDateTime}");
                 }
                 else
@@ -90,14 +90,14 @@ namespace Bhbk.Cli.Aurora.IO
             };
         }
 
-        public static void KeyPairSecrets(IEnumerable<E_PrivateKey> privKeys)
+        public static void KeyPairSecrets(IEnumerable<PrivateKey_EF> privKeys)
         {
             foreach (var key in privKeys)
             {
                 Console.Out.WriteLine();
 
                 Console.ForegroundColor = ConsoleColor.Green;
-                Console.Out.WriteLine($"  [private key GUID] {key.Id} [algo] {key.KeyAlgo}{(!key.IsDeletable ? " is not deletable and" : null)}" +
+                Console.Out.WriteLine($"  [private key GUID] {key.Id} [algo] {key.KeyAlgorithmId}{(!key.IsDeletable ? " is not deletable and" : null)}" +
                     $"{(key.IsEnabled ? " is enabled" : " is disabled")} [created] {key.CreatedUtc.LocalDateTime}");
 
                 Console.ForegroundColor = ConsoleColor.White;
@@ -107,7 +107,7 @@ namespace Bhbk.Cli.Aurora.IO
             };
         }
 
-        public static void Logins(IEnumerable<E_Login> users, bool? detail = null)
+        public static void Logins(IEnumerable<Login_EF> users, bool? detail = null)
         {
             foreach (var user in users)
             {
@@ -125,28 +125,25 @@ namespace Bhbk.Cli.Aurora.IO
                 if (detail.HasValue && detail.Value)
                 {
                     Console.ForegroundColor = ConsoleColor.White;
-                    Console.Out.WriteLine($"    file system type is '{user.FileSystemType}' and mounts as {(user.IsFileSystemReadOnly ? "read-only" : "read-write")}" +
+                    Console.Out.WriteLine($"    file system type is '{user.FileSystemTypeId}' and mounts as {(user.IsFileSystemReadOnly ? "read-only" : "read-write")}" +
                         $"{(string.IsNullOrEmpty(user.FileSystemChrootPath) ? null : " with chroot to " + (user.FileSystemChrootPath) + "")}" +
                         $"{Environment.NewLine}    password authentication is {(user.IsPasswordRequired ? "enabled" : "disabled")} " +
                         $"{Environment.NewLine}    public key authentication is {(user.IsPublicKeyRequired ? "enabled" : "disabled")} " +
                         $"{Environment.NewLine}    session maximum is {user.Usage.SessionMax} and {user.Usage.SessionsInUse} currently used");
 
-                    FileSystemProviderType userFileSystem;
-                    Enum.TryParse(user.FileSystemType, out userFileSystem);
-
-                    switch (userFileSystem)
+                    switch (user.FileSystemTypeId)
                     {
-                        case FileSystemProviderType.Database:
+                        case (int)FileSystemType_E.Database:
                             Console.Out.WriteLine($"    quota maximum is {user.Usage.QuotaInBytes / 1048576f}MB and quota used is {user.Usage.QuotaUsedInBytes / 1048576f}MB");
                             break;
-                        case FileSystemProviderType.Memory:
+                        case (int)FileSystemType_E.Memory:
                             Console.Out.WriteLine($"    quota maximum is 100MB and quota used is N/A... data is deleted at session end");
                             break;
-                        case FileSystemProviderType.SMB:
+                        case (int)FileSystemType_E.SMB:
                             Console.Out.WriteLine($"    quota maximum is N/A and quota used is N/A... depends on storage backing the mount");
                             break;
                         default:
-                            var validFileSystemtypes = string.Join(", ", Enum.GetNames(typeof(FileSystemProviderType)));
+                            var validFileSystemtypes = string.Join(", ", Enum.GetNames(typeof(FileSystemType_E)));
                             throw new ConsoleHelpAsException($"  *** Invalid filesystem type. Options are '{validFileSystemtypes}' ***");
                     }
                 }
@@ -155,7 +152,7 @@ namespace Bhbk.Cli.Aurora.IO
             }
         }
 
-        public static void LoginSecrets(IEnumerable<E_Login> logins)
+        public static void LoginSecrets(IEnumerable<Login_EF> logins)
         {
             foreach (var login in logins)
             {
@@ -172,16 +169,16 @@ namespace Bhbk.Cli.Aurora.IO
             }
         }
 
-        public static void Mounts(IEnumerable<E_Mount> mounts)
+        public static void Mounts(IEnumerable<Mount_EF> mounts)
         {
             foreach (var mount in mounts)
             {
                 Console.Out.WriteLine();
 
-                if (mount.Login.FileSystemType != FileSystemProviderType.SMB.ToString())
+                if (mount.Login.FileSystemTypeId != (int)FileSystemType_E.SMB)
                 {
                     Console.ForegroundColor = ConsoleColor.Red;
-                    Console.Out.WriteLine($"  *** valid only with {FileSystemProviderType.SMB} filesystem ***");
+                    Console.Out.WriteLine($"  *** valid only with {FileSystemType_E.SMB} filesystem ***");
                 }
                 else
                     Console.ForegroundColor = ConsoleColor.Green;
@@ -196,7 +193,7 @@ namespace Bhbk.Cli.Aurora.IO
             }
         }
 
-        public static void Networks(IEnumerable<E_Network> networks)
+        public static void Networks(IEnumerable<Network_EF> networks)
         {
             if (networks.Count() > 0)
                 Console.Out.WriteLine();
@@ -211,7 +208,7 @@ namespace Bhbk.Cli.Aurora.IO
             }
         }
 
-        public static void Sessions(IEnumerable<E_Session> sessions, bool? detail = null)
+        public static void Sessions(IEnumerable<Session_EF> sessions, bool? detail = null)
         {
             foreach (var session in sessions)
             {
@@ -244,7 +241,7 @@ namespace Bhbk.Cli.Aurora.IO
             }
         }
 
-        public static void Settings(IEnumerable<E_Setting> settings)
+        public static void Settings(IEnumerable<Setting_EF> settings)
         {
             foreach (var setting in settings)
             {

@@ -56,33 +56,33 @@ namespace Bhbk.Cli.Aurora.Commands.System
         {
             try
             {
-                IQueryExpression<E_Session> expr;
+                IQueryExpression<Session_EF> expr;
 
                 if (!string.IsNullOrEmpty(_network))
                 {
                     if (_active)
-                        expr = QueryExpressionFactory.GetQueryExpression<E_Session>()
+                        expr = QueryExpressionFactory.GetQueryExpression<Session_EF>()
                             .Where(x => x.RemoteEndPoint.Contains(_network) && x.IsActive == true);
                     else
-                        expr = QueryExpressionFactory.GetQueryExpression<E_Session>()
+                        expr = QueryExpressionFactory.GetQueryExpression<Session_EF>()
                             .Where(x => x.RemoteEndPoint.Contains(_network));
                 }
                 else if (!string.IsNullOrEmpty(_user))
                 {
                     if (_active)
-                        expr = QueryExpressionFactory.GetQueryExpression<E_Session>()
+                        expr = QueryExpressionFactory.GetQueryExpression<Session_EF>()
                             .Where(x => x.UserName.Contains(_user) && x.IsActive == true);
                     else
-                        expr = QueryExpressionFactory.GetQueryExpression<E_Session>()
+                        expr = QueryExpressionFactory.GetQueryExpression<Session_EF>()
                             .Where(x => x.UserName.Contains(_user));
                 }
                 else
                 {
                     if (_active)
-                        expr = QueryExpressionFactory.GetQueryExpression<E_Session>()
+                        expr = QueryExpressionFactory.GetQueryExpression<Session_EF>()
                             .Where(x => x.IsActive == true);
                     else
-                        expr = QueryExpressionFactory.GetQueryExpression<E_Session>();
+                        expr = QueryExpressionFactory.GetQueryExpression<Session_EF>();
                 }
 
                 var remotes = _uow.Sessions.Get(expr.ToLambda())
@@ -91,7 +91,7 @@ namespace Bhbk.Cli.Aurora.Commands.System
 
                 foreach (var remote in remotes)
                 {
-                    var sessions = _uow.Sessions.Get(QueryExpressionFactory.GetQueryExpression<E_Session>()
+                    var sessions = _uow.Sessions.Get(QueryExpressionFactory.GetQueryExpression<Session_EF>()
                         .Where(x => x.RemoteEndPoint == remote).ToLambda());
 
                     Console.Out.WriteLine();

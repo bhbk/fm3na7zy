@@ -1,14 +1,17 @@
 ﻿CREATE TABLE [dbo].[tbl_Setting] (
-    [Id]             UNIQUEIDENTIFIER   NOT NULL,
-    [UserId]         UNIQUEIDENTIFIER   NULL,
-    [ConfigKey]      NVARCHAR (128)     NOT NULL,
-    [ConfigValue]    NVARCHAR (256)     NOT NULL,
-    [IsDeletable]    BIT                NOT NULL,
-    [CreatedUtc]     DATETIMEOFFSET (7) NOT NULL,
-    [LastUpdatedUtc] DATETIMEOFFSET (7) NULL,
+    [Id]          UNIQUEIDENTIFIER   NOT NULL,
+    [UserId]      UNIQUEIDENTIFIER   NULL,
+    [ConfigKey]   NVARCHAR (128)     NOT NULL,
+    [ConfigValue] NVARCHAR (256)     NOT NULL,
+    [IsDeletable] BIT                NOT NULL,
+    [CreatedUtc]  DATETIMEOFFSET (7) NOT NULL,
     CONSTRAINT [PK_tbl_Setting] PRIMARY KEY CLUSTERED ([Id] ASC),
-    CONSTRAINT [FK_tbl_Setting_UserID] FOREIGN KEY ([UserId]) REFERENCES [dbo].[tbl_Login] ([UserId]) ON UPDATE CASCADE
+    CONSTRAINT [FK_tbl_Setting_tbl_Login] FOREIGN KEY ([UserId]) REFERENCES [dbo].[tbl_Login] ([UserId]) ON UPDATE CASCADE
 );
+
+
+
+
 
 
 

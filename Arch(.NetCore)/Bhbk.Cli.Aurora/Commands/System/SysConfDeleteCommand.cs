@@ -34,7 +34,7 @@ namespace Bhbk.Cli.Aurora.Commands.System
         {
             try
             {
-                var configs = _uow.Settings.Get(QueryExpressionFactory.GetQueryExpression<E_Setting>()
+                var configs = _uow.Settings.Get(QueryExpressionFactory.GetQueryExpression<Setting_EF>()
                     .Where(x => x.UserId == null && x.IsDeletable == true).ToLambda());
 
                 FormatOutput.Settings(configs);
