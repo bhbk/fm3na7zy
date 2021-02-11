@@ -1,6 +1,6 @@
 ﻿using Bhbk.Cli.Aurora.IO;
 using Bhbk.Lib.Aurora.Data_EF6.Models;
-using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
+using Bhbk.Lib.Aurora.Data_EF6.UnitOfWorks;
 using Bhbk.Lib.CommandLine.IO;
 using Bhbk.Lib.Common.Primitives.Enums;
 using Bhbk.Lib.Common.Services;
@@ -37,7 +37,8 @@ namespace Bhbk.Cli.Aurora.Commands.System
                 var networks = _uow.Networks.Get(QueryExpressionFactory.GetQueryExpression<Network_EF>()
                     .Where(x => x.UserId == null).ToLambda());
 
-                FormatOutput.Networks(networks);
+                foreach (var network in networks.OrderBy(x => x.SequenceId))
+                    FormatOutput.Write(network, true);
 
                 return StandardOutput.FondFarewell();
             }

@@ -27,6 +27,7 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Alert' does not have a primary 
           <Property Name="ToEmailAddress" Type="nvarchar" MaxLength="320" />
           <Property Name="ToPhoneNumber" Type="nvarchar" MaxLength="15" />
           <Property Name="IsEnabled" Type="bit" Nullable="false" />
+          <Property Name="Comment" Type="nvarchar" MaxLength="256" />
           <Property Name="CreatedUtc" Type="datetimeoffset" Precision="7" Nullable="false" />
         </EntityType>
         <!--Errors Found During Generation:
@@ -41,7 +42,7 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Ambassador' does not have a pri
             
           </Key>
           <Property Name="Id" Type="uniqueidentifier" Nullable="false" />
-          <Property Name="UserName" Type="nvarchar" MaxLength="128" Nullable="false" />
+          <Property Name="UserPrincipalName" Type="nvarchar" MaxLength="128" Nullable="false" />
           <Property Name="EncryptedPass" Type="nvarchar" MaxLength="128" Nullable="false" />
           <Property Name="IsEnabled" Type="bit" Nullable="false" />
           <Property Name="IsDeletable" Type="bit" Nullable="false" />
@@ -64,17 +65,20 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_File' does not have a primary k
             
             
             
+            
+            
           </Key>
           <Property Name="Id" Type="uniqueidentifier" Nullable="false" />
-          <Property Name="UserId" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="FileSystemId" Type="uniqueidentifier" Nullable="false" />
           <Property Name="FolderId" Type="uniqueidentifier" Nullable="false" />
           <Property Name="VirtualName" Type="nvarchar" MaxLength="260" Nullable="false" />
           <Property Name="IsReadOnly" Type="bit" Nullable="false" />
           <Property Name="RealPath" Type="nvarchar(max)" Nullable="false" />
           <Property Name="RealFileName" Type="nvarchar" MaxLength="260" Nullable="false" />
           <Property Name="RealFileSize" Type="bigint" Nullable="false" />
-          <Property Name="HashTypeId" Type="int" />
+          <Property Name="HashTypeId" Type="int" Nullable="false" />
           <Property Name="HashValue" Type="nvarchar" MaxLength="64" Nullable="false" />
+          <Property Name="CreatorId" Type="uniqueidentifier" Nullable="false" />
           <Property Name="CreatedUtc" Type="datetimeoffset" Precision="7" Nullable="false" />
           <Property Name="LastAccessedUtc" Type="datetimeoffset" Precision="7" Nullable="false" />
           <Property Name="LastUpdatedUtc" Type="datetimeoffset" Precision="7" Nullable="false" />
@@ -157,12 +161,14 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Folder' does not have a primary
             
             
             
+            
           </Key>
           <Property Name="Id" Type="uniqueidentifier" Nullable="false" />
-          <Property Name="UserId" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="FileSystemId" Type="uniqueidentifier" Nullable="false" />
           <Property Name="ParentId" Type="uniqueidentifier" />
           <Property Name="VirtualName" Type="nvarchar(max)" Nullable="false" />
           <Property Name="IsReadOnly" Type="bit" Nullable="false" />
+          <Property Name="CreatorId" Type="uniqueidentifier" Nullable="false" />
           <Property Name="CreatedUtc" Type="datetimeoffset" Precision="7" Nullable="false" />
           <Property Name="LastAccessedUtc" Type="datetimeoffset" Precision="7" Nullable="false" />
           <Property Name="LastUpdatedUtc" Type="datetimeoffset" Precision="7" Nullable="false" />
@@ -212,19 +218,15 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Login' does not have a primary 
             
             
             
-            
-            
           </Key>
           <Property Name="UserId" Type="uniqueidentifier" Nullable="false" />
           <Property Name="UserName" Type="nvarchar" MaxLength="128" Nullable="false" />
           <Property Name="AuthTypeId" Type="int" Nullable="false" />
-          <Property Name="FileSystemTypeId" Type="int" Nullable="false" />
-          <Property Name="FileSystemChrootPath" Type="nvarchar" MaxLength="64" />
           <Property Name="IsPasswordRequired" Type="bit" Nullable="false" />
           <Property Name="IsPublicKeyRequired" Type="bit" Nullable="false" />
-          <Property Name="IsFileSystemReadOnly" Type="bit" Nullable="false" />
-          <Property Name="DebugTypeId" Type="int" Nullable="false" />
           <Property Name="EncryptedPass" Type="nvarchar" MaxLength="1024" />
+          <Property Name="Comment" Type="nvarchar" MaxLength="256" />
+          <Property Name="DebugTypeId" Type="int" Nullable="false" />
           <Property Name="IsEnabled" Type="bit" Nullable="false" />
           <Property Name="IsDeletable" Type="bit" Nullable="false" />
           <Property Name="CreatedUtc" Type="datetimeoffset" Precision="7" Nullable="false" />
@@ -268,34 +270,11 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_LoginUsage' does not have a pri
             <PropertyRef Name="UserId" />
             
             
-            
-            
           </Key>
           <Property Name="UserId" Type="uniqueidentifier" Nullable="false" />
           <Property Name="UserName" Type="nvarchar" MaxLength="128" />
-          <Property Name="QuotaInBytes" Type="bigint" Nullable="false" />
-          <Property Name="QuotaUsedInBytes" Type="bigint" Nullable="false" />
           <Property Name="SessionMax" Type="smallint" Nullable="false" />
           <Property Name="SessionsInUse" Type="smallint" Nullable="false" />
-        </EntityType>
-        <!--Errors Found During Generation:
-warning 6002: The table/view 'BhbkAurora.svc.uvw_Mount' does not have a primary key defined. The key has been inferred and the definition was created as a read-only table/view.-->
-        <EntityType Name="uvw_Mount">
-          <Key>
-            <PropertyRef Name="UserId" />
-            
-            
-            
-            
-            
-          </Key>
-          <Property Name="UserId" Type="uniqueidentifier" Nullable="false" />
-          <Property Name="AmbassadorId" Type="uniqueidentifier" />
-          <Property Name="AuthType" Type="nvarchar" MaxLength="16" Nullable="false" />
-          <Property Name="UncPath" Type="nvarchar" MaxLength="256" Nullable="false" />
-          <Property Name="IsEnabled" Type="bit" Nullable="false" />
-          <Property Name="IsDeletable" Type="bit" Nullable="false" />
-          <Property Name="CreatedUtc" Type="datetimeoffset" Precision="7" Nullable="false" />
         </EntityType>
         <!--Errors Found During Generation:
 warning 6002: The table/view 'BhbkAurora.svc.uvw_Network' does not have a primary key defined. The key has been inferred and the definition was created as a read-only table/view.-->
@@ -313,10 +292,27 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Network' does not have a primar
           <Property Name="UserId" Type="uniqueidentifier" />
           <Property Name="SequenceId" Type="int" Nullable="false" />
           <Property Name="Address" Type="nvarchar" MaxLength="128" Nullable="false" />
-          <Property Name="Action" Type="nvarchar" MaxLength="8" Nullable="false" />
+          <Property Name="ActionTypeId" Type="int" Nullable="false" />
           <Property Name="IsEnabled" Type="bit" Nullable="false" />
           <Property Name="IsDeletable" Type="bit" Nullable="false" />
+          <Property Name="Comment" Type="nvarchar" MaxLength="256" />
           <Property Name="CreatedUtc" Type="datetimeoffset" Precision="7" Nullable="false" />
+        </EntityType>
+        <!--Errors Found During Generation:
+warning 6002: The table/view 'BhbkAurora.svc.uvw_NetworkActionType' does not have a primary key defined. The key has been inferred and the definition was created as a read-only table/view.-->
+        <EntityType Name="uvw_NetworkActionType">
+          <Key>
+            <PropertyRef Name="Id" />
+            
+            
+            
+            
+          </Key>
+          <Property Name="Id" Type="int" Nullable="false" />
+          <Property Name="Name" Type="nvarchar" MaxLength="8" Nullable="false" />
+          <Property Name="IsEnabled" Type="bit" Nullable="false" />
+          <Property Name="IsEditable" Type="bit" Nullable="false" />
+          <Property Name="IsDeletable" Type="bit" Nullable="false" />
         </EntityType>
         <!--Errors Found During Generation:
 warning 6002: The table/view 'BhbkAurora.svc.uvw_PrivateKey' does not have a primary key defined. The key has been inferred and the definition was created as a read-only table/view.-->
@@ -407,6 +403,10 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_PublicKeySignatureType' does no
         <EntityType Name="uvw_PublicKeySignatureType">
           <Key>
             <PropertyRef Name="Id" />
+            
+            
+            
+            
           </Key>
           <Property Name="Id" Type="int" Nullable="false" />
           <Property Name="Name" Type="nvarchar" MaxLength="16" Nullable="false" />
@@ -454,6 +454,22 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Setting' does not have a primar
           <Property Name="IsDeletable" Type="bit" Nullable="false" />
           <Property Name="CreatedUtc" Type="datetimeoffset" Precision="7" Nullable="false" />
         </EntityType>
+        <!--Errors Found During Generation:
+warning 6002: The table/view 'BhbkAurora.svc.uvw_SmbAuthType' does not have a primary key defined. The key has been inferred and the definition was created as a read-only table/view.-->
+        <EntityType Name="uvw_SmbAuthType">
+          <Key>
+            <PropertyRef Name="Id" />
+            
+            
+            
+            
+          </Key>
+          <Property Name="Id" Type="int" Nullable="false" />
+          <Property Name="Name" Type="nvarchar" MaxLength="32" Nullable="false" />
+          <Property Name="IsEnabled" Type="bit" Nullable="false" />
+          <Property Name="IsEditable" Type="bit" Nullable="false" />
+          <Property Name="IsDeletable" Type="bit" Nullable="false" />
+        </EntityType>
         <Function Name="usp_Alert_Delete" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="svc">
           <Parameter Name="Id" Type="uniqueidentifier" Mode="In" />
         </Function>
@@ -466,6 +482,7 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Setting' does not have a primar
           <Parameter Name="ToEmailAddress" Type="nvarchar" Mode="In" />
           <Parameter Name="ToPhoneNumber" Type="nvarchar" Mode="In" />
           <Parameter Name="IsEnabled" Type="bit" Mode="In" />
+          <Parameter Name="Comment" Type="nvarchar" Mode="In" />
         </Function>
         <Function Name="usp_Alert_Update" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="svc">
           <Parameter Name="Id" Type="uniqueidentifier" Mode="In" />
@@ -476,19 +493,20 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Setting' does not have a primar
           <Parameter Name="ToEmailAddress" Type="nvarchar" Mode="In" />
           <Parameter Name="ToPhoneNumber" Type="nvarchar" Mode="In" />
           <Parameter Name="IsEnabled" Type="bit" Mode="In" />
+          <Parameter Name="Comment" Type="nvarchar" Mode="In" />
         </Function>
         <Function Name="usp_Ambassador_Delete" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="svc">
           <Parameter Name="Id" Type="uniqueidentifier" Mode="In" />
         </Function>
         <Function Name="usp_Ambassador_Insert" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="svc">
-          <Parameter Name="UserName" Type="nvarchar" Mode="In" />
+          <Parameter Name="UserPrincipalName" Type="nvarchar" Mode="In" />
           <Parameter Name="EncryptedPass" Type="nvarchar" Mode="In" />
           <Parameter Name="IsEnabled" Type="bit" Mode="In" />
           <Parameter Name="IsDeletable" Type="bit" Mode="In" />
         </Function>
         <Function Name="usp_Ambassador_Update" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="svc">
           <Parameter Name="Id" Type="uniqueidentifier" Mode="In" />
-          <Parameter Name="UserName" Type="nvarchar" Mode="In" />
+          <Parameter Name="UserPrincipalName" Type="nvarchar" Mode="In" />
           <Parameter Name="EncryptedPass" Type="nvarchar" Mode="In" />
           <Parameter Name="IsEnabled" Type="bit" Mode="In" />
           <Parameter Name="IsDeletable" Type="bit" Mode="In" />
@@ -497,7 +515,7 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Setting' does not have a primar
           <Parameter Name="Id" Type="uniqueidentifier" Mode="In" />
         </Function>
         <Function Name="usp_File_Insert" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="svc">
-          <Parameter Name="UserId" Type="uniqueidentifier" Mode="In" />
+          <Parameter Name="FileSystemId" Type="uniqueidentifier" Mode="In" />
           <Parameter Name="FolderId" Type="uniqueidentifier" Mode="In" />
           <Parameter Name="VirtualName" Type="nvarchar" Mode="In" />
           <Parameter Name="IsReadOnly" Type="bit" Mode="In" />
@@ -506,6 +524,7 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Setting' does not have a primar
           <Parameter Name="RealFileSize" Type="bigint" Mode="In" />
           <Parameter Name="HashTypeId" Type="int" Mode="In" />
           <Parameter Name="HashValue" Type="nvarchar" Mode="In" />
+          <Parameter Name="CreatorId" Type="uniqueidentifier" Mode="In" />
         </Function>
         <Function Name="usp_File_Update" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="svc">
           <Parameter Name="Id" Type="uniqueidentifier" Mode="In" />
@@ -570,10 +589,11 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Setting' does not have a primar
           <Parameter Name="Id" Type="uniqueidentifier" Mode="In" />
         </Function>
         <Function Name="usp_Folder_Insert" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="svc">
-          <Parameter Name="UserId" Type="uniqueidentifier" Mode="In" />
+          <Parameter Name="FileSystemId" Type="uniqueidentifier" Mode="In" />
           <Parameter Name="ParentId" Type="uniqueidentifier" Mode="In" />
           <Parameter Name="VirtualName" Type="nvarchar(max)" Mode="In" />
           <Parameter Name="IsReadOnly" Type="bit" Mode="In" />
+          <Parameter Name="CreatorId" Type="uniqueidentifier" Mode="In" />
         </Function>
         <Function Name="usp_Folder_Update" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="svc">
           <Parameter Name="Id" Type="uniqueidentifier" Mode="In" />
@@ -590,12 +610,11 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Setting' does not have a primar
           <Parameter Name="UserId" Type="uniqueidentifier" Mode="In" />
           <Parameter Name="UserName" Type="nvarchar" Mode="In" />
           <Parameter Name="AuthTypeId" Type="int" Mode="In" />
-          <Parameter Name="FileSystemTypeId" Type="int" Mode="In" />
           <Parameter Name="IsPasswordRequired" Type="bit" Mode="In" />
           <Parameter Name="IsPublicKeyRequired" Type="bit" Mode="In" />
-          <Parameter Name="IsFileSystemReadOnly" Type="bit" Mode="In" />
-          <Parameter Name="DebugTypeId" Type="int" Mode="In" />
           <Parameter Name="EncryptedPass" Type="nvarchar" Mode="In" />
+          <Parameter Name="Comment" Type="nvarchar" Mode="In" />
+          <Parameter Name="DebugTypeId" Type="int" Mode="In" />
           <Parameter Name="IsEnabled" Type="bit" Mode="In" />
           <Parameter Name="IsDeletable" Type="bit" Mode="In" />
         </Function>
@@ -603,41 +622,18 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Setting' does not have a primar
           <Parameter Name="UserId" Type="uniqueidentifier" Mode="In" />
           <Parameter Name="UserName" Type="nvarchar" Mode="In" />
           <Parameter Name="AuthTypeId" Type="int" Mode="In" />
-          <Parameter Name="FileSystemTypeId" Type="int" Mode="In" />
-          <Parameter Name="FileSystemChrootPath" Type="nvarchar" Mode="In" />
           <Parameter Name="IsPasswordRequired" Type="bit" Mode="In" />
           <Parameter Name="IsPublicKeyRequired" Type="bit" Mode="In" />
-          <Parameter Name="IsFileSystemReadOnly" Type="bit" Mode="In" />
-          <Parameter Name="DebugTypeId" Type="int" Mode="In" />
           <Parameter Name="EncryptedPass" Type="nvarchar" Mode="In" />
+          <Parameter Name="Comment" Type="nvarchar" Mode="In" />
+          <Parameter Name="DebugTypeId" Type="int" Mode="In" />
           <Parameter Name="IsEnabled" Type="bit" Mode="In" />
           <Parameter Name="IsDeletable" Type="bit" Mode="In" />
         </Function>
         <Function Name="usp_LoginUsage_Update" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="svc">
           <Parameter Name="UserId" Type="uniqueidentifier" Mode="In" />
-          <Parameter Name="QuotaInBytes" Type="bigint" Mode="In" />
-          <Parameter Name="QuotaUsedInBytes" Type="bigint" Mode="In" />
           <Parameter Name="SessionMax" Type="smallint" Mode="In" />
           <Parameter Name="SessionsInUse" Type="smallint" Mode="In" />
-        </Function>
-        <Function Name="usp_Mount_Delete" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="svc">
-          <Parameter Name="UserId" Type="uniqueidentifier" Mode="In" />
-        </Function>
-        <Function Name="usp_Mount_Insert" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="svc">
-          <Parameter Name="UserId" Type="uniqueidentifier" Mode="In" />
-          <Parameter Name="AmbassadorId" Type="uniqueidentifier" Mode="In" />
-          <Parameter Name="AuthType" Type="nvarchar" Mode="In" />
-          <Parameter Name="UncPath" Type="nvarchar" Mode="In" />
-          <Parameter Name="IsEnabled" Type="bit" Mode="In" />
-          <Parameter Name="IsDeletable" Type="bit" Mode="In" />
-        </Function>
-        <Function Name="usp_Mount_Update" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="svc">
-          <Parameter Name="UserId" Type="uniqueidentifier" Mode="In" />
-          <Parameter Name="AmbassadorId" Type="uniqueidentifier" Mode="In" />
-          <Parameter Name="AuthType" Type="nvarchar" Mode="In" />
-          <Parameter Name="UncPath" Type="nvarchar" Mode="In" />
-          <Parameter Name="IsEnabled" Type="bit" Mode="In" />
-          <Parameter Name="IsDeletable" Type="bit" Mode="In" />
         </Function>
         <Function Name="usp_Network_Delete" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="svc">
           <Parameter Name="Id" Type="uniqueidentifier" Mode="In" />
@@ -646,17 +642,19 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Setting' does not have a primar
           <Parameter Name="UserId" Type="uniqueidentifier" Mode="In" />
           <Parameter Name="SequenceId" Type="int" Mode="In" />
           <Parameter Name="Address" Type="nvarchar" Mode="In" />
-          <Parameter Name="Action" Type="nvarchar" Mode="In" />
+          <Parameter Name="ActionTypeId" Type="int" Mode="In" />
           <Parameter Name="IsEnabled" Type="bit" Mode="In" />
           <Parameter Name="IsDeletable" Type="bit" Mode="In" />
+          <Parameter Name="Comment" Type="nvarchar" Mode="In" />
         </Function>
         <Function Name="usp_Network_Update" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="svc">
           <Parameter Name="Id" Type="uniqueidentifier" Mode="In" />
           <Parameter Name="SequenceId" Type="int" Mode="In" />
           <Parameter Name="Address" Type="nvarchar" Mode="In" />
-          <Parameter Name="Action" Type="nvarchar" Mode="In" />
+          <Parameter Name="ActionTypeId" Type="int" Mode="In" />
           <Parameter Name="IsEnabled" Type="bit" Mode="In" />
           <Parameter Name="IsDeletable" Type="bit" Mode="In" />
+          <Parameter Name="Comment" Type="nvarchar" Mode="In" />
         </Function>
         <Function Name="usp_PrivateKey_Delete" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="svc">
           <Parameter Name="Id" Type="uniqueidentifier" Mode="In" />
@@ -733,6 +731,12 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Setting' does not have a primar
           <Parameter Name="RemoteSoftwareIdentifier" Type="varchar" Mode="In" />
           <Parameter Name="IsActive" Type="bit" Mode="In" />
         </Function>
+        <Function Name="usp_Sessions_Delete" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="svc">
+          <Parameter Name="UserId" Type="uniqueidentifier" Mode="In" />
+          <Parameter Name="DeleteBeforeDate" Type="datetimeoffset" Mode="In" />
+          <Parameter Name="LocalEndPoint" Type="nvarchar" Mode="In" />
+          <Parameter Name="RemoteEndPoint" Type="nvarchar" Mode="In" />
+        </Function>
         <Function Name="usp_Setting_Delete" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="svc">
           <Parameter Name="Id" Type="uniqueidentifier" Mode="In" />
         </Function>
@@ -760,13 +764,14 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Setting' does not have a primar
     [uvw_Alert].[ToEmailAddress] AS [ToEmailAddress], 
     [uvw_Alert].[ToPhoneNumber] AS [ToPhoneNumber], 
     [uvw_Alert].[IsEnabled] AS [IsEnabled], 
+    [uvw_Alert].[Comment] AS [Comment], 
     [uvw_Alert].[CreatedUtc] AS [CreatedUtc]
     FROM [svc].[uvw_Alert] AS [uvw_Alert]</DefiningQuery>
           </EntitySet>
           <EntitySet Name="uvw_Ambassador" EntityType="Self.uvw_Ambassador" store:Type="Views" store:Schema="svc">
             <DefiningQuery>SELECT 
     [uvw_Ambassador].[Id] AS [Id], 
-    [uvw_Ambassador].[UserName] AS [UserName], 
+    [uvw_Ambassador].[UserPrincipalName] AS [UserPrincipalName], 
     [uvw_Ambassador].[EncryptedPass] AS [EncryptedPass], 
     [uvw_Ambassador].[IsEnabled] AS [IsEnabled], 
     [uvw_Ambassador].[IsDeletable] AS [IsDeletable], 
@@ -776,7 +781,7 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Setting' does not have a primar
           <EntitySet Name="uvw_File" EntityType="Self.uvw_File" store:Type="Views" store:Schema="svc">
             <DefiningQuery>SELECT 
     [uvw_File].[Id] AS [Id], 
-    [uvw_File].[UserId] AS [UserId], 
+    [uvw_File].[FileSystemId] AS [FileSystemId], 
     [uvw_File].[FolderId] AS [FolderId], 
     [uvw_File].[VirtualName] AS [VirtualName], 
     [uvw_File].[IsReadOnly] AS [IsReadOnly], 
@@ -785,6 +790,7 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Setting' does not have a primar
     [uvw_File].[RealFileSize] AS [RealFileSize], 
     [uvw_File].[HashTypeId] AS [HashTypeId], 
     [uvw_File].[HashValue] AS [HashValue], 
+    [uvw_File].[CreatorId] AS [CreatorId], 
     [uvw_File].[CreatedUtc] AS [CreatedUtc], 
     [uvw_File].[LastAccessedUtc] AS [LastAccessedUtc], 
     [uvw_File].[LastUpdatedUtc] AS [LastUpdatedUtc], 
@@ -834,10 +840,11 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Setting' does not have a primar
           <EntitySet Name="uvw_Folder" EntityType="Self.uvw_Folder" store:Type="Views" store:Schema="svc">
             <DefiningQuery>SELECT 
     [uvw_Folder].[Id] AS [Id], 
-    [uvw_Folder].[UserId] AS [UserId], 
+    [uvw_Folder].[FileSystemId] AS [FileSystemId], 
     [uvw_Folder].[ParentId] AS [ParentId], 
     [uvw_Folder].[VirtualName] AS [VirtualName], 
     [uvw_Folder].[IsReadOnly] AS [IsReadOnly], 
+    [uvw_Folder].[CreatorId] AS [CreatorId], 
     [uvw_Folder].[CreatedUtc] AS [CreatedUtc], 
     [uvw_Folder].[LastAccessedUtc] AS [LastAccessedUtc], 
     [uvw_Folder].[LastUpdatedUtc] AS [LastUpdatedUtc]
@@ -866,13 +873,11 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Setting' does not have a primar
     [uvw_Login].[UserId] AS [UserId], 
     [uvw_Login].[UserName] AS [UserName], 
     [uvw_Login].[AuthTypeId] AS [AuthTypeId], 
-    [uvw_Login].[FileSystemTypeId] AS [FileSystemTypeId], 
-    [uvw_Login].[FileSystemChrootPath] AS [FileSystemChrootPath], 
     [uvw_Login].[IsPasswordRequired] AS [IsPasswordRequired], 
     [uvw_Login].[IsPublicKeyRequired] AS [IsPublicKeyRequired], 
-    [uvw_Login].[IsFileSystemReadOnly] AS [IsFileSystemReadOnly], 
-    [uvw_Login].[DebugTypeId] AS [DebugTypeId], 
     [uvw_Login].[EncryptedPass] AS [EncryptedPass], 
+    [uvw_Login].[Comment] AS [Comment], 
+    [uvw_Login].[DebugTypeId] AS [DebugTypeId], 
     [uvw_Login].[IsEnabled] AS [IsEnabled], 
     [uvw_Login].[IsDeletable] AS [IsDeletable], 
     [uvw_Login].[CreatedUtc] AS [CreatedUtc]
@@ -900,22 +905,9 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Setting' does not have a primar
             <DefiningQuery>SELECT 
     [uvw_LoginUsage].[UserId] AS [UserId], 
     [uvw_LoginUsage].[UserName] AS [UserName], 
-    [uvw_LoginUsage].[QuotaInBytes] AS [QuotaInBytes], 
-    [uvw_LoginUsage].[QuotaUsedInBytes] AS [QuotaUsedInBytes], 
     [uvw_LoginUsage].[SessionMax] AS [SessionMax], 
     [uvw_LoginUsage].[SessionsInUse] AS [SessionsInUse]
     FROM [svc].[uvw_LoginUsage] AS [uvw_LoginUsage]</DefiningQuery>
-          </EntitySet>
-          <EntitySet Name="uvw_Mount" EntityType="Self.uvw_Mount" store:Type="Views" store:Schema="svc">
-            <DefiningQuery>SELECT 
-    [uvw_Mount].[UserId] AS [UserId], 
-    [uvw_Mount].[AmbassadorId] AS [AmbassadorId], 
-    [uvw_Mount].[AuthType] AS [AuthType], 
-    [uvw_Mount].[UncPath] AS [UncPath], 
-    [uvw_Mount].[IsEnabled] AS [IsEnabled], 
-    [uvw_Mount].[IsDeletable] AS [IsDeletable], 
-    [uvw_Mount].[CreatedUtc] AS [CreatedUtc]
-    FROM [svc].[uvw_Mount] AS [uvw_Mount]</DefiningQuery>
           </EntitySet>
           <EntitySet Name="uvw_Network" EntityType="Self.uvw_Network" store:Type="Views" store:Schema="svc">
             <DefiningQuery>SELECT 
@@ -923,11 +915,21 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Setting' does not have a primar
     [uvw_Network].[UserId] AS [UserId], 
     [uvw_Network].[SequenceId] AS [SequenceId], 
     [uvw_Network].[Address] AS [Address], 
-    [uvw_Network].[Action] AS [Action], 
+    [uvw_Network].[ActionTypeId] AS [ActionTypeId], 
     [uvw_Network].[IsEnabled] AS [IsEnabled], 
     [uvw_Network].[IsDeletable] AS [IsDeletable], 
+    [uvw_Network].[Comment] AS [Comment], 
     [uvw_Network].[CreatedUtc] AS [CreatedUtc]
     FROM [svc].[uvw_Network] AS [uvw_Network]</DefiningQuery>
+          </EntitySet>
+          <EntitySet Name="uvw_NetworkActionType" EntityType="Self.uvw_NetworkActionType" store:Type="Views" store:Schema="svc">
+            <DefiningQuery>SELECT 
+    [uvw_NetworkActionType].[Id] AS [Id], 
+    [uvw_NetworkActionType].[Name] AS [Name], 
+    [uvw_NetworkActionType].[IsEnabled] AS [IsEnabled], 
+    [uvw_NetworkActionType].[IsEditable] AS [IsEditable], 
+    [uvw_NetworkActionType].[IsDeletable] AS [IsDeletable]
+    FROM [svc].[uvw_NetworkActionType] AS [uvw_NetworkActionType]</DefiningQuery>
           </EntitySet>
           <EntitySet Name="uvw_PrivateKey" EntityType="Self.uvw_PrivateKey" store:Type="Views" store:Schema="svc">
             <DefiningQuery>SELECT 
@@ -1011,6 +1013,15 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Setting' does not have a primar
     [uvw_Setting].[CreatedUtc] AS [CreatedUtc]
     FROM [svc].[uvw_Setting] AS [uvw_Setting]</DefiningQuery>
           </EntitySet>
+          <EntitySet Name="uvw_SmbAuthType" EntityType="Self.uvw_SmbAuthType" store:Type="Views" store:Schema="svc">
+            <DefiningQuery>SELECT 
+    [uvw_SmbAuthType].[Id] AS [Id], 
+    [uvw_SmbAuthType].[Name] AS [Name], 
+    [uvw_SmbAuthType].[IsEnabled] AS [IsEnabled], 
+    [uvw_SmbAuthType].[IsEditable] AS [IsEditable], 
+    [uvw_SmbAuthType].[IsDeletable] AS [IsDeletable]
+    FROM [svc].[uvw_SmbAuthType] AS [uvw_SmbAuthType]</DefiningQuery>
+          </EntitySet>
         </EntityContainer>
       </Schema></edmx:StorageModels>
     <!-- CSDL content -->
@@ -1021,12 +1032,12 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Setting' does not have a primar
             <PropertyRef Name="Id" />
           </Key>
           <Property Name="Id" Type="Guid" Nullable="false" />
-          <Property Name="UserName" Type="String" MaxLength="128" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="UserPrincipalName" Type="String" Nullable="false" MaxLength="128" FixedLength="false" Unicode="true" />
           <Property Name="EncryptedPass" Type="String" Nullable="false" MaxLength="128" FixedLength="false" Unicode="true" />
           <Property Name="IsEnabled" Type="Boolean" Nullable="false" />
           <Property Name="IsDeletable" Type="Boolean" Nullable="false" />
           <Property Name="CreatedUtc" Type="DateTimeOffset" Nullable="false" Precision="7" />
-          <NavigationProperty Name="Mounts" Relationship="AuroraModels.Ambassador_Mount" FromRole="Ambassador" ToRole="Mount" />
+          <NavigationProperty Name="FileSystems" Relationship="AuroraModels.Ambassador_FileSystemLogin" FromRole="Ambassador_EF" ToRole="FileSystemLogin_EF" />
         </EntityType>
         <EntityType Name="Network_EF">
           <Key>
@@ -1036,11 +1047,13 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Setting' does not have a primar
           <Property Name="UserId" Type="Guid" />
           <Property Name="SequenceId" Type="Int32" Nullable="false" />
           <Property Name="Address" Type="String" MaxLength="128" FixedLength="false" Unicode="true" Nullable="false" />
-          <Property Name="Action" Type="String" MaxLength="8" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="ActionTypeId" Type="Int32" Nullable="false" />
           <Property Name="IsEnabled" Type="Boolean" Nullable="false" />
           <Property Name="IsDeletable" Type="Boolean" Nullable="false" />
           <Property Name="CreatedUtc" Type="DateTimeOffset" Nullable="false" Precision="7" />
           <NavigationProperty Name="Login" Relationship="AuroraModels.Login_Network" FromRole="Network" ToRole="Login" />
+          <NavigationProperty Name="ActionType" Relationship="AuroraModels.NetworkActionType_Network" FromRole="Network_EF" ToRole="NetworkActionType_EF" />
+          <Property Name="Comment" Type="String" MaxLength="256" FixedLength="false" Unicode="true" />
         </EntityType>
         <EntityType Name="PrivateKey_EF">
           <Key>
@@ -1099,23 +1112,18 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Setting' does not have a primar
           <Property Name="UserId" Type="Guid" Nullable="false" />
           <Property Name="UserName" Type="String" MaxLength="128" FixedLength="false" Unicode="true" Nullable="false" />
           <Property Name="AuthTypeId" Type="Int32" Nullable="false" />
-          <Property Name="FileSystemTypeId" Type="Int32" Nullable="false" />
-          <Property Name="FileSystemChrootPath" Type="String" MaxLength="64" FixedLength="false" Unicode="true" />
           <Property Name="IsPasswordRequired" Type="Boolean" Nullable="false" />
           <Property Name="IsPublicKeyRequired" Type="Boolean" Nullable="false" />
-          <Property Name="IsFileSystemReadOnly" Type="Boolean" Nullable="false" />
           <Property Name="DebugTypeId" Type="Int32" Nullable="false" />
           <Property Name="EncryptedPass" Type="String" MaxLength="1024" FixedLength="false" Unicode="true" />
           <Property Name="IsEnabled" Type="Boolean" Nullable="false" />
           <Property Name="IsDeletable" Type="Boolean" Nullable="false" />
+          <Property Name="Comment" Type="String" MaxLength="256" FixedLength="false" Unicode="true" />
           <Property Name="CreatedUtc" Type="DateTimeOffset" Nullable="false" Precision="7" />
           <NavigationProperty Name="Alerts" Relationship="AuroraModels.Login_Alert" FromRole="Login" ToRole="Alert" />
           <NavigationProperty Name="AuthType" Relationship="AuroraModels.LoginAuthType_Login" FromRole="Login_EF" ToRole="LoginAuthType_EF" />
           <NavigationProperty Name="DebugType" Relationship="AuroraModels.LoginDebugType_Login" FromRole="Login_EF" ToRole="LoginDebugType_EF" />
-          <NavigationProperty Name="Files" Relationship="AuroraModels.Login_File" FromRole="Login" ToRole="File" />
-          <NavigationProperty Name="Folders" Relationship="AuroraModels.Login_Folder" FromRole="Login" ToRole="Folder" />
           <NavigationProperty Name="FileSystems" Relationship="AuroraModels.Login_FileSystemLogin" FromRole="Login_EF" ToRole="FileSystemLogin_EF" />
-          <NavigationProperty Name="Mount" Relationship="AuroraModels.Login_Mount" FromRole="Login" ToRole="Mount" />
           <NavigationProperty Name="Networks" Relationship="AuroraModels.Login_Network" FromRole="Login" ToRole="Network" />
           <NavigationProperty Name="PrivateKeys" Relationship="AuroraModels.Login_PrivateKey" FromRole="Login" ToRole="PrivateKey" />
           <NavigationProperty Name="PublicKeys" Relationship="AuroraModels.Login_PublicKey" FromRole="Login_EF" ToRole="PublicKey_EF" />
@@ -1136,6 +1144,7 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Setting' does not have a primar
           <Property Name="ToEmailAddress" Type="String" MaxLength="320" FixedLength="false" Unicode="true" />
           <Property Name="ToPhoneNumber" Type="String" MaxLength="15" FixedLength="false" Unicode="true" />
           <Property Name="IsEnabled" Type="Boolean" Nullable="false" />
+          <Property Name="Comment" Type="String" MaxLength="256" FixedLength="false" Unicode="true" />
           <Property Name="CreatedUtc" Type="DateTimeOffset" Nullable="false" Precision="7" />
           <NavigationProperty Name="Login" Relationship="AuroraModels.Login_Alert" FromRole="Alert" ToRole="Login" />
         </EntityType>
@@ -1144,21 +1153,22 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Setting' does not have a primar
             <PropertyRef Name="Id" />
           </Key>
           <Property Name="Id" Type="Guid" Nullable="false" />
-          <Property Name="UserId" Type="Guid" Nullable="false" />
+          <Property Name="FileSystemId" Type="Guid" Nullable="false" />
           <Property Name="FolderId" Type="Guid" Nullable="false" />
           <Property Name="VirtualName" Type="String" MaxLength="260" FixedLength="false" Unicode="true" Nullable="false" />
           <Property Name="IsReadOnly" Type="Boolean" Nullable="false" />
           <Property Name="RealPath" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" Nullable="false" />
           <Property Name="RealFileName" Type="String" MaxLength="260" FixedLength="false" Unicode="true" Nullable="false" />
           <Property Name="RealFileSize" Type="Int64" Nullable="false" />
-          <Property Name="HashTypeId" Type="Int32" />
+          <Property Name="HashTypeId" Type="Int32" Nullable="false" />
           <Property Name="HashValue" Type="String" Nullable="false" MaxLength="64" FixedLength="false" Unicode="true" />
+          <Property Name="CreatorId" Type="Guid" Nullable="false" />
           <Property Name="CreatedUtc" Type="DateTimeOffset" Nullable="false" Precision="7" />
           <Property Name="LastAccessedUtc" Type="DateTimeOffset" Precision="7" Nullable="false" />
           <Property Name="LastUpdatedUtc" Type="DateTimeOffset" Precision="7" Nullable="false" />
           <Property Name="LastVerifiedUtc" Type="DateTimeOffset" Nullable="false" Precision="7" />
+          <NavigationProperty Name="FileSystem" Relationship="AuroraModels.FileSystem_File" FromRole="File_EF" ToRole="FileSystem_EF" />
           <NavigationProperty Name="HashType" Relationship="AuroraModels.HashAlgorithmType_File" FromRole="File_EF" ToRole="HashAlgorithmType_EF" />
-          <NavigationProperty Name="Login" Relationship="AuroraModels.Login_File" FromRole="File" ToRole="Login" />
           <NavigationProperty Name="Parent" Relationship="AuroraModels.Folder_File" FromRole="File" ToRole="Folder" />
         </EntityType>
         <EntityType Name="Folder_EF">
@@ -1166,31 +1176,18 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Setting' does not have a primar
             <PropertyRef Name="Id" />
           </Key>
           <Property Name="Id" Type="Guid" Nullable="false" />
-          <Property Name="UserId" Type="Guid" Nullable="false" />
+          <Property Name="FileSystemId" Type="Guid" Nullable="false" />
           <Property Name="ParentId" Type="Guid" />
           <Property Name="VirtualName" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" Nullable="false" />
           <Property Name="IsReadOnly" Type="Boolean" Nullable="false" />
+          <Property Name="CreatorId" Type="Guid" Nullable="false" />
           <Property Name="CreatedUtc" Type="DateTimeOffset" Nullable="false" Precision="7" />
           <Property Name="LastAccessedUtc" Type="DateTimeOffset" Precision="7" Nullable="false" />
           <Property Name="LastUpdatedUtc" Type="DateTimeOffset" Precision="7" Nullable="false" />
-          <NavigationProperty Name="Login" Relationship="AuroraModels.Login_Folder" FromRole="Folder" ToRole="Login" />
           <NavigationProperty Name="Files" Relationship="AuroraModels.Folder_File" FromRole="Folder" ToRole="File" />
+          <NavigationProperty Name="FileSystem" Relationship="AuroraModels.FileSystem_Folder" FromRole="Folder_EF" ToRole="FileSystem_EF" />
           <NavigationProperty Name="Folders" Relationship="AuroraModels.Folder_Folder" FromRole="UserFolder" ToRole="FolderParent" />
           <NavigationProperty Name="Parent" Relationship="AuroraModels.Folder_Folder" FromRole="FolderParent" ToRole="UserFolder" />
-        </EntityType>
-        <EntityType Name="Mount_EF">
-          <Key>
-            <PropertyRef Name="UserId" />
-          </Key>
-          <Property Name="UserId" Type="Guid" Nullable="false" />
-          <Property Name="AmbassadorId" Type="Guid" />
-          <Property Name="AuthType" Type="String" MaxLength="16" FixedLength="false" Unicode="true" Nullable="false" />
-          <Property Name="UncPath" Type="String" Nullable="false" MaxLength="256" FixedLength="false" Unicode="true" />
-          <Property Name="IsEnabled" Type="Boolean" Nullable="false" />
-          <Property Name="IsDeletable" Type="Boolean" Nullable="false" />
-          <Property Name="CreatedUtc" Type="DateTimeOffset" Nullable="false" Precision="7" />
-          <NavigationProperty Name="Ambassador" Relationship="AuroraModels.Ambassador_Mount" FromRole="Mount" ToRole="Ambassador" />
-          <NavigationProperty Name="Login" Relationship="AuroraModels.Login_Mount" FromRole="Mount" ToRole="Login" />
         </EntityType>
         <EntityContainer Name="AuroraEntities_EF6" annotation:LazyLoadingEnabled="true">
           <EntitySet Name="Ambassador_EF" EntityType="AuroraModels.Ambassador_EF" />
@@ -1202,19 +1199,18 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Setting' does not have a primar
           <EntitySet Name="Alert_EF" EntityType="AuroraModels.Alert_EF" />
           <EntitySet Name="File_EF" EntityType="AuroraModels.File_EF" />
           <EntitySet Name="Folder_EF" EntityType="AuroraModels.Folder_EF" />
-          <EntitySet Name="Mount_EF" EntityType="AuroraModels.Mount_EF" />
           <FunctionImport Name="usp_Ambassador_Delete" ReturnType="Collection(AuroraModels.usp_Ambassador_Delete_Result)">
           <Parameter Name="Id" Mode="In" Type="Guid" />
           </FunctionImport>
           <FunctionImport Name="usp_Ambassador_Insert" ReturnType="Collection(AuroraModels.usp_Ambassador_Insert_Result)">
-            <Parameter Name="UserName" Mode="In" Type="String" />
+            <Parameter Name="UserPrincipalName" Mode="In" Type="String" />
             <Parameter Name="EncryptedPass" Mode="In" Type="String" />
             <Parameter Name="IsEnabled" Mode="In" Type="Boolean" />
             <Parameter Name="IsDeletable" Mode="In" Type="Boolean" />
           </FunctionImport>
           <FunctionImport Name="usp_Ambassador_Update" ReturnType="Collection(AuroraModels.usp_Ambassador_Update_Result)">
             <Parameter Name="Id" Mode="In" Type="Guid" />
-            <Parameter Name="UserName" Mode="In" Type="String" />
+            <Parameter Name="UserPrincipalName" Mode="In" Type="String" />
             <Parameter Name="EncryptedPass" Mode="In" Type="String" />
             <Parameter Name="IsEnabled" Mode="In" Type="Boolean" />
             <Parameter Name="IsDeletable" Mode="In" Type="Boolean" />
@@ -1226,17 +1222,19 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Setting' does not have a primar
             <Parameter Name="UserId" Mode="In" Type="Guid" />
             <Parameter Name="SequenceId" Mode="In" Type="Int32" />
             <Parameter Name="Address" Mode="In" Type="String" />
-            <Parameter Name="Action" Mode="In" Type="String" />
+            <Parameter Name="ActionTypeId" Mode="In" Type="Int32" />
             <Parameter Name="IsEnabled" Mode="In" Type="Boolean" />
             <Parameter Name="IsDeletable" Mode="In" Type="Boolean" />
+            <Parameter Name="Comment" Mode="In" Type="String" />
           </FunctionImport>
           <FunctionImport Name="usp_Network_Update" ReturnType="Collection(AuroraModels.usp_Network_Update_Result)">
             <Parameter Name="Id" Mode="In" Type="Guid" />
             <Parameter Name="SequenceId" Mode="In" Type="Int32" />
             <Parameter Name="Address" Mode="In" Type="String" />
-            <Parameter Name="Action" Mode="In" Type="String" />
+            <Parameter Name="ActionTypeId" Mode="In" Type="Int32" />
             <Parameter Name="IsEnabled" Mode="In" Type="Boolean" />
             <Parameter Name="IsDeletable" Mode="In" Type="Boolean" />
+            <Parameter Name="Comment" Mode="In" Type="String" />
           </FunctionImport>
           <FunctionImport Name="usp_PrivateKey_Delete" ReturnType="Collection(AuroraModels.usp_PrivateKey_Delete_Result)">
           <Parameter Name="Id" Mode="In" Type="Guid" />
@@ -1312,12 +1310,11 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Setting' does not have a primar
             <Parameter Name="UserId" Mode="In" Type="Guid" />
             <Parameter Name="UserName" Mode="In" Type="String" />
             <Parameter Name="AuthTypeId" Mode="In" Type="Int32" />
-            <Parameter Name="FileSystemTypeId" Mode="In" Type="Int32" />
             <Parameter Name="IsPasswordRequired" Mode="In" Type="Boolean" />
             <Parameter Name="IsPublicKeyRequired" Mode="In" Type="Boolean" />
-            <Parameter Name="IsFileSystemReadOnly" Mode="In" Type="Boolean" />
-            <Parameter Name="DebugTypeId" Mode="In" Type="Int32" />
             <Parameter Name="EncryptedPass" Mode="In" Type="String" />
+            <Parameter Name="Comment" Mode="In" Type="String" />
+            <Parameter Name="DebugTypeId" Mode="In" Type="Int32" />
             <Parameter Name="IsEnabled" Mode="In" Type="Boolean" />
             <Parameter Name="IsDeletable" Mode="In" Type="Boolean" />
           </FunctionImport>
@@ -1325,13 +1322,11 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Setting' does not have a primar
             <Parameter Name="UserId" Mode="In" Type="Guid" />
             <Parameter Name="UserName" Mode="In" Type="String" />
             <Parameter Name="AuthTypeId" Mode="In" Type="Int32" />
-            <Parameter Name="FileSystemTypeId" Mode="In" Type="Int32" />
-            <Parameter Name="FileSystemChrootPath" Mode="In" Type="String" />
             <Parameter Name="IsPasswordRequired" Mode="In" Type="Boolean" />
             <Parameter Name="IsPublicKeyRequired" Mode="In" Type="Boolean" />
-            <Parameter Name="IsFileSystemReadOnly" Mode="In" Type="Boolean" />
-            <Parameter Name="DebugTypeId" Mode="In" Type="Int32" />
             <Parameter Name="EncryptedPass" Mode="In" Type="String" />
+            <Parameter Name="Comment" Mode="In" Type="String" />
+            <Parameter Name="DebugTypeId" Mode="In" Type="Int32" />
             <Parameter Name="IsEnabled" Mode="In" Type="Boolean" />
             <Parameter Name="IsDeletable" Mode="In" Type="Boolean" />
           </FunctionImport>
@@ -1347,6 +1342,7 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Setting' does not have a primar
             <Parameter Name="ToEmailAddress" Mode="In" Type="String" />
             <Parameter Name="ToPhoneNumber" Mode="In" Type="String" />
             <Parameter Name="IsEnabled" Mode="In" Type="Boolean" />
+            <Parameter Name="Comment" Mode="In" Type="String" />
           </FunctionImport>
           <FunctionImport Name="usp_Alert_Update" ReturnType="Collection(AuroraModels.usp_Alert_Update_Result)">
             <Parameter Name="Id" Mode="In" Type="Guid" />
@@ -1357,12 +1353,13 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Setting' does not have a primar
             <Parameter Name="ToEmailAddress" Mode="In" Type="String" />
             <Parameter Name="ToPhoneNumber" Mode="In" Type="String" />
             <Parameter Name="IsEnabled" Mode="In" Type="Boolean" />
+            <Parameter Name="Comment" Mode="In" Type="String" />
           </FunctionImport>
           <FunctionImport Name="usp_File_Delete" ReturnType="Collection(AuroraModels.usp_File_Delete_Result)">
           <Parameter Name="Id" Mode="In" Type="Guid" />
           </FunctionImport>
           <FunctionImport Name="usp_File_Insert" ReturnType="Collection(AuroraModels.usp_File_Insert_Result)">
-            <Parameter Name="UserId" Mode="In" Type="Guid" />
+            <Parameter Name="FileSystemId" Mode="In" Type="Guid" />
             <Parameter Name="FolderId" Mode="In" Type="Guid" />
             <Parameter Name="VirtualName" Mode="In" Type="String" />
             <Parameter Name="IsReadOnly" Mode="In" Type="Boolean" />
@@ -1371,6 +1368,7 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Setting' does not have a primar
             <Parameter Name="RealFileSize" Mode="In" Type="Int64" />
             <Parameter Name="HashTypeId" Mode="In" Type="Int32" />
             <Parameter Name="HashValue" Mode="In" Type="String" />
+            <Parameter Name="CreatorId" Mode="In" Type="Guid" />
           </FunctionImport>
           <FunctionImport Name="usp_File_Update" ReturnType="Collection(AuroraModels.usp_File_Update_Result)">
             <Parameter Name="Id" Mode="In" Type="Guid" />
@@ -1390,10 +1388,11 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Setting' does not have a primar
           <Parameter Name="Id" Mode="In" Type="Guid" />
           </FunctionImport>
           <FunctionImport Name="usp_Folder_Insert" ReturnType="Collection(AuroraModels.usp_Folder_Insert_Result)">
-            <Parameter Name="UserId" Mode="In" Type="Guid" />
+            <Parameter Name="FileSystemId" Mode="In" Type="Guid" />
             <Parameter Name="ParentId" Mode="In" Type="Guid" />
             <Parameter Name="VirtualName" Mode="In" Type="String" />
             <Parameter Name="IsReadOnly" Mode="In" Type="Boolean" />
+            <Parameter Name="CreatorId" Mode="In" Type="Guid" />
           </FunctionImport>
           <FunctionImport Name="usp_Folder_Update" ReturnType="Collection(AuroraModels.usp_Folder_Update_Result)">
             <Parameter Name="Id" Mode="In" Type="Guid" />
@@ -1422,14 +1421,6 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Setting' does not have a primar
             <Parameter Name="IsEnabled" Mode="In" Type="Boolean" />
             <Parameter Name="IsDeletable" Mode="In" Type="Boolean" />
           </FunctionImport>
-          <AssociationSet Name="Login_File" Association="AuroraModels.Login_File">
-            <End Role="Login" EntitySet="Login_EF" />
-            <End Role="File" EntitySet="File_EF" />
-          </AssociationSet>
-          <AssociationSet Name="Login_Folder" Association="AuroraModels.Login_Folder">
-            <End Role="Login" EntitySet="Login_EF" />
-            <End Role="Folder" EntitySet="Folder_EF" />
-          </AssociationSet>
           <AssociationSet Name="Login_PrivateKey" Association="AuroraModels.Login_PrivateKey">
             <End Role="Login" EntitySet="Login_EF" />
             <End Role="PrivateKey" EntitySet="PrivateKey_EF" />
@@ -1446,10 +1437,6 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Setting' does not have a primar
             <End Role="Login" EntitySet="Login_EF" />
             <End Role="Setting" EntitySet="Setting_EF" />
           </AssociationSet>
-          <AssociationSet Name="Ambassador_Mount" Association="AuroraModels.Ambassador_Mount">
-            <End Role="Ambassador" EntitySet="Ambassador_EF" />
-            <End Role="Mount" EntitySet="Mount_EF" />
-          </AssociationSet>
           <AssociationSet Name="Folder_File" Association="AuroraModels.Folder_File">
             <End Role="Folder" EntitySet="Folder_EF" />
             <End Role="File" EntitySet="File_EF" />
@@ -1457,10 +1444,6 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Setting' does not have a primar
           <AssociationSet Name="Folder_Folder" Association="AuroraModels.Folder_Folder">
             <End Role="UserFolder" EntitySet="Folder_EF" />
             <End Role="FolderParent" EntitySet="Folder_EF" />
-          </AssociationSet>
-          <AssociationSet Name="Login_Mount" Association="AuroraModels.Login_Mount">
-            <End Role="Login" EntitySet="Login_EF" />
-            <End Role="Mount" EntitySet="Mount_EF" />
           </AssociationSet>
           <EntitySet Name="Session_EF" EntityType="AuroraModels.Session_EF" />
           <FunctionImport Name="usp_Session_Delete">
@@ -1497,8 +1480,6 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Setting' does not have a primar
           </AssociationSet>
           <FunctionImport Name="usp_LoginUsage_Update" ReturnType="Collection(AuroraModels.usp_LoginUsage_Update_Result)">
             <Parameter Name="UserId" Mode="In" Type="Guid" />
-            <Parameter Name="QuotaInBytes" Mode="In" Type="Int64" />
-            <Parameter Name="QuotaUsedInBytes" Mode="In" Type="Int64" />
             <Parameter Name="SessionMax" Mode="In" Type="Int16" />
             <Parameter Name="SessionsInUse" Mode="In" Type="Int16" />
           </FunctionImport>
@@ -1605,6 +1586,34 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Setting' does not have a primar
           <AssociationSet Name="PublicKeySignatureType_PublicKey" Association="AuroraModels.PublicKeySignatureType_PublicKey">
             <End Role="PublicKeySignatureType_EF" EntitySet="PublicKeySignatureType_EF" />
             <End Role="PublicKey_EF" EntitySet="PublicKey_EF" />
+          </AssociationSet>
+          <FunctionImport Name="usp_Sessions_Delete">
+            <Parameter Name="UserId" Mode="In" Type="Guid" />
+            <Parameter Name="DeleteBeforeDate" Mode="In" Type="DateTimeOffset" />
+            <Parameter Name="LocalEndPoint" Mode="In" Type="String" />
+            <Parameter Name="RemoteEndPoint" Mode="In" Type="String" />
+          </FunctionImport>
+          <AssociationSet Name="Ambassador_FileSystemLogin" Association="AuroraModels.Ambassador_FileSystemLogin">
+            <End Role="Ambassador_EF" EntitySet="Ambassador_EF" />
+            <End Role="FileSystemLogin_EF" EntitySet="FileSystemLogin_EF" />
+          </AssociationSet>
+          <EntitySet Name="NetworkActionType_EF" EntityType="AuroraModels.NetworkActionType_EF" />
+          <EntitySet Name="SmbAuthType_EF" EntityType="AuroraModels.SmbAuthType_EF" />
+          <AssociationSet Name="SmbAuthType_FileSystemLogin" Association="AuroraModels.SmbAuthType_FileSystemLogin">
+            <End Role="SmbAuthType_EF" EntitySet="SmbAuthType_EF" />
+            <End Role="FileSystemLogin_EF" EntitySet="FileSystemLogin_EF" />
+          </AssociationSet>
+          <AssociationSet Name="NetworkActionType_Network" Association="AuroraModels.NetworkActionType_Network">
+            <End Role="NetworkActionType_EF" EntitySet="NetworkActionType_EF" />
+            <End Role="Network_EF" EntitySet="Network_EF" />
+          </AssociationSet>
+          <AssociationSet Name="FileSystem_File" Association="AuroraModels.FileSystem_File">
+            <End Role="FileSystem_EF" EntitySet="FileSystem_EF" />
+            <End Role="File_EF" EntitySet="File_EF" />
+          </AssociationSet>
+          <AssociationSet Name="FileSystem_Folder" Association="AuroraModels.FileSystem_Folder">
+            <End Role="FileSystem_EF" EntitySet="FileSystem_EF" />
+            <End Role="Folder_EF" EntitySet="Folder_EF" />
           </AssociationSet>
         </EntityContainer>
         <ComplexType Name="usp_Ambassador_Delete_Result">
@@ -1964,30 +1973,6 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Setting' does not have a primar
           <Property Type="DateTimeOffset" Name="CreatedUtc" Nullable="false" />
           <Property Type="DateTimeOffset" Name="LastUpdatedUtc" Nullable="true" />
         </ComplexType>
-        <Association Name="Login_File">
-          <End Type="AuroraModels.Login_EF" Role="Login" Multiplicity="1" />
-          <End Type="AuroraModels.File_EF" Role="File" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Login">
-              <PropertyRef Name="UserId" />
-            </Principal>
-            <Dependent Role="File">
-              <PropertyRef Name="UserId" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="Login_Folder">
-          <End Type="AuroraModels.Login_EF" Role="Login" Multiplicity="1" />
-          <End Type="AuroraModels.Folder_EF" Role="Folder" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Login">
-              <PropertyRef Name="UserId" />
-            </Principal>
-            <Dependent Role="Folder">
-              <PropertyRef Name="UserId" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
         <Association Name="Login_PrivateKey">
           <End Type="AuroraModels.Login_EF" Role="Login" Multiplicity="0..1" />
           <End Type="AuroraModels.PrivateKey_EF" Role="PrivateKey" Multiplicity="*" />
@@ -2036,18 +2021,6 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Setting' does not have a primar
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="Ambassador_Mount">
-          <End Type="AuroraModels.Ambassador_EF" Role="Ambassador" Multiplicity="0..1" />
-          <End Type="AuroraModels.Mount_EF" Role="Mount" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Ambassador">
-              <PropertyRef Name="Id" />
-            </Principal>
-            <Dependent Role="Mount">
-              <PropertyRef Name="AmbassadorId" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
         <Association Name="Folder_File">
           <End Type="AuroraModels.Folder_EF" Role="Folder" Multiplicity="1" />
           <End Type="AuroraModels.File_EF" Role="File" Multiplicity="*" />
@@ -2069,18 +2042,6 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Setting' does not have a primar
             </Principal>
             <Dependent Role="FolderParent">
               <PropertyRef Name="ParentId" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="Login_Mount">
-          <End Type="AuroraModels.Login_EF" Role="Login" Multiplicity="1" />
-          <End Type="AuroraModels.Mount_EF" Role="Mount" Multiplicity="0..1" />
-          <ReferentialConstraint>
-            <Principal Role="Login">
-              <PropertyRef Name="UserId" />
-            </Principal>
-            <Dependent Role="Mount">
-              <PropertyRef Name="UserId" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -2141,8 +2102,6 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Setting' does not have a primar
           </Key>
           <Property Name="UserId" Type="Guid" Nullable="false" />
           <Property Name="UserName" Type="String" MaxLength="128" FixedLength="false" Unicode="true" />
-          <Property Name="QuotaInBytes" Type="Int64" Nullable="false" />
-          <Property Name="QuotaUsedInBytes" Type="Int64" Nullable="false" />
           <Property Name="SessionMax" Type="Int16" Nullable="false" />
           <Property Name="SessionsInUse" Type="Int16" Nullable="false" />
           <NavigationProperty Name="Login" Relationship="AuroraModels.Login_Usage" FromRole="Usage" ToRole="Login" />
@@ -2179,6 +2138,8 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Setting' does not have a primar
           <Property Name="IsDeletable" Type="Boolean" Nullable="false" />
           <Property Name="CreatedUtc" Type="DateTimeOffset" Nullable="false" Precision="7" />
           <NavigationProperty Name="FileSystemType" Relationship="AuroraModels.FileSystemType_FileSystem" FromRole="FileSystem_EF" ToRole="FileSystemType_EF" />
+          <NavigationProperty Name="Files" Relationship="AuroraModels.FileSystem_File" FromRole="FileSystem_EF" ToRole="File_EF" />
+          <NavigationProperty Name="Folders" Relationship="AuroraModels.FileSystem_Folder" FromRole="FileSystem_EF" ToRole="Folder_EF" />
           <NavigationProperty Name="Logins" Relationship="AuroraModels.FileSystem_FileSystemLogin" FromRole="FileSystem_EF" ToRole="FileSystemLogin_EF" />
           <NavigationProperty Name="Usage" Relationship="AuroraModels.FileSystem_FileSystemUsage" FromRole="FileSystem_EF" ToRole="FileSystemUsage_EF" />
         </EntityType>
@@ -2194,8 +2155,10 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Setting' does not have a primar
           <Property Name="ChrootPath" Type="String" MaxLength="128" FixedLength="false" Unicode="true" />
           <Property Name="IsReadOnly" Type="Boolean" Nullable="false" />
           <Property Name="CreatedUtc" Type="DateTimeOffset" Nullable="false" Precision="7" />
+          <NavigationProperty Name="Ambassador" Relationship="AuroraModels.Ambassador_FileSystemLogin" FromRole="FileSystemLogin_EF" ToRole="Ambassador_EF" />
           <NavigationProperty Name="FileSystem" Relationship="AuroraModels.FileSystem_FileSystemLogin" FromRole="FileSystemLogin_EF" ToRole="FileSystem_EF" />
           <NavigationProperty Name="Login" Relationship="AuroraModels.Login_FileSystemLogin" FromRole="FileSystemLogin_EF" ToRole="Login_EF" />
+          <NavigationProperty Name="SmbAuthType" Relationship="AuroraModels.SmbAuthType_FileSystemLogin" FromRole="FileSystemLogin_EF" ToRole="SmbAuthType_EF" />
         </EntityType>
         <EntityType Name="FileSystemUsage_EF">
           <Key>
@@ -2435,7 +2398,7 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Setting' does not have a primar
           </ReferentialConstraint>
         </Association>
         <Association Name="HashAlgorithmType_File">
-          <End Type="AuroraModels.HashAlgorithmType_EF" Role="HashAlgorithmType_EF" Multiplicity="0..1" />
+          <End Type="AuroraModels.HashAlgorithmType_EF" Role="HashAlgorithmType_EF" Multiplicity="1" />
           <End Type="AuroraModels.File_EF" Role="File_EF" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="HashAlgorithmType_EF">
@@ -2482,6 +2445,88 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Setting' does not have a primar
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="Ambassador_FileSystemLogin">
+          <End Type="AuroraModels.Ambassador_EF" Role="Ambassador_EF" Multiplicity="0..1" />
+          <End Type="AuroraModels.FileSystemLogin_EF" Role="FileSystemLogin_EF" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Ambassador_EF">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="FileSystemLogin_EF">
+              <PropertyRef Name="AmbassadorId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityType Name="NetworkActionType_EF">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" />
+          <Property Name="Name" Type="String" Nullable="false" MaxLength="8" FixedLength="false" Unicode="true" />
+          <Property Name="IsEnabled" Type="Boolean" Nullable="false" />
+          <Property Name="IsEditable" Type="Boolean" Nullable="false" />
+          <Property Name="IsDeletable" Type="Boolean" Nullable="false" />
+          <NavigationProperty Name="Networks" Relationship="AuroraModels.NetworkActionType_Network" FromRole="NetworkActionType_EF" ToRole="Network_EF" />
+        </EntityType>
+        <EntityType Name="SmbAuthType_EF">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" />
+          <Property Name="Name" Type="String" Nullable="false" MaxLength="32" FixedLength="false" Unicode="true" />
+          <Property Name="IsEnabled" Type="Boolean" Nullable="false" />
+          <Property Name="IsEditable" Type="Boolean" Nullable="false" />
+          <Property Name="IsDeletable" Nullable="false" Type="Boolean" />
+          <NavigationProperty Name="FileSystems" Relationship="AuroraModels.SmbAuthType_FileSystemLogin" FromRole="SmbAuthType_EF" ToRole="FileSystemLogin_EF" />
+        </EntityType>
+        <Association Name="SmbAuthType_FileSystemLogin">
+          <End Type="AuroraModels.SmbAuthType_EF" Role="SmbAuthType_EF" Multiplicity="0..1" />
+          <End Type="AuroraModels.FileSystemLogin_EF" Role="FileSystemLogin_EF" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="SmbAuthType_EF">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="FileSystemLogin_EF">
+              <PropertyRef Name="SmbAuthTypeId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="NetworkActionType_Network">
+          <End Type="AuroraModels.NetworkActionType_EF" Role="NetworkActionType_EF" Multiplicity="1" />
+          <End Type="AuroraModels.Network_EF" Role="Network_EF" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="NetworkActionType_EF">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="Network_EF">
+              <PropertyRef Name="ActionTypeId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FileSystem_File">
+          <End Type="AuroraModels.FileSystem_EF" Role="FileSystem_EF" Multiplicity="1" />
+          <End Type="AuroraModels.File_EF" Role="File_EF" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="FileSystem_EF">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="File_EF">
+              <PropertyRef Name="FileSystemId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FileSystem_Folder">
+          <End Type="AuroraModels.FileSystem_EF" Role="FileSystem_EF" Multiplicity="1" />
+          <End Type="AuroraModels.Folder_EF" Role="Folder_EF" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="FileSystem_EF">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="Folder_EF">
+              <PropertyRef Name="FileSystemId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
       </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
@@ -2491,9 +2536,9 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Setting' does not have a primar
           <EntitySetMapping Name="Ambassador_EF">
             <EntityTypeMapping TypeName="AuroraModels.Ambassador_EF">
               <MappingFragment StoreEntitySet="uvw_Ambassador">
+                <ScalarProperty Name="UserPrincipalName" ColumnName="UserPrincipalName" />
                 <ScalarProperty Name="EncryptedPass" ColumnName="EncryptedPass" />
                 <ScalarProperty Name="Id" ColumnName="Id" />
-                <ScalarProperty Name="UserName" ColumnName="UserName" />
                 <ScalarProperty Name="IsEnabled" ColumnName="IsEnabled" />
                 <ScalarProperty Name="IsDeletable" ColumnName="IsDeletable" />
                 <ScalarProperty Name="CreatedUtc" ColumnName="CreatedUtc" />
@@ -2505,17 +2550,17 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Setting' does not have a primar
                   <ScalarProperty Name="Id" ParameterName="Id" />
                 </DeleteFunction>
                 <UpdateFunction FunctionName="AuroraModels.Store.usp_Ambassador_Update">
+                  <ScalarProperty Name="UserPrincipalName" ParameterName="UserPrincipalName" Version="Current" />
                   <ScalarProperty Name="EncryptedPass" ParameterName="EncryptedPass" Version="Current" />
                   <ScalarProperty Name="IsDeletable" ParameterName="IsDeletable" Version="Current" />
                   <ScalarProperty Name="IsEnabled" ParameterName="IsEnabled" Version="Current" />
-                  <ScalarProperty Name="UserName" ParameterName="UserName" Version="Current" />
                   <ScalarProperty Name="Id" ParameterName="Id" Version="Current" />
                 </UpdateFunction>
                 <InsertFunction FunctionName="AuroraModels.Store.usp_Ambassador_Insert">
+                  <ScalarProperty Name="UserPrincipalName" ParameterName="UserPrincipalName" />
                   <ScalarProperty Name="EncryptedPass" ParameterName="EncryptedPass" />
                   <ScalarProperty Name="IsDeletable" ParameterName="IsDeletable" />
                   <ScalarProperty Name="IsEnabled" ParameterName="IsEnabled" />
-                  <ScalarProperty Name="UserName" ParameterName="UserName" />
                   <ResultBinding Name="Id" ColumnName="Id" />
                   <ResultBinding Name="CreatedUtc" ColumnName="CreatedUtc" />
                 </InsertFunction>
@@ -2525,12 +2570,13 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Setting' does not have a primar
           <EntitySetMapping Name="Network_EF">
             <EntityTypeMapping TypeName="AuroraModels.Network_EF">
               <MappingFragment StoreEntitySet="uvw_Network">
+                <ScalarProperty Name="Comment" ColumnName="Comment" />
+                <ScalarProperty Name="ActionTypeId" ColumnName="ActionTypeId" />
                 <ScalarProperty Name="SequenceId" ColumnName="SequenceId" />
                 <ScalarProperty Name="IsDeletable" ColumnName="IsDeletable" />
                 <ScalarProperty Name="Id" ColumnName="Id" />
                 <ScalarProperty Name="UserId" ColumnName="UserId" />
                 <ScalarProperty Name="Address" ColumnName="Address" />
-                <ScalarProperty Name="Action" ColumnName="Action" />
                 <ScalarProperty Name="IsEnabled" ColumnName="IsEnabled" />
                 <ScalarProperty Name="CreatedUtc" ColumnName="CreatedUtc" />
               </MappingFragment>
@@ -2541,18 +2587,20 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Setting' does not have a primar
                   <ScalarProperty Name="Id" ParameterName="Id" />
                 </DeleteFunction>
                 <UpdateFunction FunctionName="AuroraModels.Store.usp_Network_Update">
+                  <ScalarProperty Name="Comment" ParameterName="Comment" Version="Current" />
+                  <ScalarProperty Name="ActionTypeId" ParameterName="ActionTypeId" Version="Current" />
                   <ScalarProperty Name="SequenceId" ParameterName="SequenceId" Version="Current" />
                   <ScalarProperty Name="IsDeletable" ParameterName="IsDeletable" Version="Current" />
                   <ScalarProperty Name="IsEnabled" ParameterName="IsEnabled" Version="Current" />
-                  <ScalarProperty Name="Action" ParameterName="Action" Version="Current" />
                   <ScalarProperty Name="Address" ParameterName="Address" Version="Current" />
                   <ScalarProperty Name="Id" ParameterName="Id" Version="Current" />
                 </UpdateFunction>
                 <InsertFunction FunctionName="AuroraModels.Store.usp_Network_Insert">
+                  <ScalarProperty Name="Comment" ParameterName="Comment" />
+                  <ScalarProperty Name="ActionTypeId" ParameterName="ActionTypeId" />
                   <ScalarProperty Name="SequenceId" ParameterName="SequenceId" />
                   <ScalarProperty Name="IsDeletable" ParameterName="IsDeletable" />
                   <ScalarProperty Name="IsEnabled" ParameterName="IsEnabled" />
-                  <ScalarProperty Name="Action" ParameterName="Action" />
                   <ScalarProperty Name="Address" ParameterName="Address" />
                   <ScalarProperty Name="UserId" ParameterName="UserId" />
                   <ResultBinding Name="Id" ColumnName="Id" />
@@ -2691,12 +2739,10 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Setting' does not have a primar
           <EntitySetMapping Name="Login_EF">
             <EntityTypeMapping TypeName="AuroraModels.Login_EF">
               <MappingFragment StoreEntitySet="uvw_Login">
+                <ScalarProperty Name="Comment" ColumnName="Comment" />
                 <ScalarProperty Name="DebugTypeId" ColumnName="DebugTypeId" />
-                <ScalarProperty Name="FileSystemTypeId" ColumnName="FileSystemTypeId" />
                 <ScalarProperty Name="AuthTypeId" ColumnName="AuthTypeId" />
                 <ScalarProperty Name="EncryptedPass" ColumnName="EncryptedPass" />
-                <ScalarProperty Name="FileSystemChrootPath" ColumnName="FileSystemChrootPath" />
-                <ScalarProperty Name="IsFileSystemReadOnly" ColumnName="IsFileSystemReadOnly" />
                 <ScalarProperty Name="IsPublicKeyRequired" ColumnName="IsPublicKeyRequired" />
                 <ScalarProperty Name="IsPasswordRequired" ColumnName="IsPasswordRequired" />
                 <ScalarProperty Name="UserId" ColumnName="UserId" />
@@ -2712,12 +2758,10 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Setting' does not have a primar
                   <ScalarProperty Name="UserId" ParameterName="UserId" />
                 </DeleteFunction>
                 <UpdateFunction FunctionName="AuroraModels.Store.usp_Login_Update">
+                  <ScalarProperty Name="Comment" ParameterName="Comment" Version="Current" />
                   <ScalarProperty Name="DebugTypeId" ParameterName="DebugTypeId" Version="Current" />
-                  <ScalarProperty Name="FileSystemTypeId" ParameterName="FileSystemTypeId" Version="Current" />
                   <ScalarProperty Name="AuthTypeId" ParameterName="AuthTypeId" Version="Current" />
                   <ScalarProperty Name="EncryptedPass" ParameterName="EncryptedPass" Version="Current" />
-                  <ScalarProperty Name="FileSystemChrootPath" ParameterName="FileSystemChrootPath" Version="Current" />
-                  <ScalarProperty Name="IsFileSystemReadOnly" ParameterName="IsFileSystemReadOnly" Version="Current" />
                   <ScalarProperty Name="IsPublicKeyRequired" ParameterName="IsPublicKeyRequired" Version="Current" />
                   <ScalarProperty Name="IsPasswordRequired" ParameterName="IsPasswordRequired" Version="Current" />
                   <ScalarProperty Name="IsDeletable" ParameterName="IsDeletable" Version="Current" />
@@ -2726,11 +2770,10 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Setting' does not have a primar
                   <ScalarProperty Name="UserId" ParameterName="UserId" Version="Current" />
                 </UpdateFunction>
                 <InsertFunction FunctionName="AuroraModels.Store.usp_Login_Insert">
+                  <ScalarProperty Name="Comment" ParameterName="Comment" />
                   <ScalarProperty Name="DebugTypeId" ParameterName="DebugTypeId" />
-                  <ScalarProperty Name="FileSystemTypeId" ParameterName="FileSystemTypeId" />
                   <ScalarProperty Name="AuthTypeId" ParameterName="AuthTypeId" />
                   <ScalarProperty Name="EncryptedPass" ParameterName="EncryptedPass" />
-                  <ScalarProperty Name="IsFileSystemReadOnly" ParameterName="IsFileSystemReadOnly" />
                   <ScalarProperty Name="IsPublicKeyRequired" ParameterName="IsPublicKeyRequired" />
                   <ScalarProperty Name="IsPasswordRequired" ParameterName="IsPasswordRequired" />
                   <ScalarProperty Name="IsDeletable" ParameterName="IsDeletable" />
@@ -2745,6 +2788,7 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Setting' does not have a primar
           <EntitySetMapping Name="Alert_EF">
             <EntityTypeMapping TypeName="AuroraModels.Alert_EF">
               <MappingFragment StoreEntitySet="uvw_Alert">
+                <ScalarProperty Name="Comment" ColumnName="Comment" />
                 <ScalarProperty Name="ToDisplayName" ColumnName="ToDisplayName" />
                 <ScalarProperty Name="IsEnabled" ColumnName="IsEnabled" />
                 <ScalarProperty Name="Id" ColumnName="Id" />
@@ -2763,6 +2807,7 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Setting' does not have a primar
                   <ScalarProperty Name="Id" ParameterName="Id" />
                 </DeleteFunction>
                 <UpdateFunction FunctionName="AuroraModels.Store.usp_Alert_Update">
+                  <ScalarProperty Name="Comment" ParameterName="Comment" Version="Current" />
                   <ScalarProperty Name="ToDisplayName" ParameterName="ToDisplayName" Version="Current" />
                   <ScalarProperty Name="IsEnabled" ParameterName="IsEnabled" Version="Current" />
                   <ScalarProperty Name="ToPhoneNumber" ParameterName="ToPhoneNumber" Version="Current" />
@@ -2773,6 +2818,7 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Setting' does not have a primar
                   <ScalarProperty Name="Id" ParameterName="Id" Version="Current" />
                 </UpdateFunction>
                 <InsertFunction FunctionName="AuroraModels.Store.usp_Alert_Insert">
+                  <ScalarProperty Name="Comment" ParameterName="Comment" />
                   <ScalarProperty Name="ToDisplayName" ParameterName="ToDisplayName" />
                   <ScalarProperty Name="IsEnabled" ParameterName="IsEnabled" />
                   <ScalarProperty Name="ToPhoneNumber" ParameterName="ToPhoneNumber" />
@@ -2790,10 +2836,11 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Setting' does not have a primar
           <EntitySetMapping Name="File_EF">
             <EntityTypeMapping TypeName="AuroraModels.File_EF">
               <MappingFragment StoreEntitySet="uvw_File">
+                <ScalarProperty Name="CreatorId" ColumnName="CreatorId" />
+                <ScalarProperty Name="FileSystemId" ColumnName="FileSystemId" />
                 <ScalarProperty Name="HashValue" ColumnName="HashValue" />
                 <ScalarProperty Name="HashTypeId" ColumnName="HashTypeId" />
                 <ScalarProperty Name="Id" ColumnName="Id" />
-                <ScalarProperty Name="UserId" ColumnName="UserId" />
                 <ScalarProperty Name="FolderId" ColumnName="FolderId" />
                 <ScalarProperty Name="VirtualName" ColumnName="VirtualName" />
                 <ScalarProperty Name="RealPath" ColumnName="RealPath" />
@@ -2824,9 +2871,10 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Setting' does not have a primar
                   <ScalarProperty Name="VirtualName" ParameterName="VirtualName" Version="Current" />
                   <ScalarProperty Name="FolderId" ParameterName="FolderId" Version="Current" />
                   <ScalarProperty Name="Id" ParameterName="Id" Version="Current" />
-                  <ResultBinding Name="CreatedUtc" ColumnName="CreatedUtc" />
                 </UpdateFunction>
                 <InsertFunction FunctionName="AuroraModels.Store.usp_File_Insert">
+                  <ScalarProperty Name="CreatorId" ParameterName="CreatorId" />
+                  <ScalarProperty Name="FileSystemId" ParameterName="FileSystemId" />
                   <ScalarProperty Name="HashValue" ParameterName="HashValue" />
                   <ScalarProperty Name="HashTypeId" ParameterName="HashTypeId" />
                   <ScalarProperty Name="RealFileSize" ParameterName="RealFileSize" />
@@ -2835,7 +2883,6 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Setting' does not have a primar
                   <ScalarProperty Name="RealPath" ParameterName="RealPath" />
                   <ScalarProperty Name="VirtualName" ParameterName="VirtualName" />
                   <ScalarProperty Name="FolderId" ParameterName="FolderId" />
-                  <ScalarProperty Name="UserId" ParameterName="UserId" />
                   <ResultBinding Name="Id" ColumnName="Id" />
                   <ResultBinding Name="CreatedUtc" ColumnName="CreatedUtc" />
                   <ResultBinding Name="LastAccessedUtc" ColumnName="LastAccessedUtc" />
@@ -2848,8 +2895,9 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Setting' does not have a primar
           <EntitySetMapping Name="Folder_EF">
             <EntityTypeMapping TypeName="AuroraModels.Folder_EF">
               <MappingFragment StoreEntitySet="uvw_Folder">
+                <ScalarProperty Name="CreatorId" ColumnName="CreatorId" />
+                <ScalarProperty Name="FileSystemId" ColumnName="FileSystemId" />
                 <ScalarProperty Name="Id" ColumnName="Id" />
-                <ScalarProperty Name="UserId" ColumnName="UserId" />
                 <ScalarProperty Name="ParentId" ColumnName="ParentId" />
                 <ScalarProperty Name="VirtualName" ColumnName="VirtualName" />
                 <ScalarProperty Name="IsReadOnly" ColumnName="IsReadOnly" />
@@ -2870,56 +2918,18 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Setting' does not have a primar
                   <ScalarProperty Name="VirtualName" ParameterName="VirtualName" Version="Current" />
                   <ScalarProperty Name="ParentId" ParameterName="ParentId" Version="Current" />
                   <ScalarProperty Name="Id" ParameterName="Id" Version="Current" />
-                  <ResultBinding Name="CreatedUtc" ColumnName="CreatedUtc" />
                 </UpdateFunction>
                 <InsertFunction FunctionName="AuroraModels.Store.usp_Folder_Insert">
+                  <ScalarProperty Name="CreatorId" ParameterName="CreatorId" />
+                  <ScalarProperty Name="FileSystemId" ParameterName="FileSystemId" />
                   <ScalarProperty Name="IsReadOnly" ParameterName="IsReadOnly" />
                   <ScalarProperty Name="VirtualName" ParameterName="VirtualName" />
                   <ScalarProperty Name="ParentId" ParameterName="ParentId" />
-                  <ScalarProperty Name="UserId" ParameterName="UserId" />
                   <ResultBinding Name="Id" ColumnName="Id" />
                   <ResultBinding Name="CreatedUtc" ColumnName="CreatedUtc" />
                   <ResultBinding Name="LastAccessedUtc" ColumnName="LastAccessedUtc" />
                   <ResultBinding Name="LastUpdatedUtc" ColumnName="LastUpdatedUtc" />
                 </InsertFunction>
-              </ModificationFunctionMapping>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="Mount_EF">
-            <EntityTypeMapping TypeName="AuroraModels.Mount_EF">
-              <MappingFragment StoreEntitySet="uvw_Mount">
-                <ScalarProperty Name="UncPath" ColumnName="UncPath" />
-                <ScalarProperty Name="UserId" ColumnName="UserId" />
-                <ScalarProperty Name="AmbassadorId" ColumnName="AmbassadorId" />
-                <ScalarProperty Name="AuthType" ColumnName="AuthType" />
-                <ScalarProperty Name="IsEnabled" ColumnName="IsEnabled" />
-                <ScalarProperty Name="IsDeletable" ColumnName="IsDeletable" />
-                <ScalarProperty Name="CreatedUtc" ColumnName="CreatedUtc" />
-              </MappingFragment>
-            </EntityTypeMapping>
-            <EntityTypeMapping TypeName="AuroraModels.Mount_EF">
-              <ModificationFunctionMapping>
-                <UpdateFunction FunctionName="AuroraModels.Store.usp_Mount_Update">
-                  <ScalarProperty Name="UncPath" ParameterName="UncPath" Version="Current" />
-                  <ScalarProperty Name="IsDeletable" ParameterName="IsDeletable" Version="Current" />
-                  <ScalarProperty Name="IsEnabled" ParameterName="IsEnabled" Version="Current" />
-                  <ScalarProperty Name="AuthType" ParameterName="AuthType" Version="Current" />
-                  <ScalarProperty Name="AmbassadorId" ParameterName="AmbassadorId" Version="Current" />
-                  <ScalarProperty Name="UserId" ParameterName="UserId" Version="Current" />
-                </UpdateFunction>
-                <InsertFunction FunctionName="AuroraModels.Store.usp_Mount_Insert">
-                  <ScalarProperty Name="UncPath" ParameterName="UncPath" />
-                  <ScalarProperty Name="IsDeletable" ParameterName="IsDeletable" />
-                  <ScalarProperty Name="IsEnabled" ParameterName="IsEnabled" />
-                  <ScalarProperty Name="AuthType" ParameterName="AuthType" />
-                  <ScalarProperty Name="AmbassadorId" ParameterName="AmbassadorId" />
-                  <ScalarProperty Name="UserId" ParameterName="UserId" />
-                  <ResultBinding Name="UserId" ColumnName="UserId" />
-                  <ResultBinding Name="CreatedUtc" ColumnName="CreatedUtc" />
-                </InsertFunction>
-                <DeleteFunction FunctionName="AuroraModels.Store.usp_Mount_Delete" >
-                  <ScalarProperty Name="UserId" ParameterName="UserId" />
-                </DeleteFunction>
               </ModificationFunctionMapping>
             </EntityTypeMapping>
           </EntitySetMapping>
@@ -3355,51 +3365,6 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Setting' does not have a primar
               </ComplexTypeMapping>
             </ResultMapping>
           </FunctionImportMapping>
-          <FunctionImportMapping FunctionImportName="usp_Mount_Delete" FunctionName="AuroraModels.Store.usp_Mount_Delete">
-            <ResultMapping>
-              <ComplexTypeMapping TypeName="AuroraModels.usp_Mount_Delete_Result">
-                <ScalarProperty Name="UserId" ColumnName="UserId" />
-                <ScalarProperty Name="AmbassadorId" ColumnName="AmbassadorId" />
-                <ScalarProperty Name="AuthType" ColumnName="AuthType" />
-                <ScalarProperty Name="ServerAddress" ColumnName="ServerAddress" />
-                <ScalarProperty Name="ServerShare" ColumnName="ServerShare" />
-                <ScalarProperty Name="IsEnabled" ColumnName="IsEnabled" />
-                <ScalarProperty Name="IsDeletable" ColumnName="IsDeletable" />
-                <ScalarProperty Name="CreatedUtc" ColumnName="CreatedUtc" />
-                <ScalarProperty Name="LastUpdatedUtc" ColumnName="LastUpdatedUtc" />
-              </ComplexTypeMapping>
-            </ResultMapping>
-          </FunctionImportMapping>
-          <FunctionImportMapping FunctionImportName="usp_Mount_Insert" FunctionName="AuroraModels.Store.usp_Mount_Insert">
-            <ResultMapping>
-              <ComplexTypeMapping TypeName="AuroraModels.usp_Mount_Insert_Result">
-                <ScalarProperty Name="UserId" ColumnName="UserId" />
-                <ScalarProperty Name="AmbassadorId" ColumnName="AmbassadorId" />
-                <ScalarProperty Name="AuthType" ColumnName="AuthType" />
-                <ScalarProperty Name="ServerAddress" ColumnName="ServerAddress" />
-                <ScalarProperty Name="ServerShare" ColumnName="ServerShare" />
-                <ScalarProperty Name="IsEnabled" ColumnName="IsEnabled" />
-                <ScalarProperty Name="IsDeletable" ColumnName="IsDeletable" />
-                <ScalarProperty Name="CreatedUtc" ColumnName="CreatedUtc" />
-                <ScalarProperty Name="LastUpdatedUtc" ColumnName="LastUpdatedUtc" />
-              </ComplexTypeMapping>
-            </ResultMapping>
-          </FunctionImportMapping>
-          <FunctionImportMapping FunctionImportName="usp_Mount_Update" FunctionName="AuroraModels.Store.usp_Mount_Update">
-            <ResultMapping>
-              <ComplexTypeMapping TypeName="AuroraModels.usp_Mount_Update_Result">
-                <ScalarProperty Name="UserId" ColumnName="UserId" />
-                <ScalarProperty Name="AmbassadorId" ColumnName="AmbassadorId" />
-                <ScalarProperty Name="AuthType" ColumnName="AuthType" />
-                <ScalarProperty Name="ServerAddress" ColumnName="ServerAddress" />
-                <ScalarProperty Name="ServerShare" ColumnName="ServerShare" />
-                <ScalarProperty Name="IsEnabled" ColumnName="IsEnabled" />
-                <ScalarProperty Name="IsDeletable" ColumnName="IsDeletable" />
-                <ScalarProperty Name="CreatedUtc" ColumnName="CreatedUtc" />
-                <ScalarProperty Name="LastUpdatedUtc" ColumnName="LastUpdatedUtc" />
-              </ComplexTypeMapping>
-            </ResultMapping>
-          </FunctionImportMapping>
           <EntitySetMapping Name="Session_EF">
             <EntityTypeMapping TypeName="AuroraModels.Session_EF">
               <MappingFragment StoreEntitySet="uvw_Session">
@@ -3482,8 +3447,6 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Setting' does not have a primar
               <MappingFragment StoreEntitySet="uvw_LoginUsage">
                 <ScalarProperty Name="SessionsInUse" ColumnName="SessionsInUse" />
                 <ScalarProperty Name="SessionMax" ColumnName="SessionMax" />
-                <ScalarProperty Name="QuotaUsedInBytes" ColumnName="QuotaUsedInBytes" />
-                <ScalarProperty Name="QuotaInBytes" ColumnName="QuotaInBytes" />
                 <ScalarProperty Name="UserName" ColumnName="UserName" />
                 <ScalarProperty Name="UserId" ColumnName="UserId" />
               </MappingFragment>
@@ -3493,8 +3456,6 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Setting' does not have a primar
                 <UpdateFunction FunctionName="AuroraModels.Store.usp_LoginUsage_Update">
                   <ScalarProperty Name="SessionsInUse" ParameterName="SessionsInUse" Version="Current" />
                   <ScalarProperty Name="SessionMax" ParameterName="SessionMax" Version="Current" />
-                  <ScalarProperty Name="QuotaUsedInBytes" ParameterName="QuotaUsedInBytes" Version="Current" />
-                  <ScalarProperty Name="QuotaInBytes" ParameterName="QuotaInBytes" Version="Current" />
                   <ScalarProperty Name="UserId" ParameterName="UserId" Version="Current" />
                 </UpdateFunction>
               </ModificationFunctionMapping>
@@ -3753,6 +3714,29 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_Setting' does not have a primar
           <EntitySetMapping Name="PublicKeySignatureType_EF">
             <EntityTypeMapping TypeName="AuroraModels.PublicKeySignatureType_EF">
               <MappingFragment StoreEntitySet="uvw_PublicKeySignatureType">
+                <ScalarProperty Name="IsDeletable" ColumnName="IsDeletable" />
+                <ScalarProperty Name="IsEditable" ColumnName="IsEditable" />
+                <ScalarProperty Name="IsEnabled" ColumnName="IsEnabled" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <FunctionImportMapping FunctionImportName="usp_Sessions_Delete" FunctionName="AuroraModels.Store.usp_Sessions_Delete" />
+          <EntitySetMapping Name="NetworkActionType_EF">
+            <EntityTypeMapping TypeName="AuroraModels.NetworkActionType_EF">
+              <MappingFragment StoreEntitySet="uvw_NetworkActionType">
+                <ScalarProperty Name="IsDeletable" ColumnName="IsDeletable" />
+                <ScalarProperty Name="IsEditable" ColumnName="IsEditable" />
+                <ScalarProperty Name="IsEnabled" ColumnName="IsEnabled" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="SmbAuthType_EF">
+            <EntityTypeMapping TypeName="AuroraModels.SmbAuthType_EF">
+              <MappingFragment StoreEntitySet="uvw_SmbAuthType">
                 <ScalarProperty Name="IsDeletable" ColumnName="IsDeletable" />
                 <ScalarProperty Name="IsEditable" ColumnName="IsEditable" />
                 <ScalarProperty Name="IsEnabled" ColumnName="IsEnabled" />

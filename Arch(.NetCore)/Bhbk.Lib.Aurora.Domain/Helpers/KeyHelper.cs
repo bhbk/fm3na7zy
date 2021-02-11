@@ -1,5 +1,5 @@
 ﻿using Bhbk.Lib.Aurora.Data_EF6.Models;
-using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
+using Bhbk.Lib.Aurora.Data_EF6.UnitOfWorks;
 using Bhbk.Lib.Cryptography.Encryption;
 using Bhbk.Lib.Cryptography.Entropy;
 using Bhbk.Lib.QueryExpression.Extensions;

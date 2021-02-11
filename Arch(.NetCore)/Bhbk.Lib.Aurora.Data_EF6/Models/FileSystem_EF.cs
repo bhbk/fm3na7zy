@@ -17,6 +17,8 @@ namespace Bhbk.Lib.Aurora.Data_EF6.Models
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
         public FileSystem_EF()
         {
+            this.Files = new HashSet<File_EF>();
+            this.Folders = new HashSet<Folder_EF>();
             this.Logins = new HashSet<FileSystemLogin_EF>();
         }
     
@@ -30,6 +32,10 @@ namespace Bhbk.Lib.Aurora.Data_EF6.Models
         public System.DateTimeOffset CreatedUtc { get; set; }
     
         public virtual FileSystemType_EF FileSystemType { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<File_EF> Files { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<Folder_EF> Folders { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<FileSystemLogin_EF> Logins { get; set; }
         public virtual FileSystemUsage_EF Usage { get; set; }

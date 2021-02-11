@@ -1,54 +1,47 @@
-﻿
-CREATE PROCEDURE [svc].[usp_Setting_Insert]
-     @UserId				UNIQUEIDENTIFIER
-    ,@ConfigKey				NVARCHAR (MAX) 
-    ,@ConfigValue			NVARCHAR (MAX) 
-    ,@IsDeletable			BIT
-
+﻿CREATE PROCEDURE [svc].[usp_Setting_Insert] @UserId UNIQUEIDENTIFIER,
+	@ConfigKey NVARCHAR(MAX),
+	@ConfigValue NVARCHAR(MAX),
+	@IsDeletable BIT
 AS
 BEGIN
 	SET NOCOUNT ON;
 
 	BEGIN TRY
-
-    	BEGIN TRANSACTION;
+		BEGIN TRANSACTION;
 
 		DECLARE @SETTINGID UNIQUEIDENTIFIER = NEWID()
-        DECLARE @CREATEDUTC DATETIMEOFFSET (7) = GETUTCDATE()
+		DECLARE @CREATEDUTC DATETIMEOFFSET(7) = GETUTCDATE()
 
-		INSERT INTO [dbo].[tbl_Setting]
-			(
-			 Id         
-			,UserId           
-			,ConfigKey   
-			,ConfigValue
-			,IsDeletable
-			,CreatedUtc
+		INSERT INTO [dbo].[tbl_Setting] (
+			Id,
+			UserId,
+			ConfigKey,
+			ConfigValue,
+			IsDeletable,
+			CreatedUtc
 			)
-		VALUES
-			(
-			 @SETTINGID          
-			,@UserId         
-			,@ConfigKey
-			,@ConfigValue
-			,@IsDeletable
-			,@CREATEDUTC
+		VALUES (
+			@SETTINGID,
+			@UserId,
+			@ConfigKey,
+			@ConfigValue,
+			@IsDeletable,
+			@CREATEDUTC
 			);
 
-		IF @@ROWCOUNT != 1
-			THROW 51000, 'ERROR', 1;
+		IF @@ROWCOUNT != 1 THROW 51000,
+			'ERROR',
+			1;
+			SELECT *
+			FROM [dbo].[tbl_Setting]
+			WHERE Id = @SETTINGID
 
-		SELECT * FROM [dbo].[tbl_Setting] WHERE Id = @SETTINGID
+		COMMIT TRANSACTION;
+	END TRY
 
-    	COMMIT TRANSACTION;
+	BEGIN CATCH
+		ROLLBACK TRANSACTION;
 
-    END TRY
-
-    BEGIN CATCH
-
-    	ROLLBACK TRANSACTION;
-        THROW;
-
-    END CATCH
-
+		THROW;
+	END CATCH
 END

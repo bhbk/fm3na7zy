@@ -7,10 +7,13 @@
     [CreatedUtc]    DATETIMEOFFSET (7) NOT NULL,
     [IsReadOnly]    BIT                CONSTRAINT [DF_tbl_FileSystemLogin_IsReadOnly] DEFAULT ((0)) NOT NULL,
     CONSTRAINT [PK_tbl_FileSystemLogin] PRIMARY KEY CLUSTERED ([UserId] ASC, [FileSystemId] ASC),
-    CONSTRAINT [FK_tbl_FileSystemLogin_AmbassadorID] FOREIGN KEY ([AmbassadorId]) REFERENCES [dbo].[tbl_Ambassador] ([Id]) ON UPDATE CASCADE,
-    CONSTRAINT [FK_tbl_FileSystemLogin_FileSystemID] FOREIGN KEY ([FileSystemId]) REFERENCES [dbo].[tbl_FileSystem] ([Id]) ON UPDATE CASCADE,
-    CONSTRAINT [FK_tbl_FileSystemLogin_SmbAuthTypeID] FOREIGN KEY ([SmbAuthTypeId]) REFERENCES [dbo].[tbl_SmbAuthType] ([Id]) ON UPDATE CASCADE
+    CONSTRAINT [FK_tbl_FileSystemLogin_tbl_Ambassador] FOREIGN KEY ([AmbassadorId]) REFERENCES [dbo].[tbl_Ambassador] ([Id]) ON UPDATE CASCADE,
+    CONSTRAINT [FK_tbl_FileSystemLogin_tbl_FileSystem] FOREIGN KEY ([FileSystemId]) REFERENCES [dbo].[tbl_FileSystem] ([Id]) ON UPDATE CASCADE,
+    CONSTRAINT [FK_tbl_FileSystemLogin_tbl_Login] FOREIGN KEY ([UserId]) REFERENCES [dbo].[tbl_Login] ([UserId]),
+    CONSTRAINT [FK_tbl_FileSystemLogin_tbl_SmbAuthType] FOREIGN KEY ([SmbAuthTypeId]) REFERENCES [dbo].[tbl_SmbAuthType] ([Id]) ON UPDATE CASCADE
 );
+
+
 
 
 GO

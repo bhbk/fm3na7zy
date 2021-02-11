@@ -15,22 +15,23 @@ namespace Bhbk.Lib.Aurora.Data_EF6.Models
     public partial class File_EF
     {
         public System.Guid Id { get; set; }
-        public System.Guid UserId { get; set; }
+        public System.Guid FileSystemId { get; set; }
         public System.Guid FolderId { get; set; }
         public string VirtualName { get; set; }
         public bool IsReadOnly { get; set; }
         public string RealPath { get; set; }
         public string RealFileName { get; set; }
         public long RealFileSize { get; set; }
-        public Nullable<int> HashTypeId { get; set; }
+        public int HashTypeId { get; set; }
         public string HashValue { get; set; }
+        public System.Guid CreatorId { get; set; }
         public System.DateTimeOffset CreatedUtc { get; set; }
         public System.DateTimeOffset LastAccessedUtc { get; set; }
         public System.DateTimeOffset LastUpdatedUtc { get; set; }
         public System.DateTimeOffset LastVerifiedUtc { get; set; }
     
+        public virtual FileSystem_EF FileSystem { get; set; }
         public virtual HashAlgorithmType_EF HashType { get; set; }
-        public virtual Login_EF Login { get; set; }
         public virtual Folder_EF Parent { get; set; }
     }
 }

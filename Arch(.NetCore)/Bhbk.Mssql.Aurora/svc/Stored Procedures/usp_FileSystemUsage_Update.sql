@@ -1,18 +1,25 @@
-﻿
-CREATE PROCEDURE [svc].[usp_FileSystemUsage_Update]
-     @FileSystemId uniqueidentifier
-	,@QuotaInBytes bigint
-	,@QuotaUsedInBytes bigint
-
+﻿CREATE PROCEDURE [svc].[usp_FileSystemUsage_Update] @FileSystemId UNIQUEIDENTIFIER,
+	@QuotaInBytes BIGINT,
+	@QuotaUsedInBytes BIGINT
 AS
+BEGIN
+	SET NOCOUNT ON;
 
-SET NOCOUNT ON;
+	BEGIN TRY
+		UPDATE [dbo].[tbl_FileSystemUsage]
+		SET QuotaInBytes = @QuotaInBytes,
+			QuotaUsedInBytes = @QuotaUsedInBytes
+		WHERE FileSystemId = @FileSystemId
 
-UPDATE [dbo].[tbl_FileSystemUsage]
-SET QuotaInBytes = @QuotaInBytes
-   ,QuotaUsedInBytes = @QuotaUsedInBytes
-WHERE FileSystemId = @FileSystemId
+		IF @@ROWCOUNT != 1 THROW 51000,
+			'ERROR',
+			1;
+			SELECT *
+			FROM [dbo].[tbl_FileSystemUsage]
+			WHERE FileSystemId = @FileSystemId
+	END TRY
 
-SELECT * 
-FROM [dbo].[tbl_FileSystemUsage] 
-WHERE FileSystemId = @FileSystemId
+	BEGIN CATCH
+		THROW;
+	END CATCH
+END

@@ -1,6 +1,6 @@
 ﻿using Bhbk.Cli.Aurora.IO;
 using Bhbk.Lib.Aurora.Data_EF6.Models;
-using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
+using Bhbk.Lib.Aurora.Data_EF6.UnitOfWorks;
 using Bhbk.Lib.Aurora.Primitives.Enums;
 using Bhbk.Lib.CommandLine.IO;
 using Bhbk.Lib.Common.Primitives.Enums;
@@ -10,7 +10,6 @@ using Bhbk.Lib.QueryExpression.Factories;
 using ManyConsole;
 using Microsoft.Extensions.Configuration;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace Bhbk.Cli.Aurora.Commands.System
@@ -50,14 +49,14 @@ namespace Bhbk.Cli.Aurora.Commands.System
         {
             try
             {
-                var exists = _uow.Settings.Get(QueryExpressionFactory.GetQueryExpression<Setting_EF>()
+                var found = _uow.Settings.Get(QueryExpressionFactory.GetQueryExpression<Setting_EF>()
                     .Where(x => x.ConfigKey == _configType.ToString() && x.ConfigValue == _configValue).ToLambda())
                     .LastOrDefault();
 
-                if (exists != null)
+                if (found != null)
                 {
                     Console.Out.WriteLine("  *** The config key/value pair entered already exists ***");
-                    FormatOutput.Settings(new List<Setting_EF> { exists });
+                    FormatOutput.Write(found, true);
 
                     return StandardOutput.FondFarewell();
                 }
@@ -72,7 +71,7 @@ namespace Bhbk.Cli.Aurora.Commands.System
 
                 _uow.Commit();
 
-                FormatOutput.Settings(new List<Setting_EF> { config });
+                FormatOutput.Write(config, true);
 
                 return StandardOutput.FondFarewell();
             }

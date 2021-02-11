@@ -1,7 +1,8 @@
 using Bhbk.Daemon.Aurora.SFTP.Factories;
 using Bhbk.Lib.Aurora.Data_EF6.Models;
-using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
+using Bhbk.Lib.Aurora.Data_EF6.UnitOfWorks;
 using Bhbk.Lib.Aurora.Domain.Helpers;
+using Bhbk.Lib.Aurora.Domain.Providers;
 using Bhbk.Lib.Aurora.Domain.Templates;
 using Bhbk.Lib.Aurora.Primitives;
 using Bhbk.Lib.Aurora.Primitives.Enums;
@@ -16,6 +17,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Rebex;
+using Rebex.IO.FileSystem;
 using Rebex.IO.FileSystem.Notifications;
 using Rebex.Net;
 using Rebex.Net.Servers;
@@ -245,7 +247,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                                 if (user != null)
                                 {
                                     user.Usage.SessionsInUse--;
-                                    uow.Usages.Update(user.Usage);
+                                    uow.LoginUsages.Update(user.Usage);
                                 }
 
                                 uow.Sessions.Create(
@@ -341,7 +343,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                     {
                         var found = NetworkHelper.ValidateAddress(network, e.ClientAddress);
 
-                        if (network.Action == NetworkActionType_E.Deny.ToString()
+                        if (network.ActionTypeId == (int)NetworkActionType_E.Deny
                             && found == true)
                         {
                             Log.Warning($"'{callPath}' client:'{e.ClientEndPoint}' denied:'network'");
@@ -362,7 +364,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                             return;
                         }
 
-                        if (network.Action == NetworkActionType_E.Allow.ToString()
+                        if (network.ActionTypeId == (int)NetworkActionType_E.Allow
                             && found == true)
                         {
                             Log.Information($"'{callPath}' client:'{e.ClientEndPoint}' allowed:'network'");
@@ -420,10 +422,12 @@ namespace Bhbk.Daemon.Aurora.SFTP
                 using (var scope = _factory.CreateScope())
                 {
                     var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+                    var state = scope.ServiceProvider.GetRequiredService<StateProvider>();
                     var user = uow.Logins.Get(QueryExpressionFactory.GetQueryExpression<Login_EF>()
                         .Where(x => x.UserName == e.UserName && x.IsEnabled).ToLambda(),
                             new List<Expression<Func<Login_EF, object>>>()
                             {
+                                x => x.FileSystems,
                                 x => x.Networks,
                                 x => x.PublicKeys,
                                 x => x.Usage,
@@ -540,7 +544,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                     {
                         var found = NetworkHelper.ValidateAddress(network, e.ClientAddress);
 
-                        if (network.Action == NetworkActionType_E.Deny.ToString()
+                        if (network.ActionTypeId == (int)NetworkActionType_E.Deny
                             && found == true)
                         {
                             Log.Warning($"'{callPath}' '{e.UserName}' denied:'network'");
@@ -563,7 +567,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                             return;
                         }
 
-                        if (network.Action == NetworkActionType_E.Allow.ToString()
+                        if (network.ActionTypeId == (int)NetworkActionType_E.Allow
                             && found == true)
                         {
                             Log.Information($"'{callPath}' '{e.UserName}' allowed:'network'");
@@ -610,6 +614,50 @@ namespace Bhbk.Daemon.Aurora.SFTP
                     }
 
                     /*
+                     * does user have zero or multiple file-systems... (not supported currently)
+                     */
+
+                    if (user.FileSystems.Count() == 0)
+                    {
+                        uow.Sessions.Create(
+                            new Session_EF
+                            {
+                                UserId = user.UserId,
+                                CallPath = callPath,
+                                Details = $"error:'{e.UserName}' file-system:'none are configured'",
+                                LocalEndPoint = _localEndPoint,
+                                RemoteEndPoint = e.ClientEndPoint.ToString(),
+                                RemoteSoftwareIdentifier = e.ClientSoftwareIdentifier,
+                                IsActive = true,
+                            });
+
+                        uow.Commit();
+
+                        e.Reject();
+                        return;
+                    }
+
+                    if (user.FileSystems.Count() > 1)
+                    {
+                        uow.Sessions.Create(
+                            new Session_EF
+                            {
+                                UserId = user.UserId,
+                                CallPath = callPath,
+                                Details = $"error:'{e.UserName}' file-system:'multiple are unsupported'",
+                                LocalEndPoint = _localEndPoint,
+                                RemoteEndPoint = e.ClientEndPoint.ToString(),
+                                RemoteSoftwareIdentifier = e.ClientSoftwareIdentifier,
+                                IsActive = true,
+                            });
+
+                        uow.Commit();
+
+                        e.Reject();
+                        return;
+                    }
+
+                    /*
                      * does system require password and public key authentication for user...
                      */
 
@@ -617,6 +665,8 @@ namespace Bhbk.Daemon.Aurora.SFTP
                         && user.IsPasswordRequired)
                     {
                         Log.Information($"'{callPath}' '{e.UserName}' required:'public-key and password'");
+
+                        state.Add(ServerSession.Current.Id, user.UserId, user.UserName, AuthFactorType_E.PasswordAndPublicKey);
 
                         uow.Sessions.Create(
                             new Session_EF
@@ -645,6 +695,8 @@ namespace Bhbk.Daemon.Aurora.SFTP
                     {
                         Log.Information($"'{callPath}' '{e.UserName}' required:'public-key'");
 
+                        state.Add(ServerSession.Current.Id, user.UserId, user.UserName, AuthFactorType_E.PasswordOnly);
+
                         uow.Sessions.Create(
                             new Session_EF
                             {
@@ -671,6 +723,8 @@ namespace Bhbk.Daemon.Aurora.SFTP
                         && user.IsPasswordRequired)
                     {
                         Log.Information($"'{callPath}' '{e.UserName}' required:'password'");
+
+                        state.Add(ServerSession.Current.Id, user.UserId, user.UserName, AuthFactorType_E.PublicKeyOnly);
 
                         uow.Sessions.Create(
                             new Session_EF
@@ -726,6 +780,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                 {
                     var logger = scope.ServiceProvider.GetRequiredService<ILogger>();
                     var conf = scope.ServiceProvider.GetRequiredService<IConfiguration>();
+                    var state = scope.ServiceProvider.GetRequiredService<StateProvider>();
                     var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
                     var admin = scope.ServiceProvider.GetRequiredService<IAdminService>();
                     var sts = scope.ServiceProvider.GetRequiredService<IStsService>();
@@ -734,9 +789,25 @@ namespace Bhbk.Daemon.Aurora.SFTP
                         .Where(x => x.UserName == e.UserName && x.IsEnabled).ToLambda(),
                             new List<Expression<Func<Login_EF, object>>>()
                             {
-                                x => x.Mount,
+                                x => x.FileSystems,
                                 x => x.PublicKeys,
                                 x => x.Usage,
+                            })
+                        .Single();
+
+                    var fileSystemLogin = user.FileSystems
+                        .Single();
+
+                    fileSystemLogin = uow.FileSystemLogins.Get(QueryExpressionFactory.GetQueryExpression<FileSystemLogin_EF>()
+                        .Where(x => x.UserId == fileSystemLogin.UserId && x.FileSystemId == fileSystemLogin.FileSystemId).ToLambda(),
+                            new List<Expression<Func<FileSystemLogin_EF, object>>>()
+                            {
+                                x => x.Ambassador,
+                                x => x.SmbAuthType,
+                                x => x.FileSystem,
+                                x => x.FileSystem.Usage,
+                                x => x.Login,
+                                x => x.Login.Usage,
                             })
                         .Single();
 
@@ -887,39 +958,60 @@ namespace Bhbk.Daemon.Aurora.SFTP
 
                         uow.Commit();
 
+                        state.AuthComplete_PublicKey(ServerSession.Current.Id, user.UserId);
+
                         if (e.PartiallyAccepted
                             || !user.IsPasswordRequired)
                         {
-                            /*
-                             * an smb mount will not succeed without a user password or ambassador credential.
-                             */
-
-                            if (user.FileSystemTypeId == (int)FileSystemType_E.SMB
-                                && !user.Mount.AmbassadorId.HasValue)
+                            if (fileSystemLogin.FileSystem.FileSystemTypeId == (int)FileSystemType_E.SMB)
                             {
-                                Log.Error($"'{callPath}' '{e.UserName}' {FileSystemType_E.SMB} filesystem mount denied:'missing-credential'");
+                                if (fileSystemLogin.AmbassadorId.HasValue)
+                                {
+                                    uow.Sessions.Create(
+                                        new Session_EF
+                                        {
+                                            UserId = user.UserId,
+                                            CallPath = callPath,
+                                            Details = $"info:'{e.UserName}' " +
+                                                $"mount:'{fileSystemLogin.FileSystem.UncPath}' " +
+                                                $"ambassador-as:'{fileSystemLogin.Ambassador.UserPrincipalName}' ",
+                                            LocalEndPoint = _localEndPoint,
+                                            RemoteEndPoint = e.ClientEndPoint.ToString(),
+                                            RemoteSoftwareIdentifier = e.ClientSoftwareIdentifier,
+                                            IsActive = true,
+                                        });
 
-                                uow.Sessions.Create(
-                                    new Session_EF
-                                    {
-                                        UserId = user.UserId,
-                                        CallPath = callPath,
-                                        Details = $"{FileSystemType_E.SMB} filesystem mount denied:'missing-credential'",
-                                        LocalEndPoint = _localEndPoint,
-                                        RemoteEndPoint = e.ClientEndPoint.ToString(),
-                                        RemoteSoftwareIdentifier = e.ClientSoftwareIdentifier,
-                                        IsActive = true,
-                                    });
+                                    uow.Commit();
+                                }
+                                else
+                                {
+                                    uow.Sessions.Create(
+                                        new Session_EF
+                                        {
+                                            UserId = user.UserId,
+                                            CallPath = callPath,
+                                            Details = $"info:'{e.UserName}' " +
+                                                $"mount:'{fileSystemLogin.FileSystem.UncPath}' " +
+                                                $"as:'{user.UserName}' ",
+                                            LocalEndPoint = _localEndPoint,
+                                            RemoteEndPoint = e.ClientEndPoint.ToString(),
+                                            RemoteSoftwareIdentifier = e.ClientSoftwareIdentifier,
+                                            IsActive = true,
+                                        });
 
-                                uow.Commit();
-
-                                e.Reject();
-                                return;
+                                    uow.Commit();
+                                }
                             }
 
-                            var fs = FileSystemFactory.CreateFileSystem(_factory, logger, user, e.UserName, e.Password);
+                            FileSystemProvider fsProvider;
 
-                            var fsNotify = fs.GetFileSystemNotifier();
+                            if (e.PartiallyAccepted)
+                                fsProvider = FileSystemFactory.CreateFileSystem(_factory, logger, fileSystemLogin, e.UserName,
+                                    state.GetPassword(ServerSession.Current.Id, user.UserId));
+                            else
+                                fsProvider = FileSystemFactory.CreateFileSystem(_factory, logger, fileSystemLogin, e.UserName, null);
+
+                            var fsNotify = fsProvider.GetFileSystemNotifier();
                             fsNotify.DeletePreview += User_DeletePreview;
                             fsNotify.DeleteCompleted += User_DeleteCompleted;
                             fsNotify.GetContentPreview += User_GetContentPreview;
@@ -928,7 +1020,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                             fsNotify.SaveContentCompleted += User_SaveContentCompleted;
 
                             var fsUser = new FileServerUser(e.UserName, e.Password, ShellType.Scp);
-                            fsUser.SetFileSystem(fs);
+                            fsUser.SetFileSystem(fsProvider);
 
                             /*
                              * persist session count for user so cli has data-point...
@@ -944,8 +1036,11 @@ namespace Bhbk.Daemon.Aurora.SFTP
 
                             user.Usage.SessionsInUse++;
 
-                            uow.Usages.Update(user.Usage);
+                            uow.LoginUsages.Update(user.Usage);
                             uow.Commit();
+
+                            state.AuthComplete_PublicKey(ServerSession.Current.Id, user.UserId);
+                            state.Remove(ServerSession.Current.Id, user.UserId);
 
                             e.Accept(fsUser);
                             return;
@@ -954,6 +1049,8 @@ namespace Bhbk.Daemon.Aurora.SFTP
                         /*
                          * authenticate partially if another kind of credential has not been provided yet.
                          */
+
+                        state.AuthComplete_PublicKey(ServerSession.Current.Id, user.UserId);
 
                         e.AcceptPartially();
                         return;
@@ -1073,10 +1170,12 @@ namespace Bhbk.Daemon.Aurora.SFTP
 
                         uow.Commit();
 
+                        state.AuthComplete_Password(ServerSession.Current.Id, user.UserId, e.Password);
+
                         if (e.PartiallyAccepted
                             || !user.IsPublicKeyRequired)
                         {
-                            var fs = FileSystemFactory.CreateFileSystem(_factory, logger, user, e.UserName, e.Password);
+                            var fs = FileSystemFactory.CreateFileSystem(_factory, logger, fileSystemLogin, e.UserName, e.Password);
 
                             var fsNotify = fs.GetFileSystemNotifier();
                             fsNotify.DeletePreview += User_DeletePreview;
@@ -1103,8 +1202,11 @@ namespace Bhbk.Daemon.Aurora.SFTP
 
                             user.Usage.SessionsInUse++;
 
-                            uow.Usages.Update(user.Usage);
+                            uow.LoginUsages.Update(user.Usage);
                             uow.Commit();
+
+                            state.AuthComplete_Password(ServerSession.Current.Id, user.UserId, e.Password);
+                            state.Remove(ServerSession.Current.Id, user.UserId);
 
                             e.Accept(fsUser);
                             return;
@@ -1113,6 +1215,8 @@ namespace Bhbk.Daemon.Aurora.SFTP
                         /*
                          * authenticate partially if another kind of credential has not been provided yet.
                          */
+
+                        state.AuthComplete_Password(ServerSession.Current.Id, user.UserId, e.Password);
 
                         e.AcceptPartially();
                         return;
@@ -1176,7 +1280,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                     if (user != null)
                     {
                         user.Usage.SessionsInUse--;
-                        uow.Usages.Update(user.Usage);
+                        uow.LoginUsages.Update(user.Usage);
                     }
 
                     uow.Sessions.Create(

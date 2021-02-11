@@ -1,12 +1,14 @@
 ﻿CREATE TABLE [dbo].[tbl_LoginUsage] (
-    [UserId]           UNIQUEIDENTIFIER NOT NULL,
-    [QuotaInBytes]     BIGINT           NOT NULL,
-    [QuotaUsedInBytes] BIGINT           NOT NULL,
-    [SessionMax]       SMALLINT         NOT NULL,
-    [SessionsInUse]    SMALLINT         NOT NULL,
+    [UserId]        UNIQUEIDENTIFIER NOT NULL,
+    [SessionMax]    SMALLINT         NOT NULL,
+    [SessionsInUse] SMALLINT         NOT NULL,
     CONSTRAINT [PK_tbl_Usage] PRIMARY KEY CLUSTERED ([UserId] ASC),
-    CONSTRAINT [FK_tbl_Usage_tbl_Login] FOREIGN KEY ([UserId]) REFERENCES [dbo].[tbl_Login] ([UserId]) ON UPDATE CASCADE
+    CONSTRAINT [FK_tbl_LoginUsage_tbl_Login] FOREIGN KEY ([UserId]) REFERENCES [dbo].[tbl_Login] ([UserId]) ON UPDATE CASCADE
 );
+
+
+
+
 
 
 

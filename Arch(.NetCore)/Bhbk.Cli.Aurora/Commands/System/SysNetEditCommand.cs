@@ -1,6 +1,6 @@
 ﻿using Bhbk.Cli.Aurora.IO;
 using Bhbk.Lib.Aurora.Data_EF6.Models;
-using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
+using Bhbk.Lib.Aurora.Data_EF6.UnitOfWorks;
 using Bhbk.Lib.Aurora.Primitives.Enums;
 using Bhbk.Lib.CommandLine.IO;
 using Bhbk.Lib.Common.Primitives.Enums;
@@ -10,7 +10,6 @@ using Bhbk.Lib.QueryExpression.Factories;
 using ManyConsole;
 using Microsoft.Extensions.Configuration;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 
@@ -22,9 +21,11 @@ namespace Bhbk.Cli.Aurora.Commands.System
         private IUnitOfWork _uow;
         private Guid _id;
         private Int32 _sequence = Int32.MinValue;
+        private bool? _isEnabled;
         private IPNetwork _cidr = null;
         private NetworkActionType_E _actionType;
         private readonly string _actionTypeList = string.Join(", ", Enum.GetNames(typeof(NetworkActionType_E)));
+        private string _comment;
 
         public SysNetEditCommand()
         {
@@ -48,7 +49,7 @@ namespace Bhbk.Cli.Aurora.Commands.System
                     throw new ConsoleHelpAsException($"  *** Invalid sequence value ***");
             });
 
-            HasOption("c|cidr=", "Enter CIDR address to use", arg =>
+            HasOption("n|network=", "Enter CIDR address to use", arg =>
             {
                 if (!IPNetwork.TryParse(arg, out _cidr))
                     throw new ConsoleHelpAsException($"  *** Invalid cidr address ***");
@@ -58,6 +59,19 @@ namespace Bhbk.Cli.Aurora.Commands.System
             {
                 if (!Enum.TryParse(arg, out _actionType))
                     throw new ConsoleHelpAsException($"  *** Invalid action type. Options are '{_actionTypeList}' ***");
+            });
+
+            HasOption("c|comment=", "Enter comment", arg =>
+            {
+                if (!string.IsNullOrEmpty(arg))
+                    _comment = arg;
+            });
+
+            HasOption("e|enabled=", "Is enabled?", arg =>
+            {
+                CheckRequiredArguments();
+
+                _isEnabled = bool.Parse(arg);
             });
         }
 
@@ -81,12 +95,18 @@ namespace Bhbk.Cli.Aurora.Commands.System
                     network.Address = _cidr.ToString();
 
                 if (_actionType.ToString() != null)
-                    network.Action = _actionType.ToString();
+                    network.ActionTypeId = (int)_actionType;
+
+                if (_comment != null)
+                    network.Comment = _comment;
+
+                if (_isEnabled.HasValue)
+                    network.IsEnabled = _isEnabled.HasValue;
 
                 _uow.Networks.Update(network);
                 _uow.Commit();
 
-                FormatOutput.Networks(new List<Network_EF> { network });
+                FormatOutput.Write(network, true);
 
                 return StandardOutput.FondFarewell();
             }

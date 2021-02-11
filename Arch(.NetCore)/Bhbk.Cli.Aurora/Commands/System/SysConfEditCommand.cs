@@ -1,6 +1,6 @@
 ﻿using Bhbk.Cli.Aurora.IO;
-using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
 using Bhbk.Lib.Aurora.Data_EF6.Models;
+using Bhbk.Lib.Aurora.Data_EF6.UnitOfWorks;
 using Bhbk.Lib.Aurora.Primitives.Enums;
 using Bhbk.Lib.CommandLine.IO;
 using Bhbk.Lib.Common.Primitives.Enums;
@@ -10,7 +10,6 @@ using Bhbk.Lib.QueryExpression.Factories;
 using ManyConsole;
 using Microsoft.Extensions.Configuration;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace Bhbk.Cli.Aurora.Commands.System
@@ -19,7 +18,7 @@ namespace Bhbk.Cli.Aurora.Commands.System
     {
         private readonly IConfiguration _conf;
         private readonly IUnitOfWork _uow;
-        private Guid _id;
+        private Setting_EF _config;
         private ConfigType_E _configType;
         private readonly string _configTypeList = string.Join(", ", Enum.GetNames(typeof(ConfigType_E)));
         private string _configValue;
@@ -37,7 +36,14 @@ namespace Bhbk.Cli.Aurora.Commands.System
 
             HasRequiredOption("i|id=", "Enter GUID of config key/value pair to edit", arg =>
             {
-                _id = Guid.Parse(arg);
+                var id = Guid.Parse(arg);
+
+                _config = _uow.Settings.Get(QueryExpressionFactory.GetQueryExpression<Setting_EF>()
+                    .Where(x => x.Id == id).ToLambda())
+                    .SingleOrDefault();
+
+                if (_config == null)
+                    throw new ConsoleHelpAsException($"  *** Invalid config type '{_configType}' ***");
             });
 
             HasOption("k|key=", "Enter config key", arg =>
@@ -56,23 +62,16 @@ namespace Bhbk.Cli.Aurora.Commands.System
         {
             try
             {
-                var config = _uow.Settings.Get(QueryExpressionFactory.GetQueryExpression<Setting_EF>()
-                    .Where(x => x.Id == _id).ToLambda())
-                    .SingleOrDefault();
-
-                if (config == null)
-                    throw new ConsoleHelpAsException($"  *** Invalid config type '{_configType}' ***");
-
                 if (_configType.ToString() != null)
-                    config.ConfigKey = _configType.ToString();
+                    _config.ConfigKey = _configType.ToString();
 
                 if (_configValue != null)
-                    config.ConfigValue = _configValue;
+                    _config.ConfigValue = _configValue;
 
-                _uow.Settings.Update(config);
+                _uow.Settings.Update(_config);
                 _uow.Commit();
 
-                FormatOutput.Settings(new List<Setting_EF> { config });
+                FormatOutput.Write(_config);
 
                 return StandardOutput.FondFarewell();
             }

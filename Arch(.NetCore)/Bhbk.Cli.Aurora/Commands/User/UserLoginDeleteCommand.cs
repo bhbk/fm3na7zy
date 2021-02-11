@@ -1,6 +1,6 @@
 ﻿using Bhbk.Cli.Aurora.IO;
 using Bhbk.Lib.Aurora.Data_EF6.Models;
-using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
+using Bhbk.Lib.Aurora.Data_EF6.UnitOfWorks;
 using Bhbk.Lib.CommandLine.IO;
 using Bhbk.Lib.Common.Primitives.Enums;
 using Bhbk.Lib.Common.Services;
@@ -11,7 +11,6 @@ using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
 
 namespace Bhbk.Cli.Aurora.Commands.User
 {
@@ -38,12 +37,7 @@ namespace Bhbk.Cli.Aurora.Commands.User
                     throw new ConsoleHelpAsException($"  *** No user name given ***");
 
                 _user = _uow.Logins.Get(QueryExpressionFactory.GetQueryExpression<Login_EF>()
-                    .Where(x => x.UserName == arg && x.IsDeletable == true).ToLambda(),
-                        new List<Expression<Func<Login_EF, object>>>()
-                        {
-                            x => x.Files,
-                            x => x.Folders,
-                        })
+                    .Where(x => x.UserName == arg && x.IsDeletable == true).ToLambda())
                     .SingleOrDefault();
 
                 if (_user == null)
@@ -55,20 +49,16 @@ namespace Bhbk.Cli.Aurora.Commands.User
         {
             try
             {
-                FormatOutput.Logins(new List<Login_EF> { _user }, true);
+                FormatOutput.Write(_user, true);
                 Console.Out.WriteLine();
 
                 Console.Out.Write("  *** Enter 'yes' to delete user *** : ");
                 var input = StandardInput.GetInput();
                 Console.Out.WriteLine();
 
-                if (input.ToLower() == "yes")
+                if (input.ToLower() == "yes"
+                    && !_user.IsDeletable)
                 {
-                    var files = _user.Files.Count;
-
-                    if (files > 0)
-                        throw new ConsoleHelpAsException($"  *** The user can not be deleted. There are {files} files owned ***");
-
                     _uow.Logins.Delete(_user);
                     _uow.Commit();
                 }

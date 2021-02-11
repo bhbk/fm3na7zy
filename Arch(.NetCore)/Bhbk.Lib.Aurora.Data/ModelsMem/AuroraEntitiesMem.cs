@@ -17,15 +17,15 @@ namespace Bhbk.Lib.Aurora.Data.ModelsMem
         {
         }
 
-        public virtual DbSet<E_FileMem> FileMem { get; set; }
-        public virtual DbSet<E_FolderMem> FolderMem { get; set; }
-        public virtual DbSet<E_LoginMem> LoginMem { get; set; }
+        public virtual DbSet<FileMem_EF> FileMem { get; set; }
+        public virtual DbSet<FolderMem_EF> FolderMem { get; set; }
+        public virtual DbSet<LoginMem_EF> LoginMem { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.HasAnnotation("Relational:Collation", "SQL_Latin1_General_CP1_CI_AS");
 
-            modelBuilder.Entity<E_FileMem>(entity =>
+            modelBuilder.Entity<FileMem_EF>(entity =>
             {
                 entity.ToTable("FileMem");
 
@@ -34,7 +34,7 @@ namespace Bhbk.Lib.Aurora.Data.ModelsMem
 
                 entity.Property(e => e.Id).ValueGeneratedNever();
 
-                entity.Property(e => e.HashSHA256)
+                entity.Property(e => e.HashValue)
                     .IsRequired()
                     .HasMaxLength(64);
 
@@ -50,11 +50,11 @@ namespace Bhbk.Lib.Aurora.Data.ModelsMem
 
                 entity.HasOne(d => d.User)
                     .WithMany(p => p.Files)
-                    .HasForeignKey(d => d.UserId)
+                    .HasForeignKey(d => d.CreatorId)
                     .HasConstraintName("FK_FileMem_IdentityID");
             });
 
-            modelBuilder.Entity<E_FolderMem>(entity =>
+            modelBuilder.Entity<FolderMem_EF>(entity =>
             {
                 entity.ToTable("FolderMem");
 
@@ -69,7 +69,7 @@ namespace Bhbk.Lib.Aurora.Data.ModelsMem
 
                 entity.HasOne(d => d.User)
                     .WithMany(p => p.Folders)
-                    .HasForeignKey(d => d.UserId)
+                    .HasForeignKey(d => d.CreatorId)
                     .HasConstraintName("FK_FolderMem_IdentityID");
 
                 entity.HasOne(d => d.Parent)
@@ -78,7 +78,7 @@ namespace Bhbk.Lib.Aurora.Data.ModelsMem
                     .HasConstraintName("FK_FolderMem_ParentID");
             });
 
-            modelBuilder.Entity<E_LoginMem>(entity =>
+            modelBuilder.Entity<LoginMem_EF>(entity =>
             {
                 entity.HasKey(e => e.UserId)
                     .HasName("PK_LoginMem");

@@ -1,6 +1,6 @@
 ﻿using Bhbk.Cli.Aurora.IO;
 using Bhbk.Lib.Aurora.Data_EF6.Models;
-using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
+using Bhbk.Lib.Aurora.Data_EF6.UnitOfWorks;
 using Bhbk.Lib.Aurora.Domain.Helpers;
 using Bhbk.Lib.CommandLine.IO;
 using Bhbk.Lib.Common.Primitives.Enums;
@@ -12,11 +12,13 @@ using ManyConsole;
 using Microsoft.Extensions.Configuration;
 using Rebex.Net;
 using Rebex.Security.Certificates;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Net;
+using System.Reflection;
 
 namespace Bhbk.Cli.Aurora.Commands.User
 {
@@ -66,7 +68,7 @@ namespace Bhbk.Cli.Aurora.Commands.User
                     throw new ConsoleHelpAsException($"  *** Invalid user '{arg}' ***");
             });
 
-            HasRequiredOption("a|alg=", "Enter key algorithm", arg =>
+            HasRequiredOption("a|algorithm=", "Enter key algorithm", arg =>
             {
                 if (!Enum.TryParse(arg, out _keyAlgo))
                     throw new ConsoleHelpAsException($"  *** Invalid key algorithm. Options are '{_keyAlgoList}' ***");
@@ -78,12 +80,12 @@ namespace Bhbk.Cli.Aurora.Commands.User
                     throw new ConsoleHelpAsException($"  *** Invalid key size '{_privKeySize}' ***");
             });
 
-            HasOption("p|pass=", "Enter private key password", arg =>
+            HasOption("p|passphrase=", "Enter private key password", arg =>
             {
                 _privKeyPass = arg;
             });
 
-            HasOption("d|dns=", "Enter public key comment", arg =>
+            HasOption("c|comment=", "Enter public key comment", arg =>
             {
                 _pubKeyComment = arg;
             });
@@ -91,12 +93,14 @@ namespace Bhbk.Cli.Aurora.Commands.User
 
         public override int Run(string[] remainingArguments)
         {
+            var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
+
             try
             {
                 if (string.IsNullOrEmpty(_privKeyPass))
                 {
                     _privKeyPass = AlphaNumeric.CreateString(32);
-                    Console.Out.WriteLine($"  *** The password for the private key *** : {_privKeyPass}");
+                    Console.Out.WriteLine($"  *** The private key password *** : {_privKeyPass}");
                     Console.Out.WriteLine();
                 }
                 else
@@ -109,19 +113,30 @@ namespace Bhbk.Cli.Aurora.Commands.User
                 if (string.IsNullOrEmpty(_pubKeyComment))
                     _pubKeyComment = Dns.GetHostName();
 
-                var keyPair = KeyHelper.CreateKeyPair(_conf, _uow, _user, _keyAlgo, SignatureHashAlgorithm.SHA256, _privKeySize, _privKeyPass, _pubKeyComment);
+                var (pubKey, privKey) = KeyHelper.CreateKeyPair(_conf, _uow, _user, _keyAlgo, SignatureHashAlgorithm.SHA256, _privKeySize, _privKeyPass, _pubKeyComment);
 
-                if (keyPair.Item1 != null)
-                    _uow.PublicKeys.Create(keyPair.Item1);
-
-                _uow.Commit();
-
-                if (keyPair.Item2 != null)
-                    _uow.PrivateKeys.Create(keyPair.Item2);
+                if (pubKey != null)
+                    _uow.PublicKeys.Create(pubKey);
 
                 _uow.Commit();
 
-                FormatOutput.KeyPairs(new List<PublicKey_EF> { keyPair.Item1 }, new List<PrivateKey_EF> { keyPair.Item2 });
+                if (privKey != null)
+                    _uow.PrivateKeys.Create(privKey);
+
+                _uow.Commit();
+
+                if (pubKey != null)
+                    Log.Information($"{callPath} '{_user.UserName}' creating new public key... " +
+                        $"{Environment.NewLine} [algo] {(SshHostKeyAlgorithm)pubKey.KeyAlgorithmId} [format] {(SshPublicKeyFormat)pubKey.KeyFormatId} " +
+                        $"{Environment.NewLine} [sig] {pubKey.SigValue}" +
+                        $"{Environment.NewLine}{pubKey.KeyValue}");
+
+                if (privKey != null)
+                    Log.Information($"{callPath} '{_user.UserName}' creating new private key... " +
+                        $"{Environment.NewLine} [algo] {(SshHostKeyAlgorithm)privKey.KeyAlgorithmId} [format] {(SshPrivateKeyFormat)privKey.KeyFormatId} " +
+                        $"{Environment.NewLine}{privKey.KeyValue}");
+
+                FormatOutput.Write(pubKey, privKey, true);
 
                 return StandardOutput.FondFarewell();
             }

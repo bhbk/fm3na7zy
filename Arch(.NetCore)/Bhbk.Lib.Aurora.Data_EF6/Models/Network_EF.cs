@@ -18,11 +18,13 @@ namespace Bhbk.Lib.Aurora.Data_EF6.Models
         public Nullable<System.Guid> UserId { get; set; }
         public int SequenceId { get; set; }
         public string Address { get; set; }
-        public string Action { get; set; }
+        public int ActionTypeId { get; set; }
         public bool IsEnabled { get; set; }
         public bool IsDeletable { get; set; }
         public System.DateTimeOffset CreatedUtc { get; set; }
+        public string Comment { get; set; }
     
         public virtual Login_EF Login { get; set; }
+        public virtual NetworkActionType_EF ActionType { get; set; }
     }
 }

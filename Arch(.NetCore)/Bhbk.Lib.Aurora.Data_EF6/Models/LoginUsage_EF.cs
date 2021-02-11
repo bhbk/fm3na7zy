@@ -16,8 +16,6 @@ namespace Bhbk.Lib.Aurora.Data_EF6.Models
     {
         public System.Guid UserId { get; set; }
         public string UserName { get; set; }
-        public long QuotaInBytes { get; set; }
-        public long QuotaUsedInBytes { get; set; }
         public short SessionMax { get; set; }
         public short SessionsInUse { get; set; }
     

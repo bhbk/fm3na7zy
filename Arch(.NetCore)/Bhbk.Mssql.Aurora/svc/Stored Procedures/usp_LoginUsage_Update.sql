@@ -1,38 +1,25 @@
-﻿
-CREATE PROCEDURE [svc].[usp_LoginUsage_Update]
-     @UserId	    		UNIQUEIDENTIFIER
-	,@QuotaInBytes			BIGINT
-	,@QuotaUsedInBytes		BIGINT
-    ,@SessionMax            SMALLINT
-    ,@SessionsInUse         SMALLINT
-
+﻿CREATE PROCEDURE [svc].[usp_LoginUsage_Update] @UserId UNIQUEIDENTIFIER,
+	@SessionMax SMALLINT,
+	@SessionsInUse SMALLINT
 AS
 BEGIN
 	SET NOCOUNT ON;
 
 	BEGIN TRY
+		UPDATE [dbo].[tbl_LoginUsage]
+		SET SessionMax = @SessionMax,
+			SessionsInUse = @SessionsInUse
+		WHERE UserId = @UserId
 
-        DECLARE @LASTUPDATED DATETIMEOFFSET (7) = GETUTCDATE()
+		IF @@ROWCOUNT != 1 THROW 51000,
+			'ERROR',
+			1;
+			SELECT *
+			FROM [dbo].[tbl_LoginUsage]
+			WHERE UserId = @UserId
+	END TRY
 
-        UPDATE [dbo].[tbl_LoginUsage]
-        SET
-			QuotaInBytes			= @QuotaInBytes
-			,QuotaUsedInBytes		= @QuotaUsedInBytes
-            ,SessionMax             = @SessionMax
-            ,SessionsInUse          = @SessionsInUse
-        WHERE UserId = @UserId
-
-		IF @@ROWCOUNT != 1
-			THROW 51000, 'ERROR', 1;
-
-        SELECT * FROM [dbo].[tbl_LoginUsage] 
-            WHERE UserId = @UserId
-
-    END TRY
-
-    BEGIN CATCH
-        THROW;
-
-    END CATCH
-
+	BEGIN CATCH
+		THROW;
+	END CATCH
 END

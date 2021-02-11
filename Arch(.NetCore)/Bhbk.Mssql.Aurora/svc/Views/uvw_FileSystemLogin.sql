@@ -1,13 +1,10 @@
-﻿
-CREATE VIEW [svc].[uvw_FileSystemLogin]
-
+﻿CREATE VIEW [svc].[uvw_FileSystemLogin]
 AS
-
-SELECT FileSystemId
-      ,UserId
-      ,SmbAuthTypeId
-      ,AmbassadorId
-      ,ChrootPath
-      ,CreatedUtc
-      ,IsReadOnly
+SELECT FileSystemId,
+	UserId,
+	SmbAuthTypeId,
+	AmbassadorId,
+	ChrootPath,
+	CreatedUtc,
+	IsReadOnly
 FROM [dbo].[tbl_FileSystemLogin]

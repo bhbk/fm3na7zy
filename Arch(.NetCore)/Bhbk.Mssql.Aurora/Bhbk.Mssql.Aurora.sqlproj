@@ -120,7 +120,6 @@
     <None Include="Maintenance\DbCompare-Test.scmp" />
   </ItemGroup>
   <ItemGroup>
-    <Build Include="svc\Views\uvw_Mount.sql" />
     <Build Include="svc\Views\uvw_Folder.sql" />
     <Build Include="svc\Views\uvw_File.sql" />
     <Build Include="svc\Views\uvw_PublicKey.sql" />
@@ -155,9 +154,6 @@
     <Build Include="dbo\Tables\tbl_PublicKey.sql" />
     <Build Include="dbo\Tables\tbl_PrivateKey.sql" />
     <Build Include="dbo\Tables\tbl_Network.sql" />
-    <Build Include="svc\Stored Procedures\usp_Mount_Update.sql" />
-    <Build Include="svc\Stored Procedures\usp_Mount_Insert.sql" />
-    <Build Include="svc\Stored Procedures\usp_Mount_Delete.sql" />
     <Build Include="svc\Stored Procedures\usp_Login_Update.sql" />
     <Build Include="svc\Stored Procedures\usp_Login_Insert.sql" />
     <Build Include="svc\Stored Procedures\usp_Login_Delete.sql" />
@@ -170,7 +166,6 @@
     <Build Include="svc\Stored Procedures\usp_Alert_Update.sql" />
     <Build Include="svc\Stored Procedures\usp_Alert_Insert.sql" />
     <Build Include="svc\Stored Procedures\usp_Alert_Delete.sql" />
-    <Build Include="dbo\Tables\tbl_Mount.sql" />
     <Build Include="dbo\Tables\tbl_Login.sql" />
     <Build Include="dbo\Tables\tbl_Folder.sql" />
     <Build Include="dbo\Tables\tbl_File.sql" />
@@ -240,9 +235,9 @@
     <Build Include="svc\Stored Procedures\usp_PublicKeySignatureType_Delete.sql" />
     <Build Include="svc\Stored Procedures\usp_PublicKeySignatureType_Insert.sql" />
     <Build Include="svc\Stored Procedures\usp_PublicKeySignatureType_Update.sql" />
-    <Build Include="svc\Stored Procedures\usp_Session_Delete_Bulk.sql" />
     <Build Include="svc\Stored Procedures\usp_SmbAuthType_Delete.sql" />
     <Build Include="svc\Stored Procedures\usp_SmbAuthType_Insert.sql" />
     <Build Include="svc\Stored Procedures\usp_SmbAuthType_Update.sql" />
+    <Build Include="svc\Stored Procedures\usp_Sessions_Delete.sql" />
   </ItemGroup>
 </Project>

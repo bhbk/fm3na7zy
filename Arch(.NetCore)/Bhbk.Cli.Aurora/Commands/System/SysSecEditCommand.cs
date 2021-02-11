@@ -1,6 +1,6 @@
 ﻿using Bhbk.Cli.Aurora.IO;
 using Bhbk.Lib.Aurora.Data_EF6.Models;
-using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
+using Bhbk.Lib.Aurora.Data_EF6.UnitOfWorks;
 using Bhbk.Lib.Aurora.Domain.Helpers;
 using Bhbk.Lib.Aurora.Primitives.Enums;
 using Bhbk.Lib.CommandLine.IO;
@@ -11,7 +11,6 @@ using Bhbk.Lib.QueryExpression.Extensions;
 using Bhbk.Lib.QueryExpression.Factories;
 using ManyConsole;
 using Microsoft.Extensions.Configuration;
-using Rebex;
 using Rebex.Security.Cryptography;
 using System;
 using System.Linq;
@@ -32,7 +31,7 @@ namespace Bhbk.Cli.Aurora.Commands.System
             var env = new ContextService(InstanceContext.DeployedOrLocal);
             _uow = new UnitOfWork(_conf["Databases:AuroraEntities_EF6"], env);
 
-            IsCommand("sys-sec-edit", "Edit encrypt/decrypt secret in use by system");
+            IsCommand("sys-sec-edit", "Edit encrypt/decrypt secret used on system");
         }
 
         public override int Run(string[] remainingArguments)
@@ -64,24 +63,27 @@ namespace Bhbk.Cli.Aurora.Commands.System
                 var loginType = (int)AuthType_E.Local;
 
                 var ambassadors = _uow.Ambassadors.Get();
-                var privateKeys = _uow.PrivateKeys.Get();
+                var privKeys = _uow.PrivateKeys.Get();
                 var logins = _uow.Logins.Get(QueryExpressionFactory.GetQueryExpression<Login_EF>()
                     .Where(x => x.AuthTypeId == (int)loginType).ToLambda());
 
-                Console.Out.WriteLine("  *** Current ambassador encrypted passwords *** ");
-                FormatOutput.AmbassadorSecrets(ambassadors);
+                Console.Out.WriteLine("  *** Current credential encrypted passwords *** ");
+                foreach (var ambassador in ambassadors)
+                    FormatOutput.Write(ambassador, true);
                 Console.Out.WriteLine();
 
                 Console.Out.WriteLine("  *** Current private key encrypted passwords *** ");
-                FormatOutput.KeyPairSecrets(privateKeys);
+                foreach (var privKey in privKeys)
+                    FormatOutput.Write(privKey, true);
                 Console.Out.WriteLine();
 
                 Console.Out.WriteLine("  *** Current login encrypted passwords *** ");
-                FormatOutput.LoginSecrets(logins);
+                foreach (var login in logins)
+                    FormatOutput.Write(login, true);
                 Console.Out.WriteLine();
 
                 var updatedAmbassadors = UserHelper.ChangeAmbassadorSecrets(ambassadors.ToList(), secretCurrent, secretNew);
-                var updatedKeys = KeyHelper.ChangePrivKeySecrets(privateKeys.ToList(), secretCurrent, secretNew);
+                var updatedPrivKeys = KeyHelper.ChangePrivKeySecrets(privKeys.ToList(), secretCurrent, secretNew);
                 var updatedLogins = UserHelper.ChangeLoginSecrets(logins.ToList(), secretCurrent, secretNew);
 
                 Console.Out.Write("  *** Enter yes/no to proceed *** : ");
@@ -90,20 +92,23 @@ namespace Bhbk.Cli.Aurora.Commands.System
 
                 if (decision.ToLower() == "yes")
                 {
-                    Console.Out.WriteLine("  *** New ambassador encrypted passwords *** ");
-                    FormatOutput.AmbassadorSecrets(updatedAmbassadors);
+                    Console.Out.WriteLine("  *** New credential encrypted passwords *** ");
+                    foreach (var updatedAmbassador in updatedAmbassadors)
+                        FormatOutput.Write(updatedAmbassador, true);
                     Console.Out.WriteLine();
 
                     Console.Out.WriteLine("  *** New private key encrypted passwords *** ");
-                    FormatOutput.KeyPairSecrets(updatedKeys);
+                    foreach (var updatedPrivKey in updatedPrivKeys)
+                        FormatOutput.Write(updatedPrivKey, true);
                     Console.Out.WriteLine();
 
                     Console.Out.WriteLine("  *** New login encrypted passwords *** ");
-                    FormatOutput.LoginSecrets(updatedLogins);
+                    foreach (var updatedLogin in updatedLogins)
+                        FormatOutput.Write(updatedLogin, true);
                     Console.Out.WriteLine();
 
                     _uow.Ambassadors.Update(updatedAmbassadors);
-                    _uow.PrivateKeys.Update(updatedKeys);
+                    _uow.PrivateKeys.Update(updatedPrivKeys);
                     _uow.Logins.Update(updatedLogins);
                     _uow.Commit();
                 }

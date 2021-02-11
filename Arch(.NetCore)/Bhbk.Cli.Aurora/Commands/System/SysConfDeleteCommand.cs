@@ -1,6 +1,6 @@
 ﻿using Bhbk.Cli.Aurora.IO;
 using Bhbk.Lib.Aurora.Data_EF6.Models;
-using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
+using Bhbk.Lib.Aurora.Data_EF6.UnitOfWorks;
 using Bhbk.Lib.CommandLine.IO;
 using Bhbk.Lib.Common.Primitives.Enums;
 using Bhbk.Lib.Common.Services;
@@ -34,16 +34,17 @@ namespace Bhbk.Cli.Aurora.Commands.System
         {
             try
             {
-                var configs = _uow.Settings.Get(QueryExpressionFactory.GetQueryExpression<Setting_EF>()
+                var exists = _uow.Settings.Get(QueryExpressionFactory.GetQueryExpression<Setting_EF>()
                     .Where(x => x.UserId == null && x.IsDeletable == true).ToLambda());
 
-                FormatOutput.Settings(configs);
+                foreach (var exist in exists)
+                    FormatOutput.Write(exist, true);
 
                 Console.Out.WriteLine();
                 Console.Out.Write("  *** Enter GUID of config key/value pair to delete *** : ");
                 var input = Guid.Parse(StandardInput.GetInput());
 
-                var config = configs.Where(x => x.Id == input)
+                var config = exists.Where(x => x.Id == input)
                     .SingleOrDefault();
 
                 if (config != null)

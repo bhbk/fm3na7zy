@@ -1,6 +1,6 @@
 ﻿using Bhbk.Cli.Aurora.IO;
 using Bhbk.Lib.Aurora.Data_EF6.Models;
-using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
+using Bhbk.Lib.Aurora.Data_EF6.UnitOfWorks;
 using Bhbk.Lib.Aurora.Primitives.Enums;
 using Bhbk.Lib.CommandLine.IO;
 using Bhbk.Lib.Common.Primitives.Enums;
@@ -24,6 +24,7 @@ namespace Bhbk.Cli.Aurora.Commands.System
         private Int32 _sequence;
         private NetworkActionType_E _actionType;
         private string _actionTypeList = string.Join(", ", Enum.GetNames(typeof(NetworkActionType_E)));
+        private string _comment;
 
         public SysNetCreateCommand()
         {
@@ -42,7 +43,7 @@ namespace Bhbk.Cli.Aurora.Commands.System
                     throw new ConsoleHelpAsException($"  *** Invalid sequence value ***");
             });
 
-            HasRequiredOption("c|cidr=", "Enter CIDR address", arg =>
+            HasRequiredOption("n|network=", "Enter CIDR address", arg =>
             {
                 if (!IPNetwork.TryParse(arg, out _cidr))
                     throw new ConsoleHelpAsException($"  *** Invalid cidr address ***");
@@ -52,6 +53,12 @@ namespace Bhbk.Cli.Aurora.Commands.System
             {
                 if (!Enum.TryParse(arg, out _actionType))
                     throw new ConsoleHelpAsException($"  *** Invalid action type. Options are '{_actionTypeList}' ***");
+            });
+
+            HasOption("c|comment=", "Enter comment", arg =>
+            {
+                if (!string.IsNullOrEmpty(arg))
+                    _comment = arg;
             });
         }
 
@@ -68,7 +75,7 @@ namespace Bhbk.Cli.Aurora.Commands.System
                 if (exists != null)
                 {
                     Console.Out.WriteLine("  *** The network entered already exists for user ***");
-                    FormatOutput.Networks(new List<Network_EF> { exists });
+                    FormatOutput.Write(exists, true);
 
                     return StandardOutput.FondFarewell();
                 }
@@ -78,14 +85,15 @@ namespace Bhbk.Cli.Aurora.Commands.System
                     {
                         SequenceId = _sequence,
                         Address = _cidr.ToString(),
-                        Action = _actionType.ToString(),
+                        ActionTypeId = (int)_actionType,
+                        Comment = _comment,
                         IsEnabled = true,
                         IsDeletable = true,
                     });
 
                 _uow.Commit();
 
-                FormatOutput.Networks(new List<Network_EF> { network });
+                FormatOutput.Write(network, true);
 
                 return StandardOutput.FondFarewell();
             }

@@ -5,44 +5,39 @@
     <!-- Diagram content (shape and connector positions) -->
     <edmx:Diagrams>
       <Diagram DiagramId="9987c23f50ce4740a09964d44d420b3b" Name="Diagram1" ZoomLevel="75">
-        <EntityTypeShape EntityType="AuroraModels.Ambassador_EF" Width="1.5" PointX="11.625" PointY="21.75" IsExpanded="true" />
-        <EntityTypeShape EntityType="AuroraModels.Network_EF" Width="1.5" PointX="3.5" PointY="22.75" IsExpanded="true" />
-        <EntityTypeShape EntityType="AuroraModels.PrivateKey_EF" Width="1.5" PointX="6" PointY="26.25" IsExpanded="true" />
-        <EntityTypeShape EntityType="AuroraModels.PublicKey_EF" Width="1.5" PointX="11.625" PointY="27.875" IsExpanded="true" />
-        <EntityTypeShape EntityType="AuroraModels.Setting_EF" Width="1.5" PointX="6" PointY="22.875" IsExpanded="true" />
-        <EntityTypeShape EntityType="AuroraModels.Login_EF" Width="1.5" PointX="8.625" PointY="26.25" IsExpanded="true" />
-        <EntityTypeShape EntityType="AuroraModels.Alert_EF" Width="1.5" PointX="0.875" PointY="24.125" IsExpanded="true" />
-        <EntityTypeShape EntityType="AuroraModels.File_EF" Width="1.5" PointX="5.875" PointY="31.125" IsExpanded="true" />
-        <EntityTypeShape EntityType="AuroraModels.Folder_EF" Width="1.5" PointX="11.625" PointY="34.125" IsExpanded="true" />
-        <EntityTypeShape EntityType="AuroraModels.Mount_EF" Width="1.5" PointX="11.625" PointY="24.75" IsExpanded="true" />
-        <AssociationConnector Association="AuroraModels.Login_File" />
-        <AssociationConnector Association="AuroraModels.Login_Folder" />
+        <EntityTypeShape EntityType="AuroraModels.Ambassador_EF" Width="1.5" PointX="6.5" PointY="9.375" IsExpanded="true" />
+        <EntityTypeShape EntityType="AuroraModels.Network_EF" Width="1.5" PointX="9.375" PointY="21.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="AuroraModels.PrivateKey_EF" Width="1.5" PointX="9.375" PointY="17.625" IsExpanded="true" />
+        <EntityTypeShape EntityType="AuroraModels.PublicKey_EF" Width="1.5" PointX="3.875" PointY="11.375" IsExpanded="true" />
+        <EntityTypeShape EntityType="AuroraModels.Setting_EF" Width="1.5" PointX="0.75" PointY="18.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="AuroraModels.Login_EF" Width="1.5" PointX="3.75" PointY="17.25" IsExpanded="true" />
+        <EntityTypeShape EntityType="AuroraModels.Alert_EF" Width="1.5" PointX="15" PointY="18.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="AuroraModels.File_EF" Width="1.5" PointX="12" PointY="13.5" IsExpanded="true" />
+        <EntityTypeShape EntityType="AuroraModels.Folder_EF" Width="1.5" PointX="6.5" PointY="13.125" IsExpanded="true" />
         <AssociationConnector Association="AuroraModels.Login_PrivateKey" />
         <AssociationConnector Association="AuroraModels.Login_Network" />
         <AssociationConnector Association="AuroraModels.Login_Alert" />
         <AssociationConnector Association="AuroraModels.Login_Setting" />
-        <AssociationConnector Association="AuroraModels.Ambassador_Mount" />
         <AssociationConnector Association="AuroraModels.Folder_File" />
         <AssociationConnector Association="AuroraModels.Folder_Folder" />
-        <AssociationConnector Association="AuroraModels.Login_Mount" />
-        <EntityTypeShape EntityType="AuroraModels.Session_EF" Width="1.5" PointX="14.375" PointY="21.5" />
+        <EntityTypeShape EntityType="AuroraModels.Session_EF" Width="1.5" PointX="6.5" PointY="18.75" />
         <AssociationConnector Association="AuroraModels.Login_Session" />
-        <EntityTypeShape EntityType="AuroraModels.LoginUsage_EF" Width="1.5" PointX="14.5" PointY="35.5" />
+        <EntityTypeShape EntityType="AuroraModels.LoginUsage_EF" Width="1.5" PointX="0.75" PointY="21.625" />
         <AssociationConnector Association="AuroraModels.Login_Usage" />
-        <EntityTypeShape EntityType="AuroraModels.FileSystem_EF" Width="1.5" PointX="8.625" PointY="33.25" />
-        <EntityTypeShape EntityType="AuroraModels.FileSystemLogin_EF" Width="1.5" PointX="14.5" PointY="31.625" />
-        <EntityTypeShape EntityType="AuroraModels.FileSystemUsage_EF" Width="1.5" PointX="8.625" PointY="37.5" />
+        <EntityTypeShape EntityType="AuroraModels.FileSystem_EF" Width="1.5" PointX="12" PointY="7.375" />
+        <EntityTypeShape EntityType="AuroraModels.FileSystemLogin_EF" Width="1.5" PointX="9.375" PointY="13.375" />
+        <EntityTypeShape EntityType="AuroraModels.FileSystemUsage_EF" Width="1.5" PointX="15" PointY="7.875" />
         <AssociationConnector Association="AuroraModels.FileSystem_FileSystemUsage" />
         <AssociationConnector Association="AuroraModels.Login_FileSystemLogin" />
         <AssociationConnector Association="AuroraModels.FileSystem_FileSystemLogin" />
-        <EntityTypeShape EntityType="AuroraModels.FileSystemType_EF" Width="1.5" PointX="5.875" PointY="37.5" />
-        <EntityTypeShape EntityType="AuroraModels.HashAlgorithmType_EF" Width="1.5" PointX="3.375" PointY="32.75" />
-        <EntityTypeShape EntityType="AuroraModels.KeyAlgorithmType_EF" Width="1.5" PointX="0.875" PointY="28.5" />
-        <EntityTypeShape EntityType="AuroraModels.LoginAuthType_EF" Width="1.5" PointX="8.625" PointY="22" />
-        <EntityTypeShape EntityType="AuroraModels.LoginDebugType_EF" Width="1.5" PointX="3.375" PointY="29.75" />
-        <EntityTypeShape EntityType="AuroraModels.PrivateKeyFormatType_EF" Width="1.5" PointX="3.5" PointY="26.625" />
-        <EntityTypeShape EntityType="AuroraModels.PublicKeyFormatType_EF" Width="1.5" PointX="14.5" PointY="25.5" />
-        <EntityTypeShape EntityType="AuroraModels.PublicKeySignatureType_EF" Width="1.5" PointX="14.5" PointY="28.375" />
+        <EntityTypeShape EntityType="AuroraModels.FileSystemType_EF" Width="1.5" PointX="9.375" PointY="7.875" />
+        <EntityTypeShape EntityType="AuroraModels.HashAlgorithmType_EF" Width="1.5" PointX="9.375" PointY="10.625" />
+        <EntityTypeShape EntityType="AuroraModels.KeyAlgorithmType_EF" Width="1.5" PointX="15" PointY="16" />
+        <EntityTypeShape EntityType="AuroraModels.LoginAuthType_EF" Width="1.5" PointX="0.75" PointY="13" />
+        <EntityTypeShape EntityType="AuroraModels.LoginDebugType_EF" Width="1.5" PointX="0.75" PointY="15.875" />
+        <EntityTypeShape EntityType="AuroraModels.PrivateKeyFormatType_EF" Width="1.5" PointX="15" PointY="13.125" />
+        <EntityTypeShape EntityType="AuroraModels.PublicKeyFormatType_EF" Width="1.5" PointX="3.875" PointY="8.5" />
+        <EntityTypeShape EntityType="AuroraModels.PublicKeySignatureType_EF" Width="1.5" PointX="0.75" PointY="9.875" />
         <AssociationConnector Association="AuroraModels.FileSystemType_FileSystem" />
         <AssociationConnector Association="AuroraModels.LoginAuthType_Login" />
         <AssociationConnector Association="AuroraModels.PrivateKeyFormatType_PrivateKey" />
@@ -51,7 +46,16 @@
         <AssociationConnector Association="AuroraModels.HashAlgorithmType_File" />
         <AssociationConnector Association="AuroraModels.PublicKeyFormatType_PublicKey" />
         <AssociationConnector Association="AuroraModels.LoginDebugType_Login" />
-        <AssociationConnector Association="AuroraModels.PublicKeySignatureType_PublicKey" />
+        <AssociationConnector Association="AuroraModels.PublicKeySignatureType_PublicKey" ManuallyRouted="false" >
+        </AssociationConnector>
+        <AssociationConnector Association="AuroraModels.Ambassador_FileSystemLogin" />
+        <EntityTypeShape EntityType="AuroraModels.NetworkActionType_EF" Width="1.5" PointX="15" PointY="10.375" />
+        <EntityTypeShape EntityType="AuroraModels.SmbAuthType_EF" Width="1.5" PointX="12" PointY="20.75" />
+        <AssociationConnector Association="AuroraModels.SmbAuthType_FileSystemLogin" />
+        <AssociationConnector Association="AuroraModels.NetworkActionType_Network" />
+        <AssociationConnector Association="AuroraModels.FileSystem_File" />
+        <AssociationConnector Association="AuroraModels.FileSystem_Folder" ManuallyRouted="false" >
+        </AssociationConnector>
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

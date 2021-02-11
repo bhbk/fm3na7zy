@@ -12,7 +12,7 @@ using System.Linq;
 using System.Linq.Dynamic.Core;
 using Xunit;
 using AutoMapper;
-using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
+using Bhbk.Lib.Aurora.Data_EF6.UnitOfWorks;
 using Bhbk.Lib.Aurora.Domain.Profiles;
 using Bhbk.Lib.Common.Primitives.Enums;
 using Bhbk.Lib.Common.Services;

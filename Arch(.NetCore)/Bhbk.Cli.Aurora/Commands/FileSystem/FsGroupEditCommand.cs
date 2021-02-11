@@ -1,8 +1,8 @@
 ﻿using Bhbk.Cli.Aurora.IO;
 using Bhbk.Lib.Aurora.Data_EF6.Models;
-using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
+using Bhbk.Lib.Aurora.Data_EF6.UnitOfWorks;
+using Bhbk.Lib.Aurora.Domain.Helpers;
 using Bhbk.Lib.Aurora.Primitives.Enums;
-using Bhbk.Lib.CommandLine.IO;
 using Bhbk.Lib.Common.Primitives.Enums;
 using Bhbk.Lib.Common.Services;
 using Bhbk.Lib.QueryExpression.Extensions;
@@ -20,11 +20,9 @@ namespace Bhbk.Cli.Aurora.Commands.FileSystem
     {
         private readonly IConfiguration _conf;
         private readonly IUnitOfWork _uow;
-        private Login_EF _user;
-        private Uri _uncPath;
-        private SmbAuthType_E _authType;
-        private string _authTypeList = string.Join(", ", Enum.GetNames(typeof(SmbAuthType_E)));
-        private bool _alternateCredential;
+        private FileSystem_EF _fileSystem = null;
+        private string _name, _uncPath;
+        private bool? _isEnabled, _isDeletable;
 
         public FsGroupEditCommand()
         {
@@ -35,46 +33,71 @@ namespace Bhbk.Cli.Aurora.Commands.FileSystem
             var env = new ContextService(InstanceContext.DeployedOrLocal);
             _uow = new UnitOfWork(_conf["Databases:AuroraEntities_EF6"], env);
 
-            IsCommand("user-mount-edit", "Edit mount for user");
+            IsCommand("fs-group-edit", "Edit file-system group on system");
 
-            HasRequiredOption("u|user=", "Enter user that exists already", arg =>
+            HasRequiredOption("f|file-system=", "Enter existing file-system group", arg =>
             {
                 if (string.IsNullOrEmpty(arg))
-                    throw new ConsoleHelpAsException($"  *** No user name given ***");
+                    throw new ConsoleHelpAsException($"  *** No file-system group given ***");
 
-                _user = _uow.Logins.Get(QueryExpressionFactory.GetQueryExpression<Login_EF>()
-                    .Where(x => x.UserName == arg).ToLambda(),
-                        new List<Expression<Func<Login_EF, object>>>()
-                        {
-                            x => x.Mount,
-                            x => x.Mount.Ambassador,
-                        })
+                _fileSystem = _uow.FileSystems.Get(QueryExpressionFactory.GetQueryExpression<FileSystem_EF>()
+                    .Where(x => x.Name == arg).ToLambda())
                     .SingleOrDefault();
 
-                if (_user == null)
-                    throw new ConsoleHelpAsException($"  *** Invalid user '{arg}' ***");
+                if (_fileSystem == null)
+                    throw new ConsoleHelpAsException($"  *** Invalid file-system group '{arg}' ***");
             });
 
-            HasOption("p|path=", "Enter UNC path", arg =>
+            HasOption("n|name=", "Enter name", arg =>
             {
-                if (!Uri.TryCreate(arg, UriKind.Absolute, out _uncPath)
-                    || !(new Uri(arg).IsUnc))
+                CheckRequiredArguments();
+
+                if (string.IsNullOrEmpty(arg))
+                    throw new ConsoleHelpAsException($"  *** No name given ***");
+
+                _name = arg;
+            });
+
+            HasOption("d|description=", "Enter description", arg =>
+            {
+                CheckRequiredArguments();
+
+                if (!string.IsNullOrEmpty(arg))
+                    _fileSystem.Description = arg;
+            });
+
+            HasOption("q|quota-max=", "Enter quota maximum (in bytes)", arg =>
+            {
+                CheckRequiredArguments();
+
+                if (string.IsNullOrEmpty(arg))
+                    throw new ConsoleHelpAsException($"  *** No quota maximum given ***");
+
+                _fileSystem.Usage.QuotaInBytes = Int32.Parse(arg);
+            });
+
+            HasOption("p|path=", $"Enter full UNC path to share (only for '{FileSystemType_E.SMB}' file-system group type)", arg =>
+            {
+                CheckRequiredArguments();
+
+                if (!FilePathHelper.IsValidUncPath(arg.ToLower()))
                     throw new ConsoleHelpAsException($"  *** Invalid UNC path '{arg}' ***");
 
-                _user.Mount.UncPath = arg;
+                _uncPath = arg.ToLower();
             });
 
-            HasOption("a|auth=", "Enter type of auth", arg =>
+            HasOption("e|enabled=", "Is enabled?", arg =>
             {
-                if (!Enum.TryParse(arg, out _authType))
-                    throw new ConsoleHelpAsException($"  *** Invalid auth type. Options are '{_authTypeList}' ***");
+                CheckRequiredArguments();
 
-                _user.Mount.AuthType = _authType.ToString();
+                _isEnabled = bool.Parse(arg);
             });
 
-            HasOption("c|credential", "Use ambassador credential for mount", arg =>
+            HasOption("x|deletable=", "Is deletable?", arg =>
             {
-                _alternateCredential = true;
+                CheckRequiredArguments();
+
+                _isDeletable = bool.Parse(arg);
             });
         }
 
@@ -82,30 +105,58 @@ namespace Bhbk.Cli.Aurora.Commands.FileSystem
         {
             try
             {
-                if (_alternateCredential)
+                /*
+                 * when file-systme group type smb additional args needed...
+                 */
+
+                if (_fileSystem.FileSystemTypeId == (int)FileSystemType_E.SMB
+                    && _fileSystem.UncPath == null
+                    && _uncPath == null)
+                    throw new ConsoleHelpAsException($"  *** Invalid options for '{(FileSystemType_E)_fileSystem.FileSystemTypeId}' file-system group type ***");
+
+                /*
+                 * when file-system group name already exists do not allow rename...
+                 */
+
+                if (_name != null)
                 {
-                    var credentials = _uow.Ambassadors.Get();
+                    if (_uow.FileSystems.Get()
+                        .Where(x => x.Name.ToLower() == _name.ToLower()).Any())
+                        throw new ConsoleHelpAsException($"  *** The file-system group '{_fileSystem.Name}' already exists ***");
 
-                    FormatOutput.Ambassadors(credentials);
-
-                    Console.Out.WriteLine();
-                    Console.Out.Write("  *** Enter GUID of ambassador credential to use for mount *** : ");
-                    var input = StandardInput.GetInput();
-                    Console.Out.WriteLine();
-
-                    _user.Mount.AmbassadorId = Guid.Parse(input);
+                    _fileSystem.Name = _name;
                 }
 
-                _uow.Logins.Update(_user);
+                if (_uncPath != null)
+                    _fileSystem.UncPath = _uncPath;
+
+                if (_isEnabled.HasValue)
+                    _fileSystem.IsEnabled = _isEnabled.Value;
+
+                if (_isDeletable.HasValue)
+                    _fileSystem.IsDeletable = _isDeletable.Value;
+
+                _fileSystem = _uow.FileSystems.Update(_fileSystem);
                 _uow.Commit();
 
-                FormatOutput.Mounts(new List<Mount_EF> { _user.Mount });
+                _fileSystem = _uow.FileSystems.Get(QueryExpressionFactory.GetQueryExpression<FileSystem_EF>()
+                    .Where(x => x.Id == _fileSystem.Id).ToLambda(),
+                        new List<Expression<Func<FileSystem_EF, object>>>()
+                        {
+                            x => x.Files,
+                            x => x.Folders,
+                            x => x.Logins,
+                            x => x.Usage,
+                        })
+                    .SingleOrDefault();
 
-                return StandardOutput.FondFarewell();
+                FormatOutput.Write(_fileSystem, true);
+
+                return FormatOutput.FondFarewell();
             }
             catch (Exception ex)
             {
-                return StandardOutput.AngryFarewell(ex);
+                return FormatOutput.AngryFarewell(ex);
             }
         }
     }

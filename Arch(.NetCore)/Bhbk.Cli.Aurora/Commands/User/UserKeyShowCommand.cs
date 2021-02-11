@@ -1,6 +1,6 @@
 ﻿using Bhbk.Cli.Aurora.IO;
 using Bhbk.Lib.Aurora.Data_EF6.Models;
-using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
+using Bhbk.Lib.Aurora.Data_EF6.UnitOfWorks;
 using Bhbk.Lib.CommandLine.IO;
 using Bhbk.Lib.Common.Primitives.Enums;
 using Bhbk.Lib.Common.Services;
@@ -55,7 +55,8 @@ namespace Bhbk.Cli.Aurora.Commands.User
         {
             try
             {
-                FormatOutput.KeyPairs(_user.PublicKeys.OrderBy(x => x.CreatedUtc), _user.PrivateKeys);
+                foreach (var pubKey in _user.PublicKeys.OrderBy(x => x.CreatedUtc))
+                    FormatOutput.Write(pubKey, _user.PrivateKeys.Where(x => x.PublicKeyId == pubKey.Id).SingleOrDefault(), true);
 
                 return StandardOutput.FondFarewell();
             }

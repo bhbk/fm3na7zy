@@ -1,42 +1,35 @@
-﻿
-CREATE PROCEDURE [svc].[usp_Ambassador_Update]
-     @Id					UNIQUEIDENTIFIER 
-    ,@UserName				NVARCHAR (128) 
-    ,@EncryptedPass 		NVARCHAR (128) 
-    ,@IsEnabled				BIT
-    ,@IsDeletable			BIT
-
+﻿CREATE PROCEDURE [svc].[usp_Ambassador_Update] @Id UNIQUEIDENTIFIER,
+	@UserPrincipalName NVARCHAR(128),
+	@EncryptedPass NVARCHAR(128),
+	@IsEnabled BIT,
+	@IsDeletable BIT
 AS
 BEGIN
 	SET NOCOUNT ON;
 
 	BEGIN TRY
+		BEGIN TRANSACTION;
 
-    	BEGIN TRANSACTION;
+		UPDATE [dbo].[tbl_Ambassador]
+		SET UserPrincipalName = @UserPrincipalName,
+			EncryptedPass = @EncryptedPass,
+			IsEnabled = @IsEnabled,
+			IsDeletable = @IsDeletable
+		WHERE Id = @Id
 
-        UPDATE [dbo].[tbl_Ambassador]
-        SET
-            UserName				= @UserName
-			,EncryptedPass  		= @EncryptedPass
-			,IsEnabled				= @IsEnabled
-            ,IsDeletable			= @IsDeletable
-        WHERE Id = @Id
+		IF @@ROWCOUNT != 1 THROW 51000,
+			'ERROR',
+			1;
+			SELECT *
+			FROM [dbo].[tbl_Ambassador]
+			WHERE Id = @Id
 
-		IF @@ROWCOUNT != 1
-			THROW 51000, 'ERROR', 1;
+		COMMIT TRANSACTION;
+	END TRY
 
-        SELECT * FROM [dbo].[tbl_Ambassador] 
-            WHERE Id = @Id
+	BEGIN CATCH
+		ROLLBACK TRANSACTION;
 
-    	COMMIT TRANSACTION;
-
-    END TRY
-
-    BEGIN CATCH
-
-    	ROLLBACK TRANSACTION;
-        THROW;
-
-    END CATCH
-
+		THROW;
+	END CATCH
 END

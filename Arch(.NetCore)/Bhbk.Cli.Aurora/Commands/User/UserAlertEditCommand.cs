@@ -1,6 +1,6 @@
 ﻿using Bhbk.Cli.Aurora.IO;
 using Bhbk.Lib.Aurora.Data_EF6.Models;
-using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
+using Bhbk.Lib.Aurora.Data_EF6.UnitOfWorks;
 using Bhbk.Lib.CommandLine.IO;
 using Bhbk.Lib.Common.Primitives.Enums;
 using Bhbk.Lib.Common.Services;
@@ -23,7 +23,7 @@ namespace Bhbk.Cli.Aurora.Commands.User
         private IUnitOfWork _uow;
         private Login_EF _user;
         private Guid _id;
-        private string _displayName, _emailAddress, _phoneNumber;
+        private string _displayName, _emailAddress, _phoneNumber, _comment;
         private bool? _delete, _download, _upload, _isEnabled;
 
         public UserAlertEditCommand()
@@ -93,6 +93,14 @@ namespace Bhbk.Cli.Aurora.Commands.User
                 }
             });
 
+            HasOption("c|comment=", "Enter comment", arg =>
+            {
+                CheckRequiredArguments();
+
+                if (!string.IsNullOrEmpty(arg))
+                    _comment = arg;
+            });
+
             HasOption("x|on-delete=", "Is sent when delete happens", arg =>
             {
                 _delete = bool.Parse(arg);
@@ -148,7 +156,7 @@ namespace Bhbk.Cli.Aurora.Commands.User
                 _uow.Alerts.Update(alert);
                 _uow.Commit();
 
-                FormatOutput.Alerts(new List<Alert_EF> { alert });
+                FormatOutput.Write(alert, true);
 
                 return StandardOutput.FondFarewell();
             }

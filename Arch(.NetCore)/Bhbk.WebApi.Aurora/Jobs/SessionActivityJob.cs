@@ -1,5 +1,5 @@
 ﻿using Bhbk.Lib.Aurora.Data_EF6.Models;
-using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
+using Bhbk.Lib.Aurora.Data_EF6.UnitOfWorks;
 using Bhbk.Lib.QueryExpression.Extensions;
 using Bhbk.Lib.QueryExpression.Factories;
 using Microsoft.Extensions.Configuration;

@@ -1,6 +1,6 @@
 ﻿using Bhbk.Cli.Aurora.IO;
 using Bhbk.Lib.Aurora.Data_EF6.Models;
-using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
+using Bhbk.Lib.Aurora.Data_EF6.UnitOfWorks;
 using Bhbk.Lib.Aurora.Domain.Helpers;
 using Bhbk.Lib.Aurora.Primitives.Enums;
 using Bhbk.Lib.CommandLine.IO;
@@ -62,7 +62,7 @@ namespace Bhbk.Cli.Aurora.Commands.User
                 _path = new FileInfo(arg);
             });
 
-            HasOption("p|pass=", "Enter private key password", arg =>
+            HasOption("p|passphrase=", "Enter private key password", arg =>
             {
                 _privKeyPass = arg;
             });
@@ -142,7 +142,7 @@ namespace Bhbk.Cli.Aurora.Commands.User
                     .Where(x => x.PublicKeyId == keyPair.Item1.Id).ToLambda())
                     .Single();
 
-                FormatOutput.KeyPairs(new List<PublicKey_EF> { pubKey }, new List<PrivateKey_EF> { privKey });
+                FormatOutput.Write(pubKey, privKey, true);
 
                 return StandardOutput.FondFarewell();
             }

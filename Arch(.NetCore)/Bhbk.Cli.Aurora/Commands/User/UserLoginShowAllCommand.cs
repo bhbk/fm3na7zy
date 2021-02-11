@@ -1,9 +1,11 @@
 ﻿using Bhbk.Cli.Aurora.IO;
 using Bhbk.Lib.Aurora.Data_EF6.Models;
-using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
+using Bhbk.Lib.Aurora.Data_EF6.UnitOfWorks;
+using Bhbk.Lib.Aurora.Primitives.Enums;
 using Bhbk.Lib.CommandLine.IO;
 using Bhbk.Lib.Common.Primitives.Enums;
 using Bhbk.Lib.Common.Services;
+using Bhbk.Lib.QueryExpression;
 using Bhbk.Lib.QueryExpression.Extensions;
 using Bhbk.Lib.QueryExpression.Factories;
 using ManyConsole;
@@ -11,6 +13,7 @@ using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 
 namespace Bhbk.Cli.Aurora.Commands.User
 {
@@ -18,7 +21,8 @@ namespace Bhbk.Cli.Aurora.Commands.User
     {
         private IConfiguration _conf;
         private IUnitOfWork _uow;
-        private string _user;
+        private string _filter;
+        private int _count;
 
         public UserLoginShowAllCommand()
         {
@@ -29,12 +33,20 @@ namespace Bhbk.Cli.Aurora.Commands.User
             var env = new ContextService(InstanceContext.DeployedOrLocal);
             _uow = new UnitOfWork(_conf["Databases:AuroraEntities_EF6"], env);
 
-            IsCommand("sys-login-show", "Show login(s) on system");
+            IsCommand("user-login-show-all", "Show all login(s) for user(s)");
 
-            HasOption("u|user=", "Enter user to search for", arg =>
+            HasRequiredOption("c|count=", "Enter how many user login(s) to display", arg =>
             {
                 if (!string.IsNullOrEmpty(arg))
-                    _user = arg;
+                    _count = int.Parse(arg);
+            });
+
+            HasOption("f|filter=", "Enter user (full or partial) login to look for", arg =>
+            {
+                CheckRequiredArguments();
+
+                if (!string.IsNullOrEmpty(arg))
+                    _filter = arg;
             });
         }
 
@@ -42,18 +54,56 @@ namespace Bhbk.Cli.Aurora.Commands.User
         {
             try
             {
-                IEnumerable<Login_EF> users;
+                IQueryExpression<Login_EF> expression =
+                    QueryExpressionFactory.GetQueryExpression<Login_EF>();
 
-                if (!string.IsNullOrEmpty(_user))
-                    users = _uow.Logins.Get(QueryExpressionFactory.GetQueryExpression<Session_EF>()
-                        .Where(x => x.UserName.Contains(_user)).ToLambda())
-                        .OrderBy(x => x.UserName).TakeLast(100);
+                if (!string.IsNullOrEmpty(_filter))
+                    expression = expression.Where(x => x.UserName.Contains(_filter));
 
-                else
-                    users = _uow.Logins.Get()
-                        .OrderBy(x => x.UserName).TakeLast(100);
+                var results = _uow.Logins.Get(expression.ToLambda(),
+                    new List<Expression<Func<Login_EF, object>>>()
+                    {
+                        x => x.Alerts,
+                        x => x.Networks,
+                        x => x.PrivateKeys,
+                        x => x.PublicKeys,
+                        x => x.Sessions,
+                        x => x.Settings,
+                        x => x.Usage,
+                    })
+                    .OrderBy(x => x.UserName);
 
-                FormatOutput.Logins(users);
+                var users = results.TakeLast(_count);
+
+                if (results.Count() != users.Count())
+                {
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.Out.WriteLine($"  *** Showing {_count} user(s). Not showing {results.Count() - users.Count()} user(s) ***");
+                    Console.Out.WriteLine();
+                    Console.ResetColor();
+                }
+
+                if (users.Where(x => x.AuthTypeId == (int)AuthType_E.Identity).Any())
+                {
+                    Console.Out.WriteLine();
+                    Console.ForegroundColor = ConsoleColor.Cyan;
+                    Console.Out.WriteLine($"  [incoming (identity) user(s)]");
+                    Console.ResetColor();
+
+                    foreach (var user in users.Where(x => x.AuthTypeId == (int)AuthType_E.Identity))
+                        FormatOutput.Write(user, false);
+                }
+
+                if (users.Where(x => x.AuthTypeId == (int)AuthType_E.Local).Any())
+                {
+                    Console.Out.WriteLine();
+                    Console.ForegroundColor = ConsoleColor.Cyan;
+                    Console.Out.WriteLine($"  [outgoing (local) user(s)]");
+                    Console.ResetColor();
+
+                    foreach (var user in users.Where(x => x.AuthTypeId == (int)AuthType_E.Local))
+                        FormatOutput.Write(user, false);
+                }
 
                 return StandardOutput.FondFarewell();
             }

@@ -1,6 +1,5 @@
 ﻿using Bhbk.Cli.Aurora.IO;
-using Bhbk.Lib.Aurora.Data_EF6.Models;
-using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
+using Bhbk.Lib.Aurora.Data_EF6.UnitOfWorks;
 using Bhbk.Lib.Aurora.Domain.Helpers;
 using Bhbk.Lib.CommandLine.IO;
 using Bhbk.Lib.Common.Primitives.Enums;
@@ -10,9 +9,10 @@ using ManyConsole;
 using Microsoft.Extensions.Configuration;
 using Rebex.Net;
 using Rebex.Security.Certificates;
+using Serilog;
 using System;
-using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 
 namespace Bhbk.Cli.Aurora.Commands.System
 {
@@ -42,7 +42,7 @@ namespace Bhbk.Cli.Aurora.Commands.System
 
             IsCommand("sys-key-create", "Create public/private key for system");
 
-            HasRequiredOption("a|alg=", "Enter key algorithm", arg =>
+            HasRequiredOption("a|algorithm=", "Enter key algorithm", arg =>
             {
                 if (!Enum.TryParse(arg, out _keyAlgo))
                     throw new ConsoleHelpAsException($"  *** Invalid key algorithm. Options are '{_keyAlgoList}' ***");
@@ -54,7 +54,7 @@ namespace Bhbk.Cli.Aurora.Commands.System
                     throw new ConsoleHelpAsException($"  *** Invalid key size '{_privKeySize}' ***");
             });
 
-            HasOption("p|pass=", "Enter private key password", arg =>
+            HasOption("p|passphrase=", "Enter private key passphrase", arg =>
             {
                 _privKeyPass = arg;
             });
@@ -62,34 +62,41 @@ namespace Bhbk.Cli.Aurora.Commands.System
 
         public override int Run(string[] remainingArguments)
         {
+            var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
+
             try
             {
                 if (string.IsNullOrEmpty(_privKeyPass))
                 {
                     _privKeyPass = AlphaNumeric.CreateString(32);
-                    Console.Out.WriteLine($"  *** The password for the private key *** : {_privKeyPass}");
-                    Console.Out.WriteLine();
-                }
-                else
-                {
-                    Console.Out.Write("  *** Enter password for the private key *** : ");
-                    _privKeyPass = StandardInput.GetHiddenInput();
+                    Console.Out.WriteLine($"  *** The private key password *** : {_privKeyPass}");
                     Console.Out.WriteLine();
                 }
 
-                var keyPair = KeyHelper.CreateKeyPair(_conf, _uow, _keyAlgo, SignatureHashAlgorithm.SHA256, _privKeySize, _privKeyPass);
+                var (pubKey, privKey) = KeyHelper.CreateKeyPair(_conf, _uow, _keyAlgo, SignatureHashAlgorithm.SHA256, _privKeySize, _privKeyPass);
 
-                if (keyPair.Item1 != null)
-                    _uow.PublicKeys.Create(keyPair.Item1);
-
-                _uow.Commit();
-
-                if (keyPair.Item2 != null)
-                    _uow.PrivateKeys.Create(keyPair.Item2);
+                if (pubKey != null)
+                    _uow.PublicKeys.Create(pubKey);
 
                 _uow.Commit();
 
-                FormatOutput.KeyPairs(new List<PublicKey_EF> { keyPair.Item1 }, new List<PrivateKey_EF> { keyPair.Item2 });
+                if (privKey != null)
+                    _uow.PrivateKeys.Create(privKey);
+
+                _uow.Commit();
+
+                if (pubKey != null)
+                    Log.Information($"{callPath} 'system' created new public key... " +
+                        $"{Environment.NewLine} [algo] {(SshHostKeyAlgorithm)pubKey.KeyAlgorithmId} [format] {(SshPublicKeyFormat)pubKey.KeyFormatId} " +
+                        $"{Environment.NewLine} [sig] {pubKey.SigValue}" +
+                        $"{Environment.NewLine}{pubKey.KeyValue}");
+
+                if (privKey != null)
+                    Log.Information($"{callPath} 'system' created new private key... " +
+                        $"{Environment.NewLine} [algo] {(SshHostKeyAlgorithm)privKey.KeyAlgorithmId} [format] {(SshPrivateKeyFormat)privKey.KeyFormatId} " +
+                        $"{Environment.NewLine}{privKey.KeyValue}");
+
+                FormatOutput.Write(pubKey, privKey, true);
 
                 return StandardOutput.FondFarewell();
             }

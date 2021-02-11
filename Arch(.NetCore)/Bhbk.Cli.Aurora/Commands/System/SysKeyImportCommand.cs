@@ -1,6 +1,6 @@
 ﻿using Bhbk.Cli.Aurora.IO;
 using Bhbk.Lib.Aurora.Data_EF6.Models;
-using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
+using Bhbk.Lib.Aurora.Data_EF6.UnitOfWorks;
 using Bhbk.Lib.Aurora.Domain.Helpers;
 using Bhbk.Lib.Aurora.Primitives.Enums;
 using Bhbk.Lib.CommandLine.IO;
@@ -13,7 +13,6 @@ using Microsoft.Extensions.Configuration;
 using Rebex.Security.Certificates;
 using Rebex.Security.Cryptography;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
@@ -67,7 +66,7 @@ namespace Bhbk.Cli.Aurora.Commands.System
             {
                 if (string.IsNullOrEmpty(_privKeyPass))
                 {
-                    Console.Out.Write("  *** Enter password for the private key *** : ");
+                    Console.Out.Write("  *** Enter private key passphrase (only needed if currently encrypted) *** : ");
                     _privKeyPass = StandardInput.GetHiddenInput();
                     Console.Out.WriteLine();
                 }
@@ -110,7 +109,7 @@ namespace Bhbk.Cli.Aurora.Commands.System
                     .Where(x => x.PublicKeyId == keyPair.Item1.Id).ToLambda())
                     .Single();
 
-                FormatOutput.KeyPairs(new List<PublicKey_EF> { pubKey }, new List<PrivateKey_EF> { privKey });
+                FormatOutput.Write(pubKey, privKey, true);
 
                 return StandardOutput.FondFarewell();
             }

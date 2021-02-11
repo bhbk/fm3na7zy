@@ -1,6 +1,7 @@
 using AutoMapper;
-using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
+using Bhbk.Lib.Aurora.Data_EF6.UnitOfWorks;
 using Bhbk.Lib.Aurora.Domain.Profiles;
+using Bhbk.Lib.Aurora.Domain.Providers;
 using Bhbk.Lib.Common.Primitives.Enums;
 using Bhbk.Lib.Common.Services;
 using Bhbk.Lib.Identity.Grants;
@@ -48,6 +49,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                 sc.AddSingleton<IContextService>(_env);
                 sc.AddSingleton<ILogger>(_log);
                 sc.AddSingleton<IMapper>(_map);
+                sc.AddSingleton<StateProvider>();
                 sc.AddTransient<IUnitOfWork, UnitOfWork>(_ =>
                 {
                     return new UnitOfWork(_conf["Databases:AuroraEntities_EF6"], _env);
@@ -100,6 +102,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                 sc.AddSingleton<IContextService>(_env);
                 sc.AddSingleton<ILogger>(_log);
                 sc.AddSingleton<IMapper>(_map);
+                sc.AddSingleton<StateProvider>();
                 sc.AddTransient<IUnitOfWork, UnitOfWork>(_ =>
                 {
                     return new UnitOfWork(_conf["Databases:AuroraEntities_EF6"], _env);

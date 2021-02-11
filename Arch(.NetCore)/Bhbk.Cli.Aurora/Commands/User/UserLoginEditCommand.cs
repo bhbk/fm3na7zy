@@ -1,6 +1,6 @@
 ﻿using Bhbk.Cli.Aurora.IO;
 using Bhbk.Lib.Aurora.Data_EF6.Models;
-using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
+using Bhbk.Lib.Aurora.Data_EF6.UnitOfWorks;
 using Bhbk.Lib.Aurora.Primitives.Enums;
 using Bhbk.Lib.CommandLine.IO;
 using Bhbk.Lib.Common.Primitives.Enums;
@@ -24,6 +24,7 @@ namespace Bhbk.Cli.Aurora.Commands.User
         private Guid _id;
         private FileSystemType_E _fileSystem;
         private readonly string _fileSystemList = string.Join(", ", Enum.GetNames(typeof(FileSystemType_E)));
+        private string _alias, _comment;
         private bool? _isEnabled, _isDeletable;
 
         public UserLoginEditCommand()
@@ -45,12 +46,12 @@ namespace Bhbk.Cli.Aurora.Commands.User
                     .Where(x => x.UserId == _id).ToLambda(),
                         new List<Expression<Func<Login_EF, object>>>()
                         {
-                            x => x.Files,
-                            x => x.Folders,
-                            x => x.Mount,
+                            x => x.Alerts,
                             x => x.Networks,
                             x => x.PrivateKeys,
                             x => x.PublicKeys,
+                            x => x.Sessions,
+                            x => x.Settings,
                             x => x.Usage,
                         })
                     .SingleOrDefault();
@@ -64,23 +65,7 @@ namespace Bhbk.Cli.Aurora.Commands.User
                 if (string.IsNullOrEmpty(arg))
                     throw new ConsoleHelpAsException($"  *** No alias given ***");
 
-                _user.UserName = arg;
-            });
-
-            HasOption("f|filesystem=", "Enter type of filesystem", arg =>
-            {
-                if (!Enum.TryParse(arg, out _fileSystem))
-                    throw new ConsoleHelpAsException($"  *** Invalid filesystem type. Options are '{_fileSystemList}' ***");
-
-                _user.FileSystemTypeId = (int)_fileSystem;
-            });
-
-            HasOption("c|chroot=", "Enter chroot path", arg =>
-            {
-                if (string.IsNullOrEmpty(arg))
-                    throw new ConsoleHelpAsException($"  *** No chroot path given ***");
-
-                _user.FileSystemChrootPath = arg;
+                _alias = arg;
             });
 
             HasOption("k|publickey=", "Require public key for authentication", arg =>
@@ -101,12 +86,12 @@ namespace Bhbk.Cli.Aurora.Commands.User
                 _user.Usage.SessionMax = Int16.Parse(arg);
             });
 
-            HasOption("q|quota=", "Enter quota maximum (in bytes)", arg =>
+            HasOption("c|comment=", "Enter new comment", arg =>
             {
-                if (string.IsNullOrEmpty(arg))
-                    throw new ConsoleHelpAsException($"  *** No quota maximum given ***");
+                CheckRequiredArguments();
 
-                _user.Usage.QuotaInBytes = Int32.Parse(arg);
+                if (!string.IsNullOrEmpty(arg))
+                    _comment = arg;
             });
 
             HasOption("e|enabled=", "Is user enabled", arg =>
@@ -124,6 +109,19 @@ namespace Bhbk.Cli.Aurora.Commands.User
         {
             try
             {
+                /*
+                 * when login already exists do not allow rename...
+                 */
+                if (_alias != null)
+                {
+                    if (_uow.Logins.Get(QueryExpressionFactory.GetQueryExpression<Login_EF>()
+                        .Where(x => x.UserName.ToLower() == _alias.ToLower()).ToLambda())
+                        .Any())
+                        throw new ConsoleHelpAsException($"  *** The alias '{_user.UserName}' already exists ***");
+
+                    _user.UserName = _alias.ToLower();
+                }
+
                 if (_isEnabled.HasValue)
                     _user.IsEnabled = _isEnabled.Value;
 
@@ -131,10 +129,10 @@ namespace Bhbk.Cli.Aurora.Commands.User
                     _user.IsDeletable = _isDeletable.Value;
 
                 _uow.Logins.Update(_user);
-                _uow.Usages.Update(_user.Usage);
+                _uow.LoginUsages.Update(_user.Usage);
                 _uow.Commit();
 
-                FormatOutput.Logins(new List<Login_EF> { _user }, true);
+                FormatOutput.Write(_user, true);
 
                 return StandardOutput.FondFarewell();
             }

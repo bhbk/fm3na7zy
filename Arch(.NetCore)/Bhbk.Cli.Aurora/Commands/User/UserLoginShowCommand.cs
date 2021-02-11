@@ -1,6 +1,6 @@
 ﻿using Bhbk.Cli.Aurora.IO;
 using Bhbk.Lib.Aurora.Data_EF6.Models;
-using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
+using Bhbk.Lib.Aurora.Data_EF6.UnitOfWorks;
 using Bhbk.Lib.CommandLine.IO;
 using Bhbk.Lib.Common.Primitives.Enums;
 using Bhbk.Lib.Common.Services;
@@ -42,10 +42,6 @@ namespace Bhbk.Cli.Aurora.Commands.User
                         new List<Expression<Func<Login_EF, object>>>()
                         {
                             x => x.Alerts,
-                            x => x.Files,
-                            x => x.Folders,
-                            x => x.Mount,
-                            x => x.Mount.Ambassador,
                             x => x.Networks,
                             x => x.PrivateKeys,
                             x => x.PublicKeys,
@@ -56,7 +52,7 @@ namespace Bhbk.Cli.Aurora.Commands.User
                     .SingleOrDefault();
 
                 if (_user == null)
-                    throw new ConsoleHelpAsException($"  *** No user '{arg}' ***");
+                    throw new ConsoleHelpAsException($"  *** Invalid user '{arg}' ***");
             });
         }
 
@@ -64,14 +60,57 @@ namespace Bhbk.Cli.Aurora.Commands.User
         {
             try
             {
-                FormatOutput.Logins(new List<Login_EF> { _user }, true);
+                FormatOutput.Write(_user, true);
 
-                if (_user.Mount != null)
-                    FormatOutput.Mounts(new List<Mount_EF> { _user.Mount });
+                if (_user.FileSystems.Count() > 0)
+                {
+                    Console.Out.WriteLine();
+                    Console.ForegroundColor = ConsoleColor.Cyan;
+                    Console.Out.WriteLine($"  [file system(s)]");
+                    Console.ResetColor();
 
-                FormatOutput.KeyPairs(_user.PublicKeys.OrderBy(x => x.CreatedUtc), _user.PrivateKeys);
-                FormatOutput.Networks(_user.Networks.OrderBy(x => x.Action));
-                FormatOutput.Alerts(_user.Alerts.OrderBy(x => x.ToDisplayName));
+                    foreach (var fileSystem in _user.FileSystems.OrderBy(x => x.CreatedUtc))
+                    {
+                        var fileSystemLogin = _uow.FileSystemLogins.Get(QueryExpressionFactory.GetQueryExpression<FileSystemLogin_EF>()
+                            .Where(x => x.UserId == _user.UserId && x.FileSystemId == fileSystem.FileSystemId).ToLambda())
+                            .Single();
+
+                        FormatOutput.Write(fileSystemLogin, false);
+                    }
+                }
+
+                if (_user.PublicKeys.Count() > 0)
+                {
+                    Console.Out.WriteLine();
+                    Console.ForegroundColor = ConsoleColor.Cyan;
+                    Console.Out.WriteLine($"  [public and private key(s)]");
+                    Console.ResetColor();
+
+                    foreach (var pubKey in _user.PublicKeys.OrderBy(x => x.CreatedUtc))
+                        FormatOutput.Write(pubKey, _user.PrivateKeys.Where(x => x.PublicKeyId == pubKey.Id).SingleOrDefault(), false);
+                }
+
+                if (_user.Networks.Count() > 0)
+                {
+                    Console.Out.WriteLine();
+                    Console.ForegroundColor = ConsoleColor.Cyan;
+                    Console.Out.WriteLine($"  [network filter(s)]");
+                    Console.ResetColor();
+
+                    foreach (var network in _user.Networks.OrderBy(x => x.SequenceId))
+                        FormatOutput.Write(network, false);
+                }
+
+                if (_user.Alerts.Count() > 0)
+                {
+                    Console.Out.WriteLine();
+                    Console.ForegroundColor = ConsoleColor.Cyan;
+                    Console.Out.WriteLine($"  [alert(s)]");
+                    Console.ResetColor();
+
+                    foreach (var alert in _user.Alerts.OrderBy(x => x.ToDisplayName))
+                        FormatOutput.Write(alert, false);
+                }
 
                 var remotes = _uow.Sessions.Get(QueryExpressionFactory.GetQueryExpression<Session_EF>()
                     .Where(x => x.UserId == _user.UserId && x.IsActive == true).ToLambda())
@@ -84,8 +123,8 @@ namespace Bhbk.Cli.Aurora.Commands.User
                         .Where(x => x.RemoteEndPoint == remote).ToLambda());
 
                     Console.Out.WriteLine();
-                    FormatOutput.Sessions(sessions
-                        .OrderBy(x => x.CreatedUtc));
+                    foreach (var session in sessions.OrderBy(x => x.CreatedUtc))
+                        FormatOutput.Write(session, false);
                 }
 
                 return StandardOutput.FondFarewell();

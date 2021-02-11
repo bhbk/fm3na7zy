@@ -1,6 +1,6 @@
 ﻿using Bhbk.Cli.Aurora.IO;
 using Bhbk.Lib.Aurora.Data_EF6.Models;
-using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
+using Bhbk.Lib.Aurora.Data_EF6.UnitOfWorks;
 using Bhbk.Lib.CommandLine.IO;
 using Bhbk.Lib.Common.Primitives.Enums;
 using Bhbk.Lib.Common.Services;
@@ -22,7 +22,7 @@ namespace Bhbk.Cli.Aurora.Commands.User
         private IConfiguration _conf;
         private IUnitOfWork _uow;
         private Login_EF _user;
-        private string _displayName, _emailAddress, _textAddress;
+        private string _displayName, _emailAddress, _textAddress, _comment;
         private bool _delete = false, _download = false, _upload = false;
 
         public UserAlertCreateCommand()
@@ -87,17 +87,25 @@ namespace Bhbk.Cli.Aurora.Commands.User
                 }
             });
 
-            HasOption("x|on-delete", "Is sent when delete happens", arg =>
+            HasOption("c|comment=", "Enter comment", arg =>
+            {
+                CheckRequiredArguments();
+
+                if (!string.IsNullOrEmpty(arg))
+                    _comment = arg;
+            });
+
+            HasOption("1|on-delete", "Is sent when delete happens", arg =>
             {
                 _delete = true;
             });
 
-            HasOption("y|on-download", "Is sent when download happens", arg =>
+            HasOption("2|on-download", "Is sent when download happens", arg =>
             {
                 _download = true;
             });
 
-            HasOption("z|on-upload", "Is sent when upload happens", arg =>
+            HasOption("3|on-upload", "Is sent when upload happens", arg =>
             {
                 _upload = true;
             });
@@ -115,7 +123,7 @@ namespace Bhbk.Cli.Aurora.Commands.User
                     if (found != null)
                     {
                         Console.Out.WriteLine("  *** The alert entered already exists for user ***");
-                        FormatOutput.Alerts(new List<Alert_EF> { found });
+                        FormatOutput.Write(found);
 
                         return StandardOutput.FondFarewell();
                     }
@@ -129,7 +137,7 @@ namespace Bhbk.Cli.Aurora.Commands.User
                     if (found != null)
                     {
                         Console.Out.WriteLine("  *** The alert entered already exists for user ***");
-                        FormatOutput.Alerts(new List<Alert_EF> { found });
+                        FormatOutput.Write(found);
 
                         return StandardOutput.FondFarewell();
                     }
@@ -145,12 +153,13 @@ namespace Bhbk.Cli.Aurora.Commands.User
                         ToDisplayName = _displayName,
                         ToEmailAddress = _emailAddress ?? null,
                         ToPhoneNumber = _textAddress ?? null,
+                        Comment = _comment,
                         IsEnabled = false,
                     });
 
                 _uow.Commit();
 
-                FormatOutput.Alerts(new List<Alert_EF> { alert });
+                FormatOutput.Write(alert, true);
 
                 return StandardOutput.FondFarewell();
             }

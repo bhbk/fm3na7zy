@@ -23,6 +23,7 @@ namespace Bhbk.Lib.Aurora.Data_EF6.Models
         public string ToEmailAddress { get; set; }
         public string ToPhoneNumber { get; set; }
         public bool IsEnabled { get; set; }
+        public string Comment { get; set; }
         public System.DateTimeOffset CreatedUtc { get; set; }
     
         public virtual Login_EF Login { get; set; }

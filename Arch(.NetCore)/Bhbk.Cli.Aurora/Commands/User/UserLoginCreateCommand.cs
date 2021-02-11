@@ -1,6 +1,6 @@
 ﻿using Bhbk.Cli.Aurora.IO;
 using Bhbk.Lib.Aurora.Data_EF6.Models;
-using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
+using Bhbk.Lib.Aurora.Data_EF6.UnitOfWorks;
 using Bhbk.Lib.Aurora.Primitives.Enums;
 using Bhbk.Lib.CommandLine.IO;
 using Bhbk.Lib.Common.Primitives.Enums;
@@ -18,6 +18,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Net;
 
 namespace Bhbk.Cli.Aurora.Commands.User
 {
@@ -29,7 +30,7 @@ namespace Bhbk.Cli.Aurora.Commands.User
         private FileSystemType_E _fileSystemType;
         private readonly string _authTypeList = string.Join(", ", Enum.GetNames(typeof(AuthType_E)));
         private readonly string _fileSystemTypeList = string.Join(", ", Enum.GetNames(typeof(FileSystemType_E)));
-        private string _userName;
+        private string _userName, _comment;
 
         public UserLoginCreateCommand()
         {
@@ -57,16 +58,18 @@ namespace Bhbk.Cli.Aurora.Commands.User
                 _userName = arg;
             });
 
-            HasRequiredOption("l|login=", "Enter type of login for user", arg =>
+            HasRequiredOption("t|type=", "Enter type of login for user", arg =>
             {
                 if (!Enum.TryParse(arg, out _authType))
                     throw new ConsoleHelpAsException($"  *** Invalid login type. Options are '{_authTypeList}' ***");
             });
 
-            HasRequiredOption("f|filesystem=", "Enter type of filesystem for user", arg =>
+            HasOption("c|comment=", "Enter comment", arg =>
             {
-                if (!Enum.TryParse(arg, out _fileSystemType))
-                    throw new ConsoleHelpAsException($"  *** Invalid filesystem type. Options are '{_fileSystemTypeList}' ***");
+                CheckRequiredArguments();
+
+                if (!string.IsNullOrEmpty(arg))
+                    _comment = arg;
             });
         }
 
@@ -78,10 +81,8 @@ namespace Bhbk.Cli.Aurora.Commands.User
                 {
                     AuthTypeId = (int)_authType,
                     UserName = _userName,
-                    FileSystemTypeId = (int)_fileSystemType,
                     IsPasswordRequired = true,
                     IsPublicKeyRequired = false,
-                    IsFileSystemReadOnly = false,
                     IsEnabled = true,
                     IsDeletable = true,
                 };
@@ -141,16 +142,52 @@ namespace Bhbk.Cli.Aurora.Commands.User
                 user = _uow.Logins.Create(user);
                 _uow.Commit();
 
+                if (user.AuthTypeId == (int)AuthType_E.Identity)
+                {
+                    _uow.Networks.Create(
+                        new Network_EF
+                        {
+                            UserId = user.UserId,
+                            SequenceId = 0,
+                            Address = "::/64",
+                            ActionTypeId = (int)NetworkActionType_E.Allow,
+                            IsEnabled = true,
+                        });
+
+                    _uow.Networks.Create(
+                        new Network_EF
+                        {
+                            UserId = user.UserId,
+                            SequenceId = 10,
+                            Address = IPNetwork.IANA_BBLK_RESERVED1.ToString(),
+                            ActionTypeId = (int)NetworkActionType_E.Allow,
+                            IsEnabled = true,
+                        });
+
+                    _uow.Networks.Create(
+                        new Network_EF
+                        {
+                            UserId = user.UserId,
+                            SequenceId = 100,
+                            Address = "0.0.0.0/0",
+                            ActionTypeId = (int)NetworkActionType_E.Deny,
+                            IsEnabled = true,
+                        });
+
+                    _uow.Commit();
+                }
+
                 user = _uow.Logins.Get(QueryExpressionFactory.GetQueryExpression<Login_EF>()
                     .Where(x => x.UserId == user.UserId).ToLambda(),
                         new List<Expression<Func<Login_EF, object>>>()
                         {
+                            x => x.Networks,
                             x => x.Usage,
                         })
                     .Single();
                 
                 Console.Out.WriteLine();
-                FormatOutput.Logins(new List<Login_EF> { user }, true);
+                FormatOutput.Write(user, true);
 
                 return StandardOutput.FondFarewell();
             }

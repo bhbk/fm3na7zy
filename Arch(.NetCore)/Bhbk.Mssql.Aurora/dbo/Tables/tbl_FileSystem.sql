@@ -8,8 +8,10 @@
     [IsEnabled]        BIT                NOT NULL,
     [IsDeletable]      BIT                NOT NULL,
     CONSTRAINT [PK_tbl_FileSystem_ID] PRIMARY KEY CLUSTERED ([Id] ASC),
-    CONSTRAINT [FK_tbl_FileSystem_FileSystemTypeID] FOREIGN KEY ([FileSystemTypeId]) REFERENCES [dbo].[tbl_FileSystemType] ([Id]) ON UPDATE CASCADE
+    CONSTRAINT [FK_tbl_FileSystem_tbl_FileSystemType] FOREIGN KEY ([FileSystemTypeId]) REFERENCES [dbo].[tbl_FileSystemType] ([Id]) ON UPDATE CASCADE
 );
+
+
 
 GO
 CREATE UNIQUE NONCLUSTERED INDEX [IX_tbl_FileSystem_Name]

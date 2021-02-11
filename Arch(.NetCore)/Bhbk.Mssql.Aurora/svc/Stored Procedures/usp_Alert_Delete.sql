@@ -1,24 +1,14 @@
-﻿
-CREATE   PROCEDURE [svc].[usp_Alert_Delete]
-    @Id uniqueidentifier
-
+﻿CREATE PROCEDURE [svc].[usp_Alert_Delete] @Id UNIQUEIDENTIFIER
 AS
 BEGIN
 	SET NOCOUNT ON;
 
 	BEGIN TRY
+		DELETE [dbo].[tbl_Alert]
+		WHERE Id = @Id
+	END TRY
 
-        SELECT * FROM [dbo].[tbl_Alert] 
-            WHERE Id = @Id
-
-        DELETE [dbo].[tbl_Alert]
-            WHERE Id = @Id
-
-    END TRY
-
-    BEGIN CATCH
-        THROW;
-
-    END CATCH
-
+	BEGIN CATCH
+		THROW;
+	END CATCH
 END

@@ -1,15 +1,12 @@
-﻿
-CREATE VIEW [svc].[uvw_Folder]
+﻿CREATE VIEW [svc].[uvw_Folder]
 AS
-SELECT
-	Id
-	,UserId
-	,ParentId
-	,VirtualName
-	,IsReadOnly
-	,CreatedUtc
-	,LastAccessedUtc
-	,LastUpdatedUtc
-
-FROM
-	[dbo].[tbl_Folder]
+SELECT Id,
+	FileSystemId,
+	ParentId,
+	VirtualName,
+	IsReadOnly,
+	CreatorId,
+	CreatedUtc,
+	LastAccessedUtc,
+	LastUpdatedUtc
+FROM [dbo].[tbl_Folder]

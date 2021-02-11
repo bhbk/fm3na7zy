@@ -101,7 +101,7 @@
     <Compile Include="Models\Login_EF.cs">
       <DependentUpon>AuroraEntities.tt</DependentUpon>
     </Compile>
-    <Compile Include="Models\Mount_EF.cs">
+    <Compile Include="Models\NetworkActionType_EF.cs">
       <DependentUpon>AuroraEntities.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\Network_EF.cs">
@@ -126,6 +126,9 @@
       <DependentUpon>AuroraEntities.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\Setting_EF.cs">
+      <DependentUpon>AuroraEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\SmbAuthType_EF.cs">
       <DependentUpon>AuroraEntities.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\usp_Alert_Delete_Result.cs">
@@ -242,8 +245,8 @@
     <Compile Include="Models\usp_Setting_Update_Result.cs">
       <DependentUpon>AuroraEntities.tt</DependentUpon>
     </Compile>
-    <Compile Include="UnitOfWork\IUnitOfWork.cs" />
-    <Compile Include="UnitOfWork\UnitOfWork.cs" />
+    <Compile Include="UnitOfWorks\IUnitOfWork.cs" />
+    <Compile Include="UnitOfWorks\UnitOfWork.cs" />
     <Compile Include="Models\AuroraEntities.Context.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>

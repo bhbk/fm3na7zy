@@ -1,6 +1,6 @@
 ﻿using Bhbk.Cli.Aurora.IO;
 using Bhbk.Lib.Aurora.Data_EF6.Models;
-using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
+using Bhbk.Lib.Aurora.Data_EF6.UnitOfWorks;
 using Bhbk.Lib.Aurora.Domain.Helpers;
 using Bhbk.Lib.CommandLine.IO;
 using Bhbk.Lib.Common.Primitives.Enums;
@@ -62,9 +62,10 @@ namespace Bhbk.Cli.Aurora.Commands.User
                 var pubKeys = _user.PublicKeys;
                 var privKeys = _user.PrivateKeys;
 
-                FormatOutput.KeyPairs(pubKeys.OrderBy(x => x.CreatedUtc), privKeys);
-
+                foreach (var foundPubKey in pubKeys.OrderBy(x => x.CreatedUtc))
+                    FormatOutput.Write(foundPubKey, privKeys.Where(x => x.PublicKeyId == foundPubKey.Id).SingleOrDefault(), true);
                 Console.Out.WriteLine();
+
                 Console.Out.Write("  *** Enter GUID of public key to export *** : ");
                 var input = Guid.Parse(StandardInput.GetInput());
                 Console.Out.WriteLine();

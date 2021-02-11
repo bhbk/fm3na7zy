@@ -1,8 +1,8 @@
 ﻿using Bhbk.Cli.Aurora.IO;
 using Bhbk.Lib.Aurora.Data_EF6.Models;
-using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
+using Bhbk.Lib.Aurora.Data_EF6.UnitOfWorks;
+using Bhbk.Lib.Aurora.Domain.Helpers;
 using Bhbk.Lib.Aurora.Primitives.Enums;
-using Bhbk.Lib.CommandLine.IO;
 using Bhbk.Lib.Common.Primitives.Enums;
 using Bhbk.Lib.Common.Services;
 using Bhbk.Lib.QueryExpression.Extensions;
@@ -20,11 +20,9 @@ namespace Bhbk.Cli.Aurora.Commands.FileSystem
     {
         private readonly IConfiguration _conf;
         private readonly IUnitOfWork _uow;
-        private Login_EF _user;
-        private Uri _uncPath;
-        private SmbAuthType_E _authType;
-        private string _authTypeList = string.Join(", ", Enum.GetNames(typeof(SmbAuthType_E)));
-        private bool _alternateCredential;
+        private FileSystemType_E _fileSystemType;
+        private readonly string _fileSystemTypeList = string.Join(", ", Enum.GetNames(typeof(FileSystemType_E)));
+        private string _fileSystemName, _description, _uncPath;
 
         public FsGroupCreateCommand()
         {
@@ -35,42 +33,45 @@ namespace Bhbk.Cli.Aurora.Commands.FileSystem
             var env = new ContextService(InstanceContext.DeployedOrLocal);
             _uow = new UnitOfWork(_conf["Databases:AuroraEntities_EF6"], env);
 
-            IsCommand("user-mount-create", "Create mount for user");
+            IsCommand("fs-group-create", "Create file-system group on system");
 
-            HasRequiredOption("u|user=", "Enter user that already exists", arg =>
+            HasRequiredOption("f|file-system=", "Enter file-system that does not exist already", arg =>
             {
                 if (string.IsNullOrEmpty(arg))
-                    throw new ConsoleHelpAsException($"  *** No user name given ***");
+                    throw new ConsoleHelpAsException($"  *** No file-system group given ***");
 
-                _user = _uow.Logins.Get(QueryExpressionFactory.GetQueryExpression<Login_EF>()
-                    .Where(x => x.UserName == arg).ToLambda(),
-                        new List<Expression<Func<Login_EF, object>>>()
-                        {
-                            x => x.Mount,
-                            x => x.Mount.Ambassador,
-                        })
+                var fileSystem = _uow.FileSystems.Get(QueryExpressionFactory.GetQueryExpression<FileSystem_EF>()
+                    .Where(x => x.Name == arg).ToLambda())
                     .SingleOrDefault();
 
-                if (_user == null)
-                    throw new ConsoleHelpAsException($"  *** Invalid user '{arg}' ***");
+                if (fileSystem != null)
+                    throw new ConsoleHelpAsException($"  *** The file-system group '{arg}' already exists ***");
+
+                _fileSystemName = arg;
             });
 
-            HasRequiredOption("p|path=", "Enter UNC path", arg =>
+            HasRequiredOption("t|type=", "Enter type of filesystem", arg =>
             {
-                if(!Uri.TryCreate(arg, UriKind.Absolute, out _uncPath)
-                    || !(new Uri(arg).IsUnc))
+                if (!Enum.TryParse(arg, true, out _fileSystemType))
+                    throw new ConsoleHelpAsException($"  *** Invalid filesystem type, options are '{_fileSystemTypeList}' ***");
+            });
+
+            HasOption("d|description=", "Enter description", arg =>
+            {
+                CheckRequiredArguments();
+
+                if (!string.IsNullOrEmpty(arg))
+                    _description = arg;
+            });
+
+            HasOption("p|path=", $"Enter full UNC path to share (only for '{FileSystemType_E.SMB}' file-system)", arg =>
+            {
+                CheckRequiredArguments();
+
+                if (!FilePathHelper.IsValidUncPath(arg.ToLower()))
                     throw new ConsoleHelpAsException($"  *** Invalid UNC path '{arg}' ***");
-            });
 
-            HasRequiredOption("a|auth=", "Enter type of auth", arg =>
-            {
-                if (!Enum.TryParse(arg, out _authType))
-                    throw new ConsoleHelpAsException($"  *** Invalid auth type. Options are '{_authTypeList}' ***");
-            });
-
-            HasOption("c|credential", "Use ambassador credential for mount", arg =>
-            {
-                _alternateCredential = true;
+                _uncPath = arg.ToLower();
             });
         }
 
@@ -78,60 +79,49 @@ namespace Bhbk.Cli.Aurora.Commands.FileSystem
         {
             try
             {
-                var exists = _user.Mount;
+                /*
+                 * when file-system type if smb additional args are needed...
+                 */
+                if (_fileSystemType == FileSystemType_E.SMB
+                    && _uncPath == null)
+                    throw new ConsoleHelpAsException($"  *** Missing options for '{(FileSystemType_E)_fileSystemType}' file-system ***");
 
-                if (exists != null)
+                var fileSystem = new FileSystem_EF
                 {
-                    Console.Out.WriteLine("  *** The user already has a mount ***");
-                    FormatOutput.Mounts(new List<Mount_EF> { exists });
+                    Name = _fileSystemName,
+                    FileSystemTypeId = (int)_fileSystemType,
+                    Description = _description,
+                    IsEnabled = true,
+                    IsDeletable = true,
+                };
 
-                    return StandardOutput.FondFarewell();
-                }
+                if (_description != null)
+                    fileSystem.Description = _description;
 
-                Mount_EF mount;
+                if (_uncPath != null)
+                    fileSystem.UncPath = _uncPath;
 
-                if (_alternateCredential)
-                {
-                    var credentials = _uow.Ambassadors.Get();
+                fileSystem = _uow.FileSystems.Create(fileSystem);
+                _uow.Commit();
 
-                    FormatOutput.Ambassadors(credentials);
-
-                    Console.Out.WriteLine();
-                    Console.Out.Write("  *** Enter GUID of ambassador credential to use for mount *** : ");
-                    var input = StandardInput.GetInput();
-                    Console.Out.WriteLine();
-
-                    mount = _uow.Mounts.Create(
-                        new Mount_EF
+                fileSystem = _uow.FileSystems.Get(QueryExpressionFactory.GetQueryExpression<FileSystem_EF>()
+                    .Where(x => x.Id == fileSystem.Id).ToLambda(),
+                        new List<Expression<Func<FileSystem_EF, object>>>()
                         {
-                            UserId = _user.UserId,
-                            AmbassadorId = Guid.Parse(input),
-                            AuthType = _authType.ToString(),
-                            UncPath = _uncPath.ToString(),
-                        });
+                            x => x.Files,
+                            x => x.Folders,
+                            x => x.Logins,
+                            x => x.Usage,
+                        })
+                    .SingleOrDefault();
 
-                    _uow.Commit();
-                }
-                else
-                {
-                    mount = _uow.Mounts.Create(
-                        new Mount_EF
-                        {
-                            UserId = _user.UserId,
-                            AuthType = _authType.ToString(),
-                            UncPath = _uncPath.ToString(),
-                        });
+                FormatOutput.Write(fileSystem, true);
 
-                    _uow.Commit();
-                }
-
-                FormatOutput.Mounts(new List<Mount_EF> { mount });
-
-                return StandardOutput.FondFarewell();
+                return FormatOutput.FondFarewell();
             }
             catch (Exception ex)
             {
-                return StandardOutput.AngryFarewell(ex);
+                return FormatOutput.AngryFarewell(ex);
             }
         }
     }

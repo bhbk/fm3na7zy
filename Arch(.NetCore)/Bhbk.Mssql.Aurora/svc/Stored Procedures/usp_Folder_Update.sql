@@ -1,46 +1,41 @@
-﻿
-CREATE PROCEDURE [svc].[usp_Folder_Update]
-	 @Id					UNIQUEIDENTIFIER
-    ,@ParentId				UNIQUEIDENTIFIER
-    ,@VirtualName			NVARCHAR (MAX) 
-    ,@IsReadOnly			BIT
-	,@LastAccessedUtc		DATETIMEOFFSET (7)
-	,@LastUpdatedUtc		DATETIMEOFFSET (7)
-
+﻿CREATE PROCEDURE [svc].[usp_Folder_Update] @Id UNIQUEIDENTIFIER,
+	@ParentId UNIQUEIDENTIFIER,
+	@VirtualName NVARCHAR(MAX),
+	@IsReadOnly BIT,
+	@LastAccessedUtc DATETIMEOFFSET(7),
+	@LastUpdatedUtc DATETIMEOFFSET(7)
 AS
 BEGIN
 	SET NOCOUNT ON;
 
 	BEGIN TRY
+		BEGIN TRANSACTION;
 
-    	BEGIN TRANSACTION;
+		DECLARE @LASTUPDATED DATETIMEOFFSET(7) = GETUTCDATE()
 
-        DECLARE @LASTUPDATED DATETIMEOFFSET (7) = GETUTCDATE()
+		UPDATE [dbo].[tbl_Folder]
+		SET ParentId = @ParentId,
+			VirtualName = @VirtualName,
+			IsReadOnly = @IsReadOnly,
+			LastAccessedUtc = @LastAccessedUtc,
+			LastUpdatedUtc = @LastUpdatedUtc
+		WHERE Id = @Id
+			AND ParentId = @ParentId
 
-        UPDATE [dbo].[tbl_Folder]
-        SET
-             ParentId               = @ParentId
-			,VirtualName			= @VirtualName
-			,IsReadOnly				= @IsReadOnly
-			,LastAccessedUtc		= @LastAccessedUtc
-            ,LastUpdatedUtc			= @LastUpdatedUtc
-        WHERE Id = @Id AND ParentId = @ParentId
+		IF @@ROWCOUNT != 1 THROW 51000,
+			'ERROR',
+			1;
+			SELECT *
+			FROM [dbo].[tbl_Folder]
+			WHERE Id = @Id
+				AND ParentId = @ParentId
 
-		IF @@ROWCOUNT != 1
-			THROW 51000, 'ERROR', 1;
+		COMMIT TRANSACTION;
+	END TRY
 
-        SELECT * FROM [dbo].[tbl_Folder] 
-			WHERE Id = @Id AND ParentId = @ParentId
+	BEGIN CATCH
+		ROLLBACK TRANSACTION;
 
-    	COMMIT TRANSACTION;
-
-    END TRY
-
-    BEGIN CATCH
-
-    	ROLLBACK TRANSACTION;
-        THROW;
-
-    END CATCH
-
+		THROW;
+	END CATCH
 END

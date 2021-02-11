@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
+using Bhbk.Lib.Aurora.Data_EF6.UnitOfWorks;
 
 namespace Bhbk.Lib.Aurora.Domain.Factories
 {

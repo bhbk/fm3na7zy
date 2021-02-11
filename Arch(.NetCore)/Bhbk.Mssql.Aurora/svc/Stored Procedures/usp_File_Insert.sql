@@ -1,76 +1,71 @@
-﻿
-CREATE PROCEDURE [svc].[usp_File_Insert]
-     @UserId				UNIQUEIDENTIFIER
-    ,@FolderId				UNIQUEIDENTIFIER
-    ,@VirtualName			NVARCHAR (260) 
-    ,@IsReadOnly			BIT
-    ,@RealPath				NVARCHAR (MAX) 
-    ,@RealFileName			NVARCHAR (260) 
-	,@RealFileSize			BIGINT
-	,@HashTypeId		INT
-    ,@HashValue			NVARCHAR (64) 
-
+﻿CREATE PROCEDURE [svc].[usp_File_Insert] @FileSystemId UNIQUEIDENTIFIER,
+	@FolderId UNIQUEIDENTIFIER,
+	@VirtualName NVARCHAR(260),
+	@IsReadOnly BIT,
+	@RealPath NVARCHAR(MAX),
+	@RealFileName NVARCHAR(260),
+	@RealFileSize BIGINT,
+	@HashTypeId INT,
+	@HashValue NVARCHAR(64),
+	@CreatorId UNIQUEIDENTIFIER
 AS
 BEGIN
 	SET NOCOUNT ON;
 
 	BEGIN TRY
-
-    	BEGIN TRANSACTION;
+		BEGIN TRANSACTION;
 
 		DECLARE @FILEID UNIQUEIDENTIFIER = NEWID()
-        DECLARE @CREATEDUTC DATETIMEOFFSET (7) = GETUTCDATE()
+		DECLARE @CREATEDUTC DATETIMEOFFSET(7) = GETUTCDATE()
 
-		INSERT INTO [dbo].[tbl_File]
-			(
-			 Id         
-			,UserId
-			,FolderId
-			,VirtualName  
-			,IsReadOnly
-			,RealPath
-			,RealFileName
-			,RealFileSize
-			,HashTypeId
-			,HashValue
-			,CreatedUtc
-			,LastAccessedUtc
-			,LastUpdatedUtc
-			,LastVerifiedUtc
+		INSERT INTO [dbo].[tbl_File] (
+			Id,
+			FileSystemId,
+			FolderId,
+			VirtualName,
+			IsReadOnly,
+			RealPath,
+			RealFileName,
+			RealFileSize,
+			HashTypeId,
+			HashValue,
+			CreatorId,
+			CreatedUtc,
+			LastAccessedUtc,
+			LastUpdatedUtc,
+			LastVerifiedUtc
 			)
-		VALUES
-			(
-			 @FILEID          
-			,@UserId
-			,@FolderId
-			,@VirtualName
-			,@IsReadOnly
-			,@RealPath
-			,@RealFileName
-			,@RealFileSize
-			,@HashTypeId
-			,@HashValue
-			,@CREATEDUTC
-			,@CREATEDUTC
-			,@CREATEDUTC
-			,@CREATEDUTC
+		VALUES (
+			@FILEID,
+			@FileSystemId,
+			@FolderId,
+			@VirtualName,
+			@IsReadOnly,
+			@RealPath,
+			@RealFileName,
+			@RealFileSize,
+			@HashTypeId,
+			@HashValue,
+			@CreatorId,
+			@CREATEDUTC,
+			@CREATEDUTC,
+			@CREATEDUTC,
+			@CREATEDUTC
 			);
 
-		IF @@ROWCOUNT != 1
-			THROW 51000, 'ERROR', 1;
-
-		SELECT * FROM [dbo].[tbl_File] 
+		IF @@ROWCOUNT != 1 THROW 51000,
+			'ERROR',
+			1;
+			SELECT *
+			FROM [dbo].[tbl_File]
 			WHERE Id = @FILEID
 
-    	COMMIT TRANSACTION;
+		COMMIT TRANSACTION;
+	END TRY
 
-    END TRY
+	BEGIN CATCH
+		ROLLBACK TRANSACTION;
 
-    BEGIN CATCH
-
-    	ROLLBACK TRANSACTION;
-        THROW;
-
-    END CATCH
-
+		THROW;
+	END CATCH
 END

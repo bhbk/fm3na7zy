@@ -1,6 +1,6 @@
 ﻿using Bhbk.Cli.Aurora.IO;
 using Bhbk.Lib.Aurora.Data_EF6.Models;
-using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
+using Bhbk.Lib.Aurora.Data_EF6.UnitOfWorks;
 using Bhbk.Lib.CommandLine.IO;
 using Bhbk.Lib.Common.Primitives.Enums;
 using Bhbk.Lib.Common.Services;
@@ -12,6 +12,7 @@ using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 
 namespace Bhbk.Cli.Aurora.Commands.System
 {
@@ -19,8 +20,8 @@ namespace Bhbk.Cli.Aurora.Commands.System
     {
         private readonly IConfiguration _conf;
         private readonly IUnitOfWork _uow;
-        private Guid _id;
-        private string _credLogin;
+        private Ambassador_EF _ambassador;
+        private string _upn;
 
         public SysAmbEditCommand()
         {
@@ -31,16 +32,26 @@ namespace Bhbk.Cli.Aurora.Commands.System
             var env = new ContextService(InstanceContext.DeployedOrLocal);
             _uow = new UnitOfWork(_conf["Databases:AuroraEntities_EF6"], env);
 
-            IsCommand("sys-cred-edit", "Edit credential for system");
+            IsCommand("sys-amb-edit", "Edit ambassador credential on system");
 
-            HasRequiredOption("i|id=", "Enter GUID of credential to edit", arg =>
+            HasRequiredOption("a|ambassador=", "Enter existing ambassador credential", arg =>
             {
-                _id = Guid.Parse(arg);
+                if (string.IsNullOrEmpty(arg))
+                    throw new ConsoleHelpAsException($"  *** No ambassador credential given ***");
+
+                _ambassador = _uow.Ambassadors.Get(QueryExpressionFactory.GetQueryExpression<Ambassador_EF>()
+                    .Where(x => x.UserPrincipalName == arg).ToLambda())
+                    .SingleOrDefault();
+
+                if (_ambassador == null)
+                    throw new ConsoleHelpAsException($"  *** Invalid ambassador credential '{arg}' ***");
             });
 
-            HasOption("l|login=", "Enter login", arg =>
+            HasOption("u|upn=", "Enter user principal name", arg =>
             {
-                _credLogin = arg;
+                CheckRequiredArguments();
+
+                _upn = arg;
             });
         }
 
@@ -48,12 +59,19 @@ namespace Bhbk.Cli.Aurora.Commands.System
         {
             try
             {
-                var ambassador = _uow.Ambassadors.Get(QueryExpressionFactory.GetQueryExpression<Ambassador_EF>()
-                    .Where(x => x.Id == _id).ToLambda())
-                    .SingleOrDefault();
+                /*
+                 * when ambassador upn already exists do not allow rename...
+                 */
 
-                if (ambassador == null)
-                    throw new ConsoleHelpAsException($"  *** Invalid credential GUID '{_id}' ***");
+                if (_upn != null)
+                {
+                    if (_uow.Ambassadors.Get(QueryExpressionFactory.GetQueryExpression<Ambassador_EF>()
+                        .Where(x => x.UserPrincipalName.ToLower() == _upn.ToLower()).ToLambda())
+                        .Any())
+                        throw new ConsoleHelpAsException($"  *** The ambassador '{_ambassador.UserPrincipalName}' already exists ***");
+
+                    _ambassador.UserPrincipalName = _upn.ToLower();
+                }
 
                 Console.Out.Write("  *** Enter credential password to use *** : ");
                 var credPass = StandardInput.GetHiddenInput();
@@ -67,16 +85,24 @@ namespace Bhbk.Cli.Aurora.Commands.System
                 if (credPass != decryptedPass)
                     throw new ArithmeticException();
 
-                if (_credLogin != null)
-                    ambassador.UserName = _credLogin;
+                if (_upn != null)
+                    _ambassador.UserPrincipalName = _upn;
 
                 if (credPass != null)
-                    ambassador.EncryptedPass = encryptedPass;
+                    _ambassador.EncryptedPass = encryptedPass;
 
-                _uow.Ambassadors.Update(ambassador);
+                _ambassador = _uow.Ambassadors.Update(_ambassador);
                 _uow.Commit();
 
-                FormatOutput.Ambassadors(new List<Ambassador_EF> { ambassador });
+                _ambassador = _uow.Ambassadors.Get(QueryExpressionFactory.GetQueryExpression<Ambassador_EF>()
+                    .Where(x => x.Id == _ambassador.Id).ToLambda(),
+                        new List<Expression<Func<Ambassador_EF, object>>>()
+                        {
+                            x => x.FileSystems,
+                        })
+                    .SingleOrDefault();
+
+                FormatOutput.Write(_ambassador);
 
                 return StandardOutput.FondFarewell();
             }

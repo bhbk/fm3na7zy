@@ -1,6 +1,6 @@
 ﻿using Bhbk.Cli.Aurora.IO;
 using Bhbk.Lib.Aurora.Data_EF6.Models;
-using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
+using Bhbk.Lib.Aurora.Data_EF6.UnitOfWorks;
 using Bhbk.Lib.CommandLine.IO;
 using Bhbk.Lib.Common.Primitives.Enums;
 using Bhbk.Lib.Common.Services;
@@ -20,6 +20,7 @@ namespace Bhbk.Cli.Aurora.Commands.System
         private readonly IConfiguration _conf;
         private readonly IUnitOfWork _uow;
         private string _network, _user;
+        private int _count;
         private bool _active = false;
 
         public SysSessShowCommand()
@@ -31,12 +32,18 @@ namespace Bhbk.Cli.Aurora.Commands.System
             var env = new ContextService(InstanceContext.DeployedOrLocal);
             _uow = new UnitOfWork(_conf["Databases:AuroraEntities_EF6"], env);
 
-            IsCommand("sys-sess-show", "Show session(s) on system");
+            IsCommand("sys-sess-show-all", "Show session details for user(s)");
 
-            HasOption("a|active", "Show only active session(s)", arg =>
+            HasRequiredOption("c|count=", "Enter how many session groups to display", arg =>
             {
                 if (!string.IsNullOrEmpty(arg))
-                    _active = true;
+                    _count = int.Parse(arg);
+            });
+
+            HasOption("u|user=", "Enter user to search for", arg =>
+            {
+                if (!string.IsNullOrEmpty(arg))
+                    _user = arg;
             });
 
             HasOption("n|network=", "Enter CIDR address to search for", arg =>
@@ -45,10 +52,10 @@ namespace Bhbk.Cli.Aurora.Commands.System
                     _network = arg;
             });
 
-            HasOption("u|user=", "Enter user to search for", arg =>
+            HasOption("a|active", "Show only active session(s)", arg =>
             {
                 if (!string.IsNullOrEmpty(arg))
-                    _user = arg;
+                    _active = true;
             });
         }
 
@@ -56,38 +63,21 @@ namespace Bhbk.Cli.Aurora.Commands.System
         {
             try
             {
-                IQueryExpression<Session_EF> expr;
+                IQueryExpression<Session_EF> expression =
+                    QueryExpressionFactory.GetQueryExpression<Session_EF>();
 
                 if (!string.IsNullOrEmpty(_network))
-                {
-                    if (_active)
-                        expr = QueryExpressionFactory.GetQueryExpression<Session_EF>()
-                            .Where(x => x.RemoteEndPoint.Contains(_network) && x.IsActive == true);
-                    else
-                        expr = QueryExpressionFactory.GetQueryExpression<Session_EF>()
-                            .Where(x => x.RemoteEndPoint.Contains(_network));
-                }
-                else if (!string.IsNullOrEmpty(_user))
-                {
-                    if (_active)
-                        expr = QueryExpressionFactory.GetQueryExpression<Session_EF>()
-                            .Where(x => x.UserName.Contains(_user) && x.IsActive == true);
-                    else
-                        expr = QueryExpressionFactory.GetQueryExpression<Session_EF>()
-                            .Where(x => x.UserName.Contains(_user));
-                }
-                else
-                {
-                    if (_active)
-                        expr = QueryExpressionFactory.GetQueryExpression<Session_EF>()
-                            .Where(x => x.IsActive == true);
-                    else
-                        expr = QueryExpressionFactory.GetQueryExpression<Session_EF>();
-                }
+                    expression = expression.Where(x => x.RemoteEndPoint.Contains(_network));
 
-                var remotes = _uow.Sessions.Get(expr.ToLambda())
+                else if (!string.IsNullOrEmpty(_user))
+                    expression = expression.Where(x => x.UserName.Contains(_user));
+
+                if (_active)
+                    expression = expression.Where(x => x.IsActive == true);
+
+                var remotes = _uow.Sessions.Get(expression.ToLambda())
                     .OrderBy(x => x.UserName).ThenBy(x => x.CreatedUtc)
-                    .Select(x => x.RemoteEndPoint).Distinct().TakeLast(100).ToList();
+                    .Select(x => x.RemoteEndPoint).Distinct().TakeLast(_count).ToList();
 
                 foreach (var remote in remotes)
                 {
@@ -95,8 +85,8 @@ namespace Bhbk.Cli.Aurora.Commands.System
                         .Where(x => x.RemoteEndPoint == remote).ToLambda());
 
                     Console.Out.WriteLine();
-                    FormatOutput.Sessions(sessions
-                        .OrderBy(x => x.CreatedUtc), true);
+                    foreach (var session in sessions.OrderBy(x => x.CreatedUtc))
+                        FormatOutput.Write(session, false);
                 }
 
                 return StandardOutput.FondFarewell();

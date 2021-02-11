@@ -22,7 +22,9 @@ namespace Bhbk.Lib.Aurora.Data_EF6.Models
         public bool IsReadOnly { get; set; }
         public System.DateTimeOffset CreatedUtc { get; set; }
     
+        public virtual Ambassador_EF Ambassador { get; set; }
         public virtual FileSystem_EF FileSystem { get; set; }
         public virtual Login_EF Login { get; set; }
+        public virtual SmbAuthType_EF SmbAuthType { get; set; }
     }
 }

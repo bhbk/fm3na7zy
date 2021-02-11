@@ -1,6 +1,6 @@
 ﻿using Bhbk.Cli.Aurora.IO;
 using Bhbk.Lib.Aurora.Data_EF6.Models;
-using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
+using Bhbk.Lib.Aurora.Data_EF6.UnitOfWorks;
 using Bhbk.Lib.CommandLine.IO;
 using Bhbk.Lib.Common.Primitives.Enums;
 using Bhbk.Lib.Common.Services;
@@ -18,7 +18,10 @@ namespace Bhbk.Cli.Aurora.Commands.System
     {
         private IConfiguration _conf;
         private IUnitOfWork _uow;
-        private Guid _id;
+        private IEnumerable<PublicKey_EF> _pubKeys;
+        private IEnumerable<PrivateKey_EF> _privKeys;
+        private PublicKey_EF _pubKey;
+        private PrivateKey_EF _privKey;
         private bool? _isEnabled, _isDeletable;
 
         public SysKeyEditCommand()
@@ -34,7 +37,22 @@ namespace Bhbk.Cli.Aurora.Commands.System
 
             HasRequiredOption("i|id=", "Enter GUID of public key in key pair to edit", arg =>
             {
-                _id = Guid.Parse(arg);
+                var id = Guid.Parse(arg);
+
+                _privKeys = _uow.PrivateKeys.Get(QueryExpressionFactory.GetQueryExpression<PrivateKey_EF>()
+                    .Where(x => x.UserId == null).ToLambda());
+
+                _pubKeys = _uow.PublicKeys.Get(QueryExpressionFactory.GetQueryExpression<PublicKey_EF>()
+                    .Where(x => x.UserId == null).ToLambda());
+
+                _privKey = _privKeys.Where(x => x.PublicKeyId == id)
+                    .SingleOrDefault();
+
+                _pubKey = _pubKeys.Where(x => x.Id == id)
+                    .SingleOrDefault();
+
+                if (_pubKey == null)
+                    throw new ConsoleHelpAsException($"*** Invalid public key GUID '{id}' ***");
             });
 
             HasOption("e|enabled=", "Is enabled", arg =>
@@ -52,44 +70,29 @@ namespace Bhbk.Cli.Aurora.Commands.System
         {
             try
             {
-                var privKeys = _uow.PrivateKeys.Get(QueryExpressionFactory.GetQueryExpression<PrivateKey_EF>()
-                    .Where(x => x.UserId == null).ToLambda());
-
-                var pubKeys = _uow.PublicKeys.Get(QueryExpressionFactory.GetQueryExpression<PublicKey_EF>()
-                    .Where(x => x.UserId == null).ToLambda());
-
-                var privKey = privKeys.Where(x => x.PublicKeyId == _id)
-                    .SingleOrDefault();
-
-                var pubKey = pubKeys.Where(x => x.Id == _id)
-                    .SingleOrDefault();
-
-                if (pubKey == null)
-                    throw new ConsoleHelpAsException($"*** Invalid public key GUID '{_id}' ***");
-
-                if (pubKey != null)
+                if (_pubKey != null)
                 {
-                    if (privKey != null)
+                    if (_privKey != null)
                     {
                         if (_isEnabled.HasValue)
-                            privKey.IsEnabled = _isEnabled.Value;
+                            _privKey.IsEnabled = _isEnabled.Value;
 
                         if (_isDeletable.HasValue)
-                            privKey.IsDeletable = _isDeletable.Value;
+                            _privKey.IsDeletable = _isDeletable.Value;
 
-                        _uow.PrivateKeys.Update(privKey);
+                        _uow.PrivateKeys.Update(_privKey);
                     }
 
                     if (_isEnabled.HasValue)
-                        pubKey.IsEnabled = _isEnabled.Value;
+                        _pubKey.IsEnabled = _isEnabled.Value;
 
                     if (_isDeletable.HasValue)
-                        pubKey.IsDeletable = _isDeletable.Value;
+                        _pubKey.IsDeletable = _isDeletable.Value;
 
-                    _uow.PublicKeys.Update(pubKey);
+                    _uow.PublicKeys.Update(_pubKey);
                     _uow.Commit();
 
-                    FormatOutput.KeyPairs(new List<PublicKey_EF> { pubKey }, new List<PrivateKey_EF> { privKey });
+                    FormatOutput.Write(_pubKey, _privKey, true);
                 }
 
                 return StandardOutput.FondFarewell();

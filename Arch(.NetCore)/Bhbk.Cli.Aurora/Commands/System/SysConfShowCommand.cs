@@ -1,5 +1,5 @@
 ﻿using Bhbk.Cli.Aurora.IO;
-using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
+using Bhbk.Lib.Aurora.Data_EF6.UnitOfWorks;
 using Bhbk.Lib.CommandLine.IO;
 using Bhbk.Lib.Common.Primitives.Enums;
 using Bhbk.Lib.Common.Services;
@@ -32,7 +32,8 @@ namespace Bhbk.Cli.Aurora.Commands.System
             {
                 var configs = _uow.Settings.Get();
 
-                FormatOutput.Settings(configs);
+                foreach (var config in configs)
+                    FormatOutput.Write(config, true);
 
                 return StandardOutput.FondFarewell();
             }

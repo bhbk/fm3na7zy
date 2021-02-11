@@ -1,62 +1,56 @@
-﻿
-CREATE PROCEDURE [svc].[usp_Session_Insert]
-    @UserId						UNIQUEIDENTIFIER
-   ,@CallPath					VARCHAR(256)
-   ,@Details					VARCHAR(MAX)
-   ,@LocalEndPoint				VARCHAR(128)
-   ,@LocalSoftwareIdentifier	VARCHAR(128)
-   ,@RemoteEndPoint				VARCHAR(128)
-   ,@RemoteSoftwareIdentifier	VARCHAR(128)
-   ,@IsActive					BIT
-
+﻿CREATE PROCEDURE [svc].[usp_Session_Insert] @UserId UNIQUEIDENTIFIER,
+	@CallPath VARCHAR(256),
+	@Details VARCHAR(MAX),
+	@LocalEndPoint VARCHAR(128),
+	@LocalSoftwareIdentifier VARCHAR(128),
+	@RemoteEndPoint VARCHAR(128),
+	@RemoteSoftwareIdentifier VARCHAR(128),
+	@IsActive BIT
 AS
 BEGIN
 	SET NOCOUNT ON;
 
 	BEGIN TRY
-
-    	BEGIN TRANSACTION;
+		BEGIN TRANSACTION;
 
 		DECLARE @STATEID UNIQUEIDENTIFIER = NEWID()
 		DECLARE @CREATED DATETIMEOFFSET = GETUTCDATE()
 
-		INSERT INTO [dbo].[tbl_Session] 
-			(Id
-			,UserId
-			,CallPath
-			,Details
-			,LocalEndPoint
-			,LocalSoftwareIdentifier
-			,RemoteEndPoint
-			,RemoteSoftwareIdentifier
-			,IsActive
-			,CreatedUtc
+		INSERT INTO [dbo].[tbl_Session] (
+			Id,
+			UserId,
+			CallPath,
+			Details,
+			LocalEndPoint,
+			LocalSoftwareIdentifier,
+			RemoteEndPoint,
+			RemoteSoftwareIdentifier,
+			IsActive,
+			CreatedUtc
 			)
-		VALUES 
-			(@STATEID
-			,@UserId
-			,@CallPath
-			,@Details
-			,@LocalEndPoint
-			,@LocalSoftwareIdentifier
-			,@RemoteEndPoint
-			,@RemoteSoftwareIdentifier
-			,@IsActive
-			,@CREATED
+		VALUES (
+			@STATEID,
+			@UserId,
+			@CallPath,
+			@Details,
+			@LocalEndPoint,
+			@LocalSoftwareIdentifier,
+			@RemoteEndPoint,
+			@RemoteSoftwareIdentifier,
+			@IsActive,
+			@CREATED
 			);
 
-		SELECT * FROM [dbo].[tbl_Session] 
-			WHERE Id = @STATEID
+		SELECT *
+		FROM [dbo].[tbl_Session]
+		WHERE Id = @STATEID
 
-    	COMMIT TRANSACTION;
+		COMMIT TRANSACTION;
+	END TRY
 
-    END TRY
+	BEGIN CATCH
+		ROLLBACK TRANSACTION;
 
-    BEGIN CATCH
-
-    	ROLLBACK TRANSACTION;
-        THROW;
-
-    END CATCH
-
+		THROW;
+	END CATCH
 END

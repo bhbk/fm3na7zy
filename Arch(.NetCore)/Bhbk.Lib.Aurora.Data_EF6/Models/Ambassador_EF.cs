@@ -17,17 +17,17 @@ namespace Bhbk.Lib.Aurora.Data_EF6.Models
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
         public Ambassador_EF()
         {
-            this.Mounts = new HashSet<Mount_EF>();
+            this.FileSystems = new HashSet<FileSystemLogin_EF>();
         }
     
         public System.Guid Id { get; set; }
-        public string UserName { get; set; }
+        public string UserPrincipalName { get; set; }
         public string EncryptedPass { get; set; }
         public bool IsEnabled { get; set; }
         public bool IsDeletable { get; set; }
         public System.DateTimeOffset CreatedUtc { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<Mount_EF> Mounts { get; set; }
+        public virtual ICollection<FileSystemLogin_EF> FileSystems { get; set; }
     }
 }

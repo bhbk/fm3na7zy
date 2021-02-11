@@ -18,8 +18,6 @@ namespace Bhbk.Lib.Aurora.Data_EF6.Models
         public Login_EF()
         {
             this.Alerts = new HashSet<Alert_EF>();
-            this.Files = new HashSet<File_EF>();
-            this.Folders = new HashSet<Folder_EF>();
             this.FileSystems = new HashSet<FileSystemLogin_EF>();
             this.Networks = new HashSet<Network_EF>();
             this.PrivateKeys = new HashSet<PrivateKey_EF>();
@@ -31,15 +29,13 @@ namespace Bhbk.Lib.Aurora.Data_EF6.Models
         public System.Guid UserId { get; set; }
         public string UserName { get; set; }
         public int AuthTypeId { get; set; }
-        public int FileSystemTypeId { get; set; }
-        public string FileSystemChrootPath { get; set; }
         public bool IsPasswordRequired { get; set; }
         public bool IsPublicKeyRequired { get; set; }
-        public bool IsFileSystemReadOnly { get; set; }
         public int DebugTypeId { get; set; }
         public string EncryptedPass { get; set; }
         public bool IsEnabled { get; set; }
         public bool IsDeletable { get; set; }
+        public string Comment { get; set; }
         public System.DateTimeOffset CreatedUtc { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
@@ -47,12 +43,7 @@ namespace Bhbk.Lib.Aurora.Data_EF6.Models
         public virtual LoginAuthType_EF AuthType { get; set; }
         public virtual LoginDebugType_EF DebugType { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<File_EF> Files { get; set; }
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<Folder_EF> Folders { get; set; }
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<FileSystemLogin_EF> FileSystems { get; set; }
-        public virtual Mount_EF Mount { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Network_EF> Networks { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]

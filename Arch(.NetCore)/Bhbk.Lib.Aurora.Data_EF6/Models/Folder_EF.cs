@@ -22,17 +22,18 @@ namespace Bhbk.Lib.Aurora.Data_EF6.Models
         }
     
         public System.Guid Id { get; set; }
-        public System.Guid UserId { get; set; }
+        public System.Guid FileSystemId { get; set; }
         public Nullable<System.Guid> ParentId { get; set; }
         public string VirtualName { get; set; }
         public bool IsReadOnly { get; set; }
+        public System.Guid CreatorId { get; set; }
         public System.DateTimeOffset CreatedUtc { get; set; }
         public System.DateTimeOffset LastAccessedUtc { get; set; }
         public System.DateTimeOffset LastUpdatedUtc { get; set; }
     
-        public virtual Login_EF Login { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<File_EF> Files { get; set; }
+        public virtual FileSystem_EF FileSystem { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Folder_EF> Folders { get; set; }
         public virtual Folder_EF Parent { get; set; }

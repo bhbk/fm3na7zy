@@ -1,6 +1,6 @@
 ﻿using Bhbk.Cli.Aurora.IO;
 using Bhbk.Lib.Aurora.Data_EF6.Models;
-using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
+using Bhbk.Lib.Aurora.Data_EF6.UnitOfWorks;
 using Bhbk.Lib.CommandLine.IO;
 using Bhbk.Lib.Common.Primitives.Enums;
 using Bhbk.Lib.Common.Services;
@@ -62,7 +62,8 @@ namespace Bhbk.Cli.Aurora.Commands.User
             {
                 var exists = _user.Alerts;
 
-                FormatOutput.Alerts(exists);
+                foreach (var exist in exists)
+                    FormatOutput.Write(exist, true);
                 Console.Out.WriteLine();
 
                 if (_deleteAll == true)

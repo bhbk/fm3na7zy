@@ -1,17 +1,14 @@
-﻿
-CREATE   VIEW [svc].[uvw_Alert]
+﻿CREATE VIEW [svc].[uvw_Alert]
 AS
-SELECT
-	Id
-	,UserId
-	,OnDelete
-	,OnDownload
-	,OnUpload
-	,ToDisplayName
-	,ToEmailAddress
-	,ToPhoneNumber
-	,IsEnabled
-	,CreatedUtc
-
-FROM
-	[dbo].[tbl_Alert]
+SELECT Id,
+	UserId,
+	OnDelete,
+	OnDownload,
+	OnUpload,
+	ToDisplayName,
+	ToEmailAddress,
+	ToPhoneNumber,
+	IsEnabled,
+	Comment,
+	CreatedUtc
+FROM [dbo].[tbl_Alert]

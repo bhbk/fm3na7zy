@@ -1,7 +1,6 @@
 ﻿using Bhbk.Cli.Aurora.IO;
 using Bhbk.Lib.Aurora.Data_EF6.Models;
-using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
-using Bhbk.Lib.CommandLine.IO;
+using Bhbk.Lib.Aurora.Data_EF6.UnitOfWorks;
 using Bhbk.Lib.Common.Primitives.Enums;
 using Bhbk.Lib.Common.Services;
 using Bhbk.Lib.QueryExpression.Extensions;
@@ -19,7 +18,7 @@ namespace Bhbk.Cli.Aurora.Commands.FileSystem
     {
         private readonly IConfiguration _conf;
         private readonly IUnitOfWork _uow;
-        private Login_EF _user;
+        private FileSystem_EF _fileSystem = null;
 
         public FsGroupDeleteCommand()
         {
@@ -30,24 +29,26 @@ namespace Bhbk.Cli.Aurora.Commands.FileSystem
             var env = new ContextService(InstanceContext.DeployedOrLocal);
             _uow = new UnitOfWork(_conf["Databases:AuroraEntities_EF6"], env);
 
-            IsCommand("user-mount-delete", "Delete mount for user");
+            IsCommand("fs-group-delete", "Delete file-system group on system");
 
-            HasRequiredOption("u|user=", "Enter user that already exists", arg =>
+            HasRequiredOption("f|file-system=", "Enter existing file-system group", arg =>
             {
                 if (string.IsNullOrEmpty(arg))
-                    throw new ConsoleHelpAsException($"  *** No user name given ***");
+                    throw new ConsoleHelpAsException($"  *** No file-system group given ***");
 
-                _user = _uow.Logins.Get(QueryExpressionFactory.GetQueryExpression<Login_EF>()
-                    .Where(x => x.UserName == arg).ToLambda(),
-                        new List<Expression<Func<Login_EF, object>>>()
+                _fileSystem = _uow.FileSystems.Get(QueryExpressionFactory.GetQueryExpression<FileSystem_EF>()
+                    .Where(x => x.Name == arg).ToLambda(),
+                        new List<Expression<Func<FileSystem_EF, object>>>()
                         {
-                            x => x.Mount,
-                            x => x.Mount.Ambassador,
+                            x => x.Files,
+                            x => x.Folders,
+                            x => x.Logins,
+                            x => x.Usage,
                         })
                     .SingleOrDefault();
 
-                if (_user == null)
-                    throw new ConsoleHelpAsException($"  *** Invalid user '{arg}' ***");
+                if (_fileSystem == null)
+                    throw new ConsoleHelpAsException($"  *** Invalid file-system group '{arg}' ***");
             });
         }
 
@@ -55,16 +56,37 @@ namespace Bhbk.Cli.Aurora.Commands.FileSystem
         {
             try
             {
-                FormatOutput.Mounts(new List<Mount_EF> { _user.Mount });
+                FormatOutput.Write(_fileSystem, true);
+                Console.Out.WriteLine();
 
-                _uow.Mounts.Delete(_user.Mount);
-                _uow.Commit();
+                Console.Out.Write("  *** Enter 'yes' to delete file-system *** : ");
+                var input = FormatInput.GetInput();
+                Console.Out.WriteLine();
 
-                return StandardOutput.FondFarewell();
+                if (input.ToLower() == "yes")
+                {
+                    if (!_fileSystem.IsDeletable)
+                        throw new ConsoleHelpAsException($"  *** The file-system can not be deleted. ***");
+
+                    var files = _fileSystem.Files.Count;
+
+                    if (files > 0)
+                        throw new ConsoleHelpAsException($"  *** The file-system can not be deleted. There are {files} files in it ***");
+
+                    var users = _fileSystem.Logins.Count;
+
+                    if (users > 0)
+                        throw new ConsoleHelpAsException($"  *** The file-system can not be deleted. There are {users} users using it ***");
+
+                    _uow.FileSystems.Delete(_fileSystem);
+                    _uow.Commit();
+                }
+
+                return FormatOutput.FondFarewell();
             }
             catch (Exception ex)
             {
-                return StandardOutput.AngryFarewell(ex);
+                return FormatOutput.AngryFarewell(ex);
             }
         }
     }

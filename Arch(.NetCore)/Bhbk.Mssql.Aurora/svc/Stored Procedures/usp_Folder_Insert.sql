@@ -1,59 +1,54 @@
-﻿
-CREATE PROCEDURE [svc].[usp_Folder_Insert]
-     @UserId				UNIQUEIDENTIFIER
-    ,@ParentId				UNIQUEIDENTIFIER
-    ,@VirtualName			NVARCHAR (MAX) 
-    ,@IsReadOnly			BIT
-
+﻿CREATE PROCEDURE [svc].[usp_Folder_Insert] @FileSystemId UNIQUEIDENTIFIER,
+	@ParentId UNIQUEIDENTIFIER,
+	@VirtualName NVARCHAR(MAX),
+	@IsReadOnly BIT,
+	@CreatorId UNIQUEIDENTIFIER
 AS
 BEGIN
 	SET NOCOUNT ON;
 
 	BEGIN TRY
-
-    	BEGIN TRANSACTION;
+		BEGIN TRANSACTION;
 
 		DECLARE @FOLDERID UNIQUEIDENTIFIER = NEWID()
-        DECLARE @CREATEDUTC DATETIMEOFFSET (7) = GETUTCDATE()
+		DECLARE @CREATEDUTC DATETIMEOFFSET(7) = GETUTCDATE()
 
-		INSERT INTO [dbo].[tbl_Folder]
-			(
-			 Id         
-			,UserId
-			,ParentId
-			,VirtualName  
-			,IsReadOnly
-			,CreatedUtc
-			,LastAccessedUtc
-			,LastUpdatedUtc
+		INSERT INTO [dbo].[tbl_Folder] (
+			Id,
+			FileSystemId,
+			ParentId,
+			VirtualName,
+			IsReadOnly,
+			CreatorId,
+			CreatedUtc,
+			LastAccessedUtc,
+			LastUpdatedUtc
 			)
-		VALUES
-			(
-			 @FOLDERID          
-			,@UserId
-			,@ParentId
-			,@VirtualName
-			,@IsReadOnly
-			,@CREATEDUTC
-			,@CREATEDUTC
-			,@CREATEDUTC
+		VALUES (
+			@FOLDERID,
+			@FileSystemId,
+			@ParentId,
+			@VirtualName,
+			@IsReadOnly,
+			@CreatorId,
+			@CREATEDUTC,
+			@CREATEDUTC,
+			@CREATEDUTC
 			);
 
-		IF @@ROWCOUNT != 1
-			THROW 51000, 'ERROR', 1;
-
-		SELECT * FROM [dbo].[tbl_Folder] 
+		IF @@ROWCOUNT != 1 THROW 51000,
+			'ERROR',
+			1;
+			SELECT *
+			FROM [dbo].[tbl_Folder]
 			WHERE Id = @FOLDERID
 
-    	COMMIT TRANSACTION;
+		COMMIT TRANSACTION;
+	END TRY
 
-    END TRY
+	BEGIN CATCH
+		ROLLBACK TRANSACTION;
 
-    BEGIN CATCH
-
-    	ROLLBACK TRANSACTION;
-        THROW;
-
-    END CATCH
-
+		THROW;
+	END CATCH
 END

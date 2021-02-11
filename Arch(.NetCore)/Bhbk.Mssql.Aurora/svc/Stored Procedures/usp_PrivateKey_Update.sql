@@ -1,48 +1,41 @@
-﻿
-CREATE PROCEDURE [svc].[usp_PrivateKey_Update]
-     @Id					UNIQUEIDENTIFIER 
-    ,@PublicKeyId			UNIQUEIDENTIFIER
-    ,@KeyValue				NVARCHAR (MAX) 
-    ,@KeyAlgorithmId				INT 
-    ,@KeyFormatId				INT 
-    ,@EncryptedPass 		NVARCHAR (1024) 
-    ,@IsEnabled				BIT
-    ,@IsDeletable			BIT
-
+﻿CREATE PROCEDURE [svc].[usp_PrivateKey_Update] @Id UNIQUEIDENTIFIER,
+	@PublicKeyId UNIQUEIDENTIFIER,
+	@KeyValue NVARCHAR(MAX),
+	@KeyAlgorithmId INT,
+	@KeyFormatId INT,
+	@EncryptedPass NVARCHAR(1024),
+	@IsEnabled BIT,
+	@IsDeletable BIT
 AS
 BEGIN
 	SET NOCOUNT ON;
 
 	BEGIN TRY
+		BEGIN TRANSACTION;
 
-    	BEGIN TRANSACTION;
+		UPDATE [dbo].[tbl_PrivateKey]
+		SET PublicKeyId = @PublicKeyId,
+			KeyValue = @KeyValue,
+			KeyAlgorithmId = @KeyAlgorithmId,
+			KeyFormatId = @KeyFormatId,
+			EncryptedPass = @EncryptedPass,
+			IsEnabled = @IsEnabled,
+			IsDeletable = @IsDeletable
+		WHERE Id = @Id
 
-        UPDATE [dbo].[tbl_PrivateKey]
-        SET
-			 PublicKeyId			= @PublicKeyId
-			,KeyValue				= @KeyValue
-			,KeyAlgorithmId				= @KeyAlgorithmId
-			,KeyFormatId				= @KeyFormatId
-			,EncryptedPass	    	= @EncryptedPass
-			,IsEnabled				= @IsEnabled
-			,IsDeletable			= @IsDeletable
-        WHERE Id = @Id
-
-		IF @@ROWCOUNT != 1
-			THROW 51000, 'ERROR', 1;
-
-        SELECT * FROM [dbo].[tbl_PrivateKey]
+		IF @@ROWCOUNT != 1 THROW 51000,
+			'ERROR',
+			1;
+			SELECT *
+			FROM [dbo].[tbl_PrivateKey]
 			WHERE Id = @Id
 
-    	COMMIT TRANSACTION;
+		COMMIT TRANSACTION;
+	END TRY
 
-    END TRY
+	BEGIN CATCH
+		ROLLBACK TRANSACTION;
 
-    BEGIN CATCH
-
-    	ROLLBACK TRANSACTION;
-        THROW;
-
-    END CATCH
-
+		THROW;
+	END CATCH
 END

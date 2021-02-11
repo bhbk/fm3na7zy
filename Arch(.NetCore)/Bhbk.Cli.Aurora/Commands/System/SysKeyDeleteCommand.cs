@@ -1,6 +1,6 @@
 ﻿using Bhbk.Cli.Aurora.IO;
 using Bhbk.Lib.Aurora.Data_EF6.Models;
-using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
+using Bhbk.Lib.Aurora.Data_EF6.UnitOfWorks;
 using Bhbk.Lib.CommandLine.IO;
 using Bhbk.Lib.Common.Primitives.Enums;
 using Bhbk.Lib.Common.Services;
@@ -46,13 +46,19 @@ namespace Bhbk.Cli.Aurora.Commands.System
                 var pubKeys = _uow.PublicKeys.Get(QueryExpressionFactory.GetQueryExpression<PublicKey_EF>()
                     .Where(x => x.UserId == null && x.IsDeletable == true).ToLambda());
 
-                FormatOutput.KeyPairs(pubKeys.OrderBy(x => x.CreatedUtc), privKeys);
+                if (pubKeys.Count() == 0)
+                    throw new ConsoleHelpAsException($"  *** Found no public/private key pairs that are deletable ***");
+
+                foreach (var foundPubKey in pubKeys.OrderBy(x => x.CreatedUtc))
+                    FormatOutput.Write(foundPubKey, privKeys.Where(x => x.PublicKeyId == foundPubKey.Id).SingleOrDefault(), true);
+
                 Console.Out.WriteLine();
 
                 if (_deleteAll == true)
                 {
-                    Console.Out.Write("  *** Enter yes to delete all public/private key pair(s) for system *** : ");
+                    Console.Out.Write("  *** Enter 'yes' to delete all public/private key pair(s) for system *** : ");
                     var input = StandardInput.GetInput();
+                    Console.Out.WriteLine();
 
                     if (input.ToLower() == "yes")
                     {

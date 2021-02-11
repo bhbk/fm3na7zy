@@ -1,6 +1,6 @@
 ﻿using Bhbk.Cli.Aurora.IO;
 using Bhbk.Lib.Aurora.Data_EF6.Models;
-using Bhbk.Lib.Aurora.Data_EF6.UnitOfWork;
+using Bhbk.Lib.Aurora.Data_EF6.UnitOfWorks;
 using Bhbk.Lib.CommandLine.IO;
 using Bhbk.Lib.Common.Primitives.Enums;
 using Bhbk.Lib.Common.Services;
@@ -30,16 +30,29 @@ namespace Bhbk.Cli.Aurora.Commands.System
             var env = new ContextService(InstanceContext.DeployedOrLocal);
             _uow = new UnitOfWork(_conf["Databases:AuroraEntities_EF6"], env);
 
-            IsCommand("sys-cred-create", "Create credential for system");
+            IsCommand("sys-amb-create", "Create ambassador credential on system");
 
-            HasRequiredOption("l|login=", "Enter login", arg =>
+            HasRequiredOption("u|upn=", "Enter user principal name that does not exist already", arg =>
             {
-                _credLogin = arg;
+                if (string.IsNullOrEmpty(arg))
+                    throw new ConsoleHelpAsException($"  *** No user principal name given ***");
+
+                var ambassador = _uow.Ambassadors.Get(QueryExpressionFactory.GetQueryExpression<Ambassador_EF>()
+                    .Where(x => x.UserPrincipalName == arg).ToLambda())
+                    .SingleOrDefault();
+
+                if (ambassador != null)
+                    throw new ConsoleHelpAsException($"  *** The user principal name '{arg}' already exists ***");
+
+                _credLogin = arg.ToLower();
             });
 
-            HasOption("p|pass=", "Enter password", arg =>
+            HasOption("p|pass=", "Enter password to use", arg =>
             {
-                _credPass = arg;
+                if (string.IsNullOrEmpty(arg))
+                    throw new ConsoleHelpAsException($"  *** No password given ***");
+
+                _credPass = arg.ToLower();
             });
         }
 
@@ -47,18 +60,6 @@ namespace Bhbk.Cli.Aurora.Commands.System
         {
             try
             {
-                var exists = _uow.Ambassadors.Get(QueryExpressionFactory.GetQueryExpression<Ambassador_EF>()
-                    .Where(x => x.UserName == _credLogin).ToLambda())
-                    .SingleOrDefault();
-
-                if (exists != null)
-                {
-                    Console.Out.WriteLine("  *** The credential entered already exists ***");
-                    FormatOutput.Ambassadors(new List<Ambassador_EF> { exists });
-
-                    return StandardOutput.FondFarewell();
-                }
-
                 if (string.IsNullOrEmpty(_credPass))
                 {
                     Console.Out.Write("  *** Enter credential password to use *** : ");
@@ -76,7 +77,7 @@ namespace Bhbk.Cli.Aurora.Commands.System
                 var ambassador = _uow.Ambassadors.Create(
                     new Ambassador_EF
                     {
-                        UserName = _credLogin,
+                        UserPrincipalName = _credLogin,
                         EncryptedPass = cipherText,
                         IsEnabled = true,
                         IsDeletable = true,
@@ -84,7 +85,7 @@ namespace Bhbk.Cli.Aurora.Commands.System
 
                 _uow.Commit();
 
-                FormatOutput.Ambassadors(new List<Ambassador_EF> { ambassador });
+                FormatOutput.Write(ambassador, true);
 
                 return StandardOutput.FondFarewell();
             }

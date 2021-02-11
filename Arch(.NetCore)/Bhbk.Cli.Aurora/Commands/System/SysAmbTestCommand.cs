@@ -9,16 +9,11 @@ namespace Bhbk.Cli.Aurora.Commands.System
 {
     public class SysAmbTestCommand : ConsoleCommand
     {
-        private string _credDomain, _credLogin, _credPass;
+        private string _credLogin, _credPass;
 
         public SysAmbTestCommand()
         {
-            IsCommand("sys-cred-test", "Test credential for system");
-
-            HasRequiredOption("d|domain=", "Enter domain", arg =>
-            {
-                _credDomain = arg;
-            });
+            IsCommand("sys-amb-test", "Test ambassador credential on system");
 
             HasRequiredOption("l|login=", "Enter login", arg =>
             {
@@ -47,7 +42,7 @@ namespace Bhbk.Cli.Aurora.Commands.System
                  * Get the user token for the specified user, domain, and password using the unmanaged LogonUser method.
                  * The local machine name can be used for the domain name to impersonate a user on this machine.
                  */
-                var safeAccessTokenHandle = UserHelper.GetSafeAccessTokenHandle(_credDomain, _credLogin, _credPass);
+                var safeAccessTokenHandle = UserHelper.GetSafeAccessTokenHandle(null, _credLogin, _credPass);
 
                 Console.Out.WriteLine();
                 Console.Out.WriteLine("Beginning user is " + WindowsIdentity.GetCurrent().Name);

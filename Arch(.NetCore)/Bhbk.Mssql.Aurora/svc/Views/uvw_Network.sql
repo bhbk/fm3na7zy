@@ -1,15 +1,12 @@
-﻿
-CREATE VIEW [svc].[uvw_Network]
+﻿CREATE VIEW [svc].[uvw_Network]
 AS
-SELECT
-	Id
-	,UserId
-	,SequenceId
-	,Address
-	,Action
-	,IsEnabled
-	,IsDeletable
-	,CreatedUtc
-
-FROM
-	[dbo].[tbl_Network]
+SELECT Id,
+	UserId,
+	SequenceId,
+	Address,
+	ActionTypeId,
+	IsEnabled,
+	IsDeletable,
+	Comment,
+	CreatedUtc
+FROM [dbo].[tbl_Network]
