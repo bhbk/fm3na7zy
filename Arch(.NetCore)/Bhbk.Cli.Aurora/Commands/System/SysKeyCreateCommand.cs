@@ -56,6 +56,8 @@ namespace Bhbk.Cli.Aurora.Commands.System
 
             HasOption("p|passphrase=", "Enter private key passphrase", arg =>
             {
+                CheckRequiredArguments();
+
                 _privKeyPass = arg;
             });
         }

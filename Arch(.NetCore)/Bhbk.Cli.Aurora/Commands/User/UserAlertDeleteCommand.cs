@@ -52,6 +52,8 @@ namespace Bhbk.Cli.Aurora.Commands.User
 
             HasOption("a|delete-all", "Delete all alerts for user", arg =>
             {
+                CheckRequiredArguments();
+
                 _deleteAll = true;
             });
         }

@@ -65,18 +65,24 @@ namespace Bhbk.Cli.Aurora.Commands.User
 
             HasOption("s|sequence=", "Enter sequence value", arg =>
             {
+                CheckRequiredArguments();
+
                 if (!Int32.TryParse(arg, out _sequence))
                     throw new ConsoleHelpAsException($"  *** Invalid sequence value ***");
             });
 
             HasOption("n|network=", "Enter CIDR address", arg =>
             {
+                CheckRequiredArguments();
+
                 if (!IPNetwork.TryParse(arg, out _cidr))
                     throw new ConsoleHelpAsException($"  *** Invalid cidr address ***");
             });
 
             HasOption("a|action=", "Enter type of action", arg =>
             {
+                CheckRequiredArguments();
+
                 if (!Enum.TryParse(arg, out _actionType))
                     throw new ConsoleHelpAsException($"  *** Invalid auth type. Options are '{_actionTypeList}' ***");
             });
@@ -91,6 +97,8 @@ namespace Bhbk.Cli.Aurora.Commands.User
 
             HasOption("e|enabled=", "Is enabled", arg =>
             {
+                CheckRequiredArguments();
+
                 _isEnabled = bool.Parse(arg);
             });
         }

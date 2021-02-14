@@ -58,16 +58,22 @@ namespace Bhbk.Cli.Aurora.Commands.User
 
             HasRequiredOption("f|file=", "Enter file for import", arg =>
             {
+                CheckRequiredArguments();
+
                 _path = new FileInfo(arg);
             });
 
             HasOption("c|comment=", "Enter public key comment", arg =>
             {
+                CheckRequiredArguments();
+
                 _pubKeyComment = arg;
             });
 
             HasOption("b|base64", "Is base64 \"authorized_keys\" format", arg =>
             {
+                CheckRequiredArguments();
+
                 _base64 = true;
             });
         }

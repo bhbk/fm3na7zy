@@ -22,6 +22,8 @@ namespace Bhbk.Cli.Aurora.Commands.System
 
             HasOption("p|pass=", "Enter password", arg =>
             {
+                CheckRequiredArguments();
+
                 _credPass = arg;
             });
         }

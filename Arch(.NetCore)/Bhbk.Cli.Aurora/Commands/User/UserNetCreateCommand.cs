@@ -107,6 +107,7 @@ namespace Bhbk.Cli.Aurora.Commands.User
                         ActionTypeId = (int)_actionType,
                         Comment = _comment,
                         IsEnabled = true,
+                        IsDeletable = false,
                     });
 
                 _uow.Commit();

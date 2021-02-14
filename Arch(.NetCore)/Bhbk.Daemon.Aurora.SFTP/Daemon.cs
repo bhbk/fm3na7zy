@@ -790,8 +790,6 @@ namespace Bhbk.Daemon.Aurora.SFTP
                             new List<Expression<Func<Login_EF, object>>>()
                             {
                                 x => x.FileSystems,
-                                x => x.PublicKeys,
-                                x => x.Usage,
                             })
                         .Single();
 
@@ -803,11 +801,12 @@ namespace Bhbk.Daemon.Aurora.SFTP
                             new List<Expression<Func<FileSystemLogin_EF, object>>>()
                             {
                                 x => x.Ambassador,
-                                x => x.SmbAuthType,
                                 x => x.FileSystem,
                                 x => x.FileSystem.Usage,
                                 x => x.Login,
                                 x => x.Login.Usage,
+                                x => x.Login.PrivateKeys,
+                                x => x.Login.PublicKeys,
                             })
                         .Single();
 
@@ -817,14 +816,14 @@ namespace Bhbk.Daemon.Aurora.SFTP
                          * does user have a valid public key...
                          */
 
-                        if (!UserHelper.ValidatePubKey(user.PublicKeys.Where(x => x.IsEnabled).ToList(), e.Key))
+                        if (!UserHelper.ValidatePubKey(fileSystemLogin.Login.PublicKeys.Where(x => x.IsEnabled).ToList(), e.Key))
                         {
                             Log.Warning($"'{callPath}' '{e.UserName}' denied:'public-key'");
 
                             uow.Sessions.Create(
                                 new Session_EF
                                 {
-                                    UserId = user.UserId,
+                                    UserId = fileSystemLogin.Login.UserId,
                                     CallPath = callPath,
                                     Details = "denied:'pubkey-key'",
                                     LocalEndPoint = _localEndPoint,
@@ -841,13 +840,13 @@ namespace Bhbk.Daemon.Aurora.SFTP
 
                         try
                         {
-                            if (user.AuthTypeId == (int)AuthType_E.Identity)
+                            if (fileSystemLogin.Login.AuthTypeId == (int)AuthType_E.Identity)
                             {
                                 /*
                                  * is identity user and password valid...
                                  */
 
-                                var identityUser = admin.User_GetV1(user.UserId.ToString())
+                                var identityUser = admin.User_GetV1(fileSystemLogin.Login.UserId.ToString())
                                     .AsTask().Result;
 
                                 if (identityUser.IsLockedOut
@@ -859,7 +858,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                                     uow.Sessions.Create(
                                         new Session_EF
                                         {
-                                            UserId = user.UserId,
+                                            UserId = fileSystemLogin.Login.UserId,
                                             CallPath = callPath,
                                             Details = $"identity-user:'{identityUser.Email}' denied:'invalid'",
                                             LocalEndPoint = _localEndPoint,
@@ -877,7 +876,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                                  * is identity user in required role(s)...
                                  */
 
-                                var identityRoles = admin.User_GetRolesV1(user.UserId.ToString())
+                                var identityRoles = admin.User_GetRolesV1(fileSystemLogin.Login.UserId.ToString())
                                     .AsTask().Result;
 
                                 if (!identityRoles.Where(x => x.Name == DefaultConstants.RoleForDaemonUsers_Aurora).Any())
@@ -888,7 +887,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                                     uow.Sessions.Create(
                                         new Session_EF
                                         {
-                                            UserId = user.UserId,
+                                            UserId = fileSystemLogin.Login.UserId,
                                             CallPath = callPath,
                                             Details = $"identity-user:'{identityUser.Email}' missing-role:'{DefaultConstants.RoleForDaemonUsers_Aurora}'",
                                             LocalEndPoint = _localEndPoint,
@@ -902,7 +901,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                                     throw new UnauthorizedAccessException();
                                 }
                             }
-                            else if (user.AuthTypeId == (int)AuthType_E.Local)
+                            else if (fileSystemLogin.Login.AuthTypeId == (int)AuthType_E.Local)
                             {
                                 /*
                                  * no need for additional checks if local user and public key valid...
@@ -923,7 +922,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                             uow.Sessions.Create(
                                 new Session_EF
                                 {
-                                    UserId = user.UserId,
+                                    UserId = fileSystemLogin.Login.UserId,
                                     CallPath = callPath,
                                     Details = $"denied:'public-key'",
                                     LocalEndPoint = _localEndPoint,
@@ -947,7 +946,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                         uow.Sessions.Create(
                             new Session_EF
                             {
-                                UserId = user.UserId,
+                                UserId = fileSystemLogin.Login.UserId,
                                 CallPath = callPath,
                                 Details = "accepted:'public-key'",
                                 LocalEndPoint = _localEndPoint,
@@ -958,10 +957,10 @@ namespace Bhbk.Daemon.Aurora.SFTP
 
                         uow.Commit();
 
-                        state.AuthComplete_PublicKey(ServerSession.Current.Id, user.UserId);
+                        state.AuthComplete_PublicKey(ServerSession.Current.Id, fileSystemLogin.Login.UserId);
 
                         if (e.PartiallyAccepted
-                            || !user.IsPasswordRequired)
+                            || !fileSystemLogin.Login.IsPasswordRequired)
                         {
                             if (fileSystemLogin.FileSystem.FileSystemTypeId == (int)FileSystemType_E.SMB)
                             {
@@ -970,7 +969,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                                     uow.Sessions.Create(
                                         new Session_EF
                                         {
-                                            UserId = user.UserId,
+                                            UserId = fileSystemLogin.Login.UserId,
                                             CallPath = callPath,
                                             Details = $"info:'{e.UserName}' " +
                                                 $"mount:'{fileSystemLogin.FileSystem.UncPath}' " +
@@ -988,11 +987,11 @@ namespace Bhbk.Daemon.Aurora.SFTP
                                     uow.Sessions.Create(
                                         new Session_EF
                                         {
-                                            UserId = user.UserId,
+                                            UserId = fileSystemLogin.Login.UserId,
                                             CallPath = callPath,
                                             Details = $"info:'{e.UserName}' " +
                                                 $"mount:'{fileSystemLogin.FileSystem.UncPath}' " +
-                                                $"as:'{user.UserName}' ",
+                                                $"as:'{fileSystemLogin.Login.UserName}' ",
                                             LocalEndPoint = _localEndPoint,
                                             RemoteEndPoint = e.ClientEndPoint.ToString(),
                                             RemoteSoftwareIdentifier = e.ClientSoftwareIdentifier,
@@ -1007,7 +1006,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
 
                             if (e.PartiallyAccepted)
                                 fsProvider = FileSystemFactory.CreateFileSystem(_factory, logger, fileSystemLogin, e.UserName,
-                                    state.GetPassword(ServerSession.Current.Id, user.UserId));
+                                    state.GetPassword(ServerSession.Current.Id, fileSystemLogin.Login.UserId));
                             else
                                 fsProvider = FileSystemFactory.CreateFileSystem(_factory, logger, fileSystemLogin, e.UserName, null);
 
@@ -1026,7 +1025,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                              * persist session count for user so cli has data-point...
                              */
 
-                            user.Usage.SessionsInUse = (short)_server.Sessions
+                            fileSystemLogin.Login.Usage.SessionsInUse = (short)_server.Sessions
                                 .Where(x => x.UserName == e.UserName)
                                 .Count();
 
@@ -1034,13 +1033,13 @@ namespace Bhbk.Daemon.Aurora.SFTP
                              * add session that is about to be created...
                              */
 
-                            user.Usage.SessionsInUse++;
+                            fileSystemLogin.Login.Usage.SessionsInUse++;
 
-                            uow.LoginUsages.Update(user.Usage);
+                            uow.LoginUsages.Update(fileSystemLogin.Login.Usage);
                             uow.Commit();
 
-                            state.AuthComplete_PublicKey(ServerSession.Current.Id, user.UserId);
-                            state.Remove(ServerSession.Current.Id, user.UserId);
+                            state.AuthComplete_PublicKey(ServerSession.Current.Id, fileSystemLogin.Login.UserId);
+                            state.Remove(ServerSession.Current.Id, fileSystemLogin.Login.UserId);
 
                             e.Accept(fsUser);
                             return;
@@ -1050,7 +1049,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                          * authenticate partially if another kind of credential has not been provided yet.
                          */
 
-                        state.AuthComplete_PublicKey(ServerSession.Current.Id, user.UserId);
+                        state.AuthComplete_PublicKey(ServerSession.Current.Id, fileSystemLogin.Login.UserId);
 
                         e.AcceptPartially();
                         return;
@@ -1060,13 +1059,13 @@ namespace Bhbk.Daemon.Aurora.SFTP
                     {
                         try
                         {
-                            if (user.AuthTypeId == (int)AuthType_E.Identity)
+                            if (fileSystemLogin.Login.AuthTypeId == (int)AuthType_E.Identity)
                             {
                                 /*
                                  * is identity user and password valid...
                                  */
 
-                                var identityUser = admin.User_GetV1(user.UserId.ToString())
+                                var identityUser = admin.User_GetV1(fileSystemLogin.Login.UserId.ToString())
                                 .AsTask().Result;
 
                                 var identityGrant = sts.ResourceOwner_GrantV2(
@@ -1094,7 +1093,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                                     uow.Sessions.Create(
                                         new Session_EF
                                         {
-                                            UserId = user.UserId,
+                                            UserId = fileSystemLogin.Login.UserId,
                                             CallPath = callPath,
                                             Details = $"identity-user:'{identityUser.Email}' missing-role:'{DefaultConstants.RoleForDaemonUsers_Aurora}'",
                                             LocalEndPoint = _localEndPoint,
@@ -1108,7 +1107,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                                     throw new UnauthorizedAccessException();
                                 }
                             }
-                            else if (user.AuthTypeId == (int)AuthType_E.Local)
+                            else if (fileSystemLogin.Login.AuthTypeId == (int)AuthType_E.Local)
                             {
                                 /*
                                  * is local user and password valid...
@@ -1135,7 +1134,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                             uow.Sessions.Create(
                                 new Session_EF
                                 {
-                                    UserId = user.UserId,
+                                    UserId = fileSystemLogin.Login.UserId,
                                     CallPath = callPath,
                                     Details = $"denied:'password'",
                                     LocalEndPoint = _localEndPoint,
@@ -1159,7 +1158,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                         uow.Sessions.Create(
                             new Session_EF
                             {
-                                UserId = user.UserId,
+                                UserId = fileSystemLogin.Login.UserId,
                                 CallPath = callPath,
                                 Details = "accepted:'password'",
                                 LocalEndPoint = _localEndPoint,
@@ -1170,10 +1169,10 @@ namespace Bhbk.Daemon.Aurora.SFTP
 
                         uow.Commit();
 
-                        state.AuthComplete_Password(ServerSession.Current.Id, user.UserId, e.Password);
+                        state.AuthComplete_Password(ServerSession.Current.Id, fileSystemLogin.Login.UserId, e.Password);
 
                         if (e.PartiallyAccepted
-                            || !user.IsPublicKeyRequired)
+                            || !fileSystemLogin.Login.IsPublicKeyRequired)
                         {
                             var fs = FileSystemFactory.CreateFileSystem(_factory, logger, fileSystemLogin, e.UserName, e.Password);
 
@@ -1192,7 +1191,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                              * persist session count for user so cli has data-point...
                              */
 
-                            user.Usage.SessionsInUse = (short)_server.Sessions
+                            fileSystemLogin.Login.Usage.SessionsInUse = (short)_server.Sessions
                                 .Where(x => x.UserName == e.UserName)
                                 .Count();
 
@@ -1200,13 +1199,13 @@ namespace Bhbk.Daemon.Aurora.SFTP
                              * add session that is about to be created...
                              */
 
-                            user.Usage.SessionsInUse++;
+                            fileSystemLogin.Login.Usage.SessionsInUse++;
 
-                            uow.LoginUsages.Update(user.Usage);
+                            uow.LoginUsages.Update(fileSystemLogin.Login.Usage);
                             uow.Commit();
 
-                            state.AuthComplete_Password(ServerSession.Current.Id, user.UserId, e.Password);
-                            state.Remove(ServerSession.Current.Id, user.UserId);
+                            state.AuthComplete_Password(ServerSession.Current.Id, fileSystemLogin.Login.UserId, e.Password);
+                            state.Remove(ServerSession.Current.Id, fileSystemLogin.Login.UserId);
 
                             e.Accept(fsUser);
                             return;
@@ -1216,7 +1215,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                          * authenticate partially if another kind of credential has not been provided yet.
                          */
 
-                        state.AuthComplete_Password(ServerSession.Current.Id, user.UserId, e.Password);
+                        state.AuthComplete_Password(ServerSession.Current.Id, fileSystemLogin.Login.UserId, e.Password);
 
                         e.AcceptPartially();
                         return;
@@ -1231,7 +1230,7 @@ namespace Bhbk.Daemon.Aurora.SFTP
                     uow.Sessions.Create(
                         new Session_EF
                         {
-                            UserId = user.UserId,
+                            UserId = fileSystemLogin.Login.UserId,
                             CallPath = callPath,
                             Details = "denied:'default'",
                             LocalEndPoint = _localEndPoint,

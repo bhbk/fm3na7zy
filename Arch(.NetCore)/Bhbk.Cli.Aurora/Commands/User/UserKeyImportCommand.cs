@@ -64,11 +64,15 @@ namespace Bhbk.Cli.Aurora.Commands.User
 
             HasOption("p|passphrase=", "Enter private key password", arg =>
             {
+                CheckRequiredArguments();
+
                 _privKeyPass = arg;
             });
 
             HasOption("c|comment=", "Enter public key comment", arg =>
             {
+                CheckRequiredArguments();
+
                 _pubKeyComment = arg;
             });
         }

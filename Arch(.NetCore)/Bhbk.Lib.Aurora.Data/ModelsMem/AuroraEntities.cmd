@@ -1,0 +1,2 @@
+﻿
+dotnet ef dbcontext scaffold "Data Source=bits.test.ochap.local; Initial Catalog=BhbkAurora; User ID=Sql.BhbkAurora; Password=Pa`$`$word01!" Microsoft.EntityFrameworkCore.SqlServer --context AuroraEntitiesMem --startup-project Bhbk.Cli.Aurora --project Bhbk.Lib.Aurora.Data --output-dir ModelsMem --table "tbl_File" --table "tbl_FileSystemLogin" --table "tbl_FileSystem" --table "tbl_FileSystemUsage" --table "tbl_Folder" --table "tbl_Login" --use-database-names --verbose --no-onconfiguring --force

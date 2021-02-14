@@ -65,7 +65,7 @@ namespace Bhbk.Cli.Aurora.Commands
                     throw new ConsoleHelpAsException($"  *** No user given ***");
 
                 _user = _uow.Logins.Get(QueryExpressionFactory.GetQueryExpression<Login_EF>()
-                    .Where(x => x.UserName == arg && x.IsDeletable == true).ToLambda())
+                    .Where(x => x.UserName == arg).ToLambda())
                     .SingleOrDefault();
 
                 if (_user == null)
@@ -187,6 +187,7 @@ namespace Bhbk.Cli.Aurora.Commands
                         {
                             x => x.Ambassador,
                             x => x.FileSystem,
+                            x => x.FileSystem.Usage,
                             x => x.Login,
                             x => x.SmbAuthType,
                         })

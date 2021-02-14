@@ -22,15 +22,13 @@ namespace Bhbk.Daemon.Aurora.SFTP.Providers
     internal class SmbReadOnlyFileProvider : ReadOnlyFileSystemProvider
     {
         private readonly SafeAccessTokenHandle _userToken;
-        private readonly FileSystem_EF _fileSystem;
-        private readonly Login_EF _user;
+        private FileSystemLogin_EF _fileSystemLogin;
 
         internal SmbReadOnlyFileProvider(FileSystemProviderSettings settings, IServiceScopeFactory factory, FileSystemLogin_EF fileSystemLogin, 
             string identityUser, string identityPass)
             : base(settings)
         {
-            _fileSystem = fileSystemLogin.FileSystem;
-            _user = fileSystemLogin.Login;
+            _fileSystemLogin = fileSystemLogin;
 
             var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
 
@@ -50,7 +48,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Providers
                     }
                     catch (CryptographicException)
                     {
-                        Log.Error($"'{callPath}' '{_user.UserName}' failure to decrypt the encrypted password used by mount credential. " +
+                        Log.Error($"'{callPath}' '{_fileSystemLogin.Login.UserName}' failure to decrypt the encrypted password used by mount credential. " +
                             $"Verify the system secret key is valid and/or reset the password for the mount credential.");
                         throw;
                     }
@@ -79,7 +77,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Providers
                     {
                         case NodeType.File:
                             {
-                                var file = FilePathHelper.PathToFile(_fileSystem.UncPath + path.StringPath);
+                                var file = FilePathHelper.PathToFile(_fileSystemLogin.FileSystem.UncPath + path.StringPath);
 
                                 if (file.Exists)
                                     exists = true;
@@ -88,7 +86,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Providers
 
                         case NodeType.Directory:
                             {
-                                var folder = FilePathHelper.PathToFolder(_fileSystem.UncPath + path.StringPath);
+                                var folder = FilePathHelper.PathToFolder(_fileSystemLogin.FileSystem.UncPath + path.StringPath);
 
                                 if (folder.Exists)
                                     exists = true;
@@ -125,7 +123,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Providers
                     {
                         case NodeType.File:
                             {
-                                var file = FilePathHelper.PathToFile(_fileSystem.UncPath + node.Path.StringPath);
+                                var file = FilePathHelper.PathToFile(_fileSystemLogin.FileSystem.UncPath + node.Path.StringPath);
 
                                 node.SetAttributes(new NodeAttributes(file.Attributes));
                             }
@@ -133,7 +131,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Providers
 
                         case NodeType.Directory:
                             {
-                                var folder = FilePathHelper.PathToFolder(_fileSystem.UncPath + node.Path.StringPath);
+                                var folder = FilePathHelper.PathToFolder(_fileSystemLogin.FileSystem.UncPath + node.Path.StringPath);
 
                                 node.SetAttributes(new NodeAttributes(folder.Attributes));
                             }
@@ -164,14 +162,14 @@ namespace Bhbk.Daemon.Aurora.SFTP.Providers
 
                 WindowsIdentity.RunImpersonated(_userToken, () =>
                 {
-                    var folder = FilePathHelper.PathToFolder(_fileSystem.UncPath + parent.Path.StringPath
+                    var folder = FilePathHelper.PathToFolder(_fileSystemLogin.FileSystem.UncPath + parent.Path.StringPath
                         + Path.DirectorySeparatorChar + name);
 
                     if (folder.Exists)
                         child = new DirectoryNode(name, parent,
                             new NodeTimeInfo(folder.CreationTime, folder.LastAccessTime, folder.LastWriteTime));
 
-                    var file = FilePathHelper.PathToFile(_fileSystem.UncPath + parent.Path.StringPath
+                    var file = FilePathHelper.PathToFile(_fileSystemLogin.FileSystem.UncPath + parent.Path.StringPath
                         + Path.DirectorySeparatorChar + name);
 
                     if (file.Exists)
@@ -202,7 +200,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Providers
 
                 WindowsIdentity.RunImpersonated(_userToken, () =>
                 {
-                    var folderParent = FilePathHelper.PathToFolder(_fileSystem.UncPath + parent.Path.StringPath);
+                    var folderParent = FilePathHelper.PathToFolder(_fileSystemLogin.FileSystem.UncPath + parent.Path.StringPath);
 
                     foreach (var folderPath in Directory.GetDirectories(folderParent.FullName))
                     {
@@ -244,11 +242,11 @@ namespace Bhbk.Daemon.Aurora.SFTP.Providers
 
                 WindowsIdentity.RunImpersonated(_userToken, () =>
                 {
-                    var file = FilePathHelper.PathToFile(_fileSystem.UncPath + node.Path.StringPath);
+                    var file = FilePathHelper.PathToFile(_fileSystemLogin.FileSystem.UncPath + node.Path.StringPath);
 
                     var stream = File.Open(file.FullName, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite);
 
-                    Log.Information($"'{callPath}' '{_user.UserName}' file:'{node.Path}' size:'{stream.Length / 1048576f}MB' at:'{file.FullName}'" +
+                    Log.Information($"'{callPath}' '{_fileSystemLogin.Login.UserName}' file:'{node.Path}' size:'{stream.Length / 1048576f}MB' at:'{file.FullName}'" +
                         $" as:'{WindowsIdentity.GetCurrent().Name}'");
 
                     content = parameters.AccessType == NodeContentAccess.Read
@@ -283,7 +281,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Providers
                     {
                         case NodeType.File:
                             {
-                                var file = FilePathHelper.PathToFile(_fileSystem.UncPath + node.Path.StringPath);
+                                var file = FilePathHelper.PathToFile(_fileSystemLogin.FileSystem.UncPath + node.Path.StringPath);
 
                                 length = file.Length;
                             }
@@ -322,7 +320,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Providers
                     {
                         case NodeType.File:
                             {
-                                var file = FilePathHelper.PathToFile(_fileSystem.UncPath + node.Path.StringPath);
+                                var file = FilePathHelper.PathToFile(_fileSystemLogin.FileSystem.UncPath + node.Path.StringPath);
 
                                 node.SetTimeInfo(new NodeTimeInfo(file.CreationTime, file.LastAccessTime, file.LastWriteTime));
                             }
@@ -330,7 +328,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Providers
 
                         case NodeType.Directory:
                             {
-                                var folder = FilePathHelper.PathToFolder(_fileSystem.UncPath + node.Path.StringPath);
+                                var folder = FilePathHelper.PathToFolder(_fileSystemLogin.FileSystem.UncPath + node.Path.StringPath);
 
                                 node.SetTimeInfo(new NodeTimeInfo(folder.CreationTime, folder.LastAccessTime, folder.LastWriteTime));
                             }

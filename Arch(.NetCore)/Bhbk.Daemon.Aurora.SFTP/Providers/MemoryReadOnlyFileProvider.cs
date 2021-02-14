@@ -21,13 +21,14 @@ namespace Bhbk.Daemon.Aurora.SFTP.Providers
     {
         private readonly IServiceScopeFactory _factory;
         private readonly IUnitOfWorkMem _uowMem;
-        private readonly FileSystem_EF _fileSystem;
-        private LoginMem_EF _userMem;
+        private FileSystemLogin_EF _fileSystemLogin;
+        private FileSystemLoginMem _fileSystemLoginMem;
 
         internal MemoryReadOnlyFileProvider(FileSystemProviderSettings settings, IServiceScopeFactory factory, FileSystemLogin_EF fileSystemLogin)
             : base(settings)
         {
             _factory = factory;
+            _fileSystemLogin = fileSystemLogin;
 
             using (var scope = _factory.CreateScope())
             {
@@ -36,10 +37,9 @@ namespace Bhbk.Daemon.Aurora.SFTP.Providers
                 _uowMem = new UnitOfWorkMem(conf["Databases:AuroraEntities_EFCore_Mem"]);
             }
 
-            _userMem = MemoryProvider.CheckUser(_uowMem, fileSystemLogin.Login);
-            _userMem = MemoryProvider.CheckContent(_uowMem, _userMem);
+            _fileSystemLoginMem = MemoryProvider.CheckFileSystemLogin(_uowMem, fileSystemLogin);
 
-            MemoryProvider.CheckFolder(_uowMem, _userMem);
+            MemoryProvider.CheckFolder(_uowMem, _fileSystemLoginMem);
         }
 
         protected override bool Exists(NodePath path, NodeType nodeType)
@@ -52,7 +52,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Providers
                 {
                     case NodeType.File:
                         {
-                            var fileEntity = MemoryProvider.PathToFile(_uowMem, _userMem, path.StringPath);
+                            var fileEntity = MemoryProvider.PathToFile(_uowMem, _fileSystemLoginMem, path.StringPath);
 
                             if (fileEntity != null)
                                 return true;
@@ -62,7 +62,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Providers
 
                     case NodeType.Directory:
                         {
-                            var folderEntity = MemoryProvider.PathToFolder(_uowMem, _userMem, path.StringPath);
+                            var folderEntity = MemoryProvider.PathToFolder(_uowMem, _fileSystemLoginMem, path.StringPath);
 
                             if (folderEntity != null)
                                 return true;
@@ -94,7 +94,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Providers
                 {
                     case NodeType.File:
                         {
-                            var fileEntity = MemoryProvider.PathToFile(_uowMem, _userMem, node.Path.StringPath);
+                            var fileEntity = MemoryProvider.PathToFile(_uowMem, _fileSystemLoginMem, node.Path.StringPath);
 
                             if (fileEntity.IsReadOnly)
                                 node.SetAttributes(new NodeAttributes(FileAttributes.Normal | FileAttributes.ReadOnly));
@@ -105,7 +105,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Providers
 
                     case NodeType.Directory:
                         {
-                            var folderEntity = MemoryProvider.PathToFolder(_uowMem, _userMem, node.Path.StringPath);
+                            var folderEntity = MemoryProvider.PathToFolder(_uowMem, _fileSystemLoginMem, node.Path.StringPath);
 
                             if (folderEntity.IsReadOnly)
                                 node.SetAttributes(new NodeAttributes(FileAttributes.Directory | FileAttributes.ReadOnly));
@@ -135,10 +135,10 @@ namespace Bhbk.Daemon.Aurora.SFTP.Providers
             {
                 NodeBase child = null;
 
-                var folderParentEntity = MemoryProvider.PathToFolder(_uowMem, _userMem, parent.Path.StringPath);
+                var folderParentEntity = MemoryProvider.PathToFolder(_uowMem, _fileSystemLoginMem, parent.Path.StringPath);
 
-                var folderEntity = _uowMem.Folders.Get(QueryExpressionFactory.GetQueryExpression<FolderMem_EF>()
-                    .Where(x => x.CreatorId == _userMem.UserId && x.ParentId == folderParentEntity.Id && x.VirtualName == name).ToLambda())
+                var folderEntity = _uowMem.Folders.Get(QueryExpressionFactory.GetQueryExpression<FolderMem>()
+                    .Where(x => x.FileSystemId == _fileSystemLogin.FileSystemId && x.ParentId == folderParentEntity.Id && x.VirtualName == name).ToLambda())
                     .SingleOrDefault();
 
                 if (folderEntity != null)
@@ -146,8 +146,8 @@ namespace Bhbk.Daemon.Aurora.SFTP.Providers
                         new NodeTimeInfo(folderEntity.CreatedUtc.UtcDateTime,
                             folderEntity.LastAccessedUtc.UtcDateTime, folderEntity.LastUpdatedUtc.UtcDateTime));
 
-                var fileEntity = _uowMem.Files.Get(QueryExpressionFactory.GetQueryExpression<FileMem_EF>()
-                    .Where(x => x.CreatorId == _userMem.UserId && x.FolderId == folderParentEntity.Id && x.VirtualName == name).ToLambda())
+                var fileEntity = _uowMem.Files.Get(QueryExpressionFactory.GetQueryExpression<FileMem>()
+                    .Where(x => x.FileSystemId == _fileSystemLogin.FileSystemId && x.FolderId == folderParentEntity.Id && x.VirtualName == name).ToLambda())
                     .SingleOrDefault();
 
                 if (fileEntity != null)
@@ -175,22 +175,22 @@ namespace Bhbk.Daemon.Aurora.SFTP.Providers
             {
                 var children = new List<NodeBase>();
 
-                var folderParentEntity = MemoryProvider.PathToFolder(_uowMem, _userMem, parent.Path.StringPath);
+                var folderParentEntity = MemoryProvider.PathToFolder(_uowMem, _fileSystemLoginMem, parent.Path.StringPath);
 
-                var folders = _uowMem.Folders.Get(QueryExpressionFactory.GetQueryExpression<FolderMem_EF>()
-                    .Where(x => x.CreatorId == _userMem.UserId).ToLambda())
+                var folders = _uowMem.Folders.Get(QueryExpressionFactory.GetQueryExpression<FolderMem>()
+                    .Where(x => x.FileSystemId == _fileSystemLogin.FileSystemId && x.ParentId == folderParentEntity.Id).ToLambda())
                     .ToList();
 
-                foreach (var folder in folders.Where(x => x.CreatorId == _userMem.UserId && x.ParentId == folderParentEntity.Id))
+                foreach (var folder in folders)
                     children.Add(new DirectoryNode(folder.VirtualName, parent,
                         new NodeTimeInfo(folder.CreatedUtc.UtcDateTime,
                             folder.LastAccessedUtc.UtcDateTime, folder.LastUpdatedUtc.UtcDateTime)));
 
-                var files = _uowMem.Files.Get(QueryExpressionFactory.GetQueryExpression<FileMem_EF>()
-                    .Where(x => x.CreatorId == _userMem.UserId).ToLambda())
+                var files = _uowMem.Files.Get(QueryExpressionFactory.GetQueryExpression<FileMem>()
+                    .Where(x => x.FileSystemId == _fileSystemLogin.FileSystemId && x.FolderId == folderParentEntity.Id).ToLambda())
                     .ToList();
 
-                foreach (var file in files.Where(x => x.CreatorId == _userMem.UserId && x.FolderId == folderParentEntity.Id))
+                foreach (var file in files)
                     children.Add(new FileNode(file.VirtualName, parent,
                         new NodeTimeInfo(file.CreatedUtc.UtcDateTime,
                             file.LastAccessedUtc.UtcDateTime, file.LastUpdatedUtc.UtcDateTime)));
@@ -219,14 +219,14 @@ namespace Bhbk.Daemon.Aurora.SFTP.Providers
                         {
                             MemoryStream stream = null;
 
-                            var fileEntity = MemoryProvider.PathToFile(_uowMem, _userMem, node.Path.StringPath);
+                            var fileEntity = MemoryProvider.PathToFile(_uowMem, _fileSystemLoginMem, node.Path.StringPath);
 
                             if (fileEntity.Data == null)
                                 stream = new MemoryStream();
                             else
                                 stream = new MemoryStream(fileEntity.Data);
 
-                            Log.Information($"'{callPath}' '{_userMem.UserName}' file:'{node.Path}' size:'{stream.Length / 1048576f}MB' at:memory");
+                            Log.Information($"'{callPath}' '{_fileSystemLogin.Login.UserName}' file:'{node.Path}' size:'{stream.Length / 1048576f}MB' at:memory");
 
                             return parameters.AccessType == NodeContentAccess.Read
                                 ? NodeContent.CreateReadOnlyContent(stream)
@@ -257,7 +257,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Providers
                 {
                     case NodeType.File:
                         {
-                            var fileEntity = MemoryProvider.PathToFile(_uowMem, _userMem, node.Path.StringPath);
+                            var fileEntity = MemoryProvider.PathToFile(_uowMem, _fileSystemLoginMem, node.Path.StringPath);
 
                             if (fileEntity.Data == null)
                                 return 0L;
@@ -291,7 +291,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Providers
                 {
                     case NodeType.File:
                         {
-                            var fileEntity = MemoryProvider.PathToFile(_uowMem, _userMem, node.Path.StringPath);
+                            var fileEntity = MemoryProvider.PathToFile(_uowMem, _fileSystemLoginMem, node.Path.StringPath);
 
                             node.SetTimeInfo(new NodeTimeInfo(fileEntity.CreatedUtc.UtcDateTime,
                                 fileEntity.LastAccessedUtc.UtcDateTime, fileEntity.LastUpdatedUtc.UtcDateTime));
@@ -300,7 +300,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Providers
 
                     case NodeType.Directory:
                         {
-                            var folderEntity = MemoryProvider.PathToFolder(_uowMem, _userMem, node.Path.StringPath);
+                            var folderEntity = MemoryProvider.PathToFolder(_uowMem, _fileSystemLoginMem, node.Path.StringPath);
 
                             node.SetTimeInfo(new NodeTimeInfo(folderEntity.CreatedUtc.UtcDateTime,
                                 folderEntity.LastAccessedUtc.UtcDateTime, folderEntity.LastUpdatedUtc.UtcDateTime));

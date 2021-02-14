@@ -32,6 +32,8 @@ namespace Bhbk.Cli.Aurora.Commands.System
 
             HasOption("d|delete-all", "Delete all networks for system", arg =>
             {
+                CheckRequiredArguments();
+
                 _deleteAll = true;
             });
         }

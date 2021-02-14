@@ -8,7 +8,7 @@
     [RealFileName]    NVARCHAR (260)     NOT NULL,
     [RealFileSize]    BIGINT             NOT NULL,
     [HashTypeId]      INT                NOT NULL,
-    [HashValue]       NVARCHAR (64)      NOT NULL,
+    [HashValue]       NVARCHAR (64)      NULL,
     [IsReadOnly]      BIT                CONSTRAINT [DF_tbl_File_IsReadOnly] DEFAULT ((0)) NOT NULL,
     [CreatedUtc]      DATETIMEOFFSET (7) NOT NULL,
     [LastAccessedUtc] DATETIMEOFFSET (7) NOT NULL,
@@ -20,6 +20,8 @@
     CONSTRAINT [FK_tbl_File_tbl_HashAlgorithmType] FOREIGN KEY ([HashTypeId]) REFERENCES [dbo].[tbl_HashAlgorithmType] ([Id]) ON UPDATE CASCADE,
     CONSTRAINT [FK_tbl_File_tbl_Login] FOREIGN KEY ([CreatorId]) REFERENCES [dbo].[tbl_Login] ([UserId]) ON UPDATE CASCADE
 );
+
+
 
 
 

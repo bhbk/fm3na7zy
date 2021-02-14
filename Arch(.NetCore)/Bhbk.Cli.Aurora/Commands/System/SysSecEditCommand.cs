@@ -72,19 +72,19 @@ namespace Bhbk.Cli.Aurora.Commands.System
                     FormatOutput.Write(ambassador, true);
                 Console.Out.WriteLine();
 
-                Console.Out.WriteLine("  *** Current private key encrypted passwords *** ");
-                foreach (var privKey in privKeys)
-                    FormatOutput.Write(privKey, true);
-                Console.Out.WriteLine();
-
                 Console.Out.WriteLine("  *** Current login encrypted passwords *** ");
                 foreach (var login in logins)
                     FormatOutput.Write(login, true);
                 Console.Out.WriteLine();
 
+                Console.Out.WriteLine("  *** Current private key encrypted passwords *** ");
+                foreach (var privKey in privKeys)
+                    FormatOutput.Write(privKey, true);
+                Console.Out.WriteLine();
+
                 var updatedAmbassadors = UserHelper.ChangeAmbassadorSecrets(ambassadors.ToList(), secretCurrent, secretNew);
-                var updatedPrivKeys = KeyHelper.ChangePrivKeySecrets(privKeys.ToList(), secretCurrent, secretNew);
                 var updatedLogins = UserHelper.ChangeLoginSecrets(logins.ToList(), secretCurrent, secretNew);
+                var updatedPrivKeys = KeyHelper.ChangePrivKeySecrets(privKeys.ToList(), secretCurrent, secretNew);
 
                 Console.Out.Write("  *** Enter yes/no to proceed *** : ");
                 var decision = StandardInput.GetInput();
@@ -97,14 +97,14 @@ namespace Bhbk.Cli.Aurora.Commands.System
                         FormatOutput.Write(updatedAmbassador, true);
                     Console.Out.WriteLine();
 
-                    Console.Out.WriteLine("  *** New private key encrypted passwords *** ");
-                    foreach (var updatedPrivKey in updatedPrivKeys)
-                        FormatOutput.Write(updatedPrivKey, true);
-                    Console.Out.WriteLine();
-
                     Console.Out.WriteLine("  *** New login encrypted passwords *** ");
                     foreach (var updatedLogin in updatedLogins)
                         FormatOutput.Write(updatedLogin, true);
+                    Console.Out.WriteLine();
+
+                    Console.Out.WriteLine("  *** New private key encrypted passwords *** ");
+                    foreach (var updatedPrivKey in updatedPrivKeys)
+                        FormatOutput.Write(updatedPrivKey, true);
                     Console.Out.WriteLine();
 
                     _uow.Ambassadors.Update(updatedAmbassadors);

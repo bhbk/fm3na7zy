@@ -42,18 +42,24 @@ namespace Bhbk.Cli.Aurora.Commands.System
 
             HasOption("u|user=", "Enter user to search for", arg =>
             {
+                CheckRequiredArguments();
+
                 if (!string.IsNullOrEmpty(arg))
                     _user = arg;
             });
 
             HasOption("n|network=", "Enter CIDR address to search for", arg =>
             {
+                CheckRequiredArguments();
+
                 if (!string.IsNullOrEmpty(arg))
                     _network = arg;
             });
 
             HasOption("a|active", "Show only active session(s)", arg =>
             {
+                CheckRequiredArguments();
+
                 if (!string.IsNullOrEmpty(arg))
                     _active = true;
             });

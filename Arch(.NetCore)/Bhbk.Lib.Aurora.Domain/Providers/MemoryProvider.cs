@@ -1,6 +1,7 @@
 ﻿using Bhbk.Lib.Aurora.Data.ModelsMem;
 using Bhbk.Lib.Aurora.Data.UnitOfWorksMem;
 using Bhbk.Lib.Aurora.Data_EF6.Models;
+using Bhbk.Lib.Aurora.Primitives.Enums;
 using Bhbk.Lib.QueryExpression.Extensions;
 using Bhbk.Lib.QueryExpression.Factories;
 using Serilog;
@@ -8,82 +9,116 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 
 namespace Bhbk.Lib.Aurora.Domain.Providers
 {
     public class MemoryProvider
     {
-        public static LoginMem_EF CheckContent(IUnitOfWorkMem uow, LoginMem_EF userMem)
-        {
-            /*
-             * only neeed if in-memory sqlite env is backed by entity framework 6. not needed if backed by ef core.
-             */
-
-            uow.Files.Delete(QueryExpressionFactory.GetQueryExpression<FileMem_EF>()
-                .Where(x => x.CreatorId == userMem.UserId).ToLambda());
-
-            uow.Folders.Delete(QueryExpressionFactory.GetQueryExpression<FolderMem_EF>()
-                .Where(x => x.CreatorId == userMem.UserId).ToLambda());
-
-            uow.Commit();
-
-            return userMem;
-        }
-
-        public static FolderMem_EF CheckFolder(IUnitOfWorkMem uow, LoginMem_EF userMem)
+        public static FileSystemLoginMem CheckFileSystemLogin(IUnitOfWorkMem uow, FileSystemLogin_EF fileSystemLogin)
         {
             var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
 
-            var folderMem = uow.Folders.Get(QueryExpressionFactory.GetQueryExpression<FolderMem_EF>()
-                .Where(x => x.CreatorId == userMem.UserId && x.ParentId == null).ToLambda())
+            var fileSystemMem = uow.FileSystems.Get(QueryExpressionFactory.GetQueryExpression<FileSystemMem>()
+                .Where(x => x.Id == fileSystemLogin.FileSystemId).ToLambda())
                 .SingleOrDefault();
 
-            if (folderMem == null)
+            if (fileSystemMem == null)
             {
-                folderMem = uow.Folders.Create(
-                    new FolderMem_EF
+                fileSystemMem = uow.FileSystems.Create(
+                    new FileSystemMem
                     {
-                        Id = Guid.NewGuid(),
-                        CreatorId = userMem.UserId,
-                        ParentId = null,
-                        VirtualName = string.Empty,
-                        CreatedUtc = DateTime.UtcNow,
-                        IsReadOnly = true,
+                        Id = fileSystemLogin.FileSystemId,
+                        FileSystemTypeId = (int)FileSystemType_E.Memory,
                     });
                 uow.Commit();
 
-                Log.Information($"'{callPath}' '{userMem.UserName}' folder:'/' at:memory");
+                fileSystemMem.Usage = uow.FileSystemUsages.Create(
+                    new FileSystemUsageMem
+                    {
+                        FileSystemId = fileSystemLogin.FileSystemId,
+                        QuotaInBytes = fileSystemLogin.FileSystem.Usage.QuotaInBytes,
+                        QuotaUsedInBytes = 0,
+                    });
+                uow.Commit();
+
+                Log.Information($"'{callPath}' '{fileSystemLogin.FileSystem.Name}' exists at:memory");
             }
 
-            return folderMem;
-        }
-
-        public static LoginMem_EF CheckUser(IUnitOfWorkMem uow, Login_EF user)
-        {
-            var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
-
-            var userMem = uow.Logins.Get(QueryExpressionFactory.GetQueryExpression<LoginMem_EF>()
-                .Where(x => x.UserId == user.UserId).ToLambda())
+            var userMem = uow.Logins.Get(QueryExpressionFactory.GetQueryExpression<LoginMem>()
+                .Where(x => x.UserId == fileSystemLogin.UserId).ToLambda())
                 .SingleOrDefault();
 
             if (userMem == null)
             {
                 userMem = uow.Logins.Create(
-                    new LoginMem_EF
+                    new LoginMem
                     {
-                        UserId = user.UserId,
-                        UserName = user.UserName,
+                        UserId = fileSystemLogin.UserId,
+                        UserName = fileSystemLogin.Login.UserName,
                     });
                 uow.Commit();
 
-                Log.Information($"'{callPath}' '{user.UserName}' exists at:memory");
+                Log.Information($"'{callPath}' '{fileSystemLogin.Login.UserName}' exists at:memory");
             }
 
-            return userMem;
+            var fileSystemLoginMem = uow.FileSystemLogins.Get(QueryExpressionFactory.GetQueryExpression<FileSystemLoginMem>()
+                .Where(x => x.FileSystemId == fileSystemLogin.FileSystemId && x.UserId == fileSystemLogin.UserId).ToLambda())
+                .SingleOrDefault();
+
+            if (fileSystemLoginMem == null)
+            {
+                fileSystemLoginMem = uow.FileSystemLogins.Create(
+                    new FileSystemLoginMem
+                    {
+                        FileSystemId = fileSystemLogin.FileSystemId,
+                        UserId = fileSystemLogin.UserId,
+                    });
+                uow.Commit();
+            }
+
+            return uow.FileSystemLogins.Get(QueryExpressionFactory.GetQueryExpression<FileSystemLoginMem>()
+                .Where(x => x.FileSystemId == fileSystemLogin.FileSystemId && x.UserId == fileSystemLogin.UserId).ToLambda(),
+                    new List<Expression<Func<FileSystemLoginMem, object>>>()
+                    {
+                        x => x.FileSystem,
+                        x => x.FileSystem.Usage,
+                        x => x.User,
+                    })
+                .Single();
         }
 
-        public static FileMem_EF PathToFile(IUnitOfWorkMem uow, LoginMem_EF userMem, string path)
+        public static FolderMem CheckFolder(IUnitOfWorkMem uow, FileSystemLoginMem fileSystemLogin)
+        {
+            var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
+
+            var folderMem = uow.Folders.Get(QueryExpressionFactory.GetQueryExpression<FolderMem>()
+                .Where(x => x.FileSystemId == fileSystemLogin.FileSystem.Id && x.ParentId == null).ToLambda())
+                .SingleOrDefault();
+
+            if (folderMem == null)
+            {
+                folderMem = uow.Folders.Create(
+                    new FolderMem
+                    {
+                        Id = Guid.NewGuid(),
+                        FileSystemId = fileSystemLogin.FileSystemId,
+                        ParentId = null,
+                        VirtualName = string.Empty,
+                        CreatorId = fileSystemLogin.UserId,
+                        CreatedUtc = DateTime.UtcNow,
+                        IsReadOnly = true,
+                    });
+                uow.Commit();
+
+                Log.Information($"'{callPath}' '{fileSystemLogin.User.UserName}' folder:'/' at:memory");
+            }
+
+            return folderMem;
+        }
+
+        public static FileMem PathToFile(IUnitOfWorkMem uow, FileSystemLoginMem fileSystemLogin, string path)
         {
             if (path.FirstOrDefault() == '/')
                 path = path.Substring(1);
@@ -95,22 +130,22 @@ namespace Bhbk.Lib.Aurora.Domain.Providers
             for (int i = 0; i <= pathBits.Count() - 2; i++)
                 folderPath += "/" + pathBits.ElementAt(i);
 
-            var folder = PathToFolder(uow, userMem, folderPath);
+            var folder = PathToFolder(uow, fileSystemLogin, folderPath);
 
-            var file = uow.Files.Get(QueryExpressionFactory.GetQueryExpression<FileMem_EF>()
-                .Where(x => x.CreatorId == userMem.UserId && x.FolderId == folder.Id && x.VirtualName == filePath).ToLambda())
+            var file = uow.Files.Get(QueryExpressionFactory.GetQueryExpression<FileMem>()
+                .Where(x => x.FileSystemId == fileSystemLogin.FileSystem.Id && x.FolderId == folder.Id && x.VirtualName == filePath).ToLambda())
                 .SingleOrDefault();
 
             return file;
         }
 
-        public static FolderMem_EF PathToFolder(IUnitOfWorkMem uow, LoginMem_EF userMem, string path)
+        public static FolderMem PathToFolder(IUnitOfWorkMem uow, FileSystemLoginMem fileSystemLogin, string path)
         {
             if (path.FirstOrDefault() == '/')
                 path = path.Substring(1);
 
-            var folder = uow.Folders.Get(QueryExpressionFactory.GetQueryExpression<FolderMem_EF>()
-                .Where(x => x.CreatorId == userMem.UserId && x.ParentId == null).ToLambda())
+            var folder = uow.Folders.Get(QueryExpressionFactory.GetQueryExpression<FolderMem>()
+                .Where(x => x.FileSystemId == fileSystemLogin.FileSystem.Id && x.ParentId == null).ToLambda())
                 .SingleOrDefault();
 
             if (string.IsNullOrWhiteSpace(path))
@@ -118,21 +153,21 @@ namespace Bhbk.Lib.Aurora.Domain.Providers
 
             foreach (var entry in path.Split("/"))
             {
-                folder = uow.Folders.Get(QueryExpressionFactory.GetQueryExpression<FolderMem_EF>()
-                    .Where(x => x.CreatorId == userMem.UserId && x.ParentId == folder.Id && x.VirtualName == entry).ToLambda())
+                folder = uow.Folders.Get(QueryExpressionFactory.GetQueryExpression<FolderMem>()
+                    .Where(x => x.FileSystemId == fileSystemLogin.FileSystem.Id && x.ParentId == folder.Id && x.VirtualName == entry).ToLambda())
                     .SingleOrDefault();
             };
 
             return folder;
         }
 
-        public static string FileToPath(IUnitOfWorkMem uow, LoginMem_EF userMem, FileMem_EF fileMem)
+        public static string FileToPath(IUnitOfWorkMem uow, FileSystemLoginMem fileSystemLogin, FileMem fileMem)
         {
             var path = string.Empty;
             var paths = new List<string> { };
 
-            var folder = uow.Folders.Get(QueryExpressionFactory.GetQueryExpression<FolderMem_EF>()
-                .Where(x => x.CreatorId == userMem.UserId && x.Id == fileMem.FolderId).ToLambda())
+            var folder = uow.Folders.Get(QueryExpressionFactory.GetQueryExpression<FolderMem>()
+                .Where(x => x.FileSystemId == fileSystemLogin.FileSystem.Id && x.Id == fileMem.FolderId).ToLambda())
                 .Single();
 
             while (folder.ParentId != null)
@@ -149,7 +184,7 @@ namespace Bhbk.Lib.Aurora.Domain.Providers
             return path;
         }
 
-        public static string FolderToPath(IUnitOfWorkMem uow, LoginMem_EF userMem, FolderMem_EF folderMem)
+        public static string FolderToPath(IUnitOfWorkMem uow, FileSystemLoginMem fileSystemLogin, FolderMem folderMem)
         {
             var path = string.Empty;
             var paths = new List<string> { };

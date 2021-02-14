@@ -66,7 +66,6 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_File' does not have a primary k
             
             
             
-            
           </Key>
           <Property Name="Id" Type="uniqueidentifier" Nullable="false" />
           <Property Name="FileSystemId" Type="uniqueidentifier" Nullable="false" />
@@ -77,7 +76,7 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_File' does not have a primary k
           <Property Name="RealFileName" Type="nvarchar" MaxLength="260" Nullable="false" />
           <Property Name="RealFileSize" Type="bigint" Nullable="false" />
           <Property Name="HashTypeId" Type="int" Nullable="false" />
-          <Property Name="HashValue" Type="nvarchar" MaxLength="64" Nullable="false" />
+          <Property Name="HashValue" Type="nvarchar" MaxLength="64" />
           <Property Name="CreatorId" Type="uniqueidentifier" Nullable="false" />
           <Property Name="CreatedUtc" Type="datetimeoffset" Precision="7" Nullable="false" />
           <Property Name="LastAccessedUtc" Type="datetimeoffset" Precision="7" Nullable="false" />
@@ -1161,7 +1160,7 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_SmbAuthType' does not have a pr
           <Property Name="RealFileName" Type="String" MaxLength="260" FixedLength="false" Unicode="true" Nullable="false" />
           <Property Name="RealFileSize" Type="Int64" Nullable="false" />
           <Property Name="HashTypeId" Type="Int32" Nullable="false" />
-          <Property Name="HashValue" Type="String" Nullable="false" MaxLength="64" FixedLength="false" Unicode="true" />
+          <Property Name="HashValue" Type="String" MaxLength="64" FixedLength="false" Unicode="true" />
           <Property Name="CreatorId" Type="Guid" Nullable="false" />
           <Property Name="CreatedUtc" Type="DateTimeOffset" Nullable="false" Precision="7" />
           <Property Name="LastAccessedUtc" Type="DateTimeOffset" Precision="7" Nullable="false" />
@@ -2583,25 +2582,25 @@ warning 6002: The table/view 'BhbkAurora.svc.uvw_SmbAuthType' does not have a pr
             </EntityTypeMapping>
             <EntityTypeMapping TypeName="AuroraModels.Network_EF">
               <ModificationFunctionMapping>
-                <DeleteFunction FunctionName="AuroraModels.Store.usp_Network_Delete" >
+                <DeleteFunction FunctionName="AuroraModels.Store.usp_Network_Delete">
                   <ScalarProperty Name="Id" ParameterName="Id" />
                 </DeleteFunction>
                 <UpdateFunction FunctionName="AuroraModels.Store.usp_Network_Update">
                   <ScalarProperty Name="Comment" ParameterName="Comment" Version="Current" />
-                  <ScalarProperty Name="ActionTypeId" ParameterName="ActionTypeId" Version="Current" />
-                  <ScalarProperty Name="SequenceId" ParameterName="SequenceId" Version="Current" />
                   <ScalarProperty Name="IsDeletable" ParameterName="IsDeletable" Version="Current" />
                   <ScalarProperty Name="IsEnabled" ParameterName="IsEnabled" Version="Current" />
+                  <ScalarProperty Name="ActionTypeId" ParameterName="ActionTypeId" Version="Current" />
                   <ScalarProperty Name="Address" ParameterName="Address" Version="Current" />
+                  <ScalarProperty Name="SequenceId" ParameterName="SequenceId" Version="Current" />
                   <ScalarProperty Name="Id" ParameterName="Id" Version="Current" />
                 </UpdateFunction>
                 <InsertFunction FunctionName="AuroraModels.Store.usp_Network_Insert">
                   <ScalarProperty Name="Comment" ParameterName="Comment" />
-                  <ScalarProperty Name="ActionTypeId" ParameterName="ActionTypeId" />
-                  <ScalarProperty Name="SequenceId" ParameterName="SequenceId" />
                   <ScalarProperty Name="IsDeletable" ParameterName="IsDeletable" />
                   <ScalarProperty Name="IsEnabled" ParameterName="IsEnabled" />
+                  <ScalarProperty Name="ActionTypeId" ParameterName="ActionTypeId" />
                   <ScalarProperty Name="Address" ParameterName="Address" />
+                  <ScalarProperty Name="SequenceId" ParameterName="SequenceId" />
                   <ScalarProperty Name="UserId" ParameterName="UserId" />
                   <ResultBinding Name="Id" ColumnName="Id" />
                   <ResultBinding Name="CreatedUtc" ColumnName="CreatedUtc" />

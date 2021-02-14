@@ -1,4 +1,5 @@
-﻿CREATE VIEW [svc].[uvw_File]
+﻿
+CREATE VIEW [svc].[uvw_File]
 AS
 SELECT Id,
 	FileSystemId,

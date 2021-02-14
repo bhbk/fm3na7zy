@@ -48,12 +48,16 @@ namespace Bhbk.Cli.Aurora.Commands.System
 
             HasOption("k|key=", "Enter config key", arg =>
             {
+                CheckRequiredArguments();
+
                 if (!Enum.TryParse(arg, out _configType))
                     throw new ConsoleHelpAsException($"  *** Invalid config key type. Options are '{_configTypeList}' ***");
             });
 
             HasOption("v|value=", "Enter config value", arg =>
             {
+                CheckRequiredArguments();
+
                 _configValue = arg;
             });
         }

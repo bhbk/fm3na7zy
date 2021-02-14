@@ -43,6 +43,7 @@ namespace Bhbk.Cli.Aurora.Commands.FileSystem
                             x => x.Folders,
                             x => x.Files,
                             x => x.Logins,
+                            x => x.Usage,
                         })
                     .SingleOrDefault();
 

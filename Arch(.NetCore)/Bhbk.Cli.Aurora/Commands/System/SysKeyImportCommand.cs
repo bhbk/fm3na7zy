@@ -38,11 +38,15 @@ namespace Bhbk.Cli.Aurora.Commands.System
 
             HasRequiredOption("f|file=", "Enter file for import", arg =>
             {
+                CheckRequiredArguments();
+
                 _path = new FileInfo(arg);
             });
 
             HasOption("p|pass=", "Enter private key password", arg =>
             {
+                CheckRequiredArguments();
+
                 _privKeyPass = arg;
             });
         }

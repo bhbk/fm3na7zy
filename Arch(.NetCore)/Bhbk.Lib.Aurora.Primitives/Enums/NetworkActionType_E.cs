@@ -4,7 +4,7 @@ namespace Bhbk.Lib.Aurora.Primitives.Enums
 {
     public enum NetworkActionType_E
     {
-        Allow,
-        Deny,
+        Allow = 1,
+        Deny = 2,
     }
 }

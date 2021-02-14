@@ -70,6 +70,7 @@ namespace Bhbk.Cli.Aurora.Commands
                         {
                             x => x.Ambassador,
                             x => x.FileSystem,
+                            x => x.FileSystem.Usage,
                             x => x.Login,
                             x => x.SmbAuthType,
                         })

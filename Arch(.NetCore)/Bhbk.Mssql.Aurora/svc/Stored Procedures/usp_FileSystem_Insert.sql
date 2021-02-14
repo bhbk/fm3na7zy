@@ -38,7 +38,7 @@ INSERT INTO [dbo].[tbl_FileSystemUsage] (
 	)
 VALUES (
 	@Id,
-	1073741824,
+	0,
 	0
 	);
 

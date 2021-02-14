@@ -12,12 +12,12 @@ namespace Bhbk.Lib.Aurora.Domain.Providers
 {
     public class DatabaseProvider
     {
-        public static Folder_EF CheckFolder(IUnitOfWork uow, FileSystem_EF fileSystem, Login_EF user)
+        public static Folder_EF CheckFolder(IUnitOfWork uow, FileSystemLogin_EF fileSystemLogin)
         {
             var callPath = $"{MethodBase.GetCurrentMethod().DeclaringType.Name}.{MethodBase.GetCurrentMethod().Name}";
 
             var folder = uow.Folders.Get(QueryExpressionFactory.GetQueryExpression<Folder_EF>()
-                .Where(x => x.FileSystemId == fileSystem.Id && x.ParentId == null).ToLambda())
+                .Where(x => x.FileSystemId == fileSystemLogin.FileSystem.Id && x.ParentId == null).ToLambda())
                 .SingleOrDefault();
 
             if (folder == null)
@@ -25,22 +25,22 @@ namespace Bhbk.Lib.Aurora.Domain.Providers
                 folder = uow.Folders.Create(
                     new Folder_EF
                     {
-                        FileSystemId = fileSystem.Id,
+                        FileSystemId = fileSystemLogin.FileSystem.Id,
                         ParentId = null,
                         VirtualName = string.Empty,
-                        CreatorId = user.UserId,
+                        CreatorId = fileSystemLogin.Login.UserId,
                         CreatedUtc = DateTime.UtcNow,
                         IsReadOnly = true,
                     });
                 uow.Commit();
 
-                Log.Information($"'{callPath}' '{user.UserName}' folder:'/' at:database");
+                Log.Information($"'{callPath}' '{fileSystemLogin.Login.UserName}' folder:'/' at:database");
             }
 
             return folder;
         }
 
-        public static File_EF PathToFile(IUnitOfWork uow, FileSystem_EF fileSystem, Login_EF user, string path)
+        public static File_EF PathToFile(IUnitOfWork uow, FileSystemLogin_EF fileSystemLogin, string path)
         {
             if (path.FirstOrDefault() == '/')
                 path = path.Substring(1);
@@ -52,22 +52,22 @@ namespace Bhbk.Lib.Aurora.Domain.Providers
             for (int i = 0; i <= pathBits.Count() - 2; i++)
                 folderPath += "/" + pathBits.ElementAt(i);
 
-            var folder = PathToFolder(uow, fileSystem, user, folderPath);
+            var folder = PathToFolder(uow, fileSystemLogin, folderPath);
 
             var file = uow.Files.Get(QueryExpressionFactory.GetQueryExpression<File_EF>()
-                .Where(x => x.FileSystemId == fileSystem.Id && x.FolderId == folder.Id && x.VirtualName == filePath).ToLambda())
+                .Where(x => x.FileSystemId == fileSystemLogin.FileSystem.Id && x.FolderId == folder.Id && x.VirtualName == filePath).ToLambda())
                 .SingleOrDefault();
 
             return file;
         }
 
-        public static Folder_EF PathToFolder(IUnitOfWork uow, FileSystem_EF fileSystem, Login_EF user, string path)
+        public static Folder_EF PathToFolder(IUnitOfWork uow, FileSystemLogin_EF fileSystemLogin, string path)
         {
             if (path.FirstOrDefault() == '/')
                 path = path.Substring(1);
 
             var folder = uow.Folders.Get(QueryExpressionFactory.GetQueryExpression<Folder_EF>()
-                .Where(x => x.FileSystemId == fileSystem.Id && x.ParentId == null).ToLambda())
+                .Where(x => x.FileSystemId == fileSystemLogin.FileSystem.Id && x.ParentId == null).ToLambda())
                 .SingleOrDefault();
 
             if (string.IsNullOrWhiteSpace(path))
@@ -76,20 +76,20 @@ namespace Bhbk.Lib.Aurora.Domain.Providers
             foreach (var entry in path.Split("/"))
             {
                 folder = uow.Folders.Get(QueryExpressionFactory.GetQueryExpression<Folder_EF>()
-                    .Where(x => x.FileSystemId == fileSystem.Id && x.ParentId == folder.Id && x.VirtualName == entry).ToLambda())
+                    .Where(x => x.FileSystemId == fileSystemLogin.FileSystem.Id && x.ParentId == folder.Id && x.VirtualName == entry).ToLambda())
                     .SingleOrDefault();
             };
 
             return folder;
         }
 
-        public static string FileToPath(IUnitOfWork uow, FileSystem_EF fileSystem, Login_EF user, File_EF file)
+        public static string FileToPath(IUnitOfWork uow, FileSystemLogin_EF fileSystemLogin, File_EF file)
         {
             var path = string.Empty;
             var paths = new List<string> { };
 
             var folder = uow.Folders.Get(QueryExpressionFactory.GetQueryExpression<Folder_EF>()
-                .Where(x => x.FileSystemId == fileSystem.Id && x.Id == file.FolderId).ToLambda())
+                .Where(x => x.FileSystemId == fileSystemLogin.FileSystem.Id && x.Id == file.FolderId).ToLambda())
                 .Single();
 
             while (folder.ParentId != null)
@@ -106,7 +106,7 @@ namespace Bhbk.Lib.Aurora.Domain.Providers
             return path;
         }
 
-        public static string FolderToPath(IUnitOfWork uow, FileSystem_EF fileSystem, Login_EF user, Folder_EF folder)
+        public static string FolderToPath(IUnitOfWork uow, FileSystemLogin_EF fileSystemLogin, Folder_EF folder)
         {
             var path = string.Empty;
             var paths = new List<string> { };

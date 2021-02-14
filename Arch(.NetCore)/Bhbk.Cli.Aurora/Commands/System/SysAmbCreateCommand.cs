@@ -49,6 +49,8 @@ namespace Bhbk.Cli.Aurora.Commands.System
 
             HasOption("p|pass=", "Enter password to use", arg =>
             {
+                CheckRequiredArguments();
+
                 if (string.IsNullOrEmpty(arg))
                     throw new ConsoleHelpAsException($"  *** No password given ***");
 

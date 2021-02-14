@@ -1,5 +1,6 @@
 ﻿using Bhbk.Lib.Aurora.Data_EF6.Models;
 using Bhbk.Lib.Aurora.Data_EF6.UnitOfWorks;
+using Bhbk.Lib.Aurora.Domain.Helpers;
 using Bhbk.Lib.Aurora.Domain.Providers;
 using Bhbk.Lib.Aurora.Primitives.Enums;
 using Bhbk.Lib.Common.Primitives;
@@ -19,6 +20,7 @@ using System.Linq.Expressions;
 using System.Net;
 using System.Reflection;
 using System.Security.Cryptography;
+using System.Text;
 using Hashing = Bhbk.Lib.Cryptography.Hashing;
 
 namespace Bhbk.Daemon.Aurora.SFTP.Providers
@@ -26,37 +28,35 @@ namespace Bhbk.Daemon.Aurora.SFTP.Providers
     internal class DatabaseReadWriteFileProvider : ReadWriteFileSystemProvider
     {
         private readonly IServiceScopeFactory _factory;
-        private readonly FileSystem_EF _fileSystem;
-        private Login_EF _user;
+        private FileSystemLogin_EF _fileSystemLogin;
 
         internal DatabaseReadWriteFileProvider(FileSystemProviderSettings settings, IServiceScopeFactory factory, FileSystemLogin_EF fileSystemLogin)
             : base(settings)
         {
             _factory = factory;
-            _fileSystem = fileSystemLogin.FileSystem;
-            _user = fileSystemLogin.Login;
+            _fileSystemLogin = fileSystemLogin;
 
             using (var scope = _factory.CreateScope())
             {
                 var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
 
-                DatabaseProvider.CheckFolder(uow, _fileSystem, _user);
+                DatabaseProvider.CheckFolder(uow, _fileSystemLogin);
             }
 
-            //var folderKeysNode = new DirectoryNode(".ssh", Root);
-            //var fileKeysNode = new FileNode("authorized_keys", folderKeysNode);
+            var folderKeysNode = new DirectoryNode(".ssh", Root);
+            var fileKeysNode = new FileNode("authorized_keys", folderKeysNode);
 
-            //if (!Exists(folderKeysNode.Path, NodeType.Directory))
-            //    CreateDirectory(Root, folderKeysNode);
+            if (!Exists(folderKeysNode.Path, NodeType.Directory))
+                CreateDirectory(Root, folderKeysNode);
 
-            //if (Exists(fileKeysNode.Path, NodeType.File))
-            //    Delete(fileKeysNode);
+            if (Exists(fileKeysNode.Path, NodeType.File))
+                Delete(fileKeysNode);
 
-            //var pubKeysContent = KeyHelper.ExportPubKeyBase64(_user, _user.PublicKeys);
+            var pubKeysContent = KeyHelper.ExportPubKeyBase64(_fileSystemLogin.Login, _fileSystemLogin.Login.PublicKeys);
 
-            //CreateFile(folderKeysNode, fileKeysNode);
-            //SaveContent(fileKeysNode, NodeContent.CreateDelayedWriteContent(
-            //    new MemoryStream(Encoding.UTF8.GetBytes(pubKeysContent.ToString()))));
+            CreateFile(folderKeysNode, fileKeysNode);
+            SaveContent(fileKeysNode, NodeContent.CreateDelayedWriteContent(
+                new MemoryStream(Encoding.UTF8.GetBytes(pubKeysContent.ToString()))));
         }
 
         protected override DirectoryNode CreateDirectory(DirectoryNode parent, DirectoryNode child)
@@ -69,20 +69,20 @@ namespace Bhbk.Daemon.Aurora.SFTP.Providers
                 {
                     var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
 
-                    var folderEntity = DatabaseProvider.PathToFolder(uow, _fileSystem, _user, parent.Path.StringPath);
+                    var folderEntity = DatabaseProvider.PathToFolder(uow, _fileSystemLogin, parent.Path.StringPath);
 
                     uow.Folders.Create(
                         new Folder_EF
                         {
-                            FileSystemId = _fileSystem.Id,
+                            FileSystemId = _fileSystemLogin.FileSystemId,
                             ParentId = folderEntity.Id,
                             VirtualName = child.Name,
-                            CreatorId = _user.UserId,
+                            CreatorId = _fileSystemLogin.UserId,
                             IsReadOnly = false,
                         });
                     uow.Commit();
 
-                    Log.Information($"'{callPath}' '{_user.UserName}' folder:'{child.Path}' at:database");
+                    Log.Information($"'{callPath}' '{_fileSystemLogin.Login.UserName}' folder:'{child.Path}' at:database");
 
                     return child;
                 }
@@ -108,16 +108,19 @@ namespace Bhbk.Daemon.Aurora.SFTP.Providers
                     var conf = scope.ServiceProvider.GetRequiredService<IConfiguration>();
                     var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
 
-                    _user = uow.Logins.Get(QueryExpressionFactory.GetQueryExpression<Login_EF>()
-                        .Where(x => x.UserId == _user.UserId).ToLambda(),
-                            new List<Expression<Func<Login_EF, object>>>()
+                    _fileSystemLogin = uow.FileSystemLogins.Get(QueryExpressionFactory.GetQueryExpression<FileSystemLogin_EF>()
+                        .Where(x => x.FileSystemId == _fileSystemLogin.FileSystemId && x.UserId == _fileSystemLogin.UserId).ToLambda(),
+                            new List<Expression<Func<FileSystemLogin_EF, object>>>()
                             {
-                                x => x.Usage,
+                                x => x.FileSystem,
+                                x => x.FileSystem.Usage,
+                                x => x.Login,
+                                x => x.Login.Usage,
                             })
                         .Single();
 
-                    var folderEntity = DatabaseProvider.PathToFolder(uow, _fileSystem, _user, parent.Path.StringPath);
-                    var folderHash = Strings.GetDirectoryHash($"{_user.UserId}{parent.Path.StringPath}{child.Name}");
+                    var folderEntity = DatabaseProvider.PathToFolder(uow, _fileSystemLogin, parent.Path.StringPath);
+                    var folderHash = Strings.GetDirectoryHash($"{_fileSystemLogin.UserId}{parent.Path.StringPath}{child.Name}");
                     var fileName = Hashing.MD5.Create(Guid.NewGuid().ToString());
 
                     folder = new DirectoryInfo(conf["Storage:UnstructuredData"]
@@ -135,39 +138,32 @@ namespace Bhbk.Daemon.Aurora.SFTP.Providers
                      * all been received. quota enforcement not possible until after exceeded.
                      */
 
-                    if (_fileSystem.Usage.QuotaUsedInBytes >= _fileSystem.Usage.QuotaInBytes)
-                        throw new FileSystemOperationCanceledException($"{callPath} '{_user.UserName}' at:'{child.Path}' size:'{child.Length / 1048576f}MB' " +
-                            $"real-at:'{file.FullName}' quota-maximum:'{_fileSystem.Usage.QuotaInBytes / 1048576f}MB' quota-used:'{_fileSystem.Usage.QuotaUsedInBytes / 1048576f}MB'");
+                    if (_fileSystemLogin.FileSystem.Usage.QuotaUsedInBytes >= _fileSystemLogin.FileSystem.Usage.QuotaInBytes)
+                        throw new FileSystemOperationCanceledException($"{callPath} '{_fileSystemLogin.Login.UserName}' at:'{child.Path}' size:'{child.Length / 1048576f}MB' " +
+                            $"real-at:'{file.FullName}' quota-maximum:'{_fileSystemLogin.FileSystem.Usage.QuotaInBytes / 1048576f}MB' quota-used:'{_fileSystemLogin.FileSystem.Usage.QuotaUsedInBytes / 1048576f}MB'");
 
                     var fileEntity = new File_EF
                     {
-                        FileSystemId = _fileSystem.Id,
+                        FileSystemId = _fileSystemLogin.FileSystemId,
                         FolderId = folderEntity.Id,
                         VirtualName = child.Name,
-                        CreatorId = _user.UserId,
                         RealPath = folderHash,
                         RealFileName = fileName,
+                        HashTypeId = (int)HashAlgorithmType_E.None,
+                        CreatorId = _fileSystemLogin.UserId,
                         IsReadOnly = false,
                     };
 
                     /*
-                     * a zero size file will always be created first regardless of actual size of file. 
+                     * a zero size file will always be created first regardless of actual size of file stream. 
                      */
 
-                    using (var sha256 = new SHA256Managed())
                     using (var fs = new FileStream(file.FullName, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite))
-                    {
-                        var hash = sha256.ComputeHash(fs);
 
-                        fileEntity.RealFileSize = fs.Length;
-                        fileEntity.HashTypeId = (int)HashAlgorithmType_E.SHA256;
-                        fileEntity.HashValue = Strings.GetHexString(hash);
-                    }
-
-                    uow.Files.Create(fileEntity);
+                        uow.Files.Create(fileEntity);
                     uow.Commit();
 
-                    Log.Information($"'{callPath}' '{_user.UserName}' empty-file:'{child.Path}' at:'{file.FullName}'");
+                    Log.Information($"'{callPath}' '{_fileSystemLogin.Login.UserName}' empty-file:'{child.Path}' at:'{file.FullName}'");
 
                     return child;
                 }
@@ -206,40 +202,44 @@ namespace Bhbk.Daemon.Aurora.SFTP.Providers
                     {
                         case NodeType.File:
                             {
-                                var fileEntity = DatabaseProvider.PathToFile(uow, _fileSystem, _user, node.Path.StringPath);
+                                var fileEntity = DatabaseProvider.PathToFile(uow, _fileSystemLogin, node.Path.StringPath);
 
                                 var file = new FileInfo(conf["Storage:UnstructuredData"]
                                     + Path.DirectorySeparatorChar + fileEntity.RealPath
                                     + Path.DirectorySeparatorChar + fileEntity.RealFileName);
 
-                                _user = uow.Logins.Get(QueryExpressionFactory.GetQueryExpression<Login_EF>()
-                                    .Where(x => x.UserId == _user.UserId).ToLambda(),
-                                        new List<Expression<Func<Login_EF, object>>>()
+                                _fileSystemLogin = uow.FileSystemLogins.Get(QueryExpressionFactory.GetQueryExpression<FileSystemLogin_EF>()
+                                    .Where(x => x.FileSystemId == _fileSystemLogin.FileSystemId && x.UserId == _fileSystemLogin.UserId).ToLambda(),
+                                        new List<Expression<Func<FileSystemLogin_EF, object>>>()
                                         {
-                                            x => x.Usage,
+                                            x => x.FileSystem,
+                                            x => x.FileSystem.Usage,
+                                            x => x.Login,
+                                            x => x.Login.Usage,
                                         })
                                     .Single();
 
-                                _fileSystem.Usage.QuotaUsedInBytes -= file.Length;
+                                if (file.Length > 0)
+                                    _fileSystemLogin.FileSystem.Usage.QuotaUsedInBytes -= file.Length;
 
                                 File.Delete(file.FullName);
 
                                 uow.Files.Delete(fileEntity);
-                                uow.FileSystemUsages.Update(_fileSystem.Usage);
+                                uow.FileSystemUsages.Update(_fileSystemLogin.FileSystem.Usage);
                                 uow.Commit();
 
-                                Log.Information($"'{callPath}' '{_user.UserName}' file:'{node.Path}' at:'{file.FullName}'");
+                                Log.Information($"'{callPath}' '{_fileSystemLogin.Login.UserName}' file:'{node.Path}' at:'{file.FullName}'");
                             }
                             break;
 
                         case NodeType.Directory:
                             {
-                                var folderEntity = DatabaseProvider.PathToFolder(uow, _fileSystem, _user, node.Path.StringPath);
+                                var folderEntity = DatabaseProvider.PathToFolder(uow, _fileSystemLogin, node.Path.StringPath);
 
                                 uow.Folders.Delete(folderEntity);
                                 uow.Commit();
 
-                                Log.Information($"'{callPath}' '{_user.UserName}' folder:'{node.Path}' at:database");
+                                Log.Information($"'{callPath}' '{_fileSystemLogin.Login.UserName}' folder:'{node.Path}' at:database");
                             }
                             break;
 
@@ -271,7 +271,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Providers
                     {
                         case NodeType.File:
                             {
-                                var fileEntity = DatabaseProvider.PathToFile(uow, _fileSystem, _user, path.StringPath);
+                                var fileEntity = DatabaseProvider.PathToFile(uow, _fileSystemLogin, path.StringPath);
 
                                 if (fileEntity != null)
                                     return true;
@@ -281,7 +281,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Providers
 
                         case NodeType.Directory:
                             {
-                                var folderEntity = DatabaseProvider.PathToFolder(uow, _fileSystem, _user, path.StringPath);
+                                var folderEntity = DatabaseProvider.PathToFolder(uow, _fileSystemLogin, path.StringPath);
 
                                 if (folderEntity != null)
                                     return true;
@@ -318,7 +318,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Providers
                     {
                         case NodeType.File:
                             {
-                                var fileEntity = DatabaseProvider.PathToFile(uow, _fileSystem, _user, node.Path.StringPath);
+                                var fileEntity = DatabaseProvider.PathToFile(uow, _fileSystemLogin, node.Path.StringPath);
 
                                 if (fileEntity.IsReadOnly)
                                     node.SetAttributes(new NodeAttributes(FileAttributes.Normal | FileAttributes.ReadOnly));
@@ -329,7 +329,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Providers
 
                         case NodeType.Directory:
                             {
-                                var folderEntity = DatabaseProvider.PathToFolder(uow, _fileSystem, _user, node.Path.StringPath);
+                                var folderEntity = DatabaseProvider.PathToFolder(uow, _fileSystemLogin, node.Path.StringPath);
 
                                 if (folderEntity.IsReadOnly)
                                     node.SetAttributes(new NodeAttributes(FileAttributes.Directory | FileAttributes.ReadOnly));
@@ -364,10 +364,10 @@ namespace Bhbk.Daemon.Aurora.SFTP.Providers
                 {
                     var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
 
-                    var folderParentEntity = DatabaseProvider.PathToFolder(uow, _fileSystem, _user, parent.Path.StringPath);
+                    var folderParentEntity = DatabaseProvider.PathToFolder(uow, _fileSystemLogin, parent.Path.StringPath);
 
                     var folderEntity = uow.Folders.Get(QueryExpressionFactory.GetQueryExpression<Folder_EF>()
-                        .Where(x => x.FileSystemId == _fileSystem.Id && x.ParentId == folderParentEntity.Id && x.VirtualName == name).ToLambda())
+                        .Where(x => x.FileSystemId == _fileSystemLogin.FileSystemId && x.ParentId == folderParentEntity.Id && x.VirtualName == name).ToLambda())
                         .SingleOrDefault();
 
                     if (folderEntity != null)
@@ -376,7 +376,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Providers
                                 folderEntity.LastAccessedUtc.UtcDateTime, folderEntity.LastUpdatedUtc.UtcDateTime));
 
                     var fileEntity = uow.Files.Get(QueryExpressionFactory.GetQueryExpression<File_EF>()
-                        .Where(x => x.FileSystemId == _fileSystem.Id && x.FolderId == folderParentEntity.Id && x.VirtualName == name).ToLambda())
+                        .Where(x => x.FileSystemId == _fileSystemLogin.FileSystemId && x.FolderId == folderParentEntity.Id && x.VirtualName == name).ToLambda())
                         .SingleOrDefault();
 
                     if (fileEntity != null)
@@ -409,10 +409,10 @@ namespace Bhbk.Daemon.Aurora.SFTP.Providers
                 {
                     var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
 
-                    var folderParentEntity = DatabaseProvider.PathToFolder(uow, _fileSystem, _user, parent.Path.StringPath);
+                    var folderParentEntity = DatabaseProvider.PathToFolder(uow, _fileSystemLogin, parent.Path.StringPath);
 
                     var folders = uow.Folders.Get(QueryExpressionFactory.GetQueryExpression<Folder_EF>()
-                        .Where(x => x.FileSystemId == _fileSystem.Id && x.ParentId == folderParentEntity.Id).ToLambda())
+                        .Where(x => x.FileSystemId == _fileSystemLogin.FileSystemId && x.ParentId == folderParentEntity.Id).ToLambda())
                         .ToList();
 
                     foreach (var folder in folders)
@@ -421,7 +421,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Providers
                                 folder.LastAccessedUtc.UtcDateTime, folder.LastUpdatedUtc.UtcDateTime)));
 
                     var files = uow.Files.Get(QueryExpressionFactory.GetQueryExpression<File_EF>()
-                        .Where(x => x.FileSystemId == _fileSystem.Id && x.FolderId == folderParentEntity.Id).ToLambda())
+                        .Where(x => x.FileSystemId == _fileSystemLogin.FileSystemId && x.FolderId == folderParentEntity.Id).ToLambda())
                         .ToList();
 
                     foreach (var file in files)
@@ -457,15 +457,18 @@ namespace Bhbk.Daemon.Aurora.SFTP.Providers
                                 var conf = scope.ServiceProvider.GetRequiredService<IConfiguration>();
                                 var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
 
-                                var fileEntity = DatabaseProvider.PathToFile(uow, _fileSystem, _user, node.Path.StringPath);
+                                var fileEntity = DatabaseProvider.PathToFile(uow, _fileSystemLogin, node.Path.StringPath);
 
                                 var file = new FileInfo(conf["Storage:UnstructuredData"]
                                     + Path.DirectorySeparatorChar + fileEntity.RealPath
                                     + Path.DirectorySeparatorChar + fileEntity.RealFileName);
 
-                                var stream = File.Open(file.FullName, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite);
+                                var stream = new MemoryStream();
 
-                                Log.Information($"'{callPath}' '{_user.UserName}' file:'{node.Path}' size:'{stream.Length / 1048576f}MB' at:'{file.FullName}'");
+                                using (var fs = new FileStream(file.FullName, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite))
+                                    fs.CopyTo(stream);
+
+                                Log.Information($"'{callPath}' '{_fileSystemLogin.Login.UserName}' file:'{node.Path}' size:'{stream.Length / 1048576f}MB' at:'{file.FullName}'");
 
                                 return parameters.AccessType == NodeContentAccess.Read
                                     ? NodeContent.CreateReadOnlyContent(stream)
@@ -501,7 +504,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Providers
                             {
                                 var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
 
-                                var fileEntity = DatabaseProvider.PathToFile(uow, _fileSystem, _user, node.Path.StringPath);
+                                var fileEntity = DatabaseProvider.PathToFile(uow, _fileSystemLogin, node.Path.StringPath);
 
                                 return fileEntity.RealFileSize;
                             }
@@ -537,7 +540,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Providers
                     {
                         case NodeType.File:
                             {
-                                var fileEntity = DatabaseProvider.PathToFile(uow, _fileSystem, _user, node.Path.StringPath);
+                                var fileEntity = DatabaseProvider.PathToFile(uow, _fileSystemLogin, node.Path.StringPath);
 
                                 node.SetTimeInfo(new NodeTimeInfo(fileEntity.CreatedUtc.UtcDateTime,
                                     fileEntity.LastAccessedUtc.UtcDateTime, fileEntity.LastUpdatedUtc.UtcDateTime));
@@ -546,7 +549,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Providers
 
                         case NodeType.Directory:
                             {
-                                var folderEntity = DatabaseProvider.PathToFolder(uow, _fileSystem, _user, node.Path.StringPath);
+                                var folderEntity = DatabaseProvider.PathToFolder(uow, _fileSystemLogin, node.Path.StringPath);
 
                                 node.SetTimeInfo(new NodeTimeInfo(folderEntity.CreatedUtc.UtcDateTime,
                                     folderEntity.LastAccessedUtc.UtcDateTime, folderEntity.LastUpdatedUtc.UtcDateTime));
@@ -584,36 +587,36 @@ namespace Bhbk.Daemon.Aurora.SFTP.Providers
                     {
                         case NodeType.File:
                             {
-                                var toBeMovedEntity = DatabaseProvider.PathToFile(uow, _fileSystem, _user, toBeMovedNode.Path.StringPath);
-                                var toBeMovedPath = DatabaseProvider.FileToPath(uow, _fileSystem, _user, toBeMovedEntity);
+                                var toBeMovedEntity = DatabaseProvider.PathToFile(uow, _fileSystemLogin, toBeMovedNode.Path.StringPath);
+                                var toBeMovedPath = DatabaseProvider.FileToPath(uow, _fileSystemLogin, toBeMovedEntity);
 
-                                var targetEntity = DatabaseProvider.PathToFile(uow, _fileSystem, _user, targetDirectory.Path.StringPath);
-                                var targetPath = DatabaseProvider.FileToPath(uow, _fileSystem, _user, targetEntity);
+                                var targetEntity = DatabaseProvider.PathToFile(uow, _fileSystemLogin, targetDirectory.Path.StringPath);
+                                var targetPath = DatabaseProvider.FileToPath(uow, _fileSystemLogin, targetEntity);
 
                                 toBeMovedEntity.FolderId = targetEntity.Id;
 
                                 uow.Files.Update(toBeMovedEntity);
                                 uow.Commit();
 
-                                Log.Information($"'{callPath}' '{_user.UserName}' from-file:'{toBeMovedPath}' to-file:'{targetPath}' at:database");
+                                Log.Information($"'{callPath}' '{_fileSystemLogin.Login.UserName}' from-file:'{toBeMovedPath}' to-file:'{targetPath}' at:database");
 
                                 return new FileNode(toBeMovedNode.Name, targetDirectory);
                             }
 
                         case NodeType.Directory:
                             {
-                                var toBeMovedEntity = DatabaseProvider.PathToFolder(uow, _fileSystem, _user, toBeMovedNode.Path.StringPath);
-                                var toBeMovedPath = DatabaseProvider.FolderToPath(uow, _fileSystem, _user, toBeMovedEntity);
+                                var toBeMovedEntity = DatabaseProvider.PathToFolder(uow, _fileSystemLogin, toBeMovedNode.Path.StringPath);
+                                var toBeMovedPath = DatabaseProvider.FolderToPath(uow, _fileSystemLogin, toBeMovedEntity);
 
-                                var targetEntity = DatabaseProvider.PathToFolder(uow, _fileSystem, _user, targetDirectory.Path.StringPath);
-                                var targetPath = DatabaseProvider.FolderToPath(uow, _fileSystem, _user, targetEntity);
+                                var targetEntity = DatabaseProvider.PathToFolder(uow, _fileSystemLogin, targetDirectory.Path.StringPath);
+                                var targetPath = DatabaseProvider.FolderToPath(uow, _fileSystemLogin, targetEntity);
 
                                 toBeMovedEntity.ParentId = targetEntity.Id;
 
                                 uow.Folders.Update(toBeMovedEntity);
                                 uow.Commit();
 
-                                Log.Information($"'{callPath}' '{_user.UserName}' from-folder:'{toBeMovedPath}' to-folder:'{targetPath}' at:database");
+                                Log.Information($"'{callPath}' '{_fileSystemLogin.Login.UserName}' from-folder:'{toBeMovedPath}' to-folder:'{targetPath}' at:database");
 
                                 return new DirectoryNode(toBeMovedNode.Name, targetDirectory);
                             }
@@ -647,7 +650,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Providers
                     {
                         case NodeType.File:
                             {
-                                var fileEntity = DatabaseProvider.PathToFile(uow, _fileSystem, _user, node.Path.StringPath);
+                                var fileEntity = DatabaseProvider.PathToFile(uow, _fileSystemLogin, node.Path.StringPath);
 
                                 fileEntity.VirtualName = newName;
                                 fileEntity.LastUpdatedUtc = DateTime.UtcNow;
@@ -655,14 +658,14 @@ namespace Bhbk.Daemon.Aurora.SFTP.Providers
                                 uow.Files.Update(fileEntity);
                                 uow.Commit();
 
-                                Log.Information($"'{callPath}' '{_user.UserName}' from-file:'{node.Path}' to-file:'{node.Parent.Path}/{newName}' at:database");
+                                Log.Information($"'{callPath}' '{_fileSystemLogin.Login.UserName}' from-file:'{node.Path}' to-file:'{node.Parent.Path}/{newName}' at:database");
 
                                 return new FileNode(newName, node.Parent);
                             }
 
                         case NodeType.Directory:
                             {
-                                var folderEntity = DatabaseProvider.PathToFolder(uow, _fileSystem, _user, node.Path.StringPath);
+                                var folderEntity = DatabaseProvider.PathToFolder(uow, _fileSystemLogin, node.Path.StringPath);
 
                                 folderEntity.VirtualName = newName;
                                 folderEntity.LastUpdatedUtc = DateTime.UtcNow;
@@ -670,7 +673,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Providers
                                 uow.Folders.Update(folderEntity);
                                 uow.Commit();
 
-                                Log.Information($"'{callPath}' '{_user.UserName}' from-folder:'{node.Path}' to-folder:'{node.Parent.Path}{newName}' at:database");
+                                Log.Information($"'{callPath}' '{_fileSystemLogin.Login.UserName}' from-folder:'{node.Path}' to-folder:'{node.Parent.Path}{newName}' at:database");
 
                                 return new DirectoryNode(newName, node.Parent);
                             }
@@ -708,13 +711,16 @@ namespace Bhbk.Daemon.Aurora.SFTP.Providers
                     {
                         case NodeType.File:
                             {
-                                var fileEntity = DatabaseProvider.PathToFile(uow, _fileSystem, _user, node.Path.StringPath);
+                                var fileEntity = DatabaseProvider.PathToFile(uow, _fileSystemLogin, node.Path.StringPath);
 
-                                _user = uow.Logins.Get(QueryExpressionFactory.GetQueryExpression<Login_EF>()
-                                    .Where(x => x.UserId == _user.UserId).ToLambda(),
-                                        new List<Expression<Func<Login_EF, object>>>()
+                                _fileSystemLogin = uow.FileSystemLogins.Get(QueryExpressionFactory.GetQueryExpression<FileSystemLogin_EF>()
+                                    .Where(x => x.FileSystemId == _fileSystemLogin.FileSystemId && x.UserId == _fileSystemLogin.UserId).ToLambda(),
+                                        new List<Expression<Func<FileSystemLogin_EF, object>>>()
                                         {
-                                            x => x.Usage,
+                                            x => x.FileSystem,
+                                            x => x.FileSystem.Usage,
+                                            x => x.Login,
+                                            x => x.Login.Usage,
                                         })
                                     .Single();
 
@@ -741,13 +747,14 @@ namespace Bhbk.Daemon.Aurora.SFTP.Providers
                                     fileEntity.HashValue = Strings.GetHexString(hash);
                                 }
 
-                                _fileSystem.Usage.QuotaUsedInBytes += content.Length;
+                                if (content.Length > 0)
+                                    _fileSystemLogin.FileSystem.Usage.QuotaUsedInBytes += content.Length;
 
                                 uow.Files.Update(fileEntity);
-                                uow.FileSystemUsages.Update(_fileSystem.Usage);
+                                uow.FileSystemUsages.Update(_fileSystemLogin.FileSystem.Usage);
                                 uow.Commit();
 
-                                Log.Information($"'{callPath}' '{_user.UserName}' file:'{node.Path}' size:'{content.Length / 1048576f}MB' at:'{file.FullName}'");
+                                Log.Information($"'{callPath}' '{_fileSystemLogin.Login.UserName}' file:'{node.Path}' size:'{content.Length / 1048576f}MB' at:'{file.FullName}'");
                             }
                             break;
 

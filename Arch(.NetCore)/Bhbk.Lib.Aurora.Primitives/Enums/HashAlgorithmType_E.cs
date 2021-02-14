@@ -4,6 +4,7 @@ namespace Bhbk.Lib.Aurora.Primitives.Enums
 {
     public enum HashAlgorithmType_E
     {
+        None = 0,
         MD2 = 10,
         MD4 = 11,
         MD5 = 12,

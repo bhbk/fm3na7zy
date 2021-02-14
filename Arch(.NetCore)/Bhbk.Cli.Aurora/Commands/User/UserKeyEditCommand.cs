@@ -59,11 +59,15 @@ namespace Bhbk.Cli.Aurora.Commands.User
 
             HasOption("e|enabled=", "Is enabled", arg =>
             {
+                CheckRequiredArguments();
+
                 _isEnabled = bool.Parse(arg);
             });
 
             HasOption("d|deletable=", "Is deletable", arg =>
             {
+                CheckRequiredArguments();
+
                 _isDeletable = bool.Parse(arg);
             });
         }

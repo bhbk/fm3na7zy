@@ -53,6 +53,8 @@ namespace Bhbk.Cli.Aurora.Commands.User
 
             HasOption("d|delete-all", "Delete all public/private key pairs for user", arg =>
             {
+                CheckRequiredArguments();
+
                 _deleteAll = true;
             });
         }

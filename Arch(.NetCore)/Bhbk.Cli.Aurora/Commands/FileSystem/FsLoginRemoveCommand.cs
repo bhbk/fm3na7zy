@@ -8,7 +8,9 @@ using Bhbk.Lib.QueryExpression.Factories;
 using ManyConsole;
 using Microsoft.Extensions.Configuration;
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 
 namespace Bhbk.Cli.Aurora.Commands
 {
@@ -50,7 +52,7 @@ namespace Bhbk.Cli.Aurora.Commands
                     throw new ConsoleHelpAsException($"  *** No user given ***");
 
                 _user = _uow.Logins.Get(QueryExpressionFactory.GetQueryExpression<Login_EF>()
-                    .Where(x => x.UserName == arg && x.IsDeletable == true).ToLambda())
+                    .Where(x => x.UserName == arg).ToLambda())
                     .SingleOrDefault();
 
                 if (_user == null)
@@ -63,7 +65,15 @@ namespace Bhbk.Cli.Aurora.Commands
             try
             {
                 _fileSystemLogin = _uow.FileSystemLogins.Get(QueryExpressionFactory.GetQueryExpression<FileSystemLogin_EF>()
-                    .Where(x => x.UserId == _user.UserId && x.FileSystemId == _fileSystem.Id).ToLambda())
+                    .Where(x => x.UserId == _user.UserId && x.FileSystemId == _fileSystem.Id).ToLambda(),
+                        new List<Expression<Func<FileSystemLogin_EF, object>>>()
+                        {
+                            x => x.Ambassador,
+                            x => x.FileSystem,
+                            x => x.FileSystem.Usage,
+                            x => x.Login,
+                            x => x.SmbAuthType,
+                        })
                     .SingleOrDefault();
 
                 if (_fileSystemLogin == null)

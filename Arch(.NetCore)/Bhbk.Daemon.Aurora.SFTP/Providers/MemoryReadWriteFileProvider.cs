@@ -1,6 +1,8 @@
-﻿using Bhbk.Lib.Aurora.Data.ModelsMem;
+﻿using AutoMapper;
+using Bhbk.Lib.Aurora.Data.ModelsMem;
 using Bhbk.Lib.Aurora.Data.UnitOfWorksMem;
 using Bhbk.Lib.Aurora.Data_EF6.Models;
+using Bhbk.Lib.Aurora.Domain.Helpers;
 using Bhbk.Lib.Aurora.Domain.Providers;
 using Bhbk.Lib.Common.Primitives;
 using Bhbk.Lib.QueryExpression.Extensions;
@@ -16,6 +18,7 @@ using System.Linq;
 using System.Net;
 using System.Reflection;
 using System.Security.Cryptography;
+using System.Text;
 using Hashing = Bhbk.Lib.Cryptography.Hashing;
 
 namespace Bhbk.Daemon.Aurora.SFTP.Providers
@@ -24,13 +27,14 @@ namespace Bhbk.Daemon.Aurora.SFTP.Providers
     {
         private readonly IServiceScopeFactory _factory;
         private readonly IUnitOfWorkMem _uowMem;
-        private readonly FileSystem_EF _fileSystem;
-        private LoginMem_EF _userMem;
+        private FileSystemLogin_EF _fileSystemLogin;
+        private FileSystemLoginMem _fileSystemLoginMem;
 
         internal MemoryReadWriteFileProvider(FileSystemProviderSettings settings, IServiceScopeFactory factory, FileSystemLogin_EF fileSystemLogin)
             : base(settings)
         {
             _factory = factory;
+            _fileSystemLogin = fileSystemLogin;
 
             using (var scope = _factory.CreateScope())
             {
@@ -39,27 +43,24 @@ namespace Bhbk.Daemon.Aurora.SFTP.Providers
                 _uowMem = new UnitOfWorkMem(conf["Databases:AuroraEntities_EFCore_Mem"]);
             }
 
-            _userMem = MemoryProvider.CheckUser(_uowMem, fileSystemLogin.Login);
-            _userMem = MemoryProvider.CheckContent(_uowMem, _userMem);
-            _userMem.QuotaInBytes = 104857600;
-            _userMem.QuotaUsedInBytes = 0;
+            _fileSystemLoginMem = MemoryProvider.CheckFileSystemLogin(_uowMem, fileSystemLogin);
 
-            MemoryProvider.CheckFolder(_uowMem, _userMem);
+            MemoryProvider.CheckFolder(_uowMem, _fileSystemLoginMem);
 
-            //var folderKeysNode = new DirectoryNode(".ssh", Root);
-            //var fileKeysNode = new FileNode("authorized_keys", folderKeysNode);
+            var folderKeysNode = new DirectoryNode(".ssh", Root);
+            var fileKeysNode = new FileNode("authorized_keys", folderKeysNode);
 
-            //if (!Exists(folderKeysNode.Path, NodeType.Directory))
-            //    CreateDirectory(Root, folderKeysNode);
+            if (!Exists(folderKeysNode.Path, NodeType.Directory))
+                CreateDirectory(Root, folderKeysNode);
 
-            //if (Exists(fileKeysNode.Path, NodeType.File))
-            //    Delete(fileKeysNode);
+            if (Exists(fileKeysNode.Path, NodeType.File))
+                Delete(fileKeysNode);
 
-            //var pubKeysContent = KeyHelper.ExportPubKeyBase64(user, user.PublicKeys);
+            var pubKeysContent = KeyHelper.ExportPubKeyBase64(_fileSystemLogin.Login, _fileSystemLogin.Login.PublicKeys);
 
-            //CreateFile(folderKeysNode, fileKeysNode);
-            //SaveContent(fileKeysNode, NodeContent.CreateDelayedWriteContent(
-            //    new MemoryStream(Encoding.UTF8.GetBytes(pubKeysContent.ToString()))));
+            CreateFile(folderKeysNode, fileKeysNode);
+            SaveContent(fileKeysNode, NodeContent.CreateDelayedWriteContent(
+                new MemoryStream(Encoding.UTF8.GetBytes(pubKeysContent.ToString()))));
         }
 
         protected override DirectoryNode CreateDirectory(DirectoryNode parent, DirectoryNode child)
@@ -68,30 +69,32 @@ namespace Bhbk.Daemon.Aurora.SFTP.Providers
 
             try
             {
-                var folderEntity = MemoryProvider.PathToFolder(_uowMem, _userMem, parent.Path.StringPath);
+                var folderEntity = MemoryProvider.PathToFolder(_uowMem, _fileSystemLoginMem, parent.Path.StringPath);
                 var now = DateTime.UtcNow;
 
                 _uowMem.Folders.Create(
-                    new FolderMem_EF
+                    new FolderMem
                     {
                         Id = Guid.NewGuid(),
-                        CreatorId = _userMem.UserId,
+                        FileSystemId = _fileSystemLoginMem.FileSystemId,
                         ParentId = folderEntity.Id,
                         VirtualName = child.Name,
                         IsReadOnly = false,
+                        CreatorId = _fileSystemLoginMem.UserId,
                         CreatedUtc = now,
                         LastAccessedUtc = now,
                         LastUpdatedUtc = now,
                     });
+
                 _uowMem.Commit();
 
-                Log.Information($"'{callPath}' '{_userMem.UserName}' folder:'{child.Path}' at:memory");
+                Log.Information($"'{callPath}' '{_fileSystemLoginMem.User.UserName}' folder:'{child.Path}' at:memory");
 
                 return child;
             }
             catch (Exception ex)
             {
-                 Log.Fatal(ex, $"'{callPath}' failed on {Dns.GetHostName().ToUpper()}");
+                Log.Fatal(ex, $"'{callPath}' failed on {Dns.GetHostName().ToUpper()}");
                 throw;
             }
         }
@@ -107,21 +110,22 @@ namespace Bhbk.Daemon.Aurora.SFTP.Providers
                  * all been received. quota enforcement not possible until after exceeded.
                  */
 
-                if (_userMem.QuotaUsedInBytes >= _userMem.QuotaInBytes)
-                    throw new FileSystemOperationCanceledException($"'{callPath}' '{_userMem.UserName}' file:'{child.Path}' size:'{child.Length / 1048576f}MB' " +
-                        $"at:memory quota-maximum:'{_userMem.QuotaInBytes / 1048576f}MB' quota-used:'{_userMem.QuotaUsedInBytes / 1048576f}MB'");
+                if (_fileSystemLoginMem.FileSystem.Usage.QuotaUsedInBytes >= _fileSystemLoginMem.FileSystem.Usage.QuotaInBytes)
+                    throw new FileSystemOperationCanceledException($"'{callPath}' '{_fileSystemLoginMem.User.UserName}' file:'{child.Path}' size:'{child.Length / 1048576f}MB' " +
+                        $"at:memory quota-maximum:'{_fileSystemLoginMem.FileSystem.Usage.QuotaInBytes / 1048576f}MB' quota-used:'{_fileSystemLoginMem.FileSystem.Usage.QuotaUsedInBytes / 1048576f}MB'");
 
-                var folderEntity = MemoryProvider.PathToFolder(_uowMem, _userMem, parent.Path.StringPath);
+                var folderEntity = MemoryProvider.PathToFolder(_uowMem, _fileSystemLoginMem, parent.Path.StringPath);
                 var fileName = Hashing.MD5.Create(Guid.NewGuid().ToString());
                 var now = DateTime.UtcNow;
 
-                var fileEntity = new FileMem_EF
+                var fileEntity = new FileMem
                 {
                     Id = Guid.NewGuid(),
-                    CreatorId = _userMem.UserId,
+                    FileSystemId = _fileSystemLoginMem.FileSystemId,
                     FolderId = folderEntity.Id,
                     VirtualName = child.Name,
                     IsReadOnly = false,
+                    CreatorId = _fileSystemLoginMem.User.UserId,
                     CreatedUtc = now,
                     LastAccessedUtc = now,
                     LastUpdatedUtc = now,
@@ -142,7 +146,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Providers
                 _uowMem.Files.Create(fileEntity);
                 _uowMem.Commit();
 
-                Log.Information($"'{callPath}' '{_userMem.UserName}' empty-file:'{child.Path}' at:memory");
+                Log.Information($"'{callPath}' '{_fileSystemLoginMem.User.UserName}' empty-file:'{child.Path}' at:memory");
 
                 return child;
             }
@@ -175,25 +179,26 @@ namespace Bhbk.Daemon.Aurora.SFTP.Providers
                 {
                     case NodeType.File:
                         {
-                            var fileEntity = MemoryProvider.PathToFile(_uowMem, _userMem, node.Path.StringPath);
+                            var fileEntity = MemoryProvider.PathToFile(_uowMem, _fileSystemLoginMem, node.Path.StringPath);
 
-                            _userMem.QuotaUsedInBytes -= fileEntity.Data.Length;
+                            if (fileEntity.Data.Length > 0)
+                                _fileSystemLoginMem.FileSystem.Usage.QuotaUsedInBytes -= fileEntity.Data.Length;
 
                             _uowMem.Files.Delete(fileEntity);
                             _uowMem.Commit();
 
-                            Log.Information($"'{callPath}' '{_userMem.UserName}' file:'{node.Path}' at:memory");
+                            Log.Information($"'{callPath}' '{_fileSystemLoginMem.User.UserName}' file:'{node.Path}' at:memory");
                         }
                         break;
 
                     case NodeType.Directory:
                         {
-                            var folderEntity = MemoryProvider.PathToFolder(_uowMem, _userMem, node.Path.StringPath);
+                            var folderEntity = MemoryProvider.PathToFolder(_uowMem, _fileSystemLoginMem, node.Path.StringPath);
 
                             _uowMem.Folders.Delete(folderEntity);
                             _uowMem.Commit();
 
-                            Log.Information($"'{callPath}' '{_userMem.UserName}' folder:'{node.Path}' at:memory");
+                            Log.Information($"'{callPath}' '{_fileSystemLoginMem.User.UserName}' folder:'{node.Path}' at:memory");
                         }
                         break;
 
@@ -205,7 +210,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Providers
             }
             catch (Exception ex)
             {
-                 Log.Fatal(ex, $"'{callPath}' failed on {Dns.GetHostName().ToUpper()}");
+                Log.Fatal(ex, $"'{callPath}' failed on {Dns.GetHostName().ToUpper()}");
                 throw;
             }
         }
@@ -220,7 +225,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Providers
                 {
                     case NodeType.File:
                         {
-                            var fileEntity = MemoryProvider.PathToFile(_uowMem, _userMem, path.StringPath);
+                            var fileEntity = MemoryProvider.PathToFile(_uowMem, _fileSystemLoginMem, path.StringPath);
 
                             if (fileEntity != null)
                                 return true;
@@ -230,7 +235,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Providers
 
                     case NodeType.Directory:
                         {
-                            var folderEntity = MemoryProvider.PathToFolder(_uowMem, _userMem, path.StringPath);
+                            var folderEntity = MemoryProvider.PathToFolder(_uowMem, _fileSystemLoginMem, path.StringPath);
 
                             if (folderEntity != null)
                                 return true;
@@ -244,7 +249,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Providers
             }
             catch (Exception ex)
             {
-                 Log.Fatal(ex, $"'{callPath}' failed on {Dns.GetHostName().ToUpper()}");
+                Log.Fatal(ex, $"'{callPath}' failed on {Dns.GetHostName().ToUpper()}");
                 throw;
             }
         }
@@ -262,7 +267,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Providers
                 {
                     case NodeType.File:
                         {
-                            var fileEntity = MemoryProvider.PathToFile(_uowMem, _userMem, node.Path.StringPath);
+                            var fileEntity = MemoryProvider.PathToFile(_uowMem, _fileSystemLoginMem, node.Path.StringPath);
 
                             if (fileEntity.IsReadOnly)
                                 node.SetAttributes(new NodeAttributes(FileAttributes.Normal | FileAttributes.ReadOnly));
@@ -273,7 +278,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Providers
 
                     case NodeType.Directory:
                         {
-                            var folderEntity = MemoryProvider.PathToFolder(_uowMem, _userMem, node.Path.StringPath);
+                            var folderEntity = MemoryProvider.PathToFolder(_uowMem, _fileSystemLoginMem, node.Path.StringPath);
 
                             if (folderEntity.IsReadOnly)
                                 node.SetAttributes(new NodeAttributes(FileAttributes.Directory | FileAttributes.ReadOnly));
@@ -290,7 +295,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Providers
             }
             catch (Exception ex)
             {
-                 Log.Fatal(ex, $"'{callPath}' failed on {Dns.GetHostName().ToUpper()}");
+                Log.Fatal(ex, $"'{callPath}' failed on {Dns.GetHostName().ToUpper()}");
                 throw;
             }
         }
@@ -303,10 +308,10 @@ namespace Bhbk.Daemon.Aurora.SFTP.Providers
             {
                 NodeBase child = null;
 
-                var folderParentEntity = MemoryProvider.PathToFolder(_uowMem, _userMem, parent.Path.StringPath);
+                var folderParentEntity = MemoryProvider.PathToFolder(_uowMem, _fileSystemLoginMem, parent.Path.StringPath);
 
-                var folderEntity = _uowMem.Folders.Get(QueryExpressionFactory.GetQueryExpression<FolderMem_EF>()
-                    .Where(x => x.CreatorId == _userMem.UserId && x.ParentId == folderParentEntity.Id && x.VirtualName == name).ToLambda())
+                var folderEntity = _uowMem.Folders.Get(QueryExpressionFactory.GetQueryExpression<FolderMem>()
+                    .Where(x => x.FileSystemId == _fileSystemLogin.FileSystemId && x.ParentId == folderParentEntity.Id && x.VirtualName == name).ToLambda())
                     .SingleOrDefault();
 
                 if (folderEntity != null)
@@ -314,8 +319,8 @@ namespace Bhbk.Daemon.Aurora.SFTP.Providers
                         new NodeTimeInfo(folderEntity.CreatedUtc.UtcDateTime,
                             folderEntity.LastAccessedUtc.UtcDateTime, folderEntity.LastUpdatedUtc.UtcDateTime));
 
-                var fileEntity = _uowMem.Files.Get(QueryExpressionFactory.GetQueryExpression<FileMem_EF>()
-                    .Where(x => x.CreatorId == _userMem.UserId && x.FolderId == folderParentEntity.Id && x.VirtualName == name).ToLambda())
+                var fileEntity = _uowMem.Files.Get(QueryExpressionFactory.GetQueryExpression<FileMem>()
+                    .Where(x => x.FileSystemId == _fileSystemLogin.FileSystemId && x.FolderId == folderParentEntity.Id && x.VirtualName == name).ToLambda())
                     .SingleOrDefault();
 
                 if (fileEntity != null)
@@ -327,7 +332,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Providers
             }
             catch (Exception ex)
             {
-                 Log.Fatal(ex, $"'{callPath}' failed on {Dns.GetHostName().ToUpper()}");
+                Log.Fatal(ex, $"'{callPath}' failed on {Dns.GetHostName().ToUpper()}");
                 throw;
             }
         }
@@ -343,22 +348,22 @@ namespace Bhbk.Daemon.Aurora.SFTP.Providers
             {
                 var children = new List<NodeBase>();
 
-                var folderParentEntity = MemoryProvider.PathToFolder(_uowMem, _userMem, parent.Path.StringPath);
+                var folderParentEntity = MemoryProvider.PathToFolder(_uowMem, _fileSystemLoginMem, parent.Path.StringPath);
 
-                var folders = _uowMem.Folders.Get(QueryExpressionFactory.GetQueryExpression<FolderMem_EF>()
-                    .Where(x => x.CreatorId == _userMem.UserId).ToLambda())
+                var folders = _uowMem.Folders.Get(QueryExpressionFactory.GetQueryExpression<FolderMem>()
+                    .Where(x => x.FileSystemId == _fileSystemLogin.FileSystemId && x.ParentId == folderParentEntity.Id).ToLambda())
                     .ToList();
 
-                foreach (var folder in folders.Where(x => x.CreatorId == _userMem.UserId && x.ParentId == folderParentEntity.Id))
+                foreach (var folder in folders)
                     children.Add(new DirectoryNode(folder.VirtualName, parent,
                         new NodeTimeInfo(folder.CreatedUtc.UtcDateTime,
                             folder.LastAccessedUtc.UtcDateTime, folder.LastUpdatedUtc.UtcDateTime)));
 
-                var files = _uowMem.Files.Get(QueryExpressionFactory.GetQueryExpression<FileMem_EF>()
-                    .Where(x => x.CreatorId == _userMem.UserId).ToLambda())
+                var files = _uowMem.Files.Get(QueryExpressionFactory.GetQueryExpression<FileMem>()
+                    .Where(x => x.FileSystemId == _fileSystemLogin.FileSystemId && x.FolderId == folderParentEntity.Id).ToLambda())
                     .ToList();
 
-                foreach (var file in files.Where(x => x.CreatorId == _userMem.UserId && x.FolderId == folderParentEntity.Id))
+                foreach (var file in files)
                     children.Add(new FileNode(file.VirtualName, parent,
                         new NodeTimeInfo(file.CreatedUtc.UtcDateTime,
                             file.LastAccessedUtc.UtcDateTime, file.LastUpdatedUtc.UtcDateTime)));
@@ -367,7 +372,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Providers
             }
             catch (Exception ex)
             {
-                 Log.Fatal(ex, $"'{callPath}' failed on {Dns.GetHostName().ToUpper()}");
+                Log.Fatal(ex, $"'{callPath}' failed on {Dns.GetHostName().ToUpper()}");
                 throw;
             }
         }
@@ -387,14 +392,14 @@ namespace Bhbk.Daemon.Aurora.SFTP.Providers
                         {
                             MemoryStream stream = null;
 
-                            var fileEntity = MemoryProvider.PathToFile(_uowMem, _userMem, node.Path.StringPath);
+                            var fileEntity = MemoryProvider.PathToFile(_uowMem, _fileSystemLoginMem, node.Path.StringPath);
 
                             if (fileEntity.Data == null)
                                 stream = new MemoryStream();
                             else
                                 stream = new MemoryStream(fileEntity.Data);
 
-                            Log.Information($"'{callPath}' '{_userMem.UserName}' file:'{node.Path}' size:'{stream.Length / 1048576f}MB' at:memory");
+                            Log.Information($"'{callPath}' '{_fileSystemLogin.Login.UserName}' file:'{node.Path}' size:'{stream.Length / 1048576f}MB' at:memory");
 
                             return parameters.AccessType == NodeContentAccess.Read
                                 ? NodeContent.CreateReadOnlyContent(stream)
@@ -407,7 +412,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Providers
             }
             catch (Exception ex)
             {
-                 Log.Fatal(ex, $"'{callPath}' failed on {Dns.GetHostName().ToUpper()}");
+                Log.Fatal(ex, $"'{callPath}' failed on {Dns.GetHostName().ToUpper()}");
                 throw;
             }
         }
@@ -425,7 +430,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Providers
                 {
                     case NodeType.File:
                         {
-                            var fileEntity = MemoryProvider.PathToFile(_uowMem, _userMem, node.Path.StringPath);
+                            var fileEntity = MemoryProvider.PathToFile(_uowMem, _fileSystemLoginMem, node.Path.StringPath);
 
                             if (fileEntity.Data == null)
                                 return 0L;
@@ -444,7 +449,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Providers
             }
             catch (Exception ex)
             {
-                 Log.Fatal(ex, $"'{callPath}' failed on {Dns.GetHostName().ToUpper()}");
+                Log.Fatal(ex, $"'{callPath}' failed on {Dns.GetHostName().ToUpper()}");
                 throw;
             }
         }
@@ -459,7 +464,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Providers
                 {
                     case NodeType.File:
                         {
-                            var fileEntity = MemoryProvider.PathToFile(_uowMem, _userMem, node.Path.StringPath);
+                            var fileEntity = MemoryProvider.PathToFile(_uowMem, _fileSystemLoginMem, node.Path.StringPath);
 
                             node.SetTimeInfo(new NodeTimeInfo(fileEntity.CreatedUtc.UtcDateTime,
                                 fileEntity.LastAccessedUtc.UtcDateTime, fileEntity.LastUpdatedUtc.UtcDateTime));
@@ -468,7 +473,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Providers
 
                     case NodeType.Directory:
                         {
-                            var folderEntity = MemoryProvider.PathToFolder(_uowMem, _userMem, node.Path.StringPath);
+                            var folderEntity = MemoryProvider.PathToFolder(_uowMem, _fileSystemLoginMem, node.Path.StringPath);
 
                             node.SetTimeInfo(new NodeTimeInfo(folderEntity.CreatedUtc.UtcDateTime,
                                 folderEntity.LastAccessedUtc.UtcDateTime, folderEntity.LastUpdatedUtc.UtcDateTime));
@@ -483,7 +488,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Providers
             }
             catch (Exception ex)
             {
-                 Log.Fatal(ex, $"'{callPath}' failed on {Dns.GetHostName().ToUpper()}");
+                Log.Fatal(ex, $"'{callPath}' failed on {Dns.GetHostName().ToUpper()}");
                 throw;
             }
         }
@@ -501,36 +506,36 @@ namespace Bhbk.Daemon.Aurora.SFTP.Providers
                 {
                     case NodeType.File:
                         {
-                            var toBeMovedEntity = MemoryProvider.PathToFile(_uowMem, _userMem, toBeMovedNode.Path.StringPath);
-                            var toBeMovedPath = MemoryProvider.FileToPath(_uowMem, _userMem, toBeMovedEntity);
+                            var toBeMovedEntity = MemoryProvider.PathToFile(_uowMem, _fileSystemLoginMem, toBeMovedNode.Path.StringPath);
+                            var toBeMovedPath = MemoryProvider.FileToPath(_uowMem, _fileSystemLoginMem, toBeMovedEntity);
 
-                            var targetEntity = MemoryProvider.PathToFile(_uowMem, _userMem, targetDirectory.Path.StringPath);
-                            var targetPath = MemoryProvider.FileToPath(_uowMem, _userMem, targetEntity);
+                            var targetEntity = MemoryProvider.PathToFile(_uowMem, _fileSystemLoginMem, targetDirectory.Path.StringPath);
+                            var targetPath = MemoryProvider.FileToPath(_uowMem, _fileSystemLoginMem, targetEntity);
 
                             toBeMovedEntity.FolderId = targetEntity.Id;
 
                             _uowMem.Files.Update(toBeMovedEntity);
                             _uowMem.Commit();
 
-                            Log.Information($"'{callPath}' '{_userMem.UserName}' from-file:'{toBeMovedPath}' to-file:'{targetPath}' at:memory");
+                            Log.Information($"'{callPath}' '{_fileSystemLoginMem.User.UserName}' from-file:'{toBeMovedPath}' to-file:'{targetPath}' at:memory");
 
                             return new FileNode(toBeMovedNode.Name, targetDirectory);
                         }
 
                     case NodeType.Directory:
                         {
-                            var toBeMovedEntity = MemoryProvider.PathToFolder(_uowMem, _userMem, toBeMovedNode.Path.StringPath);
-                            var toBeMovedPath = MemoryProvider.FolderToPath(_uowMem, _userMem, toBeMovedEntity);
+                            var toBeMovedEntity = MemoryProvider.PathToFolder(_uowMem, _fileSystemLoginMem, toBeMovedNode.Path.StringPath);
+                            var toBeMovedPath = MemoryProvider.FolderToPath(_uowMem, _fileSystemLoginMem, toBeMovedEntity);
 
-                            var targetEntity = MemoryProvider.PathToFolder(_uowMem, _userMem, targetDirectory.Path.StringPath);
-                            var targetPath = MemoryProvider.FolderToPath(_uowMem, _userMem, targetEntity);
+                            var targetEntity = MemoryProvider.PathToFolder(_uowMem, _fileSystemLoginMem, targetDirectory.Path.StringPath);
+                            var targetPath = MemoryProvider.FolderToPath(_uowMem, _fileSystemLoginMem, targetEntity);
 
                             toBeMovedEntity.ParentId = targetEntity.Id;
 
                             _uowMem.Folders.Update(toBeMovedEntity);
                             _uowMem.Commit();
 
-                            Log.Information($"'{callPath}' '{_userMem.UserName}' from-folder:'{toBeMovedPath}' to-folder:'{targetPath}' at:memory");
+                            Log.Information($"'{callPath}' '{_fileSystemLoginMem.User.UserName}' from-folder:'{toBeMovedPath}' to-folder:'{targetPath}' at:memory");
 
                             return new DirectoryNode(toBeMovedNode.Name, targetDirectory);
                         }
@@ -541,7 +546,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Providers
             }
             catch (Exception ex)
             {
-                 Log.Fatal(ex, $"'{callPath}' failed on {Dns.GetHostName().ToUpper()}");
+                Log.Fatal(ex, $"'{callPath}' failed on {Dns.GetHostName().ToUpper()}");
                 throw;
             }
         }
@@ -559,7 +564,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Providers
                 {
                     case NodeType.File:
                         {
-                            var fileEntity = MemoryProvider.PathToFile(_uowMem, _userMem, node.Path.StringPath);
+                            var fileEntity = MemoryProvider.PathToFile(_uowMem, _fileSystemLoginMem, node.Path.StringPath);
 
                             fileEntity.VirtualName = newName;
                             fileEntity.LastUpdatedUtc = DateTime.UtcNow;
@@ -567,14 +572,14 @@ namespace Bhbk.Daemon.Aurora.SFTP.Providers
                             _uowMem.Files.Update(fileEntity);
                             _uowMem.Commit();
 
-                            Log.Information($"'{callPath}' '{_userMem.UserName}' from-file:'{node.Path}' to-file:'{node.Parent.Path}/{newName}' at:memory");
+                            Log.Information($"'{callPath}' '{_fileSystemLoginMem.User.UserName}' from-file:'{node.Path}' to-file:'{node.Parent.Path}/{newName}' at:memory");
 
                             return new FileNode(newName, node.Parent);
                         }
 
                     case NodeType.Directory:
                         {
-                            var folderEntity = MemoryProvider.PathToFolder(_uowMem, _userMem, node.Path.StringPath);
+                            var folderEntity = MemoryProvider.PathToFolder(_uowMem, _fileSystemLoginMem, node.Path.StringPath);
 
                             folderEntity.VirtualName = newName;
                             folderEntity.LastUpdatedUtc = DateTime.UtcNow;
@@ -582,7 +587,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Providers
                             _uowMem.Folders.Update(folderEntity);
                             _uowMem.Commit();
 
-                            Log.Information($"'{callPath}' '{_userMem.UserName}' from-folder:'{node.Path}' to-folder:'{node.Parent.Path}{newName}' at:memory");
+                            Log.Information($"'{callPath}' '{_fileSystemLoginMem.User.UserName}' from-folder:'{node.Path}' to-folder:'{node.Parent.Path}{newName}' at:memory");
 
                             return new DirectoryNode(newName, node.Parent);
                         }
@@ -593,7 +598,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Providers
             }
             catch (Exception ex)
             {
-                 Log.Fatal(ex, $"'{callPath}' failed on {Dns.GetHostName().ToUpper()}");
+                Log.Fatal(ex, $"'{callPath}' failed on {Dns.GetHostName().ToUpper()}");
                 throw;
             }
         }
@@ -611,7 +616,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Providers
                 {
                     case NodeType.File:
                         {
-                            var fileEntity = MemoryProvider.PathToFile(_uowMem, _userMem, node.Path.StringPath);
+                            var fileEntity = MemoryProvider.PathToFile(_uowMem, _fileSystemLoginMem, node.Path.StringPath);
 
                             using (var fs = new MemoryStream())
                             {
@@ -627,12 +632,13 @@ namespace Bhbk.Daemon.Aurora.SFTP.Providers
                                 fileEntity.HashValue = Strings.GetHexString(hash);
                             }
 
-                            _userMem.QuotaUsedInBytes += content.Length;
+                            if (content.Length > 0)
+                                _fileSystemLoginMem.FileSystem.Usage.QuotaUsedInBytes += content.Length;
 
                             _uowMem.Files.Update(fileEntity);
                             _uowMem.Commit();
 
-                            Log.Information($"'{callPath}' '{_userMem.UserName}' file:'{node.Path}' size:'{content.Length / 1048576f}MB' at:memory");
+                            Log.Information($"'{callPath}' '{_fileSystemLoginMem.User.UserName}' file:'{node.Path}' size:'{content.Length / 1048576f}MB' at:memory");
                         }
                         break;
 
@@ -644,7 +650,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Providers
             }
             catch (Exception ex)
             {
-                 Log.Fatal(ex, $"'{callPath}' failed on {Dns.GetHostName().ToUpper()}");
+                Log.Fatal(ex, $"'{callPath}' failed on {Dns.GetHostName().ToUpper()}");
                 throw;
             }
         }
@@ -671,7 +677,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Providers
             }
             catch (Exception ex)
             {
-                 Log.Fatal(ex, $"'{callPath}' failed on {Dns.GetHostName().ToUpper()}");
+                Log.Fatal(ex, $"'{callPath}' failed on {Dns.GetHostName().ToUpper()}");
                 throw;
             }
         }
@@ -698,7 +704,7 @@ namespace Bhbk.Daemon.Aurora.SFTP.Providers
             }
             catch (Exception ex)
             {
-                 Log.Fatal(ex, $"'{callPath}' failed on {Dns.GetHostName().ToUpper()}");
+                Log.Fatal(ex, $"'{callPath}' failed on {Dns.GetHostName().ToUpper()}");
                 throw;
             }
         }

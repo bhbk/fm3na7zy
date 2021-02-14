@@ -61,6 +61,8 @@ namespace Bhbk.Cli.Aurora.Commands.User
 
             HasOption("e|email=", "Enter email address for recipient", arg =>
             {
+                CheckRequiredArguments();
+
                 if (!string.IsNullOrEmpty(arg))
                     _emailAddress = arg;
 
@@ -70,6 +72,8 @@ namespace Bhbk.Cli.Aurora.Commands.User
 
             HasOption("t|text=", "Enter phone number (e.164 format) for recipient", arg =>
             {
+                CheckRequiredArguments();
+
                 if (!string.IsNullOrEmpty(arg))
                     _textAddress = arg;
 
@@ -97,16 +101,22 @@ namespace Bhbk.Cli.Aurora.Commands.User
 
             HasOption("1|on-delete", "Is sent when delete happens", arg =>
             {
+                CheckRequiredArguments();
+
                 _delete = true;
             });
 
             HasOption("2|on-download", "Is sent when download happens", arg =>
             {
+                CheckRequiredArguments();
+
                 _download = true;
             });
 
             HasOption("3|on-upload", "Is sent when upload happens", arg =>
             {
+                CheckRequiredArguments();
+
                 _upload = true;
             });
         }

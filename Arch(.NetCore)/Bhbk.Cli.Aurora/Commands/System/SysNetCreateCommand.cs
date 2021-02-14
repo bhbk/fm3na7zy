@@ -10,7 +10,6 @@ using Bhbk.Lib.QueryExpression.Factories;
 using ManyConsole;
 using Microsoft.Extensions.Configuration;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 
@@ -57,6 +56,8 @@ namespace Bhbk.Cli.Aurora.Commands.System
 
             HasOption("c|comment=", "Enter comment", arg =>
             {
+                CheckRequiredArguments();
+
                 if (!string.IsNullOrEmpty(arg))
                     _comment = arg;
             });

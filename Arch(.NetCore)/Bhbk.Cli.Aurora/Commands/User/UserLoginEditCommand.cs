@@ -62,6 +62,8 @@ namespace Bhbk.Cli.Aurora.Commands.User
 
             HasOption("a|alias=", "Enter alias", arg =>
             {
+                CheckRequiredArguments();
+
                 if (string.IsNullOrEmpty(arg))
                     throw new ConsoleHelpAsException($"  *** No alias given ***");
 
@@ -70,16 +72,22 @@ namespace Bhbk.Cli.Aurora.Commands.User
 
             HasOption("k|publickey=", "Require public key for authentication", arg =>
             {
+                CheckRequiredArguments();
+
                 _user.IsPublicKeyRequired = bool.Parse(arg);
             });
 
             HasOption("p|password=", "Require password for authentication", arg =>
             {
+                CheckRequiredArguments();
+
                 _user.IsPasswordRequired = bool.Parse(arg);
             });
 
             HasOption("s|session=", "Enter session maximum", arg =>
             {
+                CheckRequiredArguments();
+
                 if (string.IsNullOrEmpty(arg))
                     throw new ConsoleHelpAsException($"  *** No session maximum given ***");
 
@@ -96,11 +104,15 @@ namespace Bhbk.Cli.Aurora.Commands.User
 
             HasOption("e|enabled=", "Is user enabled", arg =>
             {
+                CheckRequiredArguments();
+
                 _isEnabled = bool.Parse(arg);
             });
 
             HasOption("d|deletable=", "Is user deletable", arg =>
             {
+                CheckRequiredArguments();
+
                 _isDeletable = bool.Parse(arg);
             });
         }

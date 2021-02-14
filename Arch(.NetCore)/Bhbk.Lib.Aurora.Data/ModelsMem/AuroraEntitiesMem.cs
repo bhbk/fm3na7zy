@@ -17,83 +17,132 @@ namespace Bhbk.Lib.Aurora.Data.ModelsMem
         {
         }
 
-        public virtual DbSet<FileMem_EF> FileMem { get; set; }
-        public virtual DbSet<FolderMem_EF> FolderMem { get; set; }
-        public virtual DbSet<LoginMem_EF> LoginMem { get; set; }
+        public virtual DbSet<FileMem> tbl_Files { get; set; }
+        public virtual DbSet<FileSystemMem> tbl_FileSystems { get; set; }
+        public virtual DbSet<FileSystemLoginMem> tbl_FileSystemLogins { get; set; }
+        public virtual DbSet<FileSystemUsageMem> tbl_FileSystemUsages { get; set; }
+        public virtual DbSet<FolderMem> tbl_Folders { get; set; }
+        public virtual DbSet<LoginMem> tbl_Logins { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.HasAnnotation("Relational:Collation", "SQL_Latin1_General_CP1_CI_AS");
 
-            modelBuilder.Entity<FileMem_EF>(entity =>
+            modelBuilder.Entity<FileMem>(entity =>
             {
-                entity.ToTable("FileMem");
+                entity.ToTable("tbl_File");
 
-                entity.HasIndex(e => e.Id, "IX_FileMem")
+                entity.HasIndex(e => e.Id, "IX_tbl_File")
                     .IsUnique();
 
                 entity.Property(e => e.Id).ValueGeneratedNever();
 
-                entity.Property(e => e.HashValue)
-                    .IsRequired()
-                    .HasMaxLength(64);
+                entity.Property(e => e.HashValue).HasMaxLength(64);
 
                 entity.Property(e => e.VirtualName)
                     .IsRequired()
                     .HasMaxLength(260);
 
+                entity.HasOne(d => d.Creator)
+                    .WithMany(p => p.FilesCreated)
+                    .HasForeignKey(d => d.CreatorId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_tbl_File_tbl_Login");
+
+                entity.HasOne(d => d.FileSystem)
+                    .WithMany(p => p.Files)
+                    .HasForeignKey(d => d.FileSystemId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_tbl_File_tbl_FileSystem");
+
                 entity.HasOne(d => d.Folder)
                     .WithMany(p => p.Files)
                     .HasForeignKey(d => d.FolderId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_FileMem_FolderID");
-
-                entity.HasOne(d => d.User)
-                    .WithMany(p => p.Files)
-                    .HasForeignKey(d => d.CreatorId)
-                    .HasConstraintName("FK_FileMem_IdentityID");
+                    .HasConstraintName("FK_tbl_File_tbl_Folder");
             });
 
-            modelBuilder.Entity<FolderMem_EF>(entity =>
+            modelBuilder.Entity<FileSystemMem>(entity =>
             {
-                entity.ToTable("FolderMem");
+                entity.ToTable("tbl_FileSystem");
 
-                entity.HasIndex(e => e.Id, "IX_FolderMem")
+                entity.Property(e => e.Id).ValueGeneratedNever();
+            });
+
+            modelBuilder.Entity<FileSystemLoginMem>(entity =>
+            {
+                entity.HasKey(e => new { e.UserId, e.FileSystemId });
+
+                entity.ToTable("tbl_FileSystemLogin");
+
+                entity.HasIndex(e => new { e.UserId, e.FileSystemId }, "IX_tbl_FileSystemLogin")
+                    .IsUnique();
+
+                entity.HasOne(d => d.FileSystem)
+                    .WithMany(p => p.Logins)
+                    .HasForeignKey(d => d.FileSystemId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_tbl_FileSystemLogin_tbl_FileSystem");
+            });
+
+            modelBuilder.Entity<FileSystemUsageMem>(entity =>
+            {
+                entity.HasKey(e => e.FileSystemId);
+
+                entity.ToTable("tbl_FileSystemUsage");
+
+                entity.Property(e => e.FileSystemId).ValueGeneratedNever();
+
+                entity.HasOne(d => d.FileSystem)
+                    .WithOne(p => p.Usage)
+                    .HasForeignKey<FileSystemUsageMem>(d => d.FileSystemId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_tbl_FileSystemUsage_tbl_FileSystem");
+            });
+
+            modelBuilder.Entity<FolderMem>(entity =>
+            {
+                entity.ToTable("tbl_Folder");
+
+                entity.HasIndex(e => e.Id, "IX_tbl_Folder")
                     .IsUnique();
 
                 entity.Property(e => e.Id).ValueGeneratedNever();
 
-                entity.Property(e => e.VirtualName)
-                    .IsRequired()
-                    .IsUnicode(false);
+                entity.Property(e => e.VirtualName).IsRequired();
 
-                entity.HasOne(d => d.User)
-                    .WithMany(p => p.Folders)
+                entity.HasOne(d => d.Creator)
+                    .WithMany(p => p.FoldersCreated)
                     .HasForeignKey(d => d.CreatorId)
-                    .HasConstraintName("FK_FolderMem_IdentityID");
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_tbl_Folder_tbl_Login");
+
+                entity.HasOne(d => d.FileSystem)
+                    .WithMany(p => p.Folders)
+                    .HasForeignKey(d => d.FileSystemId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_tbl_Folder_tbl_FileSystem");
 
                 entity.HasOne(d => d.Parent)
                     .WithMany(p => p.Folders)
                     .HasForeignKey(d => d.ParentId)
-                    .HasConstraintName("FK_FolderMem_ParentID");
+                    .HasConstraintName("FK_tbl_Folder_tbl_Folder_Parent");
             });
 
-            modelBuilder.Entity<LoginMem_EF>(entity =>
+            modelBuilder.Entity<LoginMem>(entity =>
             {
-                entity.HasKey(e => e.UserId)
-                    .HasName("PK_LoginMem");
+                entity.HasKey(e => e.UserId);
 
-                entity.ToTable("LoginMem");
+                entity.ToTable("tbl_Login");
 
-                entity.HasIndex(e => e.UserId, "IX_LoginMem")
+                entity.HasIndex(e => e.UserId, "IX_tbl_Login")
                     .IsUnique();
 
                 entity.Property(e => e.UserId).ValueGeneratedNever();
 
                 entity.Property(e => e.UserName)
                     .IsRequired()
-                    .HasMaxLength(128)
-                    .IsUnicode(false);
+                    .HasMaxLength(128);
             });
 
             OnModelCreatingPartial(modelBuilder);

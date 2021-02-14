@@ -52,6 +52,8 @@ namespace Bhbk.Cli.Aurora.Commands.User
 
             HasOption("a|delete-all", "Delete all networks for user", arg =>
             {
+                CheckRequiredArguments();
+
                 _deleteAll = true;
             });
         }
@@ -66,7 +68,8 @@ namespace Bhbk.Cli.Aurora.Commands.User
                     FormatOutput.Write(network, true);
                 Console.Out.WriteLine();
 
-                if (_deleteAll == true)
+                if (exists.Count() > 0
+                    && _deleteAll == true)
                 {
                     Console.Out.Write("  *** Enter 'yes' to delete all networks for user *** : ");
                     var input = StandardInput.GetInput();
@@ -78,7 +81,7 @@ namespace Bhbk.Cli.Aurora.Commands.User
                         _uow.Commit();
                     }
                 }
-                else
+                else if (exists.Count() > 0)
                 {
                     Console.Out.Write("  *** Enter GUID of network for user to delete *** : ");
                     var input = Guid.Parse(StandardInput.GetInput());

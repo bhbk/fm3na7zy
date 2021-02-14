@@ -14,9 +14,12 @@ namespace Bhbk.Lib.Aurora.Data.UnitOfWorksMem
         private readonly AuroraEntitiesMem _context;
         private readonly ILoggerFactory _logger;
         public InstanceContext InstanceType { get; private set; }
-        public IGenericRepository<FileMem_EF> Files { get; private set; }
-        public IGenericRepository<FolderMem_EF> Folders { get; private set; }
-        public IGenericRepository<LoginMem_EF> Logins { get; private set; }
+        public IGenericRepository<FileMem> Files { get; private set; }
+        public IGenericRepository<FileSystemMem> FileSystems { get; private set; }
+        public IGenericRepository<FileSystemLoginMem> FileSystemLogins { get; private set; }
+        public IGenericRepository<FileSystemUsageMem> FileSystemUsages { get; private set; }
+        public IGenericRepository<FolderMem> Folders { get; private set; }
+        public IGenericRepository<LoginMem> Logins { get; private set; }
 
         public UnitOfWorkMem(string connection)
             : this(connection, new ContextService(InstanceContext.DeployedOrLocal)) { }
@@ -78,9 +81,12 @@ namespace Bhbk.Lib.Aurora.Data.UnitOfWorksMem
 
             InstanceType = env.InstanceType;
 
-            Files = new GenericRepository<FileMem_EF>(_context);
-            Folders = new GenericRepository<FolderMem_EF>(_context);
-            Logins = new GenericRepository<LoginMem_EF>(_context);
+            Files = new GenericRepository<FileMem>(_context);
+            FileSystems = new GenericRepository<FileSystemMem>(_context);
+            FileSystemLogins = new GenericRepository<FileSystemLoginMem>(_context);
+            FileSystemUsages = new GenericRepository<FileSystemUsageMem>(_context);
+            Folders = new GenericRepository<FolderMem>(_context);
+            Logins = new GenericRepository<LoginMem>(_context);
         }
 
         public void Commit()
