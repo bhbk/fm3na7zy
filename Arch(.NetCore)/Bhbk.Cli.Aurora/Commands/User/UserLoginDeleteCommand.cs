@@ -11,6 +11,7 @@ using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 
 namespace Bhbk.Cli.Aurora.Commands.User
 {
@@ -37,7 +38,17 @@ namespace Bhbk.Cli.Aurora.Commands.User
                     throw new ConsoleHelpAsException($"  *** No user name given ***");
 
                 _user = _uow.Logins.Get(QueryExpressionFactory.GetQueryExpression<Login_EF>()
-                    .Where(x => x.UserName == arg && x.IsDeletable == true).ToLambda())
+                    .Where(x => x.UserName == arg && x.IsDeletable == true).ToLambda(),
+                        new List<Expression<Func<Login_EF, object>>>()
+                        {
+                            x => x.Alerts,
+                            x => x.Networks,
+                            x => x.PrivateKeys,
+                            x => x.PublicKeys,
+                            x => x.Sessions,
+                            x => x.Settings,
+                            x => x.Usage,
+                        })
                     .SingleOrDefault();
 
                 if (_user == null)

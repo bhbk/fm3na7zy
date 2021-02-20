@@ -39,7 +39,7 @@ namespace Bhbk.Cli.Aurora.Commands.FileSystem
                     _count = int.Parse(arg);
             });
 
-            HasOption("f|filter=", "Enter file-sysm (full or partial) name to look for", arg =>
+            HasOption("f|filter=", "Enter file-system (full or partial) name to look for", arg =>
             {
                 CheckRequiredArguments();
 
@@ -52,8 +52,7 @@ namespace Bhbk.Cli.Aurora.Commands.FileSystem
         {
             try
             {
-                IQueryExpression<FileSystem_EF> expression =
-                    QueryExpressionFactory.GetQueryExpression<FileSystem_EF>();
+                var expression = QueryExpressionFactory.GetQueryExpression<FileSystem_EF>();
 
                 if (!string.IsNullOrEmpty(_filter))
                     expression = expression.Where(x => x.Name.Contains(_filter));

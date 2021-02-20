@@ -14,6 +14,7 @@ using Bhbk.Lib.QueryExpression.Extensions;
 using Bhbk.Lib.QueryExpression.Factories;
 using ManyConsole;
 using Microsoft.Extensions.Configuration;
+using Rebex;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -79,10 +80,11 @@ namespace Bhbk.Cli.Aurora.Commands.User
             {
                 var user = new Login_EF
                 {
-                    AuthTypeId = (int)_authType,
                     UserName = _userName,
+                    AuthTypeId = (int)_authType,
                     IsPasswordRequired = true,
                     IsPublicKeyRequired = false,
+                    DebugTypeId = (int)LogLevel.Off,
                     IsEnabled = true,
                     IsDeletable = true,
                 };
@@ -152,6 +154,7 @@ namespace Bhbk.Cli.Aurora.Commands.User
                             Address = "::/64",
                             ActionTypeId = (int)NetworkActionType_E.Allow,
                             IsEnabled = true,
+                            IsDeletable = true,
                         });
 
                     _uow.Networks.Create(
@@ -162,6 +165,7 @@ namespace Bhbk.Cli.Aurora.Commands.User
                             Address = IPNetwork.IANA_BBLK_RESERVED1.ToString(),
                             ActionTypeId = (int)NetworkActionType_E.Allow,
                             IsEnabled = true,
+                            IsDeletable = true,
                         });
 
                     _uow.Networks.Create(
@@ -172,6 +176,7 @@ namespace Bhbk.Cli.Aurora.Commands.User
                             Address = "0.0.0.0/0",
                             ActionTypeId = (int)NetworkActionType_E.Deny,
                             IsEnabled = true,
+                            IsDeletable = true,
                         });
 
                     _uow.Commit();

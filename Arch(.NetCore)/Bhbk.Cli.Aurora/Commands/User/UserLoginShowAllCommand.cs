@@ -5,7 +5,6 @@ using Bhbk.Lib.Aurora.Primitives.Enums;
 using Bhbk.Lib.CommandLine.IO;
 using Bhbk.Lib.Common.Primitives.Enums;
 using Bhbk.Lib.Common.Services;
-using Bhbk.Lib.QueryExpression;
 using Bhbk.Lib.QueryExpression.Extensions;
 using Bhbk.Lib.QueryExpression.Factories;
 using ManyConsole;
@@ -54,8 +53,7 @@ namespace Bhbk.Cli.Aurora.Commands.User
         {
             try
             {
-                IQueryExpression<Login_EF> expression =
-                    QueryExpressionFactory.GetQueryExpression<Login_EF>();
+                var expression = QueryExpressionFactory.GetQueryExpression<Login_EF>();
 
                 if (!string.IsNullOrEmpty(_filter))
                     expression = expression.Where(x => x.UserName.Contains(_filter));

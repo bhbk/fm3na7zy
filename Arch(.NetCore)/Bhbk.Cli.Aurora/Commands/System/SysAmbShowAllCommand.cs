@@ -3,7 +3,6 @@ using Bhbk.Lib.Aurora.Data_EF6.Models;
 using Bhbk.Lib.Aurora.Data_EF6.UnitOfWorks;
 using Bhbk.Lib.Common.Primitives.Enums;
 using Bhbk.Lib.Common.Services;
-using Bhbk.Lib.QueryExpression;
 using Bhbk.Lib.QueryExpression.Extensions;
 using Bhbk.Lib.QueryExpression.Factories;
 using ManyConsole;
@@ -31,7 +30,7 @@ namespace Bhbk.Cli.Aurora.Commands.System
             var env = new ContextService(InstanceContext.DeployedOrLocal);
             _uow = new UnitOfWork(_conf["Databases:AuroraEntities_EF6"], env);
 
-            IsCommand("sys-amb-show-all", "Show all ambassador credential(s) on system");
+            IsCommand("sys-amb-show-list", "Show list ambassador credential(s) on system");
 
             HasRequiredOption("c|count=", "Enter how many results to display", arg =>
             {
@@ -52,8 +51,7 @@ namespace Bhbk.Cli.Aurora.Commands.System
         {
             try
             {
-                IQueryExpression<Ambassador_EF> expression =
-                    QueryExpressionFactory.GetQueryExpression<Ambassador_EF>();
+                var expression = QueryExpressionFactory.GetQueryExpression<Ambassador_EF>();
 
                 if (!string.IsNullOrEmpty(_filter))
                     expression = expression.Where(x => x.UserPrincipalName.Contains(_filter));

@@ -41,7 +41,11 @@ namespace Bhbk.Cli.Aurora.Commands.FileSystem
                     throw new ConsoleHelpAsException($"  *** No file-system group given ***");
 
                 _fileSystem = _uow.FileSystems.Get(QueryExpressionFactory.GetQueryExpression<FileSystem_EF>()
-                    .Where(x => x.Name == arg).ToLambda())
+                    .Where(x => x.Name == arg).ToLambda(),
+                        new List<Expression<Func<FileSystem_EF, object>>>()
+                        {
+                            x => x.Usage,
+                        })
                     .SingleOrDefault();
 
                 if (_fileSystem == null)

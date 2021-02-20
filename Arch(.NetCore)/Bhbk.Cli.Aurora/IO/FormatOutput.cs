@@ -94,7 +94,8 @@ namespace Bhbk.Cli.Aurora.IO
                         break;
 
                     case FileSystemType_E.Memory:
-                        Console.Out.WriteLine($"   [quota maximum] 100MB and quota used is N/A... all deleted at session end");
+                        Console.Out.WriteLine($"   [quota maximum] {fileSystem.Usage.QuotaInBytes / 1048576f}MB " +
+                            $"[quota used] {fileSystem.Usage.QuotaUsedInBytes / 1048576f}MB and will be purged at logout");
                         break;
 
                     case FileSystemType_E.SMB:
@@ -157,7 +158,8 @@ namespace Bhbk.Cli.Aurora.IO
                         break;
 
                     case FileSystemType_E.Memory:
-                        Console.Out.WriteLine($"   [quota maximum] 100MB and quota used is N/A... all deleted at session end");
+                        Console.Out.WriteLine($"   [quota maximum] {fileSystemLogin.FileSystem.Usage.QuotaInBytes / 1048576f}MB " +
+                            $"[quota used] {fileSystemLogin.FileSystem.Usage.QuotaUsedInBytes / 1048576f}MB and will be purged at logout");
                         break;
 
                     case FileSystemType_E.SMB:
