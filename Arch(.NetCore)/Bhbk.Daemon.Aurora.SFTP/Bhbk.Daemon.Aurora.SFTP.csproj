@@ -30,7 +30,7 @@
     <PackageReference Include="Serilog.AspNetCore" Version="3.4.0" />
     <PackageReference Include="Serilog.Sinks.Console" Version="3.1.1" />
     <PackageReference Include="Serilog.Sinks.RollingFile" Version="3.3.0" />
-    <PackageReference Include="System.DirectoryServices.Protocols" Version="4.7.0" />
+    <PackageReference Include="System.DirectoryServices.Protocols" Version="5.0.1" />
     <PackageReference Include="System.Linq.Dynamic.Core" Version="1.2.1" />
   </ItemGroup>
 
