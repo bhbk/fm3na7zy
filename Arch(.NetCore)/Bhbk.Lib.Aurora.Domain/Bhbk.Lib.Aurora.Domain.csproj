@@ -11,7 +11,7 @@
     <PackageReference Include="Bhbk.Lib.Cryptography" Version="2020.8.11.1945" />
     <PackageReference Include="Bhbk.Lib.DataState" Version="2020.8.11.1945" />
     <PackageReference Include="IPNetwork2" Version="2.5.224" />
-    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="Rebex.Sftp" Version="5.0.7501" />
     <PackageReference Include="Serilog.AspNetCore" Version="3.4.0" />
     <PackageReference Include="Serilog.Sinks.Console" Version="3.1.1" />
